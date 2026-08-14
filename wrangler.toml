@@ -1,0 +1,8 @@
+name = "grocery"
+compatibility_date = "2025-01-01"
+pages_build_output_dir = "dist"
+
+# Replace `id` after running: wrangler kv namespace create GROCERY_STATE
+[[kv_namespaces]]
+binding = "STATE"
+id = "17515c0e0aba4083b17da459f40c8fd8"
