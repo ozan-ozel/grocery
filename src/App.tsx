@@ -41,6 +41,13 @@ import {
   type Tenant,
 } from "@/lib/store";
 import { createSync } from "@/lib/sync";
+import {
+  loadItemCategories,
+  lookupItemCategory,
+  rememberItemCategory,
+  saveItemCategories,
+  type ItemCategoryMap,
+} from "@/lib/itemCategories";
 
 type Undo =
   | { kind: "remove"; item: Item; listId: string }
@@ -53,12 +60,23 @@ export function App() {
   });
   const [state, setState] = useState<State>(() => loadState(activeTenantId));
   const [overlay, setOverlay] = useState<CategoryOverlay>(() => loadOverlay());
+  const [itemCategories, setItemCategories] = useState<ItemCategoryMap>(() =>
+    loadItemCategories(activeTenantId)
+  );
   const [undo, setUndo] = useState<Undo | null>(null);
   const undoTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     saveOverlay(overlay);
   }, [overlay]);
+
+  useEffect(() => {
+    saveItemCategories(activeTenantId, itemCategories);
+  }, [activeTenantId, itemCategories]);
+
+  useEffect(() => {
+    setItemCategories(loadItemCategories(activeTenantId));
+  }, [activeTenantId]);
 
   const mergedCategories = useMemo(() => mergeCategories(overlay), [overlay]);
 
@@ -140,9 +158,17 @@ export function App() {
       );
       return;
     }
+    const remembered = lookupItemCategory(itemCategories, name);
     updateActive((items) => [
       ...items,
-      { id: uid(), name, qty, checked: false, addedAt: Date.now() },
+      {
+        id: uid(),
+        name,
+        qty,
+        checked: false,
+        addedAt: Date.now(),
+        category: remembered,
+      },
     ]);
   }
 
@@ -153,6 +179,9 @@ export function App() {
   }
 
   function editItem(id: string, name: string, qty: string, category?: AnyCategoryId) {
+    if (category !== undefined) {
+      setItemCategories((m) => rememberItemCategory(m, name, category));
+    }
     updateActive((items) =>
       items.map((i) => {
         if (i.id !== id) return i;
