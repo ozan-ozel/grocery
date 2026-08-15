@@ -73,7 +73,7 @@ export function AddItem({ catalog, onAdd }: Props) {
       </div>
 
       {suggestions.length > 0 && (
-        <ul className="absolute z-20 mt-1 w-full overflow-hidden rounded-md border border-border bg-card shadow-sm">
+        <ul className="absolute z-20 mt-1 w-full origin-top overflow-hidden rounded-md border border-border bg-card shadow-sm transition-[opacity,transform] duration-150 starting:scale-95 starting:opacity-0">
           {suggestions.map((entry, i) => (
             <li key={entry.name}>
               <button

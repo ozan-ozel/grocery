@@ -1,4 +1,4 @@
-import pkg from "snowball-stemmers";
+import { newStemmer } from "snowball-stemmers";
 
 /**
  * Turkish grocery category taxonomy. Structure and slot names follow the
@@ -15,7 +15,6 @@ import pkg from "snowball-stemmers";
  * Short keywords (<=3 chars) require whole-word matches to avoid noise.
  */
 
-const { newStemmer } = pkg;
 const snowball = newStemmer("turkish");
 
 export type CategoryId =
@@ -42,27 +41,28 @@ export type CategoryDef = {
   id: CategoryId;
   label: string; // Turkish display name
   order: number; // stable sort order in the grouped view
+  emoji: string; // quick visual scan aid in the grouped list and settings
 };
 
 export const CATEGORIES: CategoryDef[] = [
-  { id: "meyve-sebze", label: "Meyve & Sebze", order: 1 },
-  { id: "sut-kahvalti", label: "Süt Ürünleri", order: 2 },
-  { id: "et-tavuk-balik", label: "Et, Tavuk & Balık", order: 3 },
-  { id: "sarkuteri", label: "Şarküteri", order: 4 },
-  { id: "firin", label: "Fırın & Pastane", order: 5 },
-  { id: "kahvaltilik", label: "Kahvaltılık", order: 6 },
-  { id: "temel-gida", label: "Temel Gıda", order: 7 },
-  { id: "hazir-gida", label: "Hazır & Konserve", order: 8 },
-  { id: "dondurulmus", label: "Dondurulmuş", order: 9 },
-  { id: "atistirmalik", label: "Atıştırmalık", order: 10 },
-  { id: "sicak-icecek", label: "Kahve & Çay", order: 11 },
-  { id: "icecek", label: "İçecek", order: 12 },
-  { id: "bebek", label: "Bebek", order: 13 },
-  { id: "kisisel-bakim", label: "Kişisel Bakım", order: 14 },
-  { id: "temizlik", label: "Temizlik", order: 15 },
-  { id: "ev-mutfak", label: "Ev & Mutfak", order: 16 },
-  { id: "evcil-hayvan", label: "Evcil Hayvan", order: 17 },
-  { id: "diger", label: "Diğer", order: 99 },
+  { id: "meyve-sebze", label: "Meyve & Sebze", order: 1, emoji: "🥦" },
+  { id: "sut-kahvalti", label: "Süt Ürünleri", order: 2, emoji: "🥛" },
+  { id: "et-tavuk-balik", label: "Et, Tavuk & Balık", order: 3, emoji: "🍗" },
+  { id: "sarkuteri", label: "Şarküteri", order: 4, emoji: "🥓" },
+  { id: "firin", label: "Fırın & Pastane", order: 5, emoji: "🥖" },
+  { id: "kahvaltilik", label: "Kahvaltılık", order: 6, emoji: "🍯" },
+  { id: "temel-gida", label: "Temel Gıda", order: 7, emoji: "🌾" },
+  { id: "hazir-gida", label: "Hazır & Konserve", order: 8, emoji: "🥫" },
+  { id: "dondurulmus", label: "Dondurulmuş", order: 9, emoji: "❄️" },
+  { id: "atistirmalik", label: "Atıştırmalık", order: 10, emoji: "🍿" },
+  { id: "sicak-icecek", label: "Kahve & Çay", order: 11, emoji: "☕" },
+  { id: "icecek", label: "İçecek", order: 12, emoji: "🥤" },
+  { id: "bebek", label: "Bebek", order: 13, emoji: "🍼" },
+  { id: "kisisel-bakim", label: "Kişisel Bakım", order: 14, emoji: "🧴" },
+  { id: "temizlik", label: "Temizlik", order: 15, emoji: "🧽" },
+  { id: "ev-mutfak", label: "Ev & Mutfak", order: 16, emoji: "🍽️" },
+  { id: "evcil-hayvan", label: "Evcil Hayvan", order: 17, emoji: "🐾" },
+  { id: "diger", label: "Diğer", order: 99, emoji: "🗂️" },
 ];
 
 export const CATEGORY_BY_ID: Record<CategoryId, CategoryDef> = Object.fromEntries(

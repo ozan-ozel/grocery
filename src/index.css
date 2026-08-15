@@ -38,6 +38,36 @@
   --radius-lg: 0.5rem;
 }
 
+/* Same paper-and-ink relationship, inverted: dark pine stock, pale ink. */
+:root[data-theme="dark"] {
+  --color-background: #161f1c;
+  --color-foreground: #eef2ef;
+
+  --color-card: #1d2723;
+  --color-card-foreground: #eef2ef;
+
+  --color-primary: #eef2ef;
+  --color-primary-foreground: #161f1c;
+
+  --color-secondary: #26302b;
+  --color-secondary-foreground: #eef2ef;
+
+  --color-muted: #222c27;
+  --color-muted-foreground: #8ea198;
+
+  --color-accent: #26302b;
+  --color-accent-foreground: #eef2ef;
+
+  --color-destructive: #e2564a;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #e2564a;
+
+  --color-border: #2b3733;
+  --color-input: #38443f;
+  --color-ring: #eef2ef;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
