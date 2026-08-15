@@ -7,6 +7,7 @@ import { ActiveList } from "@/components/ActiveList";
 import { CategoriesView } from "@/components/CategoriesView";
 import { HistoryView } from "@/components/HistoryView";
 import { SearchView } from "@/components/SearchView";
+import { NutritionView } from "@/components/NutritionView";
 import { TenantSwitcher } from "@/components/TenantSwitcher";
 import {
   addCustomCategory,
@@ -391,6 +392,7 @@ export function App() {
             <TabsTrigger value="list">Liste</TabsTrigger>
             <TabsTrigger value="history">Geçmiş</TabsTrigger>
             <TabsTrigger value="find">Bul</TabsTrigger>
+            <TabsTrigger value="nutrition">Besin</TabsTrigger>
             <TabsTrigger value="cats">Kategoriler</TabsTrigger>
           </TabsList>
           <Button
@@ -431,6 +433,10 @@ export function App() {
 
         <TabsContent value="find">
           <SearchView catalog={catalog} onAdd={addItem} isOnList={isOnList} />
+        </TabsContent>
+
+        <TabsContent value="nutrition">
+          <NutritionView items={active.items} />
         </TabsContent>
 
         <TabsContent value="cats">

@@ -8,7 +8,7 @@ function key(tenantId: string) {
   return `${KEY_PREFIX}${tenantId}`;
 }
 
-function normalize(name: string): string {
+export function normalize(name: string): string {
   return name.trim().toLocaleLowerCase("tr-TR");
 }
 

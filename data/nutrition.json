@@ -1,0 +1,32 @@
+[
+  {
+    "name_tr": "yoğurt",
+    "aliases": ["süzme yoğurt", "tam yağlı yoğurt"],
+    "kcal_per_100": 61,
+    "protein_g": 3.5,
+    "fat_g": 3.3,
+    "carbs_g": 4.7,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 170379"
+  },
+  {
+    "name_tr": "eski kaşar",
+    "aliases": ["eski kaşar"],
+    "kcal_per_100": 360,
+    "protein_g": 26,
+    "fat_g": 26,
+    "carbs_g": 1.5,
+    "fiber_g": 0,
+    "source": "Google"
+  },
+  {
+    "name_tr": "kabak",
+    "aliases": ["kabak"],
+    "kcal_per_100": 17,
+    "protein_g": 1.2,
+    "fat_g": 0.3,
+    "carbs_g": 3.1,
+    "fiber_g": 1.0,
+    "source": "USDA fdc_id 11477"
+  }
+]
