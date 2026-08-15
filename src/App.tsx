@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { FilePlus2 } from "lucide-react";
+import { CloudOff, FilePlus2, Moon, RefreshCw, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AddItem } from "@/components/AddItem";
@@ -13,6 +13,7 @@ import {
   loadOverlay,
   mergeCategories,
   moveCategory,
+  reorderCategories,
   removeCustomCategory,
   renameCategory,
   saveOverlay,
@@ -40,7 +41,7 @@ import {
   type State,
   type Tenant,
 } from "@/lib/store";
-import { createSync } from "@/lib/sync";
+import { createSync, type SyncStatus } from "@/lib/sync";
 import {
   loadItemCategories,
   lookupItemCategory,
@@ -48,9 +49,17 @@ import {
   saveItemCategories,
   type ItemCategoryMap,
 } from "@/lib/itemCategories";
+import {
+  loadSwipeMode,
+  loadTheme,
+  saveSwipeMode,
+  saveTheme,
+  type Theme,
+} from "@/lib/preferences";
 
 type Undo =
   | { kind: "remove"; item: Item; listId: string }
+  | { kind: "bulkRemove"; items: Item[]; listId: string }
   | { kind: "rollover"; previous: State };
 
 export function App() {
@@ -65,6 +74,29 @@ export function App() {
   );
   const [undo, setUndo] = useState<Undo | null>(null);
   const undoTimer = useRef<number | undefined>(undefined);
+  const [selectMode, setSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [theme, setTheme] = useState<Theme>(() => loadTheme());
+  const [swipeMode, setSwipeMode] = useState(() => loadSwipeMode());
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    saveTheme(theme);
+    const meta = document.querySelector('meta[name="theme-color"]');
+    meta?.setAttribute("content", theme === "dark" ? "#161F1C" : "#F2F5F2");
+  }, [theme]);
+
+  useEffect(() => {
+    saveSwipeMode(swipeMode);
+  }, [swipeMode]);
+
+  function toggleTheme() {
+    setTheme((t) => (t === "dark" ? "light" : "dark"));
+  }
+
+  function toggleSwipeMode() {
+    setSwipeMode((s) => !s);
+  }
 
   useEffect(() => {
     saveOverlay(overlay);
@@ -89,6 +121,7 @@ export function App() {
   const stateRef = useRef(state);
   stateRef.current = state;
   const syncRef = useRef<ReturnType<typeof createSync> | null>(null);
+  const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
 
   // A single sync channel per tenant. When the tenant switches we tear the
   // old one down before starting a new one so pushes never leak across tenants.
@@ -98,6 +131,7 @@ export function App() {
       setState,
       tenantId: activeTenantId,
       baseUrl: import.meta.env.VITE_API_BASE ?? "",
+      onStatusChange: setSyncStatus,
     });
     syncRef.current = sync;
     sync.start();
@@ -131,6 +165,15 @@ export function App() {
   }, [activeTenantId]);
 
   const active = state.lists.find((l) => l.id === state.activeId) ?? state.lists[0];
+
+  // Selection is tied to one list's rows; drop it if the active list changes
+  // out from under it (tenant switch, new list, rollover) so stale ids can't
+  // linger into a different list.
+  useEffect(() => {
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }, [active.id]);
+
   const past = state.lists.filter((l) => l.id !== active.id);
   const catalog = useMemo(() => buildCatalog(state.lists), [state.lists]);
   const groupByCategory = state.groupByCategory ?? false;
@@ -208,6 +251,45 @@ export function App() {
     showUndo({ kind: "remove", item, listId: active.id }, 6000);
   }
 
+  function toggleSelectMode() {
+    setSelectMode((on) => !on);
+    setSelectedIds(new Set());
+  }
+
+  function selectAll() {
+    setSelectMode(true);
+    setSelectedIds(new Set(active.items.map((i) => i.id)));
+  }
+
+  function selectCategory(ids: string[], selected: boolean) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      for (const id of ids) {
+        if (selected) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  }
+
+  function toggleSelectItem(id: string) {
+    setSelectedIds((ids) => {
+      const next = new Set(ids);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  function bulkRemove() {
+    const items = active.items.filter((i) => selectedIds.has(i.id));
+    if (items.length === 0) return;
+    updateActive((current) => current.filter((i) => !selectedIds.has(i.id)));
+    showUndo({ kind: "bulkRemove", items, listId: active.id }, 6000);
+    setSelectMode(false);
+    setSelectedIds(new Set());
+  }
+
   function restore() {
     if (!undo) return;
     if (undo.kind === "remove") {
@@ -216,6 +298,16 @@ export function App() {
         ...s,
         lists: s.lists.map((l) =>
           l.id === target.listId ? { ...l, items: [...l.items, target.item] } : l
+        ),
+      }));
+    } else if (undo.kind === "bulkRemove") {
+      const target = undo;
+      setState((s) => ({
+        ...s,
+        lists: s.lists.map((l) =>
+          l.id === target.listId
+            ? { ...l, items: [...l.items, ...target.items] }
+            : l
         ),
       }));
     } else {
@@ -330,6 +422,10 @@ export function App() {
     setOverlay((o) => moveCategory(o, id, direction));
   }
 
+  function reorderCats(ids: AnyCategoryId[]) {
+    setOverlay((o) => reorderCategories(o, ids));
+  }
+
   function addCategory(label: string) {
     setOverlay((o) => {
       const result = addCustomCategory(o, label);
@@ -356,6 +452,38 @@ export function App() {
             onRename={renameTenant}
             onDelete={deleteTenant}
           />
+          <div className="flex items-center gap-1">
+            {syncStatus !== "synced" && (
+              <span
+                title={
+                  syncStatus === "offline"
+                    ? "Çevrimdışı — bağlantı gelince senkronize edilecek"
+                    : "Senkronize ediliyor…"
+                }
+                className="flex items-center px-1.5 text-muted-foreground"
+              >
+                {syncStatus === "offline" ? (
+                  <CloudOff className="size-4 text-signal" />
+                ) : (
+                  <RefreshCw className="size-4 animate-spin" />
+                )}
+              </span>
+            )}
+            <Button
+              type="button"
+              variant="quiet"
+              size="icon"
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Açık temaya geç" : "Koyu temaya geç"}
+              aria-label={theme === "dark" ? "Açık temaya geç" : "Koyu temaya geç"}
+            >
+              {theme === "dark" ? (
+                <Sun className="size-4" />
+              ) : (
+                <Moon className="size-4" />
+              )}
+            </Button>
+          </div>
         </div>
 
         <div className="flex items-baseline gap-3">
@@ -416,6 +544,15 @@ export function App() {
               groupByCategory={groupByCategory}
               categories={mergedCategories}
               overlay={overlay}
+              selectMode={selectMode}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelectItem}
+              onToggleSelectMode={toggleSelectMode}
+              onSelectAll={selectAll}
+              onSelectCategory={selectCategory}
+              onBulkRemove={bulkRemove}
+              swipeMode={swipeMode}
+              onToggleSwipeMode={toggleSwipeMode}
               onToggle={toggleItem}
               onRemove={removeItem}
               onEdit={editItem}
@@ -440,6 +577,7 @@ export function App() {
             onRename={renameCat}
             onToggleHidden={toggleHidden}
             onMove={moveCat}
+            onReorder={reorderCats}
             onAdd={addCategory}
             onRemoveCustom={removeCategory}
           />
@@ -451,7 +589,9 @@ export function App() {
           <span className="truncate text-sm">
             {undo.kind === "remove"
               ? `${undo.item.name} kaldırıldı`
-              : "Bugün için yeni liste başlatıldı"}
+              : undo.kind === "bulkRemove"
+                ? `${undo.items.length} ürün kaldırıldı`
+                : "Bugün için yeni liste başlatıldı"}
           </span>
           <button
             type="button"

@@ -1,5 +1,14 @@
-import { useState } from "react";
-import { ArrowDown, ArrowUp, Eye, EyeOff, Pencil, Plus, X } from "lucide-react";
+import { useRef, useState } from "react";
+import {
+  ArrowDown,
+  ArrowUp,
+  Eye,
+  EyeOff,
+  GripVertical,
+  Pencil,
+  Plus,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -15,6 +24,7 @@ type Props = {
   onRename: (id: AnyCategoryId, label: string) => void;
   onToggleHidden: (id: string, hidden: boolean) => void;
   onMove: (id: AnyCategoryId, direction: "up" | "down") => void;
+  onReorder: (orderedIds: AnyCategoryId[]) => void;
   onAdd: (label: string) => void;
   onRemoveCustom: (id: string) => void;
 };
@@ -24,11 +34,28 @@ export function CategoriesView({
   onRename,
   onToggleHidden,
   onMove,
+  onReorder,
   onAdd,
   onRemoveCustom,
 }: Props) {
   const [editingId, setEditingId] = useState<AnyCategoryId | null>(null);
   const [newLabel, setNewLabel] = useState("");
+  const [dragOverId, setDragOverId] = useState<AnyCategoryId | null>(null);
+  const dragIdRef = useRef<AnyCategoryId | null>(null);
+
+  function handleDrop(targetId: AnyCategoryId) {
+    const draggedId = dragIdRef.current;
+    dragIdRef.current = null;
+    setDragOverId(null);
+    if (!draggedId || draggedId === targetId) return;
+    const ids = merged.map((c) => c.id);
+    const from = ids.indexOf(draggedId);
+    const to = ids.indexOf(targetId);
+    if (from < 0 || to < 0) return;
+    ids.splice(from, 1);
+    ids.splice(to, 0, draggedId);
+    onReorder(ids);
+  }
 
   function commitNew() {
     const trimmed = newLabel.trim();
@@ -53,8 +80,21 @@ export function CategoriesView({
           return (
             <li
               key={c.id}
+              onDragOver={(e: DragEvent) => {
+                if (!dragIdRef.current) return;
+                e.preventDefault();
+                if (dragOverId !== c.id) setDragOverId(c.id);
+              }}
+              onDragLeave={() => {
+                if (dragOverId === c.id) setDragOverId(null);
+              }}
+              onDrop={(e: DragEvent) => {
+                e.preventDefault();
+                handleDrop(c.id);
+              }}
               className={cn(
-                "flex items-center gap-2 border-b border-border py-2.5",
+                "flex items-center gap-2 border-b border-t-2 border-border py-2.5",
+                dragOverId === c.id ? "border-t-foreground" : "border-t-transparent",
                 c.hidden && !isEditing && "opacity-60"
               )}
             >
@@ -69,6 +109,28 @@ export function CategoriesView({
                 />
               ) : (
                 <>
+                  <span
+                    draggable
+                    onDragStart={(e: DragEvent) => {
+                      dragIdRef.current = c.id;
+                      if (e.dataTransfer) {
+                        e.dataTransfer.effectAllowed = "move";
+                        const li = (e.currentTarget as HTMLElement).closest("li");
+                        if (li) e.dataTransfer.setDragImage(li, 12, 12);
+                      }
+                    }}
+                    onDragEnd={() => {
+                      dragIdRef.current = null;
+                      setDragOverId(null);
+                    }}
+                    aria-hidden="true"
+                    className="cursor-grab touch-none text-muted-foreground active:cursor-grabbing"
+                  >
+                    <GripVertical className="size-4" />
+                  </span>
+
+                  <span aria-hidden="true">{c.emoji}</span>
+
                   <span className="min-w-0 flex-1 truncate text-[0.975rem]">
                     {c.label}
                   </span>

@@ -30,7 +30,12 @@ export type MergedCategory = {
   order: number;
   hidden: boolean;
   builtin: boolean;
+  emoji: string;
 };
+
+// Custom categories have no curated emoji of their own; a generic tag icon
+// keeps them visually aligned with built-ins in the emoji column.
+const CUSTOM_EMOJI = "🏷️";
 
 const OVERLAY_KEY = "grocery.categories.v1";
 const CUSTOM_PREFIX = "u:";
@@ -84,6 +89,7 @@ export function mergeCategories(overlay: CategoryOverlay): MergedCategory[] {
       order: o.order ?? c.order,
       hidden: o.hidden ?? false,
       builtin: true,
+      emoji: c.emoji,
     });
   }
   for (const c of overlay.custom) {
@@ -93,6 +99,7 @@ export function mergeCategories(overlay: CategoryOverlay): MergedCategory[] {
       order: c.order,
       hidden: false,
       builtin: false,
+      emoji: CUSTOM_EMOJI,
     });
   }
   return merged.sort((a, b) => a.order - b.order);
@@ -191,6 +198,22 @@ export function moveCategory(
   let next = overlay;
   next = writeOrder(next, a.id, b.order);
   next = writeOrder(next, b.id, a.order);
+  return next;
+}
+
+/**
+ * Reorder by drag-and-drop: caller supplies the full category list in its
+ * new order, and every category gets a fresh dense order (1, 2, 3, ...) so
+ * later inserts don't need fractional gaps.
+ */
+export function reorderCategories(
+  overlay: CategoryOverlay,
+  orderedIds: AnyCategoryId[]
+): CategoryOverlay {
+  let next = overlay;
+  orderedIds.forEach((id, idx) => {
+    next = writeOrder(next, id, idx + 1);
+  });
   return next;
 }
 
