@@ -2,11 +2,14 @@ import type { State } from "./store";
 
 type Envelope = { version: number; state: State | null };
 
+export type SyncStatus = "synced" | "syncing" | "offline";
+
 type Options = {
   getState: () => State;
   setState: (s: State) => void;
   tenantId: string;
   baseUrl?: string;
+  onStatusChange?: (status: SyncStatus) => void;
 };
 
 const POLL_MS = 15_000;
@@ -14,7 +17,13 @@ const PUSH_DEBOUNCE_MS = 500;
 const BACKOFF_START_MS = 1_000;
 const BACKOFF_MAX_MS = 30_000;
 
-export function createSync({ getState, setState, tenantId, baseUrl = "" }: Options) {
+export function createSync({
+  getState,
+  setState,
+  tenantId,
+  baseUrl = "",
+  onStatusChange,
+}: Options) {
   const url = `${baseUrl}/api/state?tenant=${encodeURIComponent(tenantId)}`;
 
   let started = false;
@@ -23,8 +32,17 @@ export function createSync({ getState, setState, tenantId, baseUrl = "" }: Optio
   let pollTimer: number | undefined;
   let backoff = BACKOFF_START_MS;
   let inflight: Promise<void> | null = null;
+  let activeRequests = 0;
+
+  function reportStatus() {
+    if (!navigator.onLine) return onStatusChange?.("offline");
+    if (activeRequests > 0) return onStatusChange?.("syncing");
+    return onStatusChange?.("synced");
+  }
 
   async function pull() {
+    activeRequests++;
+    reportStatus();
     try {
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) return;
@@ -39,6 +57,9 @@ export function createSync({ getState, setState, tenantId, baseUrl = "" }: Optio
       backoff = BACKOFF_START_MS;
     } catch {
       // Network hiccup; poller will try again.
+    } finally {
+      activeRequests--;
+      reportStatus();
     }
   }
 
@@ -49,6 +70,8 @@ export function createSync({ getState, setState, tenantId, baseUrl = "" }: Optio
     // Nothing new since the last successful send.
     if (body === lastSentSerialized) return;
 
+    activeRequests++;
+    reportStatus();
     inflight = (async () => {
       try {
         const res = await fetch(url, {
@@ -77,6 +100,8 @@ export function createSync({ getState, setState, tenantId, baseUrl = "" }: Optio
         scheduleRetry();
       } finally {
         inflight = null;
+        activeRequests--;
+        reportStatus();
       }
     })();
     return inflight;
@@ -102,15 +127,20 @@ export function createSync({ getState, setState, tenantId, baseUrl = "" }: Optio
     start() {
       if (started) return;
       started = true;
+      reportStatus();
       pull();
       pollTimer = window.setInterval(pull, POLL_MS);
       document.addEventListener("visibilitychange", onVisible);
+      window.addEventListener("online", reportStatus);
+      window.addEventListener("offline", reportStatus);
     },
     stop() {
       started = false;
       window.clearTimeout(pushTimer);
       window.clearInterval(pollTimer);
       document.removeEventListener("visibilitychange", onVisible);
+      window.removeEventListener("online", reportStatus);
+      window.removeEventListener("offline", reportStatus);
     },
     notifyChange: requestPush,
     pushNow: push,
