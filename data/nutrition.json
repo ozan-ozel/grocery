@@ -1,17 +1,175 @@
 [
   {
-    "name_tr": "yoğurt",
-    "aliases": ["süzme yoğurt", "tam yağlı yoğurt"],
-    "kcal_per_100": 61,
-    "protein_g": 3.5,
-    "fat_g": 3.3,
-    "carbs_g": 4.7,
+    "name_tr": "armut",
+    "aliases": [],
+    "kcal_per_100": 57,
+    "protein_g": 0.4,
+    "fat_g": 0.1,
+    "carbs_g": 15.2,
+    "fiber_g": 3.1,
+    "source": "USDA fdc_id 169118"
+  },
+  {
+    "name_tr": "ayçiçek yağı",
+    "aliases": [],
+    "kcal_per_100": 884,
+    "protein_g": 0,
+    "fat_g": 100,
+    "carbs_g": 0,
     "fiber_g": 0,
+    "source": "USDA fdc_id 171017"
+  },
+  {
+    "name_tr": "badem",
+    "aliases": [
+      "iç badem"
+    ],
+    "kcal_per_100": 579,
+    "protein_g": 21.2,
+    "fat_g": 49.9,
+    "carbs_g": 21.6,
+    "fiber_g": 12.5,
+    "source": "USDA fdc_id 170567"
+  },
+  {
+    "name_tr": "bal",
+    "aliases": [
+      "çiçek balı"
+    ],
+    "kcal_per_100": 304,
+    "protein_g": 0.3,
+    "fat_g": 0,
+    "carbs_g": 82.4,
+    "fiber_g": 0.2,
+    "source": "USDA fdc_id 169640"
+  },
+  {
+    "name_tr": "beyaz ekmek",
+    "aliases": [
+      "ekmek"
+    ],
+    "kcal_per_100": 266,
+    "protein_g": 8.9,
+    "fat_g": 3.3,
+    "carbs_g": 49.4,
+    "fiber_g": 2.7,
+    "source": "USDA fdc_id 174924"
+  },
+  {
+    "name_tr": "beyaz peynir",
+    "aliases": [],
+    "kcal_per_100": 265,
+    "protein_g": 14.2,
+    "fat_g": 21.5,
+    "carbs_g": 3.9,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173420"
+  },
+  {
+    "name_tr": "bitter çikolata",
+    "aliases": [],
+    "kcal_per_100": 598,
+    "protein_g": 7.8,
+    "fat_g": 42.6,
+    "carbs_g": 45.9,
+    "fiber_g": 10.9,
+    "source": "USDA fdc_id 170273"
+  },
+  {
+    "name_tr": "brokoli",
+    "aliases": [],
+    "kcal_per_100": 34,
+    "protein_g": 2.8,
+    "fat_g": 0.4,
+    "carbs_g": 6.6,
+    "fiber_g": 2.6,
     "source": "USDA fdc_id 170379"
   },
   {
+    "name_tr": "bulgur",
+    "aliases": [
+      "pilavlık bulgur"
+    ],
+    "kcal_per_100": 342,
+    "protein_g": 12.3,
+    "fat_g": 1.3,
+    "carbs_g": 75.9,
+    "fiber_g": 12.5,
+    "source": "USDA fdc_id 170688"
+  },
+  {
+    "name_tr": "ceviz",
+    "aliases": [
+      "iç ceviz"
+    ],
+    "kcal_per_100": 654,
+    "protein_g": 15.2,
+    "fat_g": 65.2,
+    "carbs_g": 13.7,
+    "fiber_g": 6.7,
+    "source": "USDA fdc_id 170187"
+  },
+  {
+    "name_tr": "çay",
+    "aliases": [
+      "siyah çay"
+    ],
+    "kcal_per_100": 1,
+    "protein_g": 0,
+    "fat_g": 0,
+    "carbs_g": 0.3,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173227"
+  },
+  {
+    "name_tr": "çilek",
+    "aliases": [],
+    "kcal_per_100": 32,
+    "protein_g": 0.7,
+    "fat_g": 0.3,
+    "carbs_g": 7.7,
+    "fiber_g": 2,
+    "source": "USDA fdc_id 167762"
+  },
+  {
+    "name_tr": "dana kıyma",
+    "aliases": [
+      "kıyma"
+    ],
+    "kcal_per_100": 215,
+    "protein_g": 18.6,
+    "fat_g": 15,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171796"
+  },
+  {
+    "name_tr": "domates",
+    "aliases": [
+      "kırmızı domates"
+    ],
+    "kcal_per_100": 18,
+    "protein_g": 0.9,
+    "fat_g": 0.2,
+    "carbs_g": 3.9,
+    "fiber_g": 1.2,
+    "source": "USDA fdc_id 170457"
+  },
+  {
+    "name_tr": "elma",
+    "aliases": [],
+    "kcal_per_100": 61.8,
+    "protein_g": 0.2,
+    "fat_g": 0.2,
+    "carbs_g": 14.8,
+    "fiber_g": 2,
+    "source": "USDA fdc_id 1750339"
+  },
+  {
     "name_tr": "eski kaşar",
-    "aliases": ["eski kaşar"],
+    "aliases": [
+      "eski kaşar"
+    ],
     "kcal_per_100": 360,
     "protein_g": 26,
     "fat_g": 26,
@@ -20,13 +178,519 @@
     "source": "Google"
   },
   {
+    "name_tr": "fındık",
+    "aliases": [
+      "iç fındık"
+    ],
+    "kcal_per_100": 628,
+    "protein_g": 15,
+    "fat_g": 60.8,
+    "carbs_g": 16.7,
+    "fiber_g": 9.7,
+    "source": "USDA fdc_id 170581"
+  },
+  {
+    "name_tr": "havuç",
+    "aliases": [],
+    "kcal_per_100": 41,
+    "protein_g": 0.9,
+    "fat_g": 0.2,
+    "carbs_g": 9.6,
+    "fiber_g": 2.8,
+    "source": "USDA fdc_id 170393"
+  },
+  {
+    "name_tr": "hindi göğsü",
+    "aliases": [],
+    "kcal_per_100": 114,
+    "protein_g": 23.7,
+    "fat_g": 1.5,
+    "carbs_g": 0.1,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171098"
+  },
+  {
+    "name_tr": "ıspanak",
+    "aliases": [],
+    "kcal_per_100": 23,
+    "protein_g": 2.9,
+    "fat_g": 0.4,
+    "carbs_g": 3.6,
+    "fiber_g": 2.2,
+    "source": "USDA fdc_id 168462"
+  },
+  {
+    "name_tr": "jambon",
+    "aliases": [],
+    "kcal_per_100": 164,
+    "protein_g": 16.6,
+    "fat_g": 8.8,
+    "carbs_g": 3.6,
+    "fiber_g": 1.3,
+    "source": "USDA fdc_id 173864"
+  },
+  {
     "name_tr": "kabak",
-    "aliases": ["kabak"],
+    "aliases": [
+      "kabak"
+    ],
     "kcal_per_100": 17,
     "protein_g": 1.2,
     "fat_g": 0.3,
     "carbs_g": 3.1,
-    "fiber_g": 1.0,
+    "fiber_g": 1,
     "source": "USDA fdc_id 11477"
+  },
+  {
+    "name_tr": "kahve",
+    "aliases": [
+      "filtre kahve"
+    ],
+    "kcal_per_100": 1,
+    "protein_g": 0.1,
+    "fat_g": 0,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171890"
+  },
+  {
+    "name_tr": "karides",
+    "aliases": [],
+    "kcal_per_100": 85,
+    "protein_g": 20.1,
+    "fat_g": 0.5,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 175179"
+  },
+  {
+    "name_tr": "karnabahar",
+    "aliases": [],
+    "kcal_per_100": 25,
+    "protein_g": 1.9,
+    "fat_g": 0.3,
+    "carbs_g": 5,
+    "fiber_g": 2,
+    "source": "USDA fdc_id 169986"
+  },
+  {
+    "name_tr": "karpuz",
+    "aliases": [],
+    "kcal_per_100": 30,
+    "protein_g": 0.6,
+    "fat_g": 0.2,
+    "carbs_g": 7.6,
+    "fiber_g": 0.4,
+    "source": "USDA fdc_id 167765"
+  },
+  {
+    "name_tr": "kaşar peyniri",
+    "aliases": [
+      "kaşar"
+    ],
+    "kcal_per_100": 403,
+    "protein_g": 22.9,
+    "fat_g": 33.3,
+    "carbs_g": 3.4,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173414"
+  },
+  {
+    "name_tr": "kavun",
+    "aliases": [],
+    "kcal_per_100": 34,
+    "protein_g": 0.8,
+    "fat_g": 0.2,
+    "carbs_g": 8.2,
+    "fiber_g": 0.9,
+    "source": "USDA fdc_id 169092"
+  },
+  {
+    "name_tr": "kayısı",
+    "aliases": [],
+    "kcal_per_100": 48,
+    "protein_g": 1.4,
+    "fat_g": 0.4,
+    "carbs_g": 11.1,
+    "fiber_g": 2,
+    "source": "USDA fdc_id 171697"
+  },
+  {
+    "name_tr": "kırmızı mercimek",
+    "aliases": [],
+    "kcal_per_100": 358,
+    "protein_g": 23.9,
+    "fat_g": 2.2,
+    "carbs_g": 63.1,
+    "fiber_g": 10.8,
+    "source": "USDA fdc_id 174284"
+  },
+  {
+    "name_tr": "krem peynir",
+    "aliases": [],
+    "kcal_per_100": 350,
+    "protein_g": 6.2,
+    "fat_g": 34.4,
+    "carbs_g": 5.5,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173418"
+  },
+  {
+    "name_tr": "kuru fasulye",
+    "aliases": [],
+    "kcal_per_100": 333,
+    "protein_g": 23.6,
+    "fat_g": 0.8,
+    "carbs_g": 60,
+    "fiber_g": 24.9,
+    "source": "USDA fdc_id 175193"
+  },
+  {
+    "name_tr": "kuru üzüm",
+    "aliases": [],
+    "kcal_per_100": 301,
+    "protein_g": 3.3,
+    "fat_g": 0.2,
+    "carbs_g": 80,
+    "fiber_g": 3.3,
+    "source": "USDA fdc_id 168164"
+  },
+  {
+    "name_tr": "kuzu but",
+    "aliases": [],
+    "kcal_per_100": 230,
+    "protein_g": 17.9,
+    "fat_g": 17.1,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 174311"
+  },
+  {
+    "name_tr": "limon",
+    "aliases": [],
+    "kcal_per_100": 29,
+    "protein_g": 1.1,
+    "fat_g": 0.3,
+    "carbs_g": 9.3,
+    "fiber_g": 2.8,
+    "source": "USDA fdc_id 167746"
+  },
+  {
+    "name_tr": "makarna",
+    "aliases": [
+      "spagetti"
+    ],
+    "kcal_per_100": 371,
+    "protein_g": 13,
+    "fat_g": 1.5,
+    "carbs_g": 74.7,
+    "fiber_g": 3.2,
+    "source": "USDA fdc_id 168927"
+  },
+  {
+    "name_tr": "mantar",
+    "aliases": [
+      "kültür mantarı"
+    ],
+    "kcal_per_100": 22,
+    "protein_g": 3.1,
+    "fat_g": 0.3,
+    "carbs_g": 3.3,
+    "fiber_g": 1,
+    "source": "USDA fdc_id 169251"
+  },
+  {
+    "name_tr": "marul",
+    "aliases": [
+      "iceberg marul"
+    ],
+    "kcal_per_100": 14,
+    "protein_g": 0.9,
+    "fat_g": 0.1,
+    "carbs_g": 3,
+    "fiber_g": 1.2,
+    "source": "USDA fdc_id 169248"
+  },
+  {
+    "name_tr": "muz",
+    "aliases": [],
+    "kcal_per_100": 89,
+    "protein_g": 1.1,
+    "fat_g": 0.3,
+    "carbs_g": 22.8,
+    "fiber_g": 2.6,
+    "source": "USDA fdc_id 173944"
+  },
+  {
+    "name_tr": "nohut",
+    "aliases": [],
+    "kcal_per_100": 378,
+    "protein_g": 20.5,
+    "fat_g": 6,
+    "carbs_g": 63,
+    "fiber_g": 12.2,
+    "source": "USDA fdc_id 173756"
+  },
+  {
+    "name_tr": "patates",
+    "aliases": [],
+    "kcal_per_100": 77,
+    "protein_g": 2.1,
+    "fat_g": 0.1,
+    "carbs_g": 17.5,
+    "fiber_g": 2.1,
+    "source": "USDA fdc_id 170026"
+  },
+  {
+    "name_tr": "patlıcan",
+    "aliases": [],
+    "kcal_per_100": 25,
+    "protein_g": 1,
+    "fat_g": 0.2,
+    "carbs_g": 5.9,
+    "fiber_g": 3,
+    "source": "USDA fdc_id 169228"
+  },
+  {
+    "name_tr": "pirinç",
+    "aliases": [
+      "baldo pirinç"
+    ],
+    "kcal_per_100": 365,
+    "protein_g": 7.1,
+    "fat_g": 0.7,
+    "carbs_g": 80,
+    "fiber_g": 1.3,
+    "source": "USDA fdc_id 169756"
+  },
+  {
+    "name_tr": "portakal",
+    "aliases": [],
+    "kcal_per_100": 47,
+    "protein_g": 0.9,
+    "fat_g": 0.1,
+    "carbs_g": 11.8,
+    "fiber_g": 2.4,
+    "source": "USDA fdc_id 169097"
+  },
+  {
+    "name_tr": "salam",
+    "aliases": [],
+    "kcal_per_100": 299,
+    "protein_g": 10.9,
+    "fat_g": 26.1,
+    "carbs_g": 4.3,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 172012"
+  },
+  {
+    "name_tr": "salatalık",
+    "aliases": [],
+    "kcal_per_100": 15,
+    "protein_g": 0.7,
+    "fat_g": 0.1,
+    "carbs_g": 3.6,
+    "fiber_g": 0.5,
+    "source": "USDA fdc_id 168409"
+  },
+  {
+    "name_tr": "sarımsak",
+    "aliases": [],
+    "kcal_per_100": 149,
+    "protein_g": 6.4,
+    "fat_g": 0.5,
+    "carbs_g": 33.1,
+    "fiber_g": 2.1,
+    "source": "USDA fdc_id 169230"
+  },
+  {
+    "name_tr": "siyah zeytin",
+    "aliases": [],
+    "kcal_per_100": 81,
+    "protein_g": 1,
+    "fat_g": 6.9,
+    "carbs_g": 5.6,
+    "fiber_g": 2.5,
+    "source": "USDA fdc_id 169095"
+  },
+  {
+    "name_tr": "soğan",
+    "aliases": [
+      "kuru soğan"
+    ],
+    "kcal_per_100": 40,
+    "protein_g": 1.1,
+    "fat_g": 0.1,
+    "carbs_g": 9.3,
+    "fiber_g": 1.7,
+    "source": "USDA fdc_id 170000"
+  },
+  {
+    "name_tr": "somon",
+    "aliases": [],
+    "kcal_per_100": 142,
+    "protein_g": 19.8,
+    "fat_g": 6.3,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173686"
+  },
+  {
+    "name_tr": "sosis",
+    "aliases": [],
+    "kcal_per_100": 322,
+    "protein_g": 11.7,
+    "fat_g": 29.4,
+    "carbs_g": 2.7,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 174614"
+  },
+  {
+    "name_tr": "şeftali",
+    "aliases": [],
+    "kcal_per_100": 39,
+    "protein_g": 0.9,
+    "fat_g": 0.3,
+    "carbs_g": 9.5,
+    "fiber_g": 1.5,
+    "source": "USDA fdc_id 169928"
+  },
+  {
+    "name_tr": "şeker",
+    "aliases": [
+      "toz şeker"
+    ],
+    "kcal_per_100": 387,
+    "protein_g": 0,
+    "fat_g": 0,
+    "carbs_g": 100,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 169655"
+  },
+  {
+    "name_tr": "tahin",
+    "aliases": [],
+    "kcal_per_100": 570,
+    "protein_g": 17.8,
+    "fat_g": 48,
+    "carbs_g": 26.2,
+    "fiber_g": 9.3,
+    "source": "USDA fdc_id 169410"
+  },
+  {
+    "name_tr": "tam buğday ekmeği",
+    "aliases": [
+      "tam buğday ekmek"
+    ],
+    "kcal_per_100": 252,
+    "protein_g": 12.5,
+    "fat_g": 3.5,
+    "carbs_g": 42.7,
+    "fiber_g": 6,
+    "source": "USDA fdc_id 172688"
+  },
+  {
+    "name_tr": "tavuk göğsü",
+    "aliases": [],
+    "kcal_per_100": 120,
+    "protein_g": 22.5,
+    "fat_g": 2.6,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171077"
+  },
+  {
+    "name_tr": "tereyağı",
+    "aliases": [
+      "tuzlu tereyağı"
+    ],
+    "kcal_per_100": 717,
+    "protein_g": 0.9,
+    "fat_g": 81.1,
+    "carbs_g": 0.1,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173410"
+  },
+  {
+    "name_tr": "tuz",
+    "aliases": [],
+    "kcal_per_100": 0,
+    "protein_g": 0,
+    "fat_g": 0,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 173468"
+  },
+  {
+    "name_tr": "un",
+    "aliases": [
+      "buğday unu"
+    ],
+    "kcal_per_100": 364,
+    "protein_g": 10.3,
+    "fat_g": 1,
+    "carbs_g": 76.3,
+    "fiber_g": 2.7,
+    "source": "USDA fdc_id 168894"
+  },
+  {
+    "name_tr": "üzüm",
+    "aliases": [
+      "yaş üzüm"
+    ],
+    "kcal_per_100": 69,
+    "protein_g": 0.7,
+    "fat_g": 0.2,
+    "carbs_g": 18.1,
+    "fiber_g": 0.9,
+    "source": "USDA fdc_id 174683"
+  },
+  {
+    "name_tr": "yeşil biber",
+    "aliases": [
+      "sivri biber",
+      "çarliston biber"
+    ],
+    "kcal_per_100": 20,
+    "protein_g": 0.9,
+    "fat_g": 0.2,
+    "carbs_g": 4.6,
+    "fiber_g": 1.7,
+    "source": "USDA fdc_id 170427"
+  },
+  {
+    "name_tr": "yoğurt",
+    "aliases": [
+      "süzme yoğurt",
+      "tam yağlı yoğurt"
+    ],
+    "kcal_per_100": 61,
+    "protein_g": 3.5,
+    "fat_g": 3.3,
+    "carbs_g": 4.7,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171284"
+  },
+  {
+    "name_tr": "yumurta",
+    "aliases": [],
+    "kcal_per_100": 143,
+    "protein_g": 12.6,
+    "fat_g": 9.5,
+    "carbs_g": 0.7,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171287"
+  },
+  {
+    "name_tr": "zeytinyağı",
+    "aliases": [
+      "sızma zeytinyağı"
+    ],
+    "kcal_per_100": 884,
+    "protein_g": 0,
+    "fat_g": 100,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA fdc_id 171413"
   }
 ]
