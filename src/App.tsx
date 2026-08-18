@@ -28,6 +28,7 @@ import {
   categorizeItems,
   DEFAULT_TENANT_ID,
   defaultTitle,
+  emptyState,
   newList,
   readTenantFromUrl,
   rolloverIfNeeded,
@@ -187,6 +188,7 @@ export function App() {
       tenantId: activeTenantId,
       baseUrl: import.meta.env.VITE_API_BASE ?? "",
       onStatusChange: setSyncStatus,
+      onEmpty: emptyState,
     });
     syncRef.current = sync;
     sync.start();
