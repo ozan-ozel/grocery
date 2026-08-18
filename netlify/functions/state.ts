@@ -35,7 +35,7 @@ function keyFor(tenantId: string) {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
-  const store = getStore("state");
+  const store = getStore({ name: "state", consistency: "strong" });
   const method = request.method.toUpperCase();
 
   if (method === "GET") return handleGet(request, store);
