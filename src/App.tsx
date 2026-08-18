@@ -25,24 +25,24 @@ import {
 import type { CategoryId } from "@/lib/categories";
 import {
   buildCatalog,
-  bootstrapTenants,
   categorizeItems,
+  DEFAULT_TENANT_ID,
   defaultTitle,
   emptyState,
-  loadState,
   newList,
-  newTenant,
-  removeTenantState,
+  readTenantFromUrl,
   rolloverIfNeeded,
-  saveActiveTenantId,
-  saveState,
-  saveTenants,
   uid,
   writeTenantToUrl,
   type Item,
   type State,
   type Tenant,
 } from "@/lib/store";
+import {
+  createHousehold,
+  listHouseholds,
+  renameHousehold,
+} from "@/lib/households";
 import { createSync, type SyncStatus } from "@/lib/sync";
 import {
   loadItemCategories,
@@ -65,15 +65,14 @@ type Undo =
   | { kind: "rollover"; previous: State };
 
 export function App() {
-  const [{ tenants, activeTenantId }, setTenantState] = useState(() => {
-    const boot = bootstrapTenants();
-    return { tenants: boot.tenants, activeTenantId: boot.activeId };
-  });
-  const [state, setState] = useState<State>(() => loadState(activeTenantId));
+  // Both start as null so the app can render a spinner until the first
+  // /api/tenants and /api/state responses land. After that they stay
+  // populated; a null state during a tenant switch means "wait for pull".
+  const [tenants, setTenants] = useState<Tenant[] | null>(null);
+  const [activeTenantId, setActiveTenantId] = useState<string | null>(null);
+  const [state, setState] = useState<State | null>(null);
   const [overlay, setOverlay] = useState<CategoryOverlay>(() => loadOverlay());
-  const [itemCategories, setItemCategories] = useState<ItemCategoryMap>(() =>
-    loadItemCategories(activeTenantId)
-  );
+  const [itemCategories, setItemCategories] = useState<ItemCategoryMap>({});
   const [undo, setUndo] = useState<Undo | null>(null);
   const undoTimer = useRef<number | undefined>(undefined);
   const [selectMode, setSelectMode] = useState(false);
@@ -105,16 +104,60 @@ export function App() {
   }, [overlay]);
 
   useEffect(() => {
-    saveItemCategories(activeTenantId, itemCategories);
+    if (activeTenantId) saveItemCategories(activeTenantId, itemCategories);
   }, [activeTenantId, itemCategories]);
 
   useEffect(() => {
-    setItemCategories(loadItemCategories(activeTenantId));
+    if (activeTenantId) setItemCategories(loadItemCategories(activeTenantId));
   }, [activeTenantId]);
 
   useEffect(() => {
-    writeTenantToUrl(activeTenantId);
+    if (activeTenantId) writeTenantToUrl(activeTenantId);
   }, [activeTenantId]);
+
+  // First mount: load tenants from server, resolve active from URL or first,
+  // then let the sync effect pull state. Runs once.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const list = await listHouseholds();
+      if (cancelled) return;
+      let effective: Tenant[] = list.map((h) => ({
+        id: h.id,
+        name: h.name,
+        createdAt: Date.parse(h.created_at),
+      }));
+      // If the server has no households at all, seed the default one so the
+      // app still boots. This should only happen on a fresh Supabase; if two
+      // devices race and one 409s, re-fetch so the loser adopts the winner's
+      // row instead of showing a blank tenant list.
+      if (effective.length === 0) {
+        const created = await createHousehold(DEFAULT_TENANT_ID, "Evim");
+        if (cancelled) return;
+        if (created) {
+          effective = [
+            { id: created.id, name: created.name, createdAt: Date.parse(created.created_at) },
+          ];
+        } else {
+          const refetched = await listHouseholds();
+          if (cancelled) return;
+          effective = refetched.map((h) => ({
+            id: h.id,
+            name: h.name,
+            createdAt: Date.parse(h.created_at),
+          }));
+        }
+      }
+      const fromUrl = readTenantFromUrl();
+      const active =
+        effective.find((t) => t.id === fromUrl) ?? effective[0];
+      setTenants(effective);
+      setActiveTenantId(active?.id ?? null);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const mergedCategories = useMemo(() => mergeCategories(overlay), [overlay]);
 
@@ -124,20 +167,28 @@ export function App() {
     undoTimer.current = window.setTimeout(() => setUndo(null), ttlMs);
   }
 
-  const stateRef = useRef(state);
+  const stateRef = useRef<State | null>(state);
   stateRef.current = state;
   const syncRef = useRef<ReturnType<typeof createSync> | null>(null);
   const [syncStatus, setSyncStatus] = useState<SyncStatus>("synced");
 
   // A single sync channel per tenant. When the tenant switches we tear the
-  // old one down before starting a new one so pushes never leak across tenants.
+  // old one down and clear state before starting a new one so pushes never
+  // leak across tenants and the UI shows a spinner until the pull returns.
   useEffect(() => {
+    if (!activeTenantId) return;
+    setState(null);
+    stateRef.current = null;
     const sync = createSync({
-      getState: () => stateRef.current,
+      // Sync only sees state once it's been hydrated; before that a push
+      // would just re-send the empty placeholder. Return a sentinel so the
+      // push path skips until real state is loaded.
+      getState: () => stateRef.current ?? { lists: [], activeId: null },
       setState,
       tenantId: activeTenantId,
       baseUrl: import.meta.env.VITE_API_BASE ?? "",
       onStatusChange: setSyncStatus,
+      onEmpty: emptyState,
     });
     syncRef.current = sync;
     sync.start();
@@ -148,15 +199,15 @@ export function App() {
   }, [activeTenantId]);
 
   useEffect(() => {
-    saveState(activeTenantId, state);
-    syncRef.current?.notifyChange();
-  }, [state, activeTenantId]);
+    if (state) syncRef.current?.notifyChange();
+  }, [state]);
 
   // Daily rollover: on mount, on tenant switch, and whenever the tab regains
   // focus after being backgrounded (which is when "next open" actually fires
   // for a PWA left running overnight). Cheap idempotent check.
   useEffect(() => {
     function check() {
+      if (!stateRef.current) return;
       const result = rolloverIfNeeded(stateRef.current);
       if (!result) return;
       setState(result.next);
@@ -170,18 +221,36 @@ export function App() {
     return () => document.removeEventListener("visibilitychange", onVisible);
   }, [activeTenantId]);
 
-  const active = state.lists.find((l) => l.id === state.activeId) ?? state.lists[0];
-
   // Selection is tied to one list's rows; drop it if the active list changes
   // out from under it (tenant switch, new list, rollover) so stale ids can't
   // linger into a different list.
   useEffect(() => {
     setSelectMode(false);
     setSelectedIds(new Set());
-  }, [active.id]);
+  }, [state?.activeId]);
 
+  const catalog = useMemo(() => buildCatalog(state?.lists ?? []), [state?.lists]);
+
+  if (!tenants || !activeTenantId || !state) {
+    return (
+      <div
+        className="mx-auto flex min-h-dvh w-full max-w-[30rem] items-center justify-center px-5"
+        role="status"
+        aria-label="Yükleniyor"
+      >
+        <RefreshCw className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  // Everything past the guard runs only with a hydrated state, so the
+  // updater callbacks below can assume State (never null). Wrap once
+  // instead of null-checking at every callsite.
+  const updateState = (fn: (s: State) => State) =>
+    setState((s) => (s ? fn(s) : s));
+
+  const active = state.lists.find((l) => l.id === state.activeId) ?? state.lists[0];
   const past = state.lists.filter((l) => l.id !== active.id);
-  const catalog = useMemo(() => buildCatalog(state.lists), [state.lists]);
   const groupByCategory = state.groupByCategory ?? false;
 
   const total = active.items.length;
@@ -189,7 +258,7 @@ export function App() {
   const progress = total ? (done / total) * 100 : 0;
 
   function updateActive(fn: (items: Item[]) => Item[]) {
-    setState((s) => ({
+    updateState((s) => ({
       ...s,
       lists: s.lists.map((l) => (l.id === active.id ? { ...l, items: fn(l.items) } : l)),
     }));
@@ -300,7 +369,7 @@ export function App() {
     if (!undo) return;
     if (undo.kind === "remove") {
       const target = undo;
-      setState((s) => ({
+      updateState((s) => ({
         ...s,
         lists: s.lists.map((l) =>
           l.id === target.listId ? { ...l, items: [...l.items, target.item] } : l
@@ -308,7 +377,7 @@ export function App() {
       }));
     } else if (undo.kind === "bulkRemove") {
       const target = undo;
-      setState((s) => ({
+      updateState((s) => ({
         ...s,
         lists: s.lists.map((l) =>
           l.id === target.listId
@@ -326,7 +395,7 @@ export function App() {
     // An untouched list isn't worth filing — just keep using it.
     if (active.items.length === 0) return;
     const next = newList();
-    setState((s) => ({
+    updateState((s) => ({
       ...s,
       lists: [
         next,
@@ -339,6 +408,7 @@ export function App() {
   }
 
   function reuseList(listId: string) {
+    if (!state) return;
     const source = state.lists.find((l) => l.id === listId);
     if (!source) return;
     const present = new Set(
@@ -360,14 +430,14 @@ export function App() {
   }
 
   function renameActive(title: string) {
-    setState((s) => ({
+    updateState((s) => ({
       ...s,
       lists: s.lists.map((l) => (l.id === active.id ? { ...l, title } : l)),
     }));
   }
 
   function toggleGrouping() {
-    setState((s) => ({ ...s, groupByCategory: !(s.groupByCategory ?? false) }));
+    updateState((s) => ({ ...s, groupByCategory: !(s.groupByCategory ?? false) }));
   }
 
   function categorizeActive() {
@@ -376,39 +446,32 @@ export function App() {
 
   function selectTenant(id: string) {
     if (id === activeTenantId) return;
-    saveActiveTenantId(id);
-    setTenantState((prev) => ({ ...prev, activeTenantId: id }));
-    setState(loadState(id));
+    // Switching tears down the sync channel (see the effect on activeTenantId);
+    // that effect also clears state so the spinner shows until the new pull.
+    setActiveTenantId(id);
   }
 
-  function addTenant(name: string) {
-    const t = newTenant(name);
-    const next = [...tenants, t];
-    saveTenants(next);
-    saveActiveTenantId(t.id);
-    setTenantState({ tenants: next, activeTenantId: t.id });
-    setState(emptyState());
+  async function addTenant(name: string) {
+    // Optimistic id — Supabase's PK is text so we control it. Server persists,
+    // then we adopt so a failed create doesn't leave a ghost tenant.
+    const id = uid();
+    const created = await createHousehold(id, name.trim() || "Ev");
+    if (!created) return;
+    const t: Tenant = {
+      id: created.id,
+      name: created.name,
+      createdAt: Date.parse(created.created_at),
+    };
+    setTenants((prev) => [...(prev ?? []), t]);
+    setActiveTenantId(t.id);
   }
 
-  function renameTenant(id: string, name: string) {
-    const next = tenants.map((t) => (t.id === id ? { ...t, name } : t));
-    saveTenants(next);
-    setTenantState((prev) => ({ ...prev, tenants: next }));
-  }
-
-  function deleteTenant(id: string) {
-    if (tenants.length <= 1) return;
-    const next = tenants.filter((t) => t.id !== id);
-    saveTenants(next);
-    removeTenantState(id);
-    if (id === activeTenantId) {
-      const fallback = next[0];
-      saveActiveTenantId(fallback.id);
-      setTenantState({ tenants: next, activeTenantId: fallback.id });
-      setState(loadState(fallback.id));
-    } else {
-      setTenantState((prev) => ({ ...prev, tenants: next }));
-    }
+  async function renameTenant(id: string, name: string) {
+    const updated = await renameHousehold(id, name.trim());
+    if (!updated) return;
+    setTenants((prev) =>
+      (prev ?? []).map((t) => (t.id === id ? { ...t, name: updated.name } : t))
+    );
   }
 
   const isOnList = (name: string) =>
@@ -451,12 +514,11 @@ export function App() {
       <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-6 backdrop-blur">
         <div className="flex items-center justify-between gap-2 pb-2">
           <TenantSwitcher
-            tenants={tenants as Tenant[]}
+            tenants={tenants}
             activeId={activeTenantId}
             onSelect={selectTenant}
             onAdd={addTenant}
             onRename={renameTenant}
-            onDelete={deleteTenant}
           />
           <div className="flex items-center gap-1">
             {syncStatus !== "synced" && (

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Plus, Trash2, Pencil } from "lucide-react";
+import { Check, ChevronDown, Plus, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/lib/store";
 
@@ -9,7 +9,6 @@ type Props = {
   onSelect: (id: string) => void;
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
-  onDelete: (id: string) => void;
 };
 
 export function TenantSwitcher({
@@ -18,7 +17,6 @@ export function TenantSwitcher({
   onSelect,
   onAdd,
   onRename,
-  onDelete,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -54,23 +52,37 @@ export function TenantSwitcher({
     };
   }, [open]);
 
+  // Enter fires commitAdd and then blurs the input, which fires commitAdd
+  // again via onBlur. Without this guard the same name posts twice and we
+  // end up with two households. Same for rename.
+  const submittingAdd = useRef(false);
+  const submittingRename = useRef(false);
+
   function commitAdd() {
+    if (submittingAdd.current) return;
+    submittingAdd.current = true;
     const name = draft.trim();
     if (!name) {
       setAdding(false);
       setDraft("");
+      submittingAdd.current = false;
       return;
     }
     onAdd(name);
     setDraft("");
     setAdding(false);
+    // Reset after the current tick so the trailing blur is swallowed.
+    setTimeout(() => (submittingAdd.current = false), 0);
   }
 
   function commitRename(id: string) {
+    if (submittingRename.current) return;
+    submittingRename.current = true;
     const name = editDraft.trim();
     if (name) onRename(id, name);
     setEditingId(null);
     setEditDraft("");
+    setTimeout(() => (submittingRename.current = false), 0);
   }
 
   return (
@@ -144,24 +156,6 @@ export function TenantSwitcher({
                       >
                         <Pencil className="size-3.5" />
                       </button>
-                      {tenants.length > 1 && (
-                        <button
-                          type="button"
-                          aria-label={`${t.name} sil`}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `"${t.name}" evini ve tüm listelerini silmek istediğine emin misin?`
-                              )
-                            ) {
-                              onDelete(t.id);
-                            }
-                          }}
-                          className="rounded p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-signal"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      )}
                     </div>
                   )}
                 </li>

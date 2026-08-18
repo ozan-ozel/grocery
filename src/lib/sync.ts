@@ -10,6 +10,10 @@ type Options = {
   tenantId: string;
   baseUrl?: string;
   onStatusChange?: (status: SyncStatus) => void;
+  // Called when the server has no state for this tenant on the first GET.
+  // Lets the caller seed an empty state so the UI can render; the next push
+  // will populate the server.
+  onEmpty?: () => State;
 };
 
 const POLL_MS = 15_000;
@@ -23,6 +27,7 @@ export function createSync({
   tenantId,
   baseUrl = "",
   onStatusChange,
+  onEmpty,
 }: Options) {
   const url = `${baseUrl}/api/state?tenant=${encodeURIComponent(tenantId)}`;
 
@@ -47,8 +52,18 @@ export function createSync({
       const res = await fetch(url, { cache: "no-store" });
       if (!res.ok) return;
       const { version, state } = (await res.json()) as Envelope;
-      // Empty server (first-ever GET): nothing to adopt, let the next push seed it.
-      if (state == null) return;
+      // Empty server: seed via the caller so the UI can render. Adopt at
+      // the server's version (0) so the next local edit's PUT matches and
+      // gets promoted. Without this the app hangs on the loading spinner
+      // for any tenant with no state yet.
+      if (state == null) {
+        if (!onEmpty) return;
+        const seeded = onEmpty();
+        setState({ ...seeded, version });
+        lastSentSerialized = serialize(seeded);
+        backoff = BACKOFF_START_MS;
+        return;
+      }
       const local = getState();
       if (local.version !== version) {
         setState({ ...state, version });
