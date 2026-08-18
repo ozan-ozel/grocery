@@ -6,3 +6,7 @@ dist
 .env.local
 .env.*.local
 .wrangler
+
+# Local Netlify folder
+.netlify
+deno.lock
