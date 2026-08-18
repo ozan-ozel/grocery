@@ -127,7 +127,9 @@ export function App() {
         createdAt: Date.parse(h.created_at),
       }));
       // If the server has no households at all, seed the default one so the
-      // app still boots. This should only happen on a fresh Supabase.
+      // app still boots. This should only happen on a fresh Supabase; if two
+      // devices race and one 409s, re-fetch so the loser adopts the winner's
+      // row instead of showing a blank tenant list.
       if (effective.length === 0) {
         const created = await createHousehold(DEFAULT_TENANT_ID, "Evim");
         if (cancelled) return;
@@ -135,6 +137,14 @@ export function App() {
           effective = [
             { id: created.id, name: created.name, createdAt: Date.parse(created.created_at) },
           ];
+        } else {
+          const refetched = await listHouseholds();
+          if (cancelled) return;
+          effective = refetched.map((h) => ({
+            id: h.id,
+            name: h.name,
+            createdAt: Date.parse(h.created_at),
+          }));
         }
       }
       const fromUrl = readTenantFromUrl();

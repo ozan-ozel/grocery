@@ -32,8 +32,11 @@ export default async (request: Request, _context: Context): Promise<Response> =>
 
 async function handleGet(request: Request): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
+  // households is small metadata with no per-row privacy, and RLS on the
+  // table blocks anon reads. Use the service_role key here so listing works
+  // without a policy migration; matches how POST/PATCH already read/write.
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -41,8 +44,8 @@ async function handleGet(request: Request): Promise<Response> {
   const id = url.searchParams.get("id")?.trim();
 
   const headers = {
-    apikey: anonKey,
-    authorization: `Bearer ${anonKey}`,
+    apikey: serviceKey,
+    authorization: `Bearer ${serviceKey}`,
     accept: "application/json",
   };
 
