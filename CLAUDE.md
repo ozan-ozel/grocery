@@ -89,11 +89,13 @@ calendar day and has items, it's archived (`closedAt`) and a fresh list opens wi
 carried over under new ids. Offered as an undo via the same `Undo` mechanism as item removal.
 
 **Design tokens** live in `src/index.css` under `@theme` (Tailwind v4, no `tailwind.config`). The
-base palette is a cool paper-white/pine-black theme ("Nane") with exactly one accent color
-(`--color-signal`) reserved for both the progress fill and destructive actions — every other theme
-follows the same rule, including `--color-destructive`, which is always set equal to `--color-signal`
-rather than getting its own hue. Quantities, counts, and dates use the `.ledger` utility (DM Mono,
-tabular-nums, right-aligned) so they read as a stacked ledger column.
+original two themes (`light`/"Nane", `dark`/"Çam") use exactly one accent color (`--color-signal`)
+for both the progress fill and destructive actions — `--color-destructive` is set equal to
+`--color-signal` there. That single-accent look was never meant to be a rule the rest of the palette
+has to follow, though: newer themes are free to give destructive its own hue where it reads better
+(a red "Sil" against a blue or violet primary accent, for instance) — check each theme's own block
+rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility (DM
+Mono, tabular-nums, right-aligned) so they read as a stacked ledger column.
 
 **Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
 2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`
