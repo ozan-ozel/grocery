@@ -27,6 +27,8 @@ const JSON_HEADERS = {
 };
 
 const MAX_NAMES = 200;
+const BROWSE_LIMIT_DEFAULT = 60;
+const BROWSE_LIMIT_MAX = 150;
 const SELECT_COLS =
   "name_tr,aliases,kcal_per_100,protein_g,fat_g,carbs_g,fiber_g";
 
@@ -40,10 +42,53 @@ function restBase(url: string): string {
 
 export default async (request: Request, _context: Context): Promise<Response> => {
   const method = request.method.toUpperCase();
+  if (method === "GET") return handleBrowse(request);
   if (method === "POST") return handleRead(request);
   if (method === "PUT") return handleWrite(request);
   return json({ error: "method not allowed" }, 405);
 };
+
+// -------- BROWSE / SEARCH ------------------------------------------------------
+// GET /api/nutrition?q=<text>&limit=<n> -> Nutrition[]
+// Powers the "Tümü" (all foods) panel: a name search over the whole table,
+// not just the caller-supplied names handleRead handles. Empty q still
+// returns a page (alphabetical) so the panel isn't blank before typing.
+
+async function handleBrowse(request: Request): Promise<Response> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !anonKey) {
+    return json({ error: "supabase not configured" }, 500);
+  }
+
+  const url = new URL(request.url);
+  const q = normalize(url.searchParams.get("q") ?? "");
+  const rawLimit = Number(url.searchParams.get("limit"));
+  const limit = Number.isFinite(rawLimit) && rawLimit > 0
+    ? Math.min(Math.floor(rawLimit), BROWSE_LIMIT_MAX)
+    : BROWSE_LIMIT_DEFAULT;
+
+  const headers = {
+    apikey: anonKey,
+    authorization: `Bearer ${anonKey}`,
+    accept: "application/json",
+  };
+
+  let queryUrl = `${restBase(supabaseUrl)}/nutrition?select=${SELECT_COLS}&order=name_tr.asc&limit=${limit}`;
+  if (q) {
+    queryUrl += `&name_tr=ilike.*${encodeURIComponent(q)}*`;
+  }
+
+  try {
+    const res = await fetch(queryUrl, { headers });
+    if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
+    const rows = ((await res.json()) as unknown[]) ?? [];
+    const coerced = rows.map(coerce).filter((n): n is Nutrition => n !== null);
+    return json(coerced, 200);
+  } catch (err) {
+    return json({ error: String(err) }, 502);
+  }
+}
 
 // -------- READ ---------------------------------------------------------------
 

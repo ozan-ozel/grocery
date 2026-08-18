@@ -31,6 +31,8 @@ const JSON_HEADERS = {
 };
 
 const MAX_NAMES = 200;
+const BROWSE_LIMIT_DEFAULT = 60;
+const BROWSE_LIMIT_MAX = 150;
 const SELECT_COLS =
   "name_tr,aliases,kcal_per_100,protein_g,fat_g,carbs_g,fiber_g";
 
@@ -107,6 +109,46 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
       if (n && !merged.has(n.name_tr)) merged.set(n.name_tr, n);
     }
     return json([...merged.values()], 200);
+  } catch (err) {
+    return json({ error: String(err) }, 502);
+  }
+};
+
+// -------- BROWSE / SEARCH ------------------------------------------------------
+// GET /api/nutrition?q=<text>&limit=<n> -> Nutrition[]
+// Powers the "Tümü" (all foods) panel: a name search over the whole table,
+// not just the caller-supplied names POST handles. Empty q still returns a
+// page (alphabetical) so the panel isn't blank before the user types.
+
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  if (!env.SUPABASE_URL || !env.SUPABASE_ANON_KEY) {
+    return json({ error: "supabase not configured" }, 500);
+  }
+
+  const url = new URL(request.url);
+  const q = normalize(url.searchParams.get("q") ?? "");
+  const rawLimit = Number(url.searchParams.get("limit"));
+  const limit = Number.isFinite(rawLimit) && rawLimit > 0
+    ? Math.min(Math.floor(rawLimit), BROWSE_LIMIT_MAX)
+    : BROWSE_LIMIT_DEFAULT;
+
+  const headers = {
+    apikey: env.SUPABASE_ANON_KEY,
+    authorization: `Bearer ${env.SUPABASE_ANON_KEY}`,
+    accept: "application/json",
+  };
+
+  let queryUrl = `${restBase(env)}/nutrition?select=${SELECT_COLS}&order=name_tr.asc&limit=${limit}`;
+  if (q) {
+    queryUrl += `&name_tr=ilike.*${encodeURIComponent(q)}*`;
+  }
+
+  try {
+    const res = await fetch(queryUrl, { headers });
+    if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
+    const rows = ((await res.json()) as unknown[]) ?? [];
+    const coerced = rows.map(coerce).filter((n): n is Nutrition => n !== null);
+    return json(coerced, 200);
   } catch (err) {
     return json({ error: String(err) }, 502);
   }

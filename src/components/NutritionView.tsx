@@ -1,9 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil, Upload } from "lucide-react";
+import { Pencil, Search, Upload } from "lucide-react";
 import type { Item } from "@/lib/store";
 import {
-  fetchNutrition,
+  browseNutrition,
+  fetchNutritionCached,
   lookupNutrition,
+  rememberNutrition,
   saveNutrition,
   saveNutritionBulk,
   type Nutrition,
@@ -19,8 +21,11 @@ type Props = {
 };
 
 type Status = "idle" | "loading" | "ready" | "error";
+type Scope = "list" | "all";
+const BROWSE_LIMIT = 60;
 
 export function NutritionView({ items }: Props) {
+  const [scope, setScope] = useState<Scope>("list");
   const [map, setMap] = useState<NutritionMap>(() => new Map());
   const [status, setStatus] = useState<Status>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -37,7 +42,7 @@ export function NutritionView({ items }: Props) {
     }
     let cancelled = false;
     setStatus("loading");
-    fetchNutrition(names)
+    fetchNutritionCached(names)
       .then((next) => {
         if (cancelled) return;
         setMap(next);
@@ -91,9 +96,11 @@ export function NutritionView({ items }: Props) {
       next.set(itemName.trim().toLocaleLowerCase("tr-TR"), saved);
       return next;
     });
+    rememberNutrition([saved]);
   }
 
   function upsertBulkLocal(savedRows: Nutrition[]) {
+    rememberNutrition(savedRows);
     setMap((prev) => {
       const next = new Map(prev);
       for (const s of savedRows) next.set(s.name_tr, s);
@@ -101,9 +108,48 @@ export function NutritionView({ items }: Props) {
     });
   }
 
+  const scopeToggle = (
+    <div className="mb-3 inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
+      <button
+        type="button"
+        onClick={() => setScope("list")}
+        className={cn(
+          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+          scope === "list"
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Listedeki ürünler
+      </button>
+      <button
+        type="button"
+        onClick={() => setScope("all")}
+        className={cn(
+          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+          scope === "all"
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Tümü
+      </button>
+    </div>
+  );
+
+  if (scope === "all") {
+    return (
+      <div>
+        {scopeToggle}
+        <AllFoodsBrowser />
+      </div>
+    );
+  }
+
   if (items.length === 0) {
     return (
       <div>
+        {scopeToggle}
         <div className="flex items-center justify-between px-1 py-3">
           <p className="text-sm text-muted-foreground">
             Önce listene bir şeyler ekle. Besin değerleri burada görünür.
@@ -122,6 +168,7 @@ export function NutritionView({ items }: Props) {
 
   return (
     <div>
+      {scopeToggle}
       <div className="flex items-center justify-between px-1 pb-3">
         <p className="text-xs text-muted-foreground">
           Değerler 100 g / 100 ml içindir.
@@ -226,8 +273,106 @@ export function NutritionView({ items }: Props) {
 
       {status === "error" && (
         <p className="px-1 pt-3 text-xs text-muted-foreground">
-          Bağlantı hatası.
+          API'ye ulaşılamadı. (Yerelde çalışıyorsan{" "}
+          <code className="ledger">npm run pages:dev</code> gerekir.)
         </p>
+      )}
+    </div>
+  );
+}
+
+type BrowseStatus = "idle" | "loading" | "ready" | "error";
+
+// Browses/searches the whole nutrition table, independent of the active
+// list. Same interaction as the Alışveriş > Bul tab (SearchView) — icon
+// inside the input, no separate search button, live as you type — but this
+// one is backed by the DB instead of an already-loaded local catalog, so
+// typing is debounced (300ms) to avoid firing a request per keystroke.
+function AllFoodsBrowser() {
+  const [query, setQuery] = useState("");
+  const [rows, setRows] = useState<Nutrition[]>([]);
+  const [status, setStatus] = useState<BrowseStatus>("idle");
+
+  useEffect(() => {
+    let cancelled = false;
+    setStatus("loading");
+    const handle = window.setTimeout(() => {
+      browseNutrition(query, BROWSE_LIMIT)
+        .then((next) => {
+          if (cancelled) return;
+          setRows(next);
+          setStatus("ready");
+        })
+        .catch(() => {
+          if (cancelled) return;
+          setStatus("error");
+        });
+    }, 300);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(handle);
+    };
+  }, [query]);
+
+  return (
+    <div>
+      <div className="relative">
+        <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <Input
+          value={query}
+          aria-label="Besin ara"
+          placeholder="Besin ara"
+          className="pl-9"
+          onInput={(e: Event) => setQuery((e.target as HTMLInputElement).value)}
+        />
+      </div>
+
+      <p className="ledger px-1 pb-1 pt-4 text-xs uppercase tracking-widest text-muted-foreground">
+        {query.trim() ? `${rows.length} sonuç` : "alfabetik"}
+      </p>
+
+      {status === "loading" && rows.length === 0 && (
+        <p className="px-1 py-8 text-sm text-muted-foreground">Yükleniyor…</p>
+      )}
+      {status === "ready" && rows.length === 0 && (
+        <p className="px-1 py-8 text-sm text-muted-foreground">
+          {query.trim()
+            ? `"${query.trim()}" ile eşleşen besin yok.`
+            : "DB'de kayıtlı besin yok."}
+        </p>
+      )}
+      {status === "error" && (
+        <p className="px-1 py-8 text-sm text-muted-foreground">
+          API'ye ulaşılamadı. (Yerelde çalışıyorsan{" "}
+          <code className="ledger">npm run pages:dev</code> gerekir.)
+        </p>
+      )}
+
+      {rows.length > 0 && (
+        <table className="w-full border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-border text-xs text-muted-foreground">
+              <th className="py-2 pr-2 text-left font-normal">Ürün</th>
+              <th className="py-2 px-1 text-right font-normal">kcal</th>
+              <th className="py-2 px-1 text-right font-normal">P</th>
+              <th className="py-2 px-1 text-right font-normal">Y</th>
+              <th className="py-2 px-1 text-right font-normal">K</th>
+              <th className="py-2 px-1 text-right font-normal">L</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((n) => (
+              <tr key={n.name_tr} className="border-b border-border/60">
+                <td className="py-2 pr-2">{n.name_tr}</td>
+                <Cell value={n.kcal_per_100} />
+                <Cell value={n.protein_g} />
+                <Cell value={n.fat_g} />
+                <Cell value={n.carbs_g} />
+                <Cell value={n.fiber_g} />
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );

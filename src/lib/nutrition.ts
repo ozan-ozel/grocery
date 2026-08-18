@@ -20,6 +20,61 @@ function apiUrl(path: string): string {
   return `${baseUrl}${path}`;
 }
 
+const CACHE_KEY = "grocery.nutrition.v1";
+
+function loadCache(): Record<string, Nutrition> {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, Nutrition>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveCache(cache: Record<string, Nutrition>) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Best-effort, same as the rest of the app — cache just won't persist.
+  }
+}
+
+// Device-local, cross-session cache of nutrition lookups (nutrition facts
+// aren't tenant-specific, so one shared cache is fine). Only names actually
+// missing from the cache hit the network — this is what makes a reload of
+// the active list's nutrition table not re-fetch names it already knows.
+export async function fetchNutritionCached(names: string[]): Promise<NutritionMap> {
+  const cache = loadCache();
+  const map: NutritionMap = new Map(Object.entries(cache));
+
+  const normalized = Array.from(
+    new Set(names.map(normalize).filter((n) => n.length > 0))
+  );
+  const missing = normalized.filter((n) => !map.has(n));
+
+  if (missing.length > 0) {
+    const fresh = await fetchNutrition(missing);
+    if (fresh.size > 0) {
+      for (const [key, value] of fresh) {
+        map.set(key, value);
+        cache[key] = value;
+      }
+      saveCache(cache);
+    }
+  }
+
+  return map;
+}
+
+// Called after a save/edit/bulk-upload so the cache doesn't serve a stale
+// value for a name the user just changed.
+export function rememberNutrition(rows: Nutrition[]) {
+  if (rows.length === 0) return;
+  const cache = loadCache();
+  for (const row of rows) cache[row.name_tr] = row;
+  saveCache(cache);
+}
+
 export async function fetchNutrition(names: string[]): Promise<NutritionMap> {
   const map: NutritionMap = new Map();
   const normalized = Array.from(
@@ -27,29 +82,52 @@ export async function fetchNutrition(names: string[]): Promise<NutritionMap> {
   );
   if (normalized.length === 0) return map;
 
-  try {
-    const res = await fetch(apiUrl("/api/nutrition"), {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ names: normalized }),
-    });
-    if (!res.ok) {
-      console.warn("[nutrition] api", res.status);
-      return map;
+  // Let a failed request throw instead of silently returning an empty map —
+  // an API outage and "none of these items have nutrition data yet" would
+  // otherwise be indistinguishable to the caller.
+  const res = await fetch(apiUrl("/api/nutrition"), {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ names: normalized }),
+  });
+  if (!res.ok) {
+    throw new Error(`nutrition api ${res.status}`);
+  }
+  const rows = (await res.json()) as ApiRow[];
+  for (const row of rows) {
+    const nutrition = pickNutrition(row);
+    map.set(nutrition.name_tr, nutrition);
+    for (const alias of row.aliases ?? []) {
+      map.set(alias, nutrition);
     }
-    const rows = (await res.json()) as ApiRow[];
-    for (const row of rows) {
-      const nutrition = pickNutrition(row);
-      map.set(nutrition.name_tr, nutrition);
-      for (const alias of row.aliases ?? []) {
-        map.set(alias, nutrition);
-      }
-    }
-  } catch (err) {
-    console.warn("[nutrition] fetch threw:", err);
   }
 
   return map;
+}
+
+// Browses/searches the whole nutrition table (not just names on the active
+// list) — backs the "Tümü" panel. Empty query still returns a page so the
+// panel isn't blank before the user types anything.
+export async function browseNutrition(
+  query: string,
+  limit = 60
+): Promise<Nutrition[]> {
+  const params = new URLSearchParams();
+  const trimmed = query.trim();
+  if (trimmed) params.set("q", trimmed);
+  params.set("limit", String(limit));
+
+  // Unlike fetchNutrition (which is asked for specific known names, so an
+  // empty result is a normal "no match"), a failed browse and a genuinely
+  // empty table would otherwise render identically. Let failures throw so
+  // the caller can tell the two apart instead of silently showing "no food
+  // in the DB" when it's actually the API that's unreachable.
+  const res = await fetch(apiUrl(`/api/nutrition?${params.toString()}`));
+  if (!res.ok) {
+    throw new Error(`browse api ${res.status}`);
+  }
+  const rows = (await res.json()) as ApiRow[];
+  return rows.map(pickNutrition);
 }
 
 export async function saveNutrition(row: NutritionWrite): Promise<Nutrition> {
