@@ -94,6 +94,31 @@ export function loadActiveTenantId(): string | null {
   }
 }
 
+const TENANT_QUERY_PARAM = "tenant";
+
+export function readTenantFromUrl(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const value = params.get(TENANT_QUERY_PARAM);
+    return value && value.trim() ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+export function writeTenantToUrl(id: string) {
+  if (typeof window === "undefined") return;
+  try {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get(TENANT_QUERY_PARAM) === id) return;
+    url.searchParams.set(TENANT_QUERY_PARAM, id);
+    window.history.replaceState(null, "", url.toString());
+  } catch {
+    // Ignored — URL sync is best-effort.
+  }
+}
+
 export function saveActiveTenantId(id: string) {
   try {
     localStorage.setItem(ACTIVE_TENANT_KEY, id);
@@ -121,8 +146,14 @@ export const DEFAULT_TENANT_ID = "default";
 export function bootstrapTenants(): { tenants: Tenant[]; activeId: string } {
   const existing = loadTenants();
   if (existing.length > 0) {
+    // URL param wins over stored preference so a shared link opens the
+    // intended tenant. Unknown ids fall back to the stored/first tenant.
+    const fromUrl = readTenantFromUrl();
     const savedActive = loadActiveTenantId();
-    const active = existing.find((t) => t.id === savedActive) ?? existing[0];
+    const active =
+      existing.find((t) => t.id === fromUrl) ??
+      existing.find((t) => t.id === savedActive) ??
+      existing[0];
     return { tenants: existing, activeId: active.id };
   }
 

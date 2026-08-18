@@ -38,6 +38,7 @@ import {
   saveState,
   saveTenants,
   uid,
+  writeTenantToUrl,
   type Item,
   type State,
   type Tenant,
@@ -109,6 +110,10 @@ export function App() {
 
   useEffect(() => {
     setItemCategories(loadItemCategories(activeTenantId));
+  }, [activeTenantId]);
+
+  useEffect(() => {
+    writeTenantToUrl(activeTenantId);
   }, [activeTenantId]);
 
   const mergedCategories = useMemo(() => mergeCategories(overlay), [overlay]);
