@@ -1,4 +1,25 @@
 import { newStemmer } from "snowball-stemmers";
+import {
+  Baby,
+  Beef,
+  Coffee,
+  Cookie,
+  Croissant,
+  CupSoda,
+  Droplet,
+  Egg,
+  Home,
+  Milk,
+  PawPrint,
+  Sandwich,
+  Snowflake,
+  Soup,
+  SprayCan,
+  Tag,
+  Wheat,
+  type LucideIcon,
+  Carrot,
+} from "lucide-react";
 
 /**
  * Turkish grocery category taxonomy. Structure and slot names follow the
@@ -41,28 +62,28 @@ export type CategoryDef = {
   id: CategoryId;
   label: string; // Turkish display name
   order: number; // stable sort order in the grouped view
-  emoji: string; // quick visual scan aid in the grouped list and settings
+  icon: LucideIcon; // quick visual scan aid in the grouped list and settings
 };
 
 export const CATEGORIES: CategoryDef[] = [
-  { id: "meyve-sebze", label: "Meyve & Sebze", order: 1, emoji: "🥦" },
-  { id: "sut-kahvalti", label: "Süt Ürünleri", order: 2, emoji: "🥛" },
-  { id: "et-tavuk-balik", label: "Et, Tavuk & Balık", order: 3, emoji: "🍗" },
-  { id: "sarkuteri", label: "Şarküteri", order: 4, emoji: "🥓" },
-  { id: "firin", label: "Fırın & Pastane", order: 5, emoji: "🥖" },
-  { id: "kahvaltilik", label: "Kahvaltılık", order: 6, emoji: "🍯" },
-  { id: "temel-gida", label: "Temel Gıda", order: 7, emoji: "🌾" },
-  { id: "hazir-gida", label: "Hazır & Konserve", order: 8, emoji: "🥫" },
-  { id: "dondurulmus", label: "Dondurulmuş", order: 9, emoji: "❄️" },
-  { id: "atistirmalik", label: "Atıştırmalık", order: 10, emoji: "🍿" },
-  { id: "sicak-icecek", label: "Kahve & Çay", order: 11, emoji: "☕" },
-  { id: "icecek", label: "İçecek", order: 12, emoji: "🥤" },
-  { id: "bebek", label: "Bebek", order: 13, emoji: "🍼" },
-  { id: "kisisel-bakim", label: "Kişisel Bakım", order: 14, emoji: "🧴" },
-  { id: "temizlik", label: "Temizlik", order: 15, emoji: "🧽" },
-  { id: "ev-mutfak", label: "Ev & Mutfak", order: 16, emoji: "🍽️" },
-  { id: "evcil-hayvan", label: "Evcil Hayvan", order: 17, emoji: "🐾" },
-  { id: "diger", label: "Diğer", order: 99, emoji: "🗂️" },
+  { id: "meyve-sebze", label: "Meyve & Sebze", order: 1, icon: Carrot },
+  { id: "sut-kahvalti", label: "Süt Ürünleri", order: 2, icon: Milk },
+  { id: "et-tavuk-balik", label: "Et, Tavuk & Balık", order: 3, icon: Beef },
+  { id: "sarkuteri", label: "Şarküteri", order: 4, icon: Sandwich },
+  { id: "firin", label: "Fırın & Pastane", order: 5, icon: Croissant },
+  { id: "kahvaltilik", label: "Kahvaltılık", order: 6, icon: Egg },
+  { id: "temel-gida", label: "Temel Gıda", order: 7, icon: Wheat },
+  { id: "hazir-gida", label: "Hazır & Konserve", order: 8, icon: Soup },
+  { id: "dondurulmus", label: "Dondurulmuş", order: 9, icon: Snowflake },
+  { id: "atistirmalik", label: "Atıştırmalık", order: 10, icon: Cookie },
+  { id: "sicak-icecek", label: "Kahve & Çay", order: 11, icon: Coffee },
+  { id: "icecek", label: "İçecek", order: 12, icon: CupSoda },
+  { id: "bebek", label: "Bebek", order: 13, icon: Baby },
+  { id: "kisisel-bakim", label: "Kişisel Bakım", order: 14, icon: Droplet },
+  { id: "temizlik", label: "Temizlik", order: 15, icon: SprayCan },
+  { id: "ev-mutfak", label: "Ev & Mutfak", order: 16, icon: Home },
+  { id: "evcil-hayvan", label: "Evcil Hayvan", order: 17, icon: PawPrint },
+  { id: "diger", label: "Diğer", order: 99, icon: Tag },
 ];
 
 export const CATEGORY_BY_ID: Record<CategoryId, CategoryDef> = Object.fromEntries(

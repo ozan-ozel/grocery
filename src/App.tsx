@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { CloudOff, FilePlus2, Moon, RefreshCw, Sun } from "lucide-react";
+import { CloudOff, FilePlus2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import { AddItem } from "@/components/AddItem";
 import { ActiveList } from "@/components/ActiveList";
 import { CategoriesView } from "@/components/CategoriesView";
@@ -9,6 +10,7 @@ import { HistoryView } from "@/components/HistoryView";
 import { SearchView } from "@/components/SearchView";
 import { NutritionView } from "@/components/NutritionView";
 import { TenantSwitcher } from "@/components/TenantSwitcher";
+import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import {
   addCustomCategory,
   loadOverlay,
@@ -56,6 +58,7 @@ import {
   loadTheme,
   saveSwipeMode,
   saveTheme,
+  THEME_META_COLOR,
   type Theme,
 } from "@/lib/preferences";
 
@@ -79,21 +82,18 @@ export function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [theme, setTheme] = useState<Theme>(() => loadTheme());
   const [swipeMode, setSwipeMode] = useState(() => loadSwipeMode());
+  const [section, setSection] = useState<"alisveris" | "besin">("alisveris");
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
     saveTheme(theme);
     const meta = document.querySelector('meta[name="theme-color"]');
-    meta?.setAttribute("content", theme === "dark" ? "#161F1C" : "#F2F5F2");
+    meta?.setAttribute("content", THEME_META_COLOR[theme]);
   }, [theme]);
 
   useEffect(() => {
     saveSwipeMode(swipeMode);
   }, [swipeMode]);
-
-  function toggleTheme() {
-    setTheme((t) => (t === "dark" ? "light" : "dark"));
-  }
 
   function toggleSwipeMode() {
     setSwipeMode((s) => !s);
@@ -537,20 +537,7 @@ export function App() {
                 )}
               </span>
             )}
-            <Button
-              type="button"
-              variant="quiet"
-              size="icon"
-              onClick={toggleTheme}
-              title={theme === "dark" ? "Açık temaya geç" : "Koyu temaya geç"}
-              aria-label={theme === "dark" ? "Açık temaya geç" : "Koyu temaya geç"}
-            >
-              {theme === "dark" ? (
-                <Sun className="size-4" />
-              ) : (
-                <Moon className="size-4" />
-              )}
-            </Button>
+            <ThemeSwitcher theme={theme} onSelect={setTheme} />
           </div>
         </div>
 
@@ -582,79 +569,114 @@ export function App() {
           />
         </div>
 
-        <div className="flex items-center justify-between pt-3">
-          <TabsList>
-            <TabsTrigger value="list">Liste</TabsTrigger>
-            <TabsTrigger value="history">Geçmiş</TabsTrigger>
-            <TabsTrigger value="find">Bul</TabsTrigger>
-            <TabsTrigger value="nutrition">Besin</TabsTrigger>
-            <TabsTrigger value="cats">Kategoriler</TabsTrigger>
-          </TabsList>
-          <Button
-            variant="quiet"
-            size="sm"
-            onClick={startNewList}
-            disabled={active.items.length === 0}
-            title="Bu listeyi arşivle ve yenisini başlat"
+        <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
+          <button
+            type="button"
+            onClick={() => setSection("alisveris")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              section === "alisveris"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
           >
-            <FilePlus2 className="size-3.5" />
-            Yeni liste
-          </Button>
+            Alışveriş
+          </button>
+          <button
+            type="button"
+            onClick={() => setSection("besin")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              section === "besin"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Besin değerleri
+          </button>
         </div>
+
+        {section === "alisveris" ? (
+          <div className="flex items-center gap-2 pt-3">
+            <div className="-mx-1 flex-1 overflow-x-auto">
+              <TabsList className="px-1">
+                <TabsTrigger value="list">Liste</TabsTrigger>
+                <TabsTrigger value="history">Geçmiş</TabsTrigger>
+                <TabsTrigger value="find">Bul</TabsTrigger>
+                <TabsTrigger value="cats">Kategoriler</TabsTrigger>
+              </TabsList>
+            </div>
+            <Button
+              variant="quiet"
+              size="sm"
+              onClick={startNewList}
+              disabled={active.items.length === 0}
+              title="Bu listeyi arşivle ve yenisini başlat"
+              className="shrink-0"
+            >
+              <FilePlus2 className="size-3.5" />
+              Yeni liste
+            </Button>
+          </div>
+        ) : (
+          <div className="pt-3" />
+        )}
         <div className="-mx-5 h-px bg-border" />
       </header>
 
       <main className="pt-5">
-        <TabsContent value="list">
-          <AddItem catalog={catalog} onAdd={addItem} />
-          <div className="pt-2">
-            <ActiveList
-              list={active}
-              groupByCategory={groupByCategory}
-              categories={mergedCategories}
-              overlay={overlay}
-              selectMode={selectMode}
-              selectedIds={selectedIds}
-              onToggleSelect={toggleSelectItem}
-              onToggleSelectMode={toggleSelectMode}
-              onSelectAll={selectAll}
-              onSelectCategory={selectCategory}
-              onBulkRemove={bulkRemove}
-              swipeMode={swipeMode}
-              onToggleSwipeMode={toggleSwipeMode}
-              onToggle={toggleItem}
-              onRemove={removeItem}
-              onEdit={editItem}
-              onCategorize={categorizeActive}
-              onToggleGrouping={toggleGrouping}
-            />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="history">
-          <HistoryView lists={past} onReuse={reuseList} />
-        </TabsContent>
-
-        <TabsContent value="find">
-          <SearchView catalog={catalog} onAdd={addItem} isOnList={isOnList} />
-        </TabsContent>
-
-        <TabsContent value="nutrition">
+        {section === "besin" ? (
           <NutritionView items={active.items} />
-        </TabsContent>
+        ) : (
+          <>
+            <TabsContent value="list">
+              <AddItem catalog={catalog} onAdd={addItem} />
+              <div className="pt-2">
+                <ActiveList
+                  list={active}
+                  groupByCategory={groupByCategory}
+                  categories={mergedCategories}
+                  overlay={overlay}
+                  selectMode={selectMode}
+                  selectedIds={selectedIds}
+                  onToggleSelect={toggleSelectItem}
+                  onToggleSelectMode={toggleSelectMode}
+                  onSelectAll={selectAll}
+                  onSelectCategory={selectCategory}
+                  onBulkRemove={bulkRemove}
+                  swipeMode={swipeMode}
+                  onToggleSwipeMode={toggleSwipeMode}
+                  onToggle={toggleItem}
+                  onRemove={removeItem}
+                  onEdit={editItem}
+                  onCategorize={categorizeActive}
+                  onToggleGrouping={toggleGrouping}
+                />
+              </div>
+            </TabsContent>
 
-        <TabsContent value="cats">
-          <CategoriesView
-            merged={mergedCategories}
-            overlay={overlay}
-            onRename={renameCat}
-            onToggleHidden={toggleHidden}
-            onMove={moveCat}
-            onReorder={reorderCats}
-            onAdd={addCategory}
-            onRemoveCustom={removeCategory}
-          />
-        </TabsContent>
+            <TabsContent value="history">
+              <HistoryView lists={past} onReuse={reuseList} />
+            </TabsContent>
+
+            <TabsContent value="find">
+              <SearchView catalog={catalog} onAdd={addItem} isOnList={isOnList} />
+            </TabsContent>
+
+            <TabsContent value="cats">
+              <CategoriesView
+                merged={mergedCategories}
+                overlay={overlay}
+                onRename={renameCat}
+                onToggleHidden={toggleHidden}
+                onMove={moveCat}
+                onReorder={reorderCats}
+                onAdd={addCategory}
+                onRemoveCustom={removeCategory}
+              />
+            </TabsContent>
+          </>
+        )}
       </main>
 
       {undo && (

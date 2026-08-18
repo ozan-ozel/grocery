@@ -1,3 +1,4 @@
+import { Tag, type LucideIcon } from "lucide-react";
 import {
   CATEGORIES,
   CATEGORY_BY_ID,
@@ -30,12 +31,12 @@ export type MergedCategory = {
   order: number;
   hidden: boolean;
   builtin: boolean;
-  emoji: string;
+  icon: LucideIcon;
 };
 
-// Custom categories have no curated emoji of their own; a generic tag icon
-// keeps them visually aligned with built-ins in the emoji column.
-const CUSTOM_EMOJI = "🏷️";
+// Custom categories have no curated icon of their own; a generic tag icon
+// keeps them visually aligned with built-ins in the icon column.
+const CUSTOM_ICON = Tag;
 
 const OVERLAY_KEY = "grocery.categories.v1";
 const CUSTOM_PREFIX = "u:";
@@ -89,7 +90,7 @@ export function mergeCategories(overlay: CategoryOverlay): MergedCategory[] {
       order: o.order ?? c.order,
       hidden: o.hidden ?? false,
       builtin: true,
-      emoji: c.emoji,
+      icon: c.icon,
     });
   }
   for (const c of overlay.custom) {
@@ -99,7 +100,7 @@ export function mergeCategories(overlay: CategoryOverlay): MergedCategory[] {
       order: c.order,
       hidden: false,
       builtin: false,
-      emoji: CUSTOM_EMOJI,
+      icon: CUSTOM_ICON,
     });
   }
   return merged.sort((a, b) => a.order - b.order);

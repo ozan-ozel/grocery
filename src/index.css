@@ -68,6 +68,227 @@
   --color-ring: #eef2ef;
 }
 
+/* Grafit: closest to the original dark theme, minus the green tint —
+   neutral graphite instead of pine. Single accent, as before. */
+:root[data-theme="grafit"] {
+  --color-background: #131316;
+  --color-foreground: #f1f1f3;
+
+  --color-card: #1b1b1f;
+  --color-card-foreground: #f1f1f3;
+
+  --color-primary: #f1f1f3;
+  --color-primary-foreground: #131316;
+
+  --color-secondary: #232327;
+  --color-secondary-foreground: #f1f1f3;
+
+  --color-muted: #202024;
+  --color-muted-foreground: #8c8c93;
+
+  --color-accent: #232327;
+  --color-accent-foreground: #f1f1f3;
+
+  --color-destructive: #e2564a;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #e2564a;
+
+  --color-border: #29292e;
+  --color-input: #35353b;
+  --color-ring: #f1f1f3;
+}
+
+/* Arduvaz: cool blue-black ground. Breaks the single-accent rule on
+   purpose — electric blue drives progress/primary, red is reserved for
+   destructive only. */
+:root[data-theme="arduvaz"] {
+  --color-background: #0a0e14;
+  --color-foreground: #e8edf4;
+
+  --color-card: #121822;
+  --color-card-foreground: #e8edf4;
+
+  --color-primary: #e8edf4;
+  --color-primary-foreground: #0a0e14;
+
+  --color-secondary: #1a222e;
+  --color-secondary-foreground: #e8edf4;
+
+  --color-muted: #161d27;
+  --color-muted-foreground: #7183a0;
+
+  --color-accent: #1a222e;
+  --color-accent-foreground: #e8edf4;
+
+  --color-destructive: #ff5c5c;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #4f8cff;
+
+  --color-border: #212c3a;
+  --color-input: #2b3849;
+  --color-ring: #e8edf4;
+}
+
+/* Karbon: near-OLED black, hairline borders, violet accent — the boldest
+   dark option. Same split as Arduvaz: violet for primary, red for delete. */
+:root[data-theme="karbon"] {
+  --color-background: #09090c;
+  --color-foreground: #f4f2f8;
+
+  --color-card: #131118;
+  --color-card-foreground: #f4f2f8;
+
+  --color-primary: #f4f2f8;
+  --color-primary-foreground: #09090c;
+
+  --color-secondary: #1c1824;
+  --color-secondary-foreground: #f4f2f8;
+
+  --color-muted: #16121c;
+  --color-muted-foreground: #8d84a3;
+
+  --color-accent: #1c1824;
+  --color-accent-foreground: #f4f2f8;
+
+  --color-destructive: #ff4d6a;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #b455f5;
+
+  --color-border: #241f30;
+  --color-input: #302940;
+  --color-ring: #f4f2f8;
+}
+
+/* Bulut: visibly cool blue-tinted ground (not just "off-white") with pure
+   white cards floating on top — the tint is what makes it read as its own
+   theme instead of a near-duplicate of Nane/İpek at a glance. */
+:root[data-theme="bulut"] {
+  --color-background: #eef3fb;
+  --color-foreground: #101826;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #101826;
+
+  --color-primary: #101826;
+  --color-primary-foreground: #eef3fb;
+
+  --color-secondary: #e4ecf7;
+  --color-secondary-foreground: #101826;
+
+  --color-muted: #e4ecf7;
+  --color-muted-foreground: #5b6b85;
+
+  --color-accent: #e4ecf7;
+  --color-accent-foreground: #101826;
+
+  --color-destructive: #dc3545;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #2f6fed;
+
+  --color-border: #d8e2f0;
+  --color-input: #c2d2e8;
+  --color-ring: #101826;
+}
+
+/* İpek: visibly warm lavender-tinted ground, same white-card-on-tint
+   pattern as Bulut but a distinctly different hue family. */
+:root[data-theme="ipek"] {
+  --color-background: #f6f0fa;
+  --color-foreground: #1e1526;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #1e1526;
+
+  --color-primary: #1e1526;
+  --color-primary-foreground: #f6f0fa;
+
+  --color-secondary: #efe4f5;
+  --color-secondary-foreground: #1e1526;
+
+  --color-muted: #efe4f5;
+  --color-muted-foreground: #7a6b8c;
+
+  --color-accent: #efe4f5;
+  --color-accent-foreground: #1e1526;
+
+  --color-destructive: #e11d48;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #9333ea;
+
+  --color-border: #e6d9f0;
+  --color-input: #d9c4e8;
+  --color-ring: #1e1526;
+}
+
+/* Nova: standalone palette — warm neutral (not blue, not lavender, not
+   mint) off-white, soft borders, indigo accent. Inspired by well-liked
+   SaaS light themes. */
+:root[data-theme="nova"] {
+  --color-background: #faf9f6;
+  --color-foreground: #1c1c1f;
+
+  --color-card: #ffffff;
+  --color-card-foreground: #1c1c1f;
+
+  --color-primary: #1c1c1f;
+  --color-primary-foreground: #faf9f6;
+
+  --color-secondary: #f1efea;
+  --color-secondary-foreground: #1c1c1f;
+
+  --color-muted: #f1efea;
+  --color-muted-foreground: #8a8f98;
+
+  --color-accent: #f1efea;
+  --color-accent-foreground: #1c1c1f;
+
+  --color-destructive: #eb5757;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #5e6ad2;
+
+  --color-border: #ebe8e2;
+  --color-input: #dad6cc;
+  --color-ring: #1c1c1f;
+}
+
+/* Parşömen: real paper — warm cream ground with a faint fibrous grain
+   (see the body rule below), single stamp-red accent for both progress
+   and destructive, closest in spirit to the original "paper & ink" idea. */
+:root[data-theme="parsomen"] {
+  --color-background: #f5f1e8;
+  --color-foreground: #2b2620;
+
+  --color-card: #fbf8f2;
+  --color-card-foreground: #2b2620;
+
+  --color-primary: #2b2620;
+  --color-primary-foreground: #f5f1e8;
+
+  --color-secondary: #ede6d6;
+  --color-secondary-foreground: #2b2620;
+
+  --color-muted: #ede6d6;
+  --color-muted-foreground: #8a8172;
+
+  --color-accent: #ede6d6;
+  --color-accent-foreground: #2b2620;
+
+  --color-destructive: #b34a30;
+  --color-destructive-foreground: #ffffff;
+
+  --color-signal: #b34a30;
+
+  --color-border: #e3dcc8;
+  --color-input: #d8cdb0;
+  --color-ring: #2b2620;
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -90,6 +311,13 @@
   :focus-visible {
     outline: 2px solid var(--color-ring);
     outline-offset: 2px;
+  }
+
+  /* Parşömen only: a faint fibrous grain over the paper ground, generated
+     inline (feTurbulence) so it costs no extra asset request. */
+  :root[data-theme="parsomen"] body {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.32 0 0 0 0 0.26 0 0 0 0 0.16 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
   }
 }
 
