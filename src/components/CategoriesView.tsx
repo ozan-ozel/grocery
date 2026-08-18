@@ -129,7 +129,7 @@ export function CategoriesView({
                     <GripVertical className="size-4" />
                   </span>
 
-                  <span aria-hidden="true">{c.emoji}</span>
+                  <c.icon aria-hidden="true" className="size-4 text-muted-foreground" />
 
                   <span className="min-w-0 flex-1 truncate text-[0.975rem]">
                     {c.label}

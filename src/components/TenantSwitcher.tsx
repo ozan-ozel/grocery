@@ -87,7 +87,7 @@ export function TenantSwitcher({
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-30 mt-1 w-64 origin-top-right overflow-hidden rounded-md border border-border bg-card shadow-lg transition-[opacity,transform] duration-150 starting:scale-95 starting:opacity-0">
+        <div className="absolute left-0 top-full z-30 mt-1 w-64 origin-top-left overflow-hidden rounded-md border border-border bg-card shadow-lg transition-[opacity,transform] duration-150 starting:scale-95 starting:opacity-0">
           <ul className="max-h-64 overflow-y-auto py-1">
             {tenants.map((t) => {
               const isActive = t.id === activeId;

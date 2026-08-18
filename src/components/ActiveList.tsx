@@ -248,6 +248,7 @@ export function ActiveList({
                 : selectedCount === items.length
                   ? true
                   : "indeterminate";
+            const CategoryIcon = categories.find(c => c.id === id)?.icon;
             return (
               <section key={id} className="pt-3">
                 <div className="flex items-center gap-3 pb-1">
@@ -264,9 +265,12 @@ export function ActiveList({
                       className="starting:scale-75 starting:opacity-0 transition-[transform,opacity] duration-200"
                     />
                   )}
-                  <span aria-hidden="true">
-                    {categories.find(c => c.id === id)?.emoji}
-                  </span>
+                  {CategoryIcon && (
+                    <CategoryIcon
+                      aria-hidden="true"
+                      className="size-3.5 text-muted-foreground"
+                    />
+                  )}
                   <span className="ledger text-xs uppercase tracking-widest text-muted-foreground">
                     {labelFor(overlay, id)}
                   </span>
@@ -469,7 +473,7 @@ function Row({
         <div
           className={cn(
             "flex items-center gap-3 bg-background py-3.5",
-            swipeActive && "pr-3",
+            swipeActive && "touch-pan-y pr-3",
           )}
           onPointerDown={swipeActive ? (onPointerDown as never) : undefined}
           onPointerMove={swipeActive ? (onPointerMove as never) : undefined}
