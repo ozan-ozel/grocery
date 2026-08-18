@@ -52,23 +52,37 @@ export function TenantSwitcher({
     };
   }, [open]);
 
+  // Enter fires commitAdd and then blurs the input, which fires commitAdd
+  // again via onBlur. Without this guard the same name posts twice and we
+  // end up with two households. Same for rename.
+  const submittingAdd = useRef(false);
+  const submittingRename = useRef(false);
+
   function commitAdd() {
+    if (submittingAdd.current) return;
+    submittingAdd.current = true;
     const name = draft.trim();
     if (!name) {
       setAdding(false);
       setDraft("");
+      submittingAdd.current = false;
       return;
     }
     onAdd(name);
     setDraft("");
     setAdding(false);
+    // Reset after the current tick so the trailing blur is swallowed.
+    setTimeout(() => (submittingAdd.current = false), 0);
   }
 
   function commitRename(id: string) {
+    if (submittingRename.current) return;
+    submittingRename.current = true;
     const name = editDraft.trim();
     if (name) onRename(id, name);
     setEditingId(null);
     setEditDraft("");
+    setTimeout(() => (submittingRename.current = false), 0);
   }
 
   return (
