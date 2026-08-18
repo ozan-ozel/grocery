@@ -88,8 +88,18 @@ mount, on tenant switch, and on `visibilitychange`. If the active list was creat
 calendar day and has items, it's archived (`closedAt`) and a fresh list opens with unchecked items
 carried over under new ids. Offered as an undo via the same `Undo` mechanism as item removal.
 
-**Design tokens** live in `src/index.css` under `@theme` (Tailwind v4, no `tailwind.config`):
-a cool paper-white/pine-black palette with exactly one accent color (`--color-signal`) reserved for
-the progress fill and destructive actions. Quantities, counts, and dates use the `.ledger` utility
-(DM Mono, tabular-nums, right-aligned) so they read as a stacked ledger column. Dark mode is a
-second token block under `:root[data-theme="dark"]`, toggled by writing `data-theme` on `<html>`.
+**Design tokens** live in `src/index.css` under `@theme` (Tailwind v4, no `tailwind.config`). The
+base palette is a cool paper-white/pine-black theme ("Nane") with exactly one accent color
+(`--color-signal`) reserved for both the progress fill and destructive actions — every other theme
+follows the same rule, including `--color-destructive`, which is always set equal to `--color-signal`
+rather than getting its own hue. Quantities, counts, and dates use the `.ledger` utility (DM Mono,
+tabular-nums, right-aligned) so they read as a stacked ledger column.
+
+**Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
+2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`
+(dark group) and `bulut`, `ipek`, `nova`, `parsomen` (light group). Each is a full
+`:root[data-theme="<id>"]` token block in `index.css`; `parsomen` additionally applies a faint
+`feTurbulence`-generated paper grain to `body`. `ThemeSwitcher.tsx` renders the picker (grouped
+Açık/Koyu), writes the chosen id to `data-theme` on `<html>`, and persists it via
+`grocery.theme.v1` in `localStorage`. `THEME_META_COLOR` mirrors each theme's `--color-background`
+as a literal hex for the PWA `theme-color` meta tag, since that can't read a CSS custom property.

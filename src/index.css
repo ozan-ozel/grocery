@@ -99,9 +99,9 @@
   --color-ring: #f1f1f3;
 }
 
-/* Arduvaz: cool blue-black ground. Breaks the single-accent rule on
-   purpose — electric blue drives progress/primary, red is reserved for
-   destructive only. */
+/* Arduvaz: cool blue-black ground, electric blue accent — same
+   one-accent-for-everything rule as every other theme: signal drives both
+   progress and destructive. */
 :root[data-theme="arduvaz"] {
   --color-background: #0a0e14;
   --color-foreground: #e8edf4;
@@ -121,7 +121,7 @@
   --color-accent: #1a222e;
   --color-accent-foreground: #e8edf4;
 
-  --color-destructive: #ff5c5c;
+  --color-destructive: #4f8cff;
   --color-destructive-foreground: #ffffff;
 
   --color-signal: #4f8cff;
@@ -132,7 +132,8 @@
 }
 
 /* Karbon: near-OLED black, hairline borders, violet accent — the boldest
-   dark option. Same split as Arduvaz: violet for primary, red for delete. */
+   dark option. Same one-accent rule as the rest: violet drives both
+   progress and destructive. */
 :root[data-theme="karbon"] {
   --color-background: #09090c;
   --color-foreground: #f4f2f8;
@@ -152,7 +153,7 @@
   --color-accent: #1c1824;
   --color-accent-foreground: #f4f2f8;
 
-  --color-destructive: #ff4d6a;
+  --color-destructive: #b455f5;
   --color-destructive-foreground: #ffffff;
 
   --color-signal: #b455f5;
@@ -184,7 +185,7 @@
   --color-accent: #e4ecf7;
   --color-accent-foreground: #101826;
 
-  --color-destructive: #dc3545;
+  --color-destructive: #2f6fed;
   --color-destructive-foreground: #ffffff;
 
   --color-signal: #2f6fed;
@@ -215,7 +216,7 @@
   --color-accent: #efe4f5;
   --color-accent-foreground: #1e1526;
 
-  --color-destructive: #e11d48;
+  --color-destructive: #9333ea;
   --color-destructive-foreground: #ffffff;
 
   --color-signal: #9333ea;
@@ -247,7 +248,7 @@
   --color-accent: #f1efea;
   --color-accent-foreground: #1c1c1f;
 
-  --color-destructive: #eb5757;
+  --color-destructive: #5e6ad2;
   --color-destructive-foreground: #ffffff;
 
   --color-signal: #5e6ad2;
