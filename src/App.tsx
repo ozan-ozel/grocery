@@ -42,6 +42,7 @@ import {
 } from "@/lib/store";
 import {
   createHousehold,
+  deleteHousehold,
   listHouseholds,
   renameHousehold,
 } from "@/lib/households";
@@ -50,6 +51,7 @@ import {
   loadItemCategories,
   lookupItemCategory,
   rememberItemCategory,
+  removeItemCategories,
   saveItemCategories,
   type ItemCategoryMap,
 } from "@/lib/itemCategories";
@@ -474,6 +476,24 @@ export function App() {
     );
   }
 
+  async function deleteTenant(id: string) {
+    const current = tenants ?? [];
+    // Never delete the last household — the app has nowhere to fall back
+    // to mid-session (a fresh reload would reseed one, but that's not a
+    // substitute for a working UI right now).
+    if (current.length <= 1) return;
+    const ok = await deleteHousehold(id);
+    if (!ok) return;
+    removeItemCategories(id);
+    const next = current.filter((t) => t.id !== id);
+    setTenants(next);
+    if (id === activeTenantId) {
+      // Same path as selectTenant: switching tears down the sync channel
+      // and clears state until the new tenant's pull lands.
+      setActiveTenantId(next[0]?.id ?? null);
+    }
+  }
+
   const isOnList = (name: string) =>
     active.items.some(
       (i) => i.name.toLocaleLowerCase("tr-TR") === name.toLocaleLowerCase("tr-TR")
@@ -519,6 +539,7 @@ export function App() {
             onSelect={selectTenant}
             onAdd={addTenant}
             onRename={renameTenant}
+            onDelete={deleteTenant}
           />
           <div className="flex items-center gap-1">
             {syncStatus !== "synced" && (

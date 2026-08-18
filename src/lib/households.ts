@@ -65,6 +65,22 @@ export async function fetchHousehold(id: string): Promise<Household | null> {
   }
 }
 
+export async function deleteHousehold(id: string): Promise<boolean> {
+  try {
+    const res = await fetch(apiUrl(`/api/households?id=${encodeURIComponent(id)}`), {
+      method: "DELETE",
+    });
+    if (!res.ok) {
+      console.warn("[households] delete failed:", res.status);
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.warn("[households] delete threw:", err);
+    return false;
+  }
+}
+
 export async function createHousehold(
   id: string,
   name: string

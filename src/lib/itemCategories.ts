@@ -31,6 +31,14 @@ export function saveItemCategories(tenantId: string, map: ItemCategoryMap) {
   }
 }
 
+export function removeItemCategories(tenantId: string) {
+  try {
+    localStorage.removeItem(key(tenantId));
+  } catch {
+    // Best-effort, matches the rest of the app.
+  }
+}
+
 export function lookupItemCategory(
   map: ItemCategoryMap,
   name: string

@@ -1,11 +1,14 @@
-// GET  /api/households?id=<id>     -> Household       (read by id)
-// POST /api/households              -> Household       (create)
+// GET    /api/households?id=<id>     -> Household       (read by id)
+// POST   /api/households              -> Household       (create)
+// DELETE /api/households?id=<id>     -> { ok: true }     (delete)
 //
 // Uses PostgREST anon key for reads and service_role key for writes.
-// Anyone with the app URL can hit POST. For a small household PWA this is fine;
-// if this stops being personal, put the app behind authentication.
+// Anyone with the app URL can hit POST/DELETE. For a small household PWA
+// this is fine; if this stops being personal, put the app behind
+// authentication.
 
 import type { Context } from "@netlify/functions";
+import { getStore } from "@netlify/blobs";
 
 export type Household = {
   id: string;
@@ -27,6 +30,7 @@ export default async (request: Request, _context: Context): Promise<Response> =>
   if (method === "GET") return handleGet(request);
   if (method === "POST") return handleCreate(request);
   if (method === "PATCH") return handleRename(request);
+  if (method === "DELETE") return handleDelete(request);
   return json({ error: "method not allowed" }, 405);
 };
 
@@ -175,6 +179,56 @@ async function handleRename(request: Request): Promise<Response> {
     return json(data[0], 200);
   } catch (e) {
     return json({ error: `failed to rename household: ${e}` }, 500);
+  }
+}
+
+async function handleDelete(request: Request): Promise<Response> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
+    return json({ error: "supabase not configured" }, 500);
+  }
+
+  const url = new URL(request.url);
+  const id = url.searchParams.get("id")?.trim();
+  if (!id) {
+    return json({ error: "expected ?id=<id>" }, 400);
+  }
+
+  const headers = {
+    apikey: serviceKey,
+    authorization: `Bearer ${serviceKey}`,
+    accept: "application/json",
+    prefer: "return=representation",
+  };
+
+  try {
+    const response = await fetch(
+      `${restBase(supabaseUrl)}/households?id=eq.${encodeURIComponent(id)}`,
+      { method: "DELETE", headers }
+    );
+    if (!response.ok) {
+      const errorData = await response.text();
+      return json(
+        { error: `supabase ${response.status}`, details: errorData },
+        502
+      );
+    }
+    const data = (await response.json()) as unknown[];
+    if (data.length === 0) return json({ error: "household not found" }, 404);
+
+    // The household row cascades to lists/items/item_category_memory at the
+    // DB level (FK ON DELETE CASCADE), but the actively-synced list state
+    // lives in Blobs — a separate store the FK cascade can't reach. Clean it
+    // up too so a future household re-created with the same id can't
+    // resurrect stale state.
+    const store = getStore({ name: "state", consistency: "strong" });
+    await store.delete(`state:${id}`);
+    if (id === "default") await store.delete("state:global");
+
+    return json({ ok: true }, 200);
+  } catch (e) {
+    return json({ error: `failed to delete household: ${e}` }, 500);
   }
 }
 
