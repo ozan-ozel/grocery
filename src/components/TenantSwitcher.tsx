@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Plus, Trash2, Pencil } from "lucide-react";
+import { Check, ChevronDown, Plus, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/lib/store";
 
@@ -9,7 +9,6 @@ type Props = {
   onSelect: (id: string) => void;
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
-  onDelete: (id: string) => void;
 };
 
 export function TenantSwitcher({
@@ -18,7 +17,6 @@ export function TenantSwitcher({
   onSelect,
   onAdd,
   onRename,
-  onDelete,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -144,24 +142,6 @@ export function TenantSwitcher({
                       >
                         <Pencil className="size-3.5" />
                       </button>
-                      {tenants.length > 1 && (
-                        <button
-                          type="button"
-                          aria-label={`${t.name} sil`}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `"${t.name}" evini ve tüm listelerini silmek istediğine emin misin?`
-                              )
-                            ) {
-                              onDelete(t.id);
-                            }
-                          }}
-                          className="rounded p-1 text-muted-foreground opacity-0 transition group-hover:opacity-100 hover:text-signal"
-                        >
-                          <Trash2 className="size-3.5" />
-                        </button>
-                      )}
                     </div>
                   )}
                 </li>

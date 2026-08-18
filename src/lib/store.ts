@@ -32,11 +32,6 @@ export type Tenant = {
   createdAt: number;
 };
 
-const STATE_KEY_PREFIX = "grocery.state.v1:";
-const TENANTS_KEY = "grocery.tenants.v1";
-const ACTIVE_TENANT_KEY = "grocery.activeTenant.v1";
-const LEGACY_KEY = "grocery.v1";
-
 export const uid = () => Math.random().toString(36).slice(2, 10);
 
 export function newList(title?: string): List {
@@ -60,38 +55,6 @@ export function defaultTitle(at: number) {
 export function emptyState(): State {
   const list = newList();
   return { lists: [list], activeId: list.id };
-}
-
-function stateKey(tenantId: string) {
-  return `${STATE_KEY_PREFIX}${tenantId}`;
-}
-
-export function loadTenants(): Tenant[] {
-  try {
-    const raw = localStorage.getItem(TENANTS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw) as Tenant[];
-    if (!Array.isArray(parsed)) return [];
-    return parsed;
-  } catch {
-    return [];
-  }
-}
-
-export function saveTenants(tenants: Tenant[]) {
-  try {
-    localStorage.setItem(TENANTS_KEY, JSON.stringify(tenants));
-  } catch {
-    // Storage full or blocked; in-memory state is still fine for the session.
-  }
-}
-
-export function loadActiveTenantId(): string | null {
-  try {
-    return localStorage.getItem(ACTIVE_TENANT_KEY);
-  } catch {
-    return null;
-  }
 }
 
 const TENANT_QUERY_PARAM = "tenant";
@@ -119,94 +82,15 @@ export function writeTenantToUrl(id: string) {
   }
 }
 
-export function saveActiveTenantId(id: string) {
-  try {
-    localStorage.setItem(ACTIVE_TENANT_KEY, id);
-  } catch {
-    // Ignored — persistence is best-effort.
-  }
-}
-
 export function newTenant(name: string): Tenant {
   return { id: uid(), name: name.trim() || "Ev", createdAt: Date.now() };
 }
 
 /**
- * Stable id used for the default tenant on first run. Every device that
- * migrates lands on this same id, so two phones that used to share the
- * pre-tenant global blob keep sharing after the update. New tenants added
- * after that get random ids from newTenant().
+ * Stable id used for the built-in "Evim" household. Every device using the
+ * app-wide default tenant lands on this same id.
  */
 export const DEFAULT_TENANT_ID = "default";
-
-/**
- * On first run there are no tenants. Migrate any pre-tenant state saved under
- * the legacy key into a default "Evim" tenant, otherwise seed an empty one.
- */
-export function bootstrapTenants(): { tenants: Tenant[]; activeId: string } {
-  const existing = loadTenants();
-  if (existing.length > 0) {
-    // URL param wins over stored preference so a shared link opens the
-    // intended tenant. Unknown ids fall back to the stored/first tenant.
-    const fromUrl = readTenantFromUrl();
-    const savedActive = loadActiveTenantId();
-    const active =
-      existing.find((t) => t.id === fromUrl) ??
-      existing.find((t) => t.id === savedActive) ??
-      existing[0];
-    return { tenants: existing, activeId: active.id };
-  }
-
-  const first: Tenant = {
-    id: DEFAULT_TENANT_ID,
-    name: "Evim",
-    createdAt: Date.now(),
-  };
-  const tenants = [first];
-  saveTenants(tenants);
-  saveActiveTenantId(first.id);
-
-  try {
-    const legacy = localStorage.getItem(LEGACY_KEY);
-    if (legacy) {
-      localStorage.setItem(stateKey(first.id), legacy);
-      localStorage.removeItem(LEGACY_KEY);
-    }
-  } catch {
-    // Migration is best-effort; the user just starts fresh if it fails.
-  }
-
-  return { tenants, activeId: first.id };
-}
-
-export function loadState(tenantId: string): State {
-  try {
-    const raw = localStorage.getItem(stateKey(tenantId));
-    if (!raw) return emptyState();
-    const parsed = JSON.parse(raw) as State;
-    if (!parsed?.lists?.length) return emptyState();
-    return parsed;
-  } catch {
-    return emptyState();
-  }
-}
-
-export function saveState(tenantId: string, state: State) {
-  try {
-    localStorage.setItem(stateKey(tenantId), JSON.stringify(state));
-  } catch {
-    // Storage full or blocked (private mode). The app keeps working
-    // in memory for this session; nothing to recover here.
-  }
-}
-
-export function removeTenantState(tenantId: string) {
-  try {
-    localStorage.removeItem(stateKey(tenantId));
-  } catch {
-    // Ignored.
-  }
-}
 
 /**
  * Splits a typed line into a name and a quantity so people can type
