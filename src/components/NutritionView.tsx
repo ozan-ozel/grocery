@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { Pencil, Search, Upload } from "lucide-react";
-import type { Item } from "@/lib/store";
+import {
+  readNutritionScopeFromUrl,
+  writeNutritionScopeToUrl,
+  type Item,
+} from "@/lib/store";
 import {
   browseNutritionCached,
   fetchNutritionCached,
@@ -24,8 +28,12 @@ type Status = "idle" | "loading" | "ready" | "error";
 type Scope = "list" | "all";
 const BROWSE_LIMIT = 60;
 
+function initialScope(): Scope {
+  return readNutritionScopeFromUrl() === "all" ? "all" : "list";
+}
+
 export function NutritionView({ items }: Props) {
-  const [scope, setScope] = useState<Scope>("list");
+  const [scope, setScope] = useState<Scope>(initialScope);
   const [map, setMap] = useState<NutritionMap>(() => new Map());
   const [status, setStatus] = useState<Status>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -33,6 +41,10 @@ export function NutritionView({ items }: Props) {
 
   const names = useMemo(() => items.map((i) => i.name), [items]);
   const namesKey = names.join(" ");
+
+  useEffect(() => {
+    writeNutritionScopeToUrl(scope);
+  }, [scope]);
 
   useEffect(() => {
     if (names.length === 0) {
