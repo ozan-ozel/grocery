@@ -154,7 +154,7 @@ export function TenantSwitcher({
                           setEditingId(t.id);
                           setEditDraft(t.name);
                         }}
-                        className="rounded p-1 text-muted-foreground transition hover:text-foreground [@media(hover:hover)]:opacity-0 [@media(hover:hover)]:focus-visible:opacity-100 [@media(hover:hover)]:group-hover:opacity-100"
+                        className="rounded p-1 text-muted-foreground transition hover:text-foreground [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
                       >
                         <Pencil className="size-3.5" />
                       </button>

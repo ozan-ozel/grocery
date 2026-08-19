@@ -532,7 +532,7 @@ function Row({
                 className={cn(
                   "rounded p-1 text-muted-foreground transition",
                   "hover:text-foreground",
-                  "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:focus-visible:opacity-100 [@media(hover:hover)]:group-hover:opacity-100",
+                  "[@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
                 )}>
                 <Pencil className="size-4" />
               </button>
@@ -544,7 +544,7 @@ function Row({
                 className={cn(
                   "-mr-1 rounded p-1 text-muted-foreground transition",
                   "hover:text-signal",
-                  "[@media(hover:hover)]:opacity-0 [@media(hover:hover)]:focus-visible:opacity-100 [@media(hover:hover)]:group-hover:opacity-100",
+                  "[@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
                 )}>
                 <X className="size-4" />
               </button>
