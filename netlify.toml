@@ -1,3 +1,6 @@
+# Deploy-trigger diagnostic: 2026-08-19, master hadn't auto-deployed after 8
+# consecutive pushes (last successful bundle was pre-session). This comment
+# is a real, non-empty file change to rule out Netlify ignoring empty commits.
 [build]
   command = "npm run build"
   publish = "dist"
