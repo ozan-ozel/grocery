@@ -49,6 +49,23 @@ export const THEME_META_COLOR: Record<Theme, string> = {
   karbon: "#09090C",
 };
 
+// Mirrors each theme's --color-signal from index.css — the accent used for
+// the checkbox/progress fill and (on the two original themes) destructive
+// actions too. Duplicated here for the same reason as THEME_META_COLOR: the
+// theme switcher needs to show every option's accent while only one theme's
+// CSS custom properties are actually active on :root at a time.
+export const THEME_SIGNAL_COLOR: Record<Theme, string> = {
+  light: "#D8402F",
+  bulut: "#2F6FED",
+  ipek: "#9333EA",
+  nova: "#5E6AD2",
+  parsomen: "#B34A30",
+  dark: "#E2564A",
+  grafit: "#E2564A",
+  arduvaz: "#4F8CFF",
+  karbon: "#B455F5",
+};
+
 const THEME_KEY = "grocery.theme.v1";
 const SWIPE_KEY = "grocery.swipeMode.v1";
 

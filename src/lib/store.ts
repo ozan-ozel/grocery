@@ -57,29 +57,57 @@ export function emptyState(): State {
   return { lists: [list], activeId: list.id };
 }
 
-const TENANT_QUERY_PARAM = "tenant";
-
-export function readTenantFromUrl(): string | null {
+function readUrlParam(param: string): string | null {
   if (typeof window === "undefined") return null;
   try {
     const params = new URLSearchParams(window.location.search);
-    const value = params.get(TENANT_QUERY_PARAM);
+    const value = params.get(param);
     return value && value.trim() ? value : null;
   } catch {
     return null;
   }
 }
 
-export function writeTenantToUrl(id: string) {
+function writeUrlParam(param: string, value: string) {
   if (typeof window === "undefined") return;
   try {
     const url = new URL(window.location.href);
-    if (url.searchParams.get(TENANT_QUERY_PARAM) === id) return;
-    url.searchParams.set(TENANT_QUERY_PARAM, id);
+    if (url.searchParams.get(param) === value) return;
+    url.searchParams.set(param, value);
     window.history.replaceState(null, "", url.toString());
   } catch {
     // Ignored — URL sync is best-effort.
   }
+}
+
+const TENANT_QUERY_PARAM = "tenant";
+
+export function readTenantFromUrl(): string | null {
+  return readUrlParam(TENANT_QUERY_PARAM);
+}
+
+export function writeTenantToUrl(id: string) {
+  writeUrlParam(TENANT_QUERY_PARAM, id);
+}
+
+const SECTION_QUERY_PARAM = "section";
+
+export function readSectionFromUrl(): string | null {
+  return readUrlParam(SECTION_QUERY_PARAM);
+}
+
+export function writeSectionToUrl(section: string) {
+  writeUrlParam(SECTION_QUERY_PARAM, section);
+}
+
+const TAB_QUERY_PARAM = "tab";
+
+export function readTabFromUrl(): string | null {
+  return readUrlParam(TAB_QUERY_PARAM);
+}
+
+export function writeTabToUrl(tab: string) {
+  writeUrlParam(TAB_QUERY_PARAM, tab);
 }
 
 export function newTenant(name: string): Tenant {
