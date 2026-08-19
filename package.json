@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "pages:dev": "wrangler pages dev dist --kv STATE",
+    "netlify:dev": "netlify dev",
     "deploy": "npm run build && wrangler pages deploy dist"
   },
   "dependencies": {

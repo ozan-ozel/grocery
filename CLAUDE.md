@@ -6,17 +6,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm install
-npm run dev          # Vite dev server, client only — /api/* calls will 404 (no Pages Functions here)
+npm run dev          # Vite dev server, client only — /api/* calls will 404 (no functions here)
 npm run build         # tsc -b (typecheck src/) && vite build -> dist/
 npm run preview       # serve the built dist/ (still no /api/*)
-npm run pages:dev     # wrangler pages dev dist --kv STATE — serves dist/ AND functions/api/* locally
-                       #   with a local KV binding. Run `npm run build` first. Needs .dev.vars
-                       #   (copy .dev.vars.example) for /api/nutrition's Supabase calls.
-npm run deploy        # build && wrangler pages deploy dist
+npm run pages:dev     # wrangler pages dev dist --kv STATE — legacy Cloudflare Pages path. Only
+                       #   functions/api/nutrition.ts and functions/api/state.ts live here; there is
+                       #   no households/lists/items equivalent. Needs .dev.vars (copy
+                       #   .dev.vars.example). Run `npm run build` first.
+npm run netlify:dev   # netlify dev — the real local stack: Vite + every netlify/functions/*
+                       #   (households, lists, items, nutrition, state), proxied on :8888. This is
+                       #   what production actually runs (see netlify.toml's /api/* redirect). Use
+                       #   this one unless you're specifically testing the legacy Cloudflare path.
+                       #   Reads Supabase creds from .env.local automatically.
+npm run deploy        # build && wrangler pages deploy dist — deploys the legacy Cloudflare Pages
+                       #   path, NOT what's live; see the note in Architecture below.
 ```
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
+
+**Two backends currently coexist on `master`.** `functions/api/*` (Cloudflare Pages Functions) is
+what this repo originally shipped with; `netlify/functions/*` was added later during a migration and
+is what `netlify.toml`'s `/api/*` redirect actually routes to in production. Only `nutrition.ts` and
+`state.ts` exist on both paths (kept in sync manually — if you change one, check whether the other
+needs the same fix). `households.ts`, `lists.ts`, and `items.ts` exist only under `netlify/functions/`.
+When in doubt about which local dev command to run, use `npm run netlify:dev`.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 ```bash
@@ -88,8 +102,20 @@ mount, on tenant switch, and on `visibilitychange`. If the active list was creat
 calendar day and has items, it's archived (`closedAt`) and a fresh list opens with unchecked items
 carried over under new ids. Offered as an undo via the same `Undo` mechanism as item removal.
 
-**Design tokens** live in `src/index.css` under `@theme` (Tailwind v4, no `tailwind.config`):
-a cool paper-white/pine-black palette with exactly one accent color (`--color-signal`) reserved for
-the progress fill and destructive actions. Quantities, counts, and dates use the `.ledger` utility
-(DM Mono, tabular-nums, right-aligned) so they read as a stacked ledger column. Dark mode is a
-second token block under `:root[data-theme="dark"]`, toggled by writing `data-theme` on `<html>`.
+**Design tokens** live in `src/index.css` under `@theme` (Tailwind v4, no `tailwind.config`). The
+original two themes (`light`/"Nane", `dark`/"Çam") use exactly one accent color (`--color-signal`)
+for both the progress fill and destructive actions — `--color-destructive` is set equal to
+`--color-signal` there. That single-accent look was never meant to be a rule the rest of the palette
+has to follow, though: newer themes are free to give destructive its own hue where it reads better
+(a red "Sil" against a blue or violet primary accent, for instance) — check each theme's own block
+rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility (DM
+Mono, tabular-nums, right-aligned) so they read as a stacked ledger column.
+
+**Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
+2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`
+(dark group) and `bulut`, `ipek`, `nova`, `parsomen` (light group). Each is a full
+`:root[data-theme="<id>"]` token block in `index.css`; `parsomen` additionally applies a faint
+`feTurbulence`-generated paper grain to `body`. `ThemeSwitcher.tsx` renders the picker (grouped
+Açık/Koyu), writes the chosen id to `data-theme` on `<html>`, and persists it via
+`grocery.theme.v1` in `localStorage`. `THEME_META_COLOR` mirrors each theme's `--color-background`
+as a literal hex for the PWA `theme-color` meta tag, since that can't read a CSS custom property.

@@ -48,8 +48,12 @@ export function NutritionView({ items }: Props) {
         setMap(next);
         setStatus("ready");
       })
-      .catch(() => {
+      .catch((err) => {
         if (cancelled) return;
+        console.warn(
+          "[nutrition] fetch failed — if you're running locally, npm run pages:dev serves /api/*, npm run dev does not:",
+          err
+        );
         setMap(new Map());
         setStatus("error");
       });
@@ -273,8 +277,7 @@ export function NutritionView({ items }: Props) {
 
       {status === "error" && (
         <p className="px-1 pt-3 text-xs text-muted-foreground">
-          API'ye ulaşılamadı. (Yerelde çalışıyorsan{" "}
-          <code className="ledger">npm run pages:dev</code> gerekir.)
+          Besin verilerine ulaşılamadı. Bağlantını kontrol edip tekrar dene.
         </p>
       )}
     </div>
@@ -303,8 +306,12 @@ function AllFoodsBrowser() {
           setRows(next);
           setStatus("ready");
         })
-        .catch(() => {
+        .catch((err) => {
           if (cancelled) return;
+          console.warn(
+            "[nutrition] browse failed — if you're running locally, npm run pages:dev serves /api/*, npm run dev does not:",
+            err
+          );
           setStatus("error");
         });
     }, 300);
@@ -338,13 +345,12 @@ function AllFoodsBrowser() {
         <p className="px-1 py-8 text-sm text-muted-foreground">
           {query.trim()
             ? `"${query.trim()}" ile eşleşen besin yok.`
-            : "DB'de kayıtlı besin yok."}
+            : "Henüz kayıtlı besin yok."}
         </p>
       )}
       {status === "error" && (
         <p className="px-1 py-8 text-sm text-muted-foreground">
-          API'ye ulaşılamadı. (Yerelde çalışıyorsan{" "}
-          <code className="ledger">npm run pages:dev</code> gerekir.)
+          Besin verilerine ulaşılamadı. Bağlantını kontrol edip tekrar dene.
         </p>
       )}
 

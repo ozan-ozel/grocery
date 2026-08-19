@@ -562,35 +562,7 @@ export function App() {
           </div>
         </div>
 
-        <div className="flex items-baseline gap-3">
-          <input
-            value={active.title}
-            aria-label="Liste adı"
-            onInput={(e: Event) =>
-              renameActive((e.target as HTMLInputElement).value)
-            }
-            onBlur={() => {
-              if (!active.title.trim()) renameActive(defaultTitle(active.createdAt));
-            }}
-            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight outline-none"
-          />
-          <span className="ledger shrink-0 text-lg">
-            <span className={done > 0 ? "text-signal" : "text-muted-foreground"}>
-              {String(done).padStart(2, "0")}
-            </span>
-            <span className="text-muted-foreground">/{String(total).padStart(2, "0")}</span>
-          </span>
-        </div>
-
-        {/* The tally line fills as the cart fills — the one moving part. */}
-        <div className="mt-3 h-px w-full bg-border">
-          <div
-            className="h-px bg-signal transition-[width] duration-300 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-
-        <div className="mt-3 inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
+        <div className="inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
           <button
             type="button"
             onClick={() => setSection("alisveris")}
@@ -616,6 +588,38 @@ export function App() {
             Besin değerleri
           </button>
         </div>
+
+        {section === "alisveris" && (
+          <>
+            <div className="mt-3 flex items-baseline gap-3">
+              <input
+                value={active.title}
+                aria-label="Liste adı"
+                onInput={(e: Event) =>
+                  renameActive((e.target as HTMLInputElement).value)
+                }
+                onBlur={() => {
+                  if (!active.title.trim()) renameActive(defaultTitle(active.createdAt));
+                }}
+                className="min-w-0 flex-1 border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight outline-none"
+              />
+              <span className="ledger shrink-0 text-lg">
+                <span className={done > 0 ? "text-signal" : "text-muted-foreground"}>
+                  {String(done).padStart(2, "0")}
+                </span>
+                <span className="text-muted-foreground">/{String(total).padStart(2, "0")}</span>
+              </span>
+            </div>
+
+            {/* The tally line fills as the cart fills — the one moving part. */}
+            <div className="mt-3 h-px w-full bg-border">
+              <div
+                className="h-px bg-signal transition-[width] duration-300 ease-out"
+                style={{ width: `${progress}%` }}
+              />
+            </div>
+          </>
+        )}
 
         {section === "alisveris" ? (
           <div className="flex items-center gap-2 pt-3">
