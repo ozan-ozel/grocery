@@ -51,7 +51,7 @@ export function NutritionView({ items }: Props) {
       .catch((err) => {
         if (cancelled) return;
         console.warn(
-          "[nutrition] fetch failed — if you're running locally, npm run pages:dev serves /api/*, npm run dev does not:",
+          "[nutrition] fetch failed — if you're running locally, npm run netlify:dev serves /api/*, npm run dev does not:",
           err
         );
         setMap(new Map());
@@ -309,7 +309,7 @@ function AllFoodsBrowser() {
         .catch((err) => {
           if (cancelled) return;
           console.warn(
-            "[nutrition] browse failed — if you're running locally, npm run pages:dev serves /api/*, npm run dev does not:",
+            "[nutrition] browse failed — if you're running locally, npm run netlify:dev serves /api/*, npm run dev does not:",
             err
           );
           setStatus("error");
