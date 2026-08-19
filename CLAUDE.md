@@ -51,33 +51,47 @@ When adding a new shadcn component with the CLI, watch for ref-type mismatches o
 global store or context. `src/lib/*.ts` holds pure logic and localStorage I/O; components stay
 mostly presentational. Persistence is split across several independent layers with different scopes:
 
-| Layer | Key(s) | Scope | Synced to server? |
+| Layer | Key(s) / store | Scope | Synced to server? |
 |---|---|---|---|
-| Tenants (households) | `grocery.tenants.v1`, `grocery.activeTenant.v1` | device | no |
-| List state (`{ lists, activeId, version }`) | `grocery.state.v1:<tenantId>` | per tenant | yes, via `functions/api/state.ts` |
+| Tenants (households) | Supabase `households` table, via `/api/households` | shared (Supabase) | yes |
+| List state (`{ lists, activeId, version }`) | `grocery.state.v1:<tenantId>` (local cache) + Netlify Blobs `state:<tenantId>` | per tenant | yes, via `netlify/functions/state.ts` |
 | Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1` | device | no |
 | Item name → category memory | `grocery.itemCategories.v1:<tenantId>` | device, per tenant | no |
 | UI prefs (theme, swipe mode) | `grocery.theme.v1`, `grocery.swipeMode.v1` | device | no |
 
-Only list state syncs across devices; category customization and per-item category memory are
-device-local even though they're keyed by tenant, so they don't currently follow a household across
-phones. Lists are never deleted — starting a new list stamps the old one with `closedAt` and files
-it into History; `buildCatalog()` (`src/lib/store.ts`) collapses every item ever added across all
-lists into a name/count/last-bought table that backs both the add-field autocomplete and the Find tab.
+Category customization and per-item category memory are still device-local even though they're keyed
+by tenant, so they don't follow a household across phones. Lists are never deleted — starting a new
+list stamps the old one with `closedAt` and files it into History; `buildCatalog()` (`src/lib/store.ts`)
+collapses every item ever added across all lists into a name/count/last-bought table that backs both
+the add-field autocomplete and the Find tab.
 
-**Tenants** (`src/lib/store.ts`) model separate households ("Evim" is the default, id `"default"`,
-stable across devices so two phones sharing the pre-tenant global blob keep sharing after upgrade).
+**Tenants** (`src/lib/store.ts` + `src/lib/households.ts`) model separate households ("Evim" is the
+default, id `"default"`). The tenant list isn't device-local: it's rows in Supabase's `households`
+table, fetched/created/renamed/deleted through `/api/households` (`netlify/functions/households.ts`,
+service_role key for every verb, including reads). On boot `App.tsx` calls `listHouseholds()`; if
+Supabase has none yet, it seeds `"default"`/"Evim" via `createHousehold()` so a fresh project still
+boots. Deleting a household (`DELETE /api/households?id=`) cascades `lists`/`items`/
+`item_category_memory` via Supabase FK constraints and separately clears its `state:<id>` Blob.
 Switching tenants tears down and recreates the sync channel (see `App.tsx`'s sync `useEffect`) so a
 push from tenant A can never land on tenant B.
 
-**Sync** (`src/lib/sync.ts` + `functions/api/state.ts`) is a polling + optimistic-concurrency
+**Sync** (`src/lib/sync.ts` + `netlify/functions/state.ts`) is a polling + optimistic-concurrency
 scheme, not a websocket: the client polls `GET /api/state?tenant=<id>` every 15s and on tab focus,
-and pushes `PUT` 500ms after any local change. The server keeps one Cloudflare KV entry per tenant
-holding `{ version, state }`; a `PUT` with a stale `version` gets rejected with 409 and the current
-server state, which the client adopts. This is last-write-wins by design — deliberately good enough
-for a household of 2-4, not a CRDT. `functions/api/state.ts` has a one-time legacy fallback: the
-pre-tenant client wrote to a single `state:global` key, and the `"default"` tenant transparently
-reads (and later writes over) that key on its first sync.
+and pushes `PUT` 500ms after any local change; a `PUT` with a stale `version` gets rejected with 409
+and the current server state, which the client adopts. Last-write-wins by design — deliberately good
+enough for a household of 2-4, not a CRDT. The backing store is **Netlify Blobs**
+(`getStore({ name: "state", consistency: "strong" })`), one key per tenant (`state:<tenantId>`), with
+a legacy `state:global` fallback for `"default"` on its first sync. If Blobs has nothing for a tenant
+yet, `state.ts` tries a one-time hydration from the Supabase `lists`/`items` tables
+(`hydrateFromSupabase()`) before falling back to `state: null` — this only fires for a household that
+exists via `/api/households` but has never had a first `/api/state` PUT.
+
+`src/lib/lists.ts` and `src/lib/items.ts` are client wrappers around `netlify/functions/lists.ts` /
+`items.ts` (per-row CRUD against the `lists`/`items` tables in `supabase/01-schema.sql`), but
+**nothing in the app calls them yet** — no import outside those two files themselves. They read as
+scaffolding for eventually replacing the single-blob-per-tenant sync with normalized per-row Supabase
+persistence, not a wired-up feature. `supabase/01-schema.sql` also defines an `item_category_memory`
+table that likewise has no reader/writer anywhere yet.
 
 **Categorization** is three layered pieces, in order of precedence when an item is added:
 1. `src/lib/itemCategories.ts` — if this item name was ever manually assigned a category before
@@ -92,10 +106,20 @@ reads (and later writes over) that key on its first sync.
    improvements retroactively apply without a data migration.
 
 **Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
-`functions/api/nutrition.ts`, a Cloudflare Pages Function that proxies to a Supabase `nutrition`
-table via PostgREST: reads use the anon key, writes use the service_role key, both kept server-side
-so the client never sees them. `docs/nutrition-prompt.md` is a copy-paste LLM prompt for turning
-free-form nutrition text into the row JSON the uploader/bulk-paste UI expects.
+`/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production (also mirrored at
+`functions/api/nutrition.ts` for the legacy Cloudflare path — see the dual-backend note above), which
+proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
+service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
+a copy-paste LLM prompt for turning free-form nutrition text into the row JSON the uploader/bulk-paste
+UI expects.
+
+**Required env vars** (Netlify site settings for production; `.env.local` or `netlify link` for local
+dev via `npm run netlify:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
+Most `netlify/functions/*.ts` GETs use the anon key and writes use the service_role key;
+`households.ts` is the exception and uses service_role for every verb including reads.
+`.env.local.example` only lists `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because
+it's scoped to the one-off `scripts/upload-nutrition.ts` seeding script — it does not cover
+`SUPABASE_ANON_KEY`, which the functions also need.
 
 **Daily rollover** (`rolloverIfNeeded` in `store.ts`) is client-triggered, not a cron: it runs on
 mount, on tenant switch, and on `visibilitychange`. If the active list was created on a previous
