@@ -110,6 +110,16 @@ export function writeTabToUrl(tab: string) {
   writeUrlParam(TAB_QUERY_PARAM, tab);
 }
 
+const NUTRITION_SCOPE_QUERY_PARAM = "scope";
+
+export function readNutritionScopeFromUrl(): string | null {
+  return readUrlParam(NUTRITION_SCOPE_QUERY_PARAM);
+}
+
+export function writeNutritionScopeToUrl(scope: string) {
+  writeUrlParam(NUTRITION_SCOPE_QUERY_PARAM, scope);
+}
+
 export function newTenant(name: string): Tenant {
   return { id: uid(), name: name.trim() || "Ev", createdAt: Date.now() };
 }
