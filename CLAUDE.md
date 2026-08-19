@@ -6,17 +6,31 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ```bash
 npm install
-npm run dev          # Vite dev server, client only — /api/* calls will 404 (no Pages Functions here)
+npm run dev          # Vite dev server, client only — /api/* calls will 404 (no functions here)
 npm run build         # tsc -b (typecheck src/) && vite build -> dist/
 npm run preview       # serve the built dist/ (still no /api/*)
-npm run pages:dev     # wrangler pages dev dist --kv STATE — serves dist/ AND functions/api/* locally
-                       #   with a local KV binding. Run `npm run build` first. Needs .dev.vars
-                       #   (copy .dev.vars.example) for /api/nutrition's Supabase calls.
-npm run deploy        # build && wrangler pages deploy dist
+npm run pages:dev     # wrangler pages dev dist --kv STATE — legacy Cloudflare Pages path. Only
+                       #   functions/api/nutrition.ts and functions/api/state.ts live here; there is
+                       #   no households/lists/items equivalent. Needs .dev.vars (copy
+                       #   .dev.vars.example). Run `npm run build` first.
+npm run netlify:dev   # netlify dev — the real local stack: Vite + every netlify/functions/*
+                       #   (households, lists, items, nutrition, state), proxied on :8888. This is
+                       #   what production actually runs (see netlify.toml's /api/* redirect). Use
+                       #   this one unless you're specifically testing the legacy Cloudflare path.
+                       #   Reads Supabase creds from .env.local automatically.
+npm run deploy        # build && wrangler pages deploy dist — deploys the legacy Cloudflare Pages
+                       #   path, NOT what's live; see the note in Architecture below.
 ```
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
+
+**Two backends currently coexist on `master`.** `functions/api/*` (Cloudflare Pages Functions) is
+what this repo originally shipped with; `netlify/functions/*` was added later during a migration and
+is what `netlify.toml`'s `/api/*` redirect actually routes to in production. Only `nutrition.ts` and
+`state.ts` exist on both paths (kept in sync manually — if you change one, check whether the other
+needs the same fix). `households.ts`, `lists.ts`, and `items.ts` exist only under `netlify/functions/`.
+When in doubt about which local dev command to run, use `npm run netlify:dev`.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 ```bash
