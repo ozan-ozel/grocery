@@ -39,9 +39,9 @@ export function ThemeSwitcher({ theme, onSelect }: Props) {
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:text-foreground"
+        className="flex size-9 items-center justify-center rounded-md transition-colors hover:bg-accent"
       >
-        <Palette className="size-4" />
+        <Palette className="size-4" style={{ color: THEME_SIGNAL_COLOR[theme] }} />
       </button>
 
       {open && (
