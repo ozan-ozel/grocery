@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Pencil, Search, Upload } from "lucide-react";
 import type { Item } from "@/lib/store";
 import {
-  browseNutrition,
+  browseNutritionCached,
   fetchNutritionCached,
   lookupNutrition,
   rememberNutrition,
@@ -300,7 +300,7 @@ function AllFoodsBrowser() {
     let cancelled = false;
     setStatus("loading");
     const handle = window.setTimeout(() => {
-      browseNutrition(query, BROWSE_LIMIT)
+      browseNutritionCached(query, BROWSE_LIMIT)
         .then((next) => {
           if (cancelled) return;
           setRows(next);

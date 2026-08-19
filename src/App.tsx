@@ -32,9 +32,13 @@ import {
   defaultTitle,
   emptyState,
   newList,
+  readSectionFromUrl,
+  readTabFromUrl,
   readTenantFromUrl,
   rolloverIfNeeded,
   uid,
+  writeSectionToUrl,
+  writeTabToUrl,
   writeTenantToUrl,
   type Item,
   type State,
@@ -69,6 +73,19 @@ type Undo =
   | { kind: "bulkRemove"; items: Item[]; listId: string }
   | { kind: "rollover"; previous: State };
 
+type Section = "alisveris" | "besin";
+type Tab = "list" | "history" | "find" | "cats";
+const TABS: Tab[] = ["list", "history", "find", "cats"];
+
+function initialSection(): Section {
+  return readSectionFromUrl() === "besin" ? "besin" : "alisveris";
+}
+
+function initialTab(): Tab {
+  const fromUrl = readTabFromUrl();
+  return (TABS as string[]).includes(fromUrl ?? "") ? (fromUrl as Tab) : "list";
+}
+
 export function App() {
   // Both start as null so the app can render a spinner until the first
   // /api/tenants and /api/state responses land. After that they stay
@@ -84,7 +101,16 @@ export function App() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [theme, setTheme] = useState<Theme>(() => loadTheme());
   const [swipeMode, setSwipeMode] = useState(() => loadSwipeMode());
-  const [section, setSection] = useState<"alisveris" | "besin">("alisveris");
+  const [section, setSection] = useState<Section>(initialSection);
+  const [tab, setTab] = useState<Tab>(initialTab);
+
+  useEffect(() => {
+    writeSectionToUrl(section);
+  }, [section]);
+
+  useEffect(() => {
+    writeTabToUrl(tab);
+  }, [tab]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -528,7 +554,8 @@ export function App() {
 
   return (
     <Tabs
-      defaultValue="list"
+      value={tab}
+      onValueChange={(v) => setTab(v as Tab)}
       className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-28"
     >
       <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-6 backdrop-blur">

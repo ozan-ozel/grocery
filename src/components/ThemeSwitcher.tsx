@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { THEME_OPTIONS, type Theme } from "@/lib/preferences";
+import { THEME_OPTIONS, THEME_SIGNAL_COLOR, type Theme } from "@/lib/preferences";
 
 type Props = {
   theme: Theme;
@@ -102,9 +102,14 @@ function ThemeGroup({
               >
                 <Check
                   className={cn(
-                    "size-3.5",
+                    "size-3.5 shrink-0",
                     isActive ? "text-foreground" : "text-transparent"
                   )}
+                />
+                <span
+                  aria-hidden="true"
+                  className="size-2.5 shrink-0 rounded-full border border-border/60"
+                  style={{ backgroundColor: THEME_SIGNAL_COLOR[opt.id] }}
                 />
                 <span className="truncate">{opt.label}</span>
               </button>

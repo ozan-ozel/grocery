@@ -73,6 +73,43 @@ export function rememberNutrition(rows: Nutrition[]) {
   const cache = loadCache();
   for (const row of rows) cache[row.name_tr] = row;
   saveCache(cache);
+  // A save can affect any number of cached browse pages (any query whose
+  // results include this row) — cheaper to drop them all than to track
+  // which pages are affected.
+  clearBrowseCache();
+}
+
+type BrowseCacheEntry = { rows: Nutrition[]; ts: number };
+const BROWSE_CACHE_KEY = "grocery.nutrition.browse.v1";
+// Browse-all is read-mostly; a short TTL is enough to stop the same page
+// (typically the default alphabetical listing) from refetching on every
+// reload or Alışveriş/Besin tab switch, without risking stale-looking data
+// for long after an edit elsewhere.
+const BROWSE_CACHE_TTL_MS = 5 * 60 * 1000;
+
+function loadBrowseCache(): Record<string, BrowseCacheEntry> {
+  try {
+    const raw = localStorage.getItem(BROWSE_CACHE_KEY);
+    return raw ? (JSON.parse(raw) as Record<string, BrowseCacheEntry>) : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveBrowseCache(cache: Record<string, BrowseCacheEntry>) {
+  try {
+    localStorage.setItem(BROWSE_CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Best-effort, same as the rest of the app — cache just won't persist.
+  }
+}
+
+function clearBrowseCache() {
+  try {
+    localStorage.removeItem(BROWSE_CACHE_KEY);
+  } catch {
+    // Ignored — best-effort.
+  }
 }
 
 export async function fetchNutrition(names: string[]): Promise<NutritionMap> {
@@ -128,6 +165,26 @@ export async function browseNutrition(
   }
   const rows = (await res.json()) as ApiRow[];
   return rows.map(pickNutrition);
+}
+
+// Cached wrapper around browseNutrition, keyed by query+limit. Makes the
+// "Tümü" panel's default (empty-query) page — and any repeated search — not
+// hit the network again on a page reload or a Besin/Alışveriş tab switch
+// within the TTL window.
+export async function browseNutritionCached(
+  query: string,
+  limit = 60
+): Promise<Nutrition[]> {
+  const key = `${query.trim().toLocaleLowerCase("tr-TR")}|${limit}`;
+  const cache = loadBrowseCache();
+  const entry = cache[key];
+  if (entry && Date.now() - entry.ts < BROWSE_CACHE_TTL_MS) {
+    return entry.rows;
+  }
+  const rows = await browseNutrition(query, limit);
+  cache[key] = { rows, ts: Date.now() };
+  saveBrowseCache(cache);
+  return rows;
 }
 
 export async function saveNutrition(row: NutritionWrite): Promise<Nutrition> {
