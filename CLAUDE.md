@@ -2,6 +2,20 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Git shorthand
+
+- **CMP** = commit, merge, push. When the user says "CMP" (about a branch with local commits ready),
+  commit any outstanding changes, merge that branch into `master`, and push `master` to `origin`.
+- **BCMP** = branch, then CMP. When the user says "BCMP" about uncommitted working-tree changes,
+  create a new branch named for what the changes actually do, switch to it, then run CMP from there
+  (commit on the branch, merge into `master`, push).
+- **LCMP** / **LBCMP** = CMP / BCMP, plus a Linear attachment. Run CMP or BCMP as normal, then ask
+  the user which Linear issue this belongs to and what to attach (a note/summary, a screenshot, or
+  both) before posting it — don't guess the issue or write the note unprompted. See the Linear
+  workspace details and branch-naming convention in memory (`linear-github-integration`); the
+  `NUT-<n>` issue prefix only does anything once a GitHub PR exists, so plain CMP/BCMP pushes won't
+  auto-link regardless.
+
 ## Commands
 
 ```bash
