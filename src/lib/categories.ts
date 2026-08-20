@@ -591,6 +591,11 @@ const HEAD_NOUN_RULES: Array<[string, string, CategoryId]> = HEAD_NOUNS.map(
  * Match head-noun first so specific compound items land under their head,
  * then fall back to whole-phrase matching for single-word items.
  */
+// Dedupe so a name that falls through on every render (categorize() runs on
+// every list render, not just on add) logs once per session instead of
+// flooding the console. Session-only signal — not persisted or sent anywhere.
+const loggedMisses = new Set<string>();
+
 export function categorize(itemName: string): CategoryId {
   const raw = itemName.toLocaleLowerCase("tr-TR").trim();
   const q = stemPhrase(itemName);
@@ -619,6 +624,14 @@ export function categorize(itemName: string): CategoryId {
     if (!rule.keyword.includes(" ") && matches(q, rule.keyword)) return rule.category;
   }
 
+  // Genuine miss: nothing in any pass matched, so this landed on "diger" by
+  // default rather than by an actual "diger" keyword (there are none — see
+  // RULES above). Log once per unique name so real miss data can drive future
+  // keyword additions instead of guessing.
+  if (!loggedMisses.has(raw)) {
+    loggedMisses.add(raw);
+    console.info(`[categorize] miss: "${raw}"`);
+  }
   return "diger";
 }
 
