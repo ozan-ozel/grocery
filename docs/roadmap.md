@@ -1,9 +1,8 @@
 # Roadmap
 
 A survey of where the project's own seams point, based on reading `package.json`,
-`supabase/01-schema.sql`, the `netlify/functions/` vs `functions/api/` split, and
-`src/components/` / `src/lib/`, cross-referenced with what's already documented in
-`CLAUDE.md`. Nothing here is scheduled — this is a menu, not a commitment.
+`supabase/01-schema.sql`, and `src/components/` / `src/lib/`, cross-referenced with what's
+already documented in `CLAUDE.md`. Nothing here is scheduled — this is a menu, not a commitment.
 
 ## Foundational — visible from the code today
 
@@ -23,14 +22,7 @@ halfway toward.
    on one phone doesn't follow to another. Syncing this table would fix that — a
    natural pairing with #1.
 
-3. **Retire the Cloudflare Pages path.** Two backends coexist
-   (`functions/api/*` vs `netlify/functions/*`), manually kept in sync for
-   `nutrition.ts`/`state.ts` only. Since Netlify is what's actually deployed, the
-   Cloudflare path is dead weight that risks drifting silently — a bug fixed on one
-   side, forgotten on the other. Deleting it is small but removes an entire
-   category of "which backend am I even testing" mistakes.
-
-4. **PWA / offline support.** No manifest, no service worker — despite a genuinely
+3. **PWA / offline support.** No manifest, no service worker — despite a genuinely
    offline-friendly shape (local cache + optimistic sync). Grocery-list apps live
    at the exact intersection of "used at a store with bad signal" and "wants to
    feel like a native app," so this is a strong product fit, not just a technical
@@ -38,8 +30,12 @@ halfway toward.
 
 ## Product-facing — build on what's there
 
-5. **Cross-device category sync.** Same work as #2, framed as a feature: *teach it
+4. **Cross-device category sync.** Same work as #2, framed as a feature: *teach it
    once, it remembers everywhere.*
+
+5. **Aisle-order learning.** Reorder the active list by where items actually tend to get
+   checked off (a proxy for shop layout), not just by category. Distinct from categorization
+   accuracy (#9) — this is about in-store sequence, not which category an item lands in.
 
 6. **Shared/collaborative lists in real time.** Current sync is poll-every-15s +
    push-on-change, deliberately not a websocket — fine for 2-4 people. A "someone's
@@ -57,9 +53,10 @@ halfway toward.
 
 9. **Smarter categorization.** The three-layer system
    (`itemCategories` → `categorize()` → `userCategories`) is rule/stem-based, not
-   ML. Could stay rule-based (extend keyword lists) or, if it starts mis-guessing
-   often, graduate to an LLM call for the head-noun fallback case specifically —
-   worth measuring the actual miss rate first rather than assuming.
+   ML. `categorize()` now logs each unique fallthrough to "diger" once per session
+   (NUT-9), so the next step is reading that miss data rather than guessing —
+   either extend the keyword lists it points at, or, if misses cluster on
+   compound/head-noun cases, graduate those specifically to an LLM call.
 
 10. **Multi-language taxonomy.** Categorization is Turkish-specific (Snowball
     Turkish stemmer, Migros/CarrefourSA aisle layout). If this ever needs to serve
@@ -77,9 +74,12 @@ halfway toward.
     category-merging system, this is the highest-leverage infra gap — bugs there
     are exactly the kind that stay silent until two devices disagree.
 
-13. **Observability on the sync path.** 409-conflict rate, Blob read/write
-    failures, and `hydrateFromSupabase()` fallback frequency are all currently
-    invisible in production.
+13. **Structured observability on the sync path.** NUT-10 landed console-level
+    logging for the 409-conflict branch, `hydrateFromSupabase()` fallback/failure,
+    and Netlify Blobs read/write errors in `state.ts` — no longer silent locally.
+    What's still missing is aggregation: none of this is collected, rated, or
+    alerted on anywhere, so a spike in 409s or Blob failures in production is
+    still invisible unless someone is reading function logs live.
 
 ## On tooling
 

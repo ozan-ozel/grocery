@@ -1,11 +1,16 @@
 # Grocery
 
-A minimal grocery list app. Preact + shadcn/ui + Tailwind v4, no backend.
+A grocery list app for Turkish households. Preact + shadcn/ui + Tailwind v4 on the client,
+synced per household across devices via Supabase + Netlify Functions.
 
 ```bash
 npm install
-npm run dev
+npm run netlify:dev   # real local stack — Vite + every netlify/functions/*, proxied on :8888
 ```
+
+`npm run dev` also works for client-only UI work, but `/api/*` calls 404 without `netlify:dev`.
+See [CLAUDE.md](./CLAUDE.md) for the full command reference and architecture — persistence
+layers, tenants, sync, categorization, nutrition, theming.
 
 ## How shadcn/ui runs on Preact
 
@@ -25,32 +30,28 @@ Two things to know when adding more components:
 
 ```
 src/
-  lib/store.ts        types, localStorage, quantity parsing, item catalogue
-  components/ui/      shadcn: button, input, checkbox, tabs
-  components/         AddItem, ActiveList, HistoryView, SearchView
-  App.tsx             all state lives here
+  lib/           pure logic + localStorage/Supabase I/O (store, sync, categories, nutrition, ...)
+  components/ui/ shadcn primitives — button, input, checkbox, tabs
+  components/    AddItem, ActiveList, HistoryView, SearchView, NutritionView, ...
+  App.tsx        all state lives here
+netlify/functions/  backend — households, lists, items, nutrition, state
 ```
 
-State is one object — `{ lists, activeId }` — held in `App` and written to
-`localStorage` on every change. Lists are never deleted; starting a new list
-stamps the old one with `closedAt` and files it into History.
-
-`buildCatalog()` collapses every item ever added into a name/count/last-bought
-record. That single derivation backs both the add-field autocomplete and the
-Find tab, which is why searching and suggesting stay consistent for free.
+Lists are never deleted; starting a new list stamps the old one with `closedAt` and files it
+into History. `buildCatalog()` collapses every item ever added into a name/count/last-bought
+record, backing both the add-field autocomplete and the Find tab. Full architecture, including
+the sync/tenant model, lives in `CLAUDE.md`.
 
 ## Design notes
 
-Cool paper white, pine-black ink, one accent (`--color-signal`, price-sticker
-red) reserved for the tally and destructive actions — nothing else may use it.
-Quantities, counts and dates are set in DM Mono and right-aligned so they stack
-into a ledger column down the right edge. The hairline under the header fills in
-red as you check things off; it's the only moving part.
+Cool paper white, pine-black ink by default (`light`/"Nane"), with eight other themes to
+choose from. Quantities, counts and dates are set in DM Mono and right-aligned so they stack
+into a ledger column down the right edge. The hairline under the header fills in with the
+theme's accent as you check things off — it's the only moving part.
 
 Tokens are in `src/index.css` under `@theme`.
 
-## Worth adding next
+## What's next
 
-- Offline install (PWA) — this app is used in a shop with bad signal
-- Aisle grouping, learned from where you tend to check items off
-- Shared lists (needs a backend; everything above is local-only)
+See [docs/roadmap.md](./docs/roadmap.md) for the current list of directions under
+consideration — it's a menu, not a commitment.

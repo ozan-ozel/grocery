@@ -1,8 +1,18 @@
 # Nutrition view — design
 
-**Status:** proposed
+**Status:** shipped
 **Author:** Ozan (with Claude)
 **Date:** 2026-08-15
+
+> **Historical note (2026-08-20):** This spec predates the Netlify migration.
+> The Problem, Non-goals, Architecture, and Data model sections below still
+> describe how nutrition actually works and why. The **Deployment** section is
+> Cloudflare-Pages-era and no longer accurate — see `CLAUDE.md` for the real
+> (Netlify + Supabase) deployment story. The fetch script also never shipped as
+> `scripts/build-nutrition.ts` / `pnpm run build:nutrition`; the real file is
+> `scripts/fetch-usda-nutrition.ts`, run directly via `node`, same as
+> `scripts/upload-nutrition.ts` (see `CLAUDE.md`'s seeding command). Kept as-is
+> below for history rather than silently rewritten.
 
 ## Problem
 

@@ -2,8 +2,28 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Related docs
+
+- [docs/roadmap.md](docs/roadmap.md) — current status and prioritized next steps; a menu, not a
+  schedule. Check here before proposing a new direction so you're not duplicating one already
+  weighed.
+- [docs/nutrition-prompt.md](docs/nutrition-prompt.md) — copy-paste LLM prompt for turning
+  free-form nutrition text into rows for `data/nutrition.json` / the Besin-tab uploader.
+- [data/README.md](data/README.md) — row schema and seeding flow for `data/nutrition.json`.
+- [supabase/01-schema.sql](supabase/01-schema.sql) — canonical DB schema (`households`, `lists`,
+  `items`, `item_category_memory`, `nutrition`). Treat this file, not prose descriptions of it,
+  as authoritative for column names/types.
+- [docs/superpowers/specs/](docs/superpowers/specs/) — feature specs from past design passes
+  (e.g. the nutrition view). Historical rationale; check each spec's own status note before
+  trusting implementation details as current.
+
 ## Git shorthand
 
+- **Default: never commit straight to `master`.** Every set of ready-to-commit changes gets its
+  own branch first, named for what the changes actually do — even if the user just says "commit
+  this" without saying BCMP, and even for doc-only changes. Treat every commit request as BCMP
+  unless a branch already exists for this work and is currently checked out, in which case plain
+  CMP applies from there.
 - **CMP** = commit, merge, push. When the user says "CMP" (about a branch with local commits ready),
   commit any outstanding changes, merge that branch into `master`, and push `master` to `origin`.
 - **BCMP** = branch, then CMP. When the user says "BCMP" about uncommitted working-tree changes,
