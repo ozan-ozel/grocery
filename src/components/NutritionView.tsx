@@ -15,7 +15,7 @@ import {
   type Nutrition,
   type NutritionMap,
   type NutritionWrite,
-} from "@/lib/nutrition/nutrition";
+} from "@/lib/nutrition";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

@@ -7,9 +7,11 @@ categorization, the nutrition backend, env vars, daily rollover, and the design/
 For the React/Preact interop notes (why shadcn/ui's React source runs unmodified), see
 README.md's "How shadcn/ui runs on Preact" section — not repeated here.
 
-`src/lib/` mirrors the section headers below as folders (`tenants/`, `sync/`, `categorization/`,
-`nutrition/`, `theming/`); `store.ts` and `utils.ts` stay at the `src/lib/` root as shared code
-several domains depend on, not owned by any one of them.
+`src/lib/` groups multi-file domains into folders (`sync/`, `categorization/`) — the ones that
+actually gained from it. `households.ts`, `nutrition.ts`, and `preferences.ts` stay flat at the
+`src/lib/` root alongside `store.ts` and `utils.ts`: each is a single-file domain today, so a
+folder would only add navigation depth with nothing to group. Promote one to a folder if it ever
+grows a second file.
 
 ## State & persistence
 
@@ -33,7 +35,7 @@ the add-field autocomplete and the Find tab.
 
 ## Tenants
 
-**Tenants** (`src/lib/store.ts` + `src/lib/tenants/households.ts`) model separate households ("Evim" is the
+**Tenants** (`src/lib/store.ts` + `src/lib/households.ts`) model separate households ("Evim" is the
 default, id `"default"`). The tenant list isn't device-local: it's rows in Supabase's `households`
 table, fetched/created/renamed/deleted through `/api/households` (`netlify/functions/households.ts`,
 service_role key for every verb, including reads). On boot `App.tsx` calls `listHouseholds()`; if
@@ -79,7 +81,7 @@ defines an `item_category_memory` table that likewise has no reader/writer anywh
 
 ## Nutrition
 
-**Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition/nutrition.ts` calls
+**Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
 `/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production, which
 proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
 service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
@@ -114,7 +116,7 @@ has to follow, though: newer themes are free to give destructive its own hue whe
 rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility (DM
 Mono, tabular-nums, right-aligned) so they read as a stacked ledger column.
 
-**Theming** is a 9-way picker (`src/lib/theming/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
+**Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
 2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`
 (dark group) and `bulut`, `ipek`, `nova`, `parsomen` (light group). Each is a full
 `:root[data-theme="<id>"]` token block in `index.css`; `parsomen` additionally applies a faint

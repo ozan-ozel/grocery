@@ -31,8 +31,8 @@ Two things to know when adding more components:
 
 ```
 src/
-  lib/            store.ts, utils.ts (shared) + one folder per domain:
-                  tenants/, sync/, categorization/, nutrition/, theming/
+  lib/            store.ts, utils.ts, households.ts, nutrition.ts, preferences.ts (single-file
+                  domains, flat) + sync/, categorization/ (multi-file domains, folders)
   components/ui/  shadcn primitives — button, input, checkbox, tabs
   components/     AddItem, ActiveList, HistoryView, SearchView, NutritionView, ...
   App.tsx         all state lives here

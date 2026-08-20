@@ -49,7 +49,7 @@ import {
   deleteHousehold,
   listHouseholds,
   renameHousehold,
-} from "@/lib/tenants/households";
+} from "@/lib/households";
 import { createSync, type SyncStatus } from "@/lib/sync/sync";
 import {
   loadItemCategories,
@@ -66,7 +66,7 @@ import {
   saveTheme,
   THEME_META_COLOR,
   type Theme,
-} from "@/lib/theming/preferences";
+} from "@/lib/preferences";
 
 type Undo =
   | { kind: "remove"; item: Item; listId: string }
