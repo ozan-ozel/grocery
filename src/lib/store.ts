@@ -1,5 +1,5 @@
-import { categorize } from "./categories";
-import { isCustomId, type AnyCategoryId } from "./userCategories";
+import { categorize } from "./categorization/categories";
+import { isCustomId, type AnyCategoryId } from "./categorization/userCategories";
 
 export type Item = {
   id: string;

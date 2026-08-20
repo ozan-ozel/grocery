@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, Palette } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { THEME_OPTIONS, THEME_SIGNAL_COLOR, type Theme } from "@/lib/preferences";
+import { THEME_OPTIONS, THEME_SIGNAL_COLOR, type Theme } from "@/lib/theming/preferences";
 
 type Props = {
   theme: Theme;

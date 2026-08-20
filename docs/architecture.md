@@ -7,6 +7,10 @@ categorization, the nutrition backend, env vars, daily rollover, and the design/
 For the React/Preact interop notes (why shadcn/ui's React source runs unmodified), see
 README.md's "How shadcn/ui runs on Preact" section — not repeated here.
 
+`src/lib/` mirrors the section headers below as folders (`tenants/`, `sync/`, `categorization/`,
+`nutrition/`, `theming/`); `store.ts` and `utils.ts` stay at the `src/lib/` root as shared code
+several domains depend on, not owned by any one of them.
+
 ## State & persistence
 
 **All state lives in `App.tsx`**, held as one object and pushed down through props — there is no
@@ -29,7 +33,7 @@ the add-field autocomplete and the Find tab.
 
 ## Tenants
 
-**Tenants** (`src/lib/store.ts` + `src/lib/households.ts`) model separate households ("Evim" is the
+**Tenants** (`src/lib/store.ts` + `src/lib/tenants/households.ts`) model separate households ("Evim" is the
 default, id `"default"`). The tenant list isn't device-local: it's rows in Supabase's `households`
 table, fetched/created/renamed/deleted through `/api/households` (`netlify/functions/households.ts`,
 service_role key for every verb, including reads). On boot `App.tsx` calls `listHouseholds()`; if
@@ -41,7 +45,7 @@ push from tenant A can never land on tenant B.
 
 ## Sync
 
-**Sync** (`src/lib/sync.ts` + `netlify/functions/state.ts`) is a polling + optimistic-concurrency
+**Sync** (`src/lib/sync/sync.ts` + `netlify/functions/state.ts`) is a polling + optimistic-concurrency
 scheme, not a websocket: the client polls `GET /api/state?tenant=<id>` every 15s and on tab focus,
 and pushes `PUT` 500ms after any local change; a `PUT` with a stale `version` gets rejected with 409
 and the current server state, which the client adopts. Last-write-wins by design — deliberately good
@@ -52,7 +56,7 @@ yet, `state.ts` tries a one-time hydration from the Supabase `lists`/`items` tab
 (`hydrateFromSupabase()`) before falling back to `state: null` — this only fires for a household that
 exists via `/api/households` but has never had a first `/api/state` PUT.
 
-`src/lib/lists.ts` and `src/lib/items.ts` are client wrappers around `netlify/functions/lists.ts` /
+`src/lib/sync/lists.ts` and `src/lib/sync/items.ts` are client wrappers around `netlify/functions/lists.ts` /
 `items.ts` (per-row CRUD against the `lists`/`items` tables in `supabase/01-schema.sql`), but
 **nothing in the app calls them yet** — no import outside those two files themselves. They read as
 scaffolding for eventually replacing the single-blob-per-tenant sync with normalized per-row Supabase
@@ -62,20 +66,20 @@ defines an `item_category_memory` table that likewise has no reader/writer anywh
 ## Categorization
 
 **Categorization** is three layered pieces, in order of precedence when an item is added:
-1. `src/lib/itemCategories.ts` — if this item name was ever manually assigned a category before
+1. `src/lib/categorization/itemCategories.ts` — if this item name was ever manually assigned a category before
    (in this tenant, on this device), reuse it.
-2. `src/lib/categories.ts` — otherwise, `categorize(name)` guesses from the built-in Turkish grocery
+2. `src/lib/categorization/categories.ts` — otherwise, `categorize(name)` guesses from the built-in Turkish grocery
    taxonomy (aisle layout modeled on Migros/CarrefourSA) using Snowball Turkish stemming, curated
    per-category keyword lists, and a head-noun fallback table for compound names like "chia tohumu"
    or "karabuğday ekmeği" that aren't worth enumerating explicitly.
-3. `src/lib/userCategories.ts` — the built-in taxonomy plus per-device renames/hide/reorder/custom
+3. `src/lib/categorization/userCategories.ts` — the built-in taxonomy plus per-device renames/hide/reorder/custom
    categories are merged via `mergeCategories()` into the list actually shown in the UI; `diger`
    ("Other") is treated as "uncategorized" everywhere and re-guessed on demand so classifier
    improvements retroactively apply without a data migration.
 
 ## Nutrition
 
-**Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
+**Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition/nutrition.ts` calls
 `/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production, which
 proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
 service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
@@ -110,7 +114,7 @@ has to follow, though: newer themes are free to give destructive its own hue whe
 rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility (DM
 Mono, tabular-nums, right-aligned) so they read as a stacked ledger column.
 
-**Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
+**Theming** is a 9-way picker (`src/lib/theming/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
 2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`
 (dark group) and `bulut`, `ipek`, `nova`, `parsomen` (light group). Each is a full
 `:root[data-theme="<id>"]` token block in `index.css`; `parsomen` additionally applies a faint

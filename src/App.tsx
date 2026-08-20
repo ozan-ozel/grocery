@@ -23,8 +23,8 @@ import {
   setHidden,
   type AnyCategoryId,
   type CategoryOverlay,
-} from "@/lib/userCategories";
-import type { CategoryId } from "@/lib/categories";
+} from "@/lib/categorization/userCategories";
+import type { CategoryId } from "@/lib/categorization/categories";
 import {
   buildCatalog,
   categorizeItems,
@@ -49,8 +49,8 @@ import {
   deleteHousehold,
   listHouseholds,
   renameHousehold,
-} from "@/lib/households";
-import { createSync, type SyncStatus } from "@/lib/sync";
+} from "@/lib/tenants/households";
+import { createSync, type SyncStatus } from "@/lib/sync/sync";
 import {
   loadItemCategories,
   lookupItemCategory,
@@ -58,7 +58,7 @@ import {
   removeItemCategories,
   saveItemCategories,
   type ItemCategoryMap,
-} from "@/lib/itemCategories";
+} from "@/lib/categorization/itemCategories";
 import {
   loadSwipeMode,
   loadTheme,
@@ -66,7 +66,7 @@ import {
   saveTheme,
   THEME_META_COLOR,
   type Theme,
-} from "@/lib/preferences";
+} from "@/lib/theming/preferences";
 
 type Undo =
   | { kind: "remove"; item: Item; listId: string }

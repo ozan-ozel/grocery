@@ -16,7 +16,7 @@ import {
   type AnyCategoryId,
   type CategoryOverlay,
   type MergedCategory,
-} from "@/lib/userCategories";
+} from "@/lib/categorization/userCategories";
 
 type Props = {
   merged: MergedCategory[];

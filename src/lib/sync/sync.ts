@@ -1,4 +1,4 @@
-import type { State } from "./store";
+import type { State } from "../store";
 
 type Envelope = { version: number; state: State | null };
 

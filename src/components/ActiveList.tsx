@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { categorize } from "@/lib/categories";
+import { categorize } from "@/lib/categorization/categories";
 import {
   parseEntry,
   type AnyCategoryId,
@@ -22,7 +22,7 @@ import {
   labelFor,
   type CategoryOverlay,
   type MergedCategory,
-} from "@/lib/userCategories";
+} from "@/lib/categorization/userCategories";
 
 type Props = {
   list: List;

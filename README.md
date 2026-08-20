@@ -31,10 +31,11 @@ Two things to know when adding more components:
 
 ```
 src/
-  lib/           pure logic + localStorage/Supabase I/O (store, sync, categories, nutrition, ...)
-  components/ui/ shadcn primitives — button, input, checkbox, tabs
-  components/    AddItem, ActiveList, HistoryView, SearchView, NutritionView, ...
-  App.tsx        all state lives here
+  lib/            store.ts, utils.ts (shared) + one folder per domain:
+                  tenants/, sync/, categorization/, nutrition/, theming/
+  components/ui/  shadcn primitives — button, input, checkbox, tabs
+  components/     AddItem, ActiveList, HistoryView, SearchView, NutritionView, ...
+  App.tsx         all state lives here
 netlify/functions/  backend — households, lists, items, nutrition, state
 ```
 

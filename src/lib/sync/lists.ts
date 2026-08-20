@@ -1,4 +1,4 @@
-import type { List } from "../../netlify/functions/lists";
+import type { List } from "../../../netlify/functions/lists";
 
 function apiUrl(path: string): string {
   const baseUrl = import.meta.env.VITE_API_BASE ?? "";

@@ -1,4 +1,4 @@
-import { normalize } from "./itemCategories";
+import { normalize } from "../categorization/itemCategories";
 
 export type Nutrition = {
   name_tr: string;
