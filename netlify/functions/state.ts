@@ -70,9 +70,15 @@ export default async (request: Request, _context: Context): Promise<Response> =>
 async function handleGet(request: Request, store: ReturnType<typeof getStore>): Promise<Response> {
   const tenantId = tenantIdFrom(request);
   const key = keyFor(tenantId);
-  let raw = await store.get(key, { type: "text" });
-  if (!raw && tenantId === DEFAULT_TENANT) {
-    raw = await store.get(LEGACY_KEY, { type: "text" });
+  let raw: string | null;
+  try {
+    raw = await store.get(key, { type: "text" });
+    if (!raw && tenantId === DEFAULT_TENANT) {
+      raw = await store.get(LEGACY_KEY, { type: "text" });
+    }
+  } catch (err) {
+    console.error(`[state] Blobs read failed tenant=${tenantId}:`, err);
+    return json({ error: "storage read failed" }, 500);
   }
   if (raw) {
     return new Response(raw, { status: 200, headers: JSON_HEADERS });
@@ -83,6 +89,7 @@ async function handleGet(request: Request, store: ReturnType<typeof getStore>): 
   // path won't run again for that tenant.
   const hydrated = await hydrateFromSupabase(tenantId);
   if (hydrated) {
+    console.info(`[state] hydrated tenant=${tenantId} from Supabase (${hydrated.lists.length} lists)`);
     return json({ version: 0, state: hydrated }, 200);
   }
 
@@ -108,7 +115,10 @@ async function hydrateFromSupabase(householdId: string): Promise<HydratedState |
       )}&order=created_at.desc`,
       { headers }
     );
-    if (!listsRes.ok) return null;
+    if (!listsRes.ok) {
+      console.error(`[state] hydrateFromSupabase: lists fetch failed tenant=${householdId} status=${listsRes.status}`);
+      return null;
+    }
     const listRows = (await listsRes.json()) as Array<{
       id: string;
       title: string;
@@ -125,7 +135,10 @@ async function hydrateFromSupabase(householdId: string): Promise<HydratedState |
       )}&order=added_at.asc`,
       { headers }
     );
-    if (!itemsRes.ok) return null;
+    if (!itemsRes.ok) {
+      console.error(`[state] hydrateFromSupabase: items fetch failed tenant=${householdId} status=${itemsRes.status}`);
+      return null;
+    }
     const itemRows = (await itemsRes.json()) as Array<{
       id: string;
       list_id: string;
@@ -163,7 +176,8 @@ async function hydrateFromSupabase(householdId: string): Promise<HydratedState |
       lists,
       activeId: active?.id ?? lists[0]?.id ?? null,
     };
-  } catch {
+  } catch (err) {
+    console.error(`[state] hydrateFromSupabase threw tenant=${householdId}:`, err);
     return null;
   }
 }
@@ -182,19 +196,31 @@ async function handlePut(request: Request, store: ReturnType<typeof getStore>): 
     return json({ error: "expected { version, state }" }, 400);
   }
 
-  let existingRaw = await store.get(key, { type: "text" });
-  if (!existingRaw && tenantId === DEFAULT_TENANT) {
-    existingRaw = await store.get(LEGACY_KEY, { type: "text" });
+  let existingRaw: string | null;
+  try {
+    existingRaw = await store.get(key, { type: "text" });
+    if (!existingRaw && tenantId === DEFAULT_TENANT) {
+      existingRaw = await store.get(LEGACY_KEY, { type: "text" });
+    }
+  } catch (err) {
+    console.error(`[state] Blobs read failed tenant=${tenantId}:`, err);
+    return json({ error: "storage read failed" }, 500);
   }
   const existing: Envelope | null = existingRaw ? JSON.parse(existingRaw) : null;
   const currentVersion = existing?.version ?? 0;
 
   if (body.version !== currentVersion) {
+    console.warn(`[state] 409 conflict tenant=${tenantId} clientVersion=${body.version} serverVersion=${currentVersion}`);
     return json({ version: currentVersion, state: existing?.state ?? null }, 409);
   }
 
   const next: Envelope = { version: currentVersion + 1, state: body.state };
-  await store.set(key, JSON.stringify(next));
+  try {
+    await store.set(key, JSON.stringify(next));
+  } catch (err) {
+    console.error(`[state] Blobs write failed tenant=${tenantId}:`, err);
+    return json({ error: "storage write failed" }, 500);
+  }
   return json({ version: next.version }, 200);
 }
 
