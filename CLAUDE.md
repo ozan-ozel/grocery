@@ -23,28 +23,18 @@ npm install
 npm run dev          # Vite dev server, client only — /api/* calls will 404 (no functions here)
 npm run build         # tsc -b (typecheck src/) && vite build -> dist/
 npm run preview       # serve the built dist/ (still no /api/*)
-npm run pages:dev     # wrangler pages dev dist --kv STATE — legacy Cloudflare Pages path. Only
-                       #   functions/api/nutrition.ts and functions/api/state.ts live here; there is
-                       #   no households/lists/items equivalent. Needs .dev.vars (copy
-                       #   .dev.vars.example). Run `npm run build` first.
 npm run netlify:dev   # netlify dev — the real local stack: Vite + every netlify/functions/*
                        #   (households, lists, items, nutrition, state), proxied on :8888. This is
-                       #   what production actually runs (see netlify.toml's /api/* redirect). Use
-                       #   this one unless you're specifically testing the legacy Cloudflare path.
+                       #   what production actually runs (see netlify.toml's /api/* redirect).
                        #   Reads Supabase creds from .env.local automatically.
-npm run deploy        # build && wrangler pages deploy dist — deploys the legacy Cloudflare Pages
-                       #   path, NOT what's live; see the note in Architecture below.
 ```
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
 
-**Two backends currently coexist on `master`.** `functions/api/*` (Cloudflare Pages Functions) is
-what this repo originally shipped with; `netlify/functions/*` was added later during a migration and
-is what `netlify.toml`'s `/api/*` redirect actually routes to in production. Only `nutrition.ts` and
-`state.ts` exist on both paths (kept in sync manually — if you change one, check whether the other
-needs the same fix). `households.ts`, `lists.ts`, and `items.ts` exist only under `netlify/functions/`.
-When in doubt about which local dev command to run, use `npm run netlify:dev`.
+All backend logic lives under `netlify/functions/*` (Cloudflare Pages Functions were retired — the
+repo used to ship a parallel `functions/api/*` path, but it was dead weight since Netlify is what
+`netlify.toml`'s `/api/*` redirect actually routes to in production).
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 ```bash
@@ -120,8 +110,7 @@ table that likewise has no reader/writer anywhere yet.
    improvements retroactively apply without a data migration.
 
 **Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
-`/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production (also mirrored at
-`functions/api/nutrition.ts` for the legacy Cloudflare path — see the dual-backend note above), which
+`/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production, which
 proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
 service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
 a copy-paste LLM prompt for turning free-form nutrition text into the row JSON the uploader/bulk-paste
