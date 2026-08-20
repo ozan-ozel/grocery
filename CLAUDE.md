@@ -1,9 +1,14 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository. See [README.md](README.md) for what
+this project is. This file is a router and behavior layer, not the architecture doc — see
+"Where things live" below before diving into a subsystem.
 
-## Related docs
+## Where things live
 
+- [docs/architecture.md](docs/architecture.md) — state & persistence, tenants, sync,
+  categorization, the nutrition backend, env vars, daily rollover, design tokens, theming.
+  Read the relevant section before touching that subsystem.
 - [docs/roadmap.md](docs/roadmap.md) — current status and prioritized next steps; a menu, not a
   schedule. Check here before proposing a new direction so you're not duplicating one already
   weighed.
@@ -52,9 +57,8 @@ npm run netlify:dev   # netlify dev — the real local stack: Vite + every netli
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
 
-All backend logic lives under `netlify/functions/*` (Cloudflare Pages Functions were retired — the
-repo used to ship a parallel `functions/api/*` path, but it was dead weight since Netlify is what
-`netlify.toml`'s `/api/*` redirect actually routes to in production).
+All backend logic lives under `netlify/functions/*` — a former `functions/api/*` Cloudflare Pages
+path was retired (see git history / `docs/roadmap.md`); Netlify is what's actually deployed.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 ```bash
@@ -62,107 +66,3 @@ node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.t
 ```
 Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (see `.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`.
-
-## Architecture
-
-**Preact standing in for React.** `@preact/preset-vite` aliases `react`/`react-dom`/`react/jsx-runtime`
-to `preact/compat` (mirrored in `tsconfig.json` `paths` for the type checker), which is what lets
-shadcn/ui components — plain React source using Radix — run unmodified from `src/components/ui/`.
-When adding a new shadcn component with the CLI, watch for ref-type mismatches on Radix `Slot`
-(`asChild`); see the workaround in `ui/button.tsx`.
-
-**All state lives in `App.tsx`**, held as one object and pushed down through props — there is no
-global store or context. `src/lib/*.ts` holds pure logic and localStorage I/O; components stay
-mostly presentational. Persistence is split across several independent layers with different scopes:
-
-| Layer | Key(s) / store | Scope | Synced to server? |
-|---|---|---|---|
-| Tenants (households) | Supabase `households` table, via `/api/households` | shared (Supabase) | yes |
-| List state (`{ lists, activeId, version }`) | `grocery.state.v1:<tenantId>` (local cache) + Netlify Blobs `state:<tenantId>` | per tenant | yes, via `netlify/functions/state.ts` |
-| Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1` | device | no |
-| Item name → category memory | `grocery.itemCategories.v1:<tenantId>` | device, per tenant | no |
-| UI prefs (theme, swipe mode) | `grocery.theme.v1`, `grocery.swipeMode.v1` | device | no |
-
-Category customization and per-item category memory are still device-local even though they're keyed
-by tenant, so they don't follow a household across phones. Lists are never deleted — starting a new
-list stamps the old one with `closedAt` and files it into History; `buildCatalog()` (`src/lib/store.ts`)
-collapses every item ever added across all lists into a name/count/last-bought table that backs both
-the add-field autocomplete and the Find tab.
-
-**Tenants** (`src/lib/store.ts` + `src/lib/households.ts`) model separate households ("Evim" is the
-default, id `"default"`). The tenant list isn't device-local: it's rows in Supabase's `households`
-table, fetched/created/renamed/deleted through `/api/households` (`netlify/functions/households.ts`,
-service_role key for every verb, including reads). On boot `App.tsx` calls `listHouseholds()`; if
-Supabase has none yet, it seeds `"default"`/"Evim" via `createHousehold()` so a fresh project still
-boots. Deleting a household (`DELETE /api/households?id=`) cascades `lists`/`items`/
-`item_category_memory` via Supabase FK constraints and separately clears its `state:<id>` Blob.
-Switching tenants tears down and recreates the sync channel (see `App.tsx`'s sync `useEffect`) so a
-push from tenant A can never land on tenant B.
-
-**Sync** (`src/lib/sync.ts` + `netlify/functions/state.ts`) is a polling + optimistic-concurrency
-scheme, not a websocket: the client polls `GET /api/state?tenant=<id>` every 15s and on tab focus,
-and pushes `PUT` 500ms after any local change; a `PUT` with a stale `version` gets rejected with 409
-and the current server state, which the client adopts. Last-write-wins by design — deliberately good
-enough for a household of 2-4, not a CRDT. The backing store is **Netlify Blobs**
-(`getStore({ name: "state", consistency: "strong" })`), one key per tenant (`state:<tenantId>`), with
-a legacy `state:global` fallback for `"default"` on its first sync. If Blobs has nothing for a tenant
-yet, `state.ts` tries a one-time hydration from the Supabase `lists`/`items` tables
-(`hydrateFromSupabase()`) before falling back to `state: null` — this only fires for a household that
-exists via `/api/households` but has never had a first `/api/state` PUT.
-
-`src/lib/lists.ts` and `src/lib/items.ts` are client wrappers around `netlify/functions/lists.ts` /
-`items.ts` (per-row CRUD against the `lists`/`items` tables in `supabase/01-schema.sql`), but
-**nothing in the app calls them yet** — no import outside those two files themselves. They read as
-scaffolding for eventually replacing the single-blob-per-tenant sync with normalized per-row Supabase
-persistence, not a wired-up feature. `supabase/01-schema.sql` also defines an `item_category_memory`
-table that likewise has no reader/writer anywhere yet.
-
-**Categorization** is three layered pieces, in order of precedence when an item is added:
-1. `src/lib/itemCategories.ts` — if this item name was ever manually assigned a category before
-   (in this tenant, on this device), reuse it.
-2. `src/lib/categories.ts` — otherwise, `categorize(name)` guesses from the built-in Turkish grocery
-   taxonomy (aisle layout modeled on Migros/CarrefourSA) using Snowball Turkish stemming, curated
-   per-category keyword lists, and a head-noun fallback table for compound names like "chia tohumu"
-   or "karabuğday ekmeği" that aren't worth enumerating explicitly.
-3. `src/lib/userCategories.ts` — the built-in taxonomy plus per-device renames/hide/reorder/custom
-   categories are merged via `mergeCategories()` into the list actually shown in the UI; `diger`
-   ("Other") is treated as "uncategorized" everywhere and re-guessed on demand so classifier
-   improvements retroactively apply without a data migration.
-
-**Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
-`/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production, which
-proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
-service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
-a copy-paste LLM prompt for turning free-form nutrition text into the row JSON the uploader/bulk-paste
-UI expects.
-
-**Required env vars** (Netlify site settings for production; `.env.local` or `netlify link` for local
-dev via `npm run netlify:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-Most `netlify/functions/*.ts` GETs use the anon key and writes use the service_role key;
-`households.ts` is the exception and uses service_role for every verb including reads.
-`.env.local.example` only lists `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because
-it's scoped to the one-off `scripts/upload-nutrition.ts` seeding script — it does not cover
-`SUPABASE_ANON_KEY`, which the functions also need.
-
-**Daily rollover** (`rolloverIfNeeded` in `store.ts`) is client-triggered, not a cron: it runs on
-mount, on tenant switch, and on `visibilitychange`. If the active list was created on a previous
-calendar day and has items, it's archived (`closedAt`) and a fresh list opens with unchecked items
-carried over under new ids. Offered as an undo via the same `Undo` mechanism as item removal.
-
-**Design tokens** live in `src/index.css` under `@theme` (Tailwind v4, no `tailwind.config`). The
-original two themes (`light`/"Nane", `dark`/"Çam") use exactly one accent color (`--color-signal`)
-for both the progress fill and destructive actions — `--color-destructive` is set equal to
-`--color-signal` there. That single-accent look was never meant to be a rule the rest of the palette
-has to follow, though: newer themes are free to give destructive its own hue where it reads better
-(a red "Sil" against a blue or violet primary accent, for instance) — check each theme's own block
-rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility (DM
-Mono, tabular-nums, right-aligned) so they read as a stacked ledger column.
-
-**Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
-2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`
-(dark group) and `bulut`, `ipek`, `nova`, `parsomen` (light group). Each is a full
-`:root[data-theme="<id>"]` token block in `index.css`; `parsomen` additionally applies a faint
-`feTurbulence`-generated paper grain to `body`. `ThemeSwitcher.tsx` renders the picker (grouped
-Açık/Koyu), writes the chosen id to `data-theme` on `<html>`, and persists it via
-`grocery.theme.v1` in `localStorage`. `THEME_META_COLOR` mirrors each theme's `--color-background`
-as a literal hex for the PWA `theme-color` meta tag, since that can't read a CSS custom property.

@@ -9,8 +9,9 @@ npm run netlify:dev   # real local stack — Vite + every netlify/functions/*, p
 ```
 
 `npm run dev` also works for client-only UI work, but `/api/*` calls 404 without `netlify:dev`.
-See [CLAUDE.md](./CLAUDE.md) for the full command reference and architecture — persistence
-layers, tenants, sync, categorization, nutrition, theming.
+See [CLAUDE.md](./CLAUDE.md) for the full command reference and
+[docs/architecture.md](./docs/architecture.md) for the architecture — persistence layers,
+tenants, sync, categorization, nutrition, theming.
 
 ## How shadcn/ui runs on Preact
 
@@ -40,7 +41,7 @@ netlify/functions/  backend — households, lists, items, nutrition, state
 Lists are never deleted; starting a new list stamps the old one with `closedAt` and files it
 into History. `buildCatalog()` collapses every item ever added into a name/count/last-bought
 record, backing both the add-field autocomplete and the Find tab. Full architecture, including
-the sync/tenant model, lives in `CLAUDE.md`.
+the sync/tenant model, lives in `docs/architecture.md`.
 
 ## Design notes
 
