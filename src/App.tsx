@@ -47,7 +47,7 @@ export function App() {
     removeCategory,
   } = useCategoryOverlay();
 
-  const { itemCategories, setItemCategories } = useItemCategories(activeTenantId);
+  const { itemCategories, rememberCategory } = useItemCategories(activeTenantId);
 
   const catalog = useMemo(() => buildCatalog(state?.lists ?? []), [state?.lists]);
 
@@ -88,7 +88,7 @@ export function App() {
     active,
     updateState,
     itemCategories,
-    setItemCategories,
+    rememberCategory,
     showUndo,
     selectedIds: selection.selectedIds,
     exitSelectMode: selection.exitSelectMode,
