@@ -49,3 +49,21 @@ create table if not exists public.item_category_memory (
   updated_at   timestamptz not null default now(),
   primary key (household_id, name_lower)
 );
+
+create table if not exists public.meal_entries (
+  id           text primary key,
+  household_id text not null references public.households(id) on delete cascade,
+  date         date not null,        -- local calendar day, e.g. 2026-08-21
+  slot         text not null,        -- 'kahvalti' | 'ogle' | 'aksam' | 'ara'
+  text         text not null,
+  kcal         numeric,
+  protein_g    numeric,
+  fat_g        numeric,
+  carbs_g      numeric,
+  fiber_g      numeric,
+  position     integer not null default 0,  -- orders multiple 'ara' entries
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists meal_entries_household_date_idx
+  on public.meal_entries (household_id, date);
