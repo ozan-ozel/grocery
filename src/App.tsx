@@ -4,6 +4,7 @@ import { Tabs } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShoppingTabs } from "@/components/AppShoppingTabs";
 import { NutritionView } from "@/components/NutritionView";
+import { MealPlanView } from "@/components/MealPlanView";
 import { UndoToast } from "@/components/UndoToast";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
@@ -120,6 +121,8 @@ export function App() {
       <main className="pt-5">
         {section === "besin" ? (
           <NutritionView items={active.items} />
+        ) : section === "yemek" ? (
+          <MealPlanView householdId={activeTenantId} />
         ) : (
           <AppShoppingTabs
             catalog={catalog}

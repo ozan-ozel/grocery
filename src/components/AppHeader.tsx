@@ -103,6 +103,18 @@ export function AppHeader({
         >
           Besin değerleri
         </button>
+        <button
+          type="button"
+          onClick={() => onSelectSection("yemek")}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+            section === "yemek"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Yemek Planı
+        </button>
       </div>
 
       {section === "alisveris" && (
