@@ -1,7 +1,5 @@
-import type { Dispatch, SetStateAction } from "react";
 import {
   lookupItemCategory,
-  rememberItemCategory,
   type ItemCategoryMap,
 } from "@/lib/categorization/itemCategories";
 import type { AnyCategoryId } from "@/lib/categorization/userCategories";
@@ -13,12 +11,12 @@ export function createListActions(params: {
   active: List;
   updateState: (fn: (s: State) => State) => void;
   itemCategories: ItemCategoryMap;
-  setItemCategories: Dispatch<SetStateAction<ItemCategoryMap>>;
+  rememberCategory: (name: string, category: AnyCategoryId) => void;
   showUndo: (u: Undo, ttlMs: number) => void;
   selectedIds: Set<string>;
   exitSelectMode: () => void;
 }) {
-  const { state, active, updateState, itemCategories, setItemCategories, showUndo, selectedIds, exitSelectMode } =
+  const { state, active, updateState, itemCategories, rememberCategory, showUndo, selectedIds, exitSelectMode } =
     params;
 
   function updateActive(fn: (items: Item[]) => Item[]) {
@@ -62,7 +60,7 @@ export function createListActions(params: {
 
   function editItem(id: string, name: string, qty: string, category?: AnyCategoryId) {
     if (category !== undefined) {
-      setItemCategories((m) => rememberItemCategory(m, name, category));
+      rememberCategory(name, category);
     }
     updateActive((items) =>
       items.map((i) => {
