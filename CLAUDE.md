@@ -24,6 +24,11 @@ this project is. This file is a router and behavior layer, not the architecture 
 
 ## Git shorthand
 
+- **Start every piece of coding work on a new local branch, before writing any code** — not just
+  before committing. Never write implementation code with `master` checked out, even if you intend
+  to branch later; create and switch to the branch first (named for what the work does), then
+  start. This applies whether the work is one file or a multi-task implementation plan (e.g.
+  subagent-driven-development executing in this checkout rather than a separate worktree).
 - **Default: never commit straight to `master`.** Every set of ready-to-commit changes gets its
   own branch first, named for what the changes actually do — even if the user just says "commit
   this" without saying BCMP, and even for doc-only changes. Treat every commit request as BCMP
