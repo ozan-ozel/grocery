@@ -120,6 +120,16 @@ export function writeNutritionScopeToUrl(scope: string) {
   writeUrlParam(NUTRITION_SCOPE_QUERY_PARAM, scope);
 }
 
+const MEAL_DATE_QUERY_PARAM = "date";
+
+export function readMealDateFromUrl(): string | null {
+  return readUrlParam(MEAL_DATE_QUERY_PARAM);
+}
+
+export function writeMealDateToUrl(date: string) {
+  writeUrlParam(MEAL_DATE_QUERY_PARAM, date);
+}
+
 export function newTenant(name: string): Tenant {
   return { id: uid(), name: name.trim() || "Ev", createdAt: Date.now() };
 }
