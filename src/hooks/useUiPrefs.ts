@@ -14,12 +14,15 @@ import {
   type Theme,
 } from "@/lib/preferences";
 
-export type Section = "alisveris" | "besin";
+export type Section = "alisveris" | "besin" | "yemek";
 export type Tab = "list" | "history" | "find" | "cats";
 const TABS: Tab[] = ["list", "history", "find", "cats"];
 
 function initialSection(): Section {
-  return readSectionFromUrl() === "besin" ? "besin" : "alisveris";
+  const fromUrl = readSectionFromUrl();
+  if (fromUrl === "besin") return "besin";
+  if (fromUrl === "yemek") return "yemek";
+  return "alisveris";
 }
 
 function initialTab(): Tab {
