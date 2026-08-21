@@ -24,11 +24,13 @@ mostly presentational. Persistence is split across several independent layers wi
 | Tenants (households) | Supabase `households` table, via `/api/households` | shared (Supabase) | yes |
 | List state (`{ lists, activeId, version }`) | `grocery.state.v1:<tenantId>` (local cache) + Netlify Blobs `state:<tenantId>` | per tenant | yes, via `netlify/functions/state.ts` |
 | Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1` | device | no |
-| Item name → category memory | `grocery.itemCategories.v1:<tenantId>` | device, per tenant | no |
+| Item name → category memory | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant | yes, via `netlify/functions/item-category-memory.ts` |
 | UI prefs (theme, swipe mode) | `grocery.theme.v1`, `grocery.swipeMode.v1` | device | no |
 
-Category customization and per-item category memory are still device-local even though they're keyed
-by tenant, so they don't follow a household across phones. Lists are never deleted — starting a new
+Category customization stays device-local even though it's keyed by tenant. Item category memory
+now syncs across devices for the same tenant (NUT-13): the local cache paints instantly, then a
+background fetch merges in the server copy (server wins on conflict), and every explicit category
+correction pushes to Supabase in addition to localStorage. Lists are never deleted — starting a new
 list stamps the old one with `closedAt` and files it into History; `buildCatalog()` (`src/lib/store.ts`)
 collapses every item ever added across all lists into a name/count/last-bought table that backs both
 the add-field autocomplete and the Find tab.
@@ -62,14 +64,19 @@ exists via `/api/households` but has never had a first `/api/state` PUT.
 `items.ts` (per-row CRUD against the `lists`/`items` tables in `supabase/01-schema.sql`), but
 **nothing in the app calls them yet** — no import outside those two files themselves. They read as
 scaffolding for eventually replacing the single-blob-per-tenant sync with normalized per-row Supabase
-persistence, not a wired-up feature (tracked in `docs/roadmap.md` #1). `supabase/01-schema.sql` also
-defines an `item_category_memory` table that likewise has no reader/writer anywhere yet (`docs/roadmap.md` #2).
+persistence, not a wired-up feature (tracked in `docs/roadmap.md` #1). `item_category_memory` (also
+in `01-schema.sql`) is wired up — see the Categorization section below.
 
 ## Categorization
 
 **Categorization** is three layered pieces, in order of precedence when an item is added:
 1. `src/lib/categorization/itemCategories.ts` — if this item name was ever manually assigned a category before
-   (in this tenant, on this device), reuse it.
+   (in this tenant), reuse it. `useItemCategories()` (`src/hooks/`) paints from the local cache
+   immediately on tenant switch, then merges in `item_category_memory` from Supabase in the
+   background (server wins on conflict); `rememberCategory()` writes both the local cache and a
+   best-effort `PUT /api/item-category-memory` on every explicit correction, so a fix on one device
+   reaches the others (NUT-13). Auto-guessed categories (layer 2 below) are never pushed — only
+   explicit corrections are remembered.
 2. `src/lib/categorization/categories.ts` — otherwise, `categorize(name)` guesses from the built-in Turkish grocery
    taxonomy (aisle layout modeled on Migros/CarrefourSA) using Snowball Turkish stemming, curated
    per-category keyword lists, and a head-noun fallback table for compound names like "chia tohumu"

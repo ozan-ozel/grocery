@@ -16,13 +16,7 @@ halfway toward.
    to be wired up. It would unlock real per-item conflict resolution instead of
    last-write-wins, and per-row history queries.
 
-2. **Wire up `item_category_memory`.** The table exists in `01-schema.sql:45-51`
-   but has no reader/writer. Right now item-name → category memory lives only in
-   `localStorage` per device (`itemCategories.ts`), so a category correction made
-   on one phone doesn't follow to another. Syncing this table would fix that — a
-   natural pairing with #1.
-
-3. **PWA / offline support.** No manifest, no service worker — despite a genuinely
+2. **PWA / offline support.** No manifest, no service worker — despite a genuinely
    offline-friendly shape (local cache + optimistic sync). Grocery-list apps live
    at the exact intersection of "used at a store with bad signal" and "wants to
    feel like a native app," so this is a strong product fit, not just a technical
@@ -30,51 +24,48 @@ halfway toward.
 
 ## Product-facing — build on what's there
 
-4. **Cross-device category sync.** Same work as #2, framed as a feature: *teach it
-   once, it remembers everywhere.*
-
-5. **Aisle-order learning.** Reorder the active list by where items actually tend to get
+3. **Aisle-order learning.** Reorder the active list by where items actually tend to get
    checked off (a proxy for shop layout), not just by category. Distinct from categorization
-   accuracy (#9) — this is about in-store sequence, not which category an item lands in.
+   accuracy (#7) — this is about in-store sequence, not which category an item lands in.
 
-6. **Shared/collaborative lists in real time.** Current sync is poll-every-15s +
+4. **Shared/collaborative lists in real time.** Current sync is poll-every-15s +
    push-on-change, deliberately not a websocket — fine for 2-4 people. A "someone's
    shopping right now" indicator or live cursor would need actual realtime
    (Supabase Realtime is already in the stack via `@supabase/supabase-js`).
 
-7. **Meal planning / recipes → auto-generate list.** The nutrition table and
+5. **Meal planning / recipes → auto-generate list.** The nutrition table and
    `NutritionView.tsx` already model per-item nutrition data; a recipe layer that
    expands "tavuklu pilav" into its ingredient list is a natural extension of that
    data model, not a new subsystem.
 
-8. **Budget / price tracking.** `qty` exists on items but no price field —
+6. **Budget / price tracking.** `qty` exists on items but no price field —
    storing price history alongside `buildCatalog()`'s existing
    name/count/last-bought table would be additive, not a rearchitecture.
 
-9. **Smarter categorization.** The three-layer system
+7. **Smarter categorization.** The three-layer system
    (`itemCategories` → `categorize()` → `userCategories`) is rule/stem-based, not
    ML. `categorize()` now logs each unique fallthrough to "diger" once per session
    (NUT-9), so the next step is reading that miss data rather than guessing —
    either extend the keyword lists it points at, or, if misses cluster on
    compound/head-noun cases, graduate those specifically to an LLM call.
 
-10. **Multi-language taxonomy.** Categorization is Turkish-specific (Snowball
+8. **Multi-language taxonomy.** Categorization is Turkish-specific (Snowball
     Turkish stemmer, Migros/CarrefourSA aisle layout). If this ever needs to serve
     non-Turkish households, that's a real architectural fork, not a tweak.
 
-11. **Native mobile app.** Currently a web app with light PWA aspirations at best.
+9. **Native mobile app.** Currently a web app with light PWA aspirations at best.
     If "an actual iOS/Android app" becomes a goal, that's a distinct, large
     decision (Expo/React Native rewrite vs. wrapping the PWA) — flagged here, not
     recommended.
 
 ## Infra / ops
 
-12. **Test suite.** `CLAUDE.md` is explicit: *"There is no test suite and no lint
+10. **Test suite.** `CLAUDE.md` is explicit: *"There is no test suite and no lint
     script in this repo."* For a project with sync/conflict logic and a
     category-merging system, this is the highest-leverage infra gap — bugs there
     are exactly the kind that stay silent until two devices disagree.
 
-13. **Structured observability on the sync path.** NUT-10 landed console-level
+11. **Structured observability on the sync path.** NUT-10 landed console-level
     logging for the 409-conflict branch, `hydrateFromSupabase()` fallback/failure,
     and Netlify Blobs read/write errors in `state.ts` — no longer silent locally.
     What's still missing is aggregation: none of this is collected, rated, or
