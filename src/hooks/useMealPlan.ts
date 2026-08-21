@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   defaultTitle,
   readMealDateFromUrl,
@@ -54,7 +54,7 @@ export type NutritionValues = {
 export function useMealPlan(householdId: string | null) {
   const [date, setDate] = useState<string>(initialDate);
   const [entries, setEntries] = useState<MealEntry[]>([]);
-  const [unsyncedIds, setUnsyncedIds] = useState<Set<string>>(new Set());
+  const unsyncedIdsRef = useRef<Set<string>>(new Set());
   const [errorIds, setErrorIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -71,7 +71,7 @@ export function useMealPlan(householdId: string | null) {
     fetchMealEntries(householdId, from, to).then((fetched) => {
       if (cancelled) return;
       setEntries(fetched);
-      setUnsyncedIds(new Set());
+      unsyncedIdsRef.current = new Set();
       setErrorIds(new Set());
     });
     return () => {
@@ -140,11 +140,7 @@ export function useMealPlan(householdId: string | null) {
       position: entry.position,
     });
     if (created) {
-      setUnsyncedIds((ids) => {
-        const next = new Set(ids);
-        next.delete(entry.id);
-        return next;
-      });
+      unsyncedIdsRef.current.delete(entry.id);
       setErrorIds((ids) => {
         const next = new Set(ids);
         next.delete(entry.id);
@@ -176,7 +172,7 @@ export function useMealPlan(householdId: string | null) {
   }
 
   function persist(entry: MealEntry) {
-    if (unsyncedIds.has(entry.id)) {
+    if (unsyncedIdsRef.current.has(entry.id)) {
       void persistCreate(entry);
     } else {
       void persistUpdate(entry);
@@ -208,7 +204,7 @@ export function useMealPlan(householdId: string | null) {
       fiberG: null,
       position: 0,
     };
-    setUnsyncedIds((ids) => new Set(ids).add(created.id));
+    unsyncedIdsRef.current.add(created.id);
     upsertLocal(created);
     persist(created);
   }
@@ -229,7 +225,7 @@ export function useMealPlan(householdId: string | null) {
       fiberG: null,
       position: nextPosition,
     };
-    setUnsyncedIds((ids) => new Set(ids).add(created.id));
+    unsyncedIdsRef.current.add(created.id);
     upsertLocal(created);
     persist(created);
   }
@@ -251,13 +247,9 @@ export function useMealPlan(householdId: string | null) {
       next.delete(id);
       return next;
     });
-    if (unsyncedIds.has(id)) {
+    if (unsyncedIdsRef.current.has(id)) {
       // Never made it to the server — nothing to delete remotely.
-      setUnsyncedIds((ids) => {
-        const next = new Set(ids);
-        next.delete(id);
-        return next;
-      });
+      unsyncedIdsRef.current.delete(id);
       return;
     }
     deleteMealEntry(id).then((ok) => {
