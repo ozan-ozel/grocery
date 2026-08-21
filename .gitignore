@@ -13,3 +13,6 @@ deno.lock
 
 # Claude Code worktrees
 .claude/worktrees
+
+# Subagent-driven-development scratch workspace (ledgers, task briefs/reports)
+.superpowers
