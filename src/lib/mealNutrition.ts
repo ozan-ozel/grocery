@@ -16,9 +16,10 @@ export const ZERO_MACROS: MacroTotals = {
   fiberG: 0,
 };
 
-// Nutrition rows are per 100g/100ml (see data/README.md); scale linearly to
-// the meal item's actual quantity.
-export function scaleNutrition(nutrition: Nutrition, quantityG: number): MacroTotals {
+export function scaleNutrition(
+  nutrition: Nutrition,
+  quantityG: number,
+): MacroTotals {
   const factor = quantityG / 100;
   return {
     kcal: nutrition.kcal_per_100 * factor,
@@ -31,13 +32,13 @@ export function scaleNutrition(nutrition: Nutrition, quantityG: number): MacroTo
 
 export function sumMacros(list: MacroTotals[]): MacroTotals {
   return list.reduce(
-    (acc, m) => ({
-      kcal: acc.kcal + m.kcal,
-      proteinG: acc.proteinG + m.proteinG,
-      fatG: acc.fatG + m.fatG,
-      carbsG: acc.carbsG + m.carbsG,
-      fiberG: acc.fiberG + m.fiberG,
+    (acc, macros) => ({
+      kcal: acc.kcal + macros.kcal,
+      proteinG: acc.proteinG + macros.proteinG,
+      fatG: acc.fatG + macros.fatG,
+      carbsG: acc.carbsG + macros.carbsG,
+      fiberG: acc.fiberG + macros.fiberG,
     }),
-    { ...ZERO_MACROS }
+    { ...ZERO_MACROS },
   );
 }
