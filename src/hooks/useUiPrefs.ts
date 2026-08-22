@@ -14,7 +14,7 @@ import {
   type Theme,
 } from "@/lib/preferences";
 
-export type Section = "alisveris" | "besin" | "yemek";
+export type Section = "alisveris" | "besin" | "yemek" | "kisisel";
 export type Tab = "list" | "history" | "find" | "cats";
 const TABS: Tab[] = ["list", "history", "find", "cats"];
 
@@ -22,6 +22,7 @@ function initialSection(): Section {
   const fromUrl = readSectionFromUrl();
   if (fromUrl === "besin") return "besin";
   if (fromUrl === "yemek") return "yemek";
+  if (fromUrl === "kisisel") return "kisisel";
   return "alisveris";
 }
 
@@ -56,8 +57,17 @@ export function useUiPrefs() {
   }, [swipeMode]);
 
   function toggleSwipeMode() {
-    setSwipeMode((s) => !s);
+    setSwipeMode(s => !s);
   }
 
-  return { theme, setTheme, swipeMode, toggleSwipeMode, section, setSection, tab, setTab };
+  return {
+    theme,
+    setTheme,
+    swipeMode,
+    toggleSwipeMode,
+    section,
+    setSection,
+    tab,
+    setTab,
+  };
 }

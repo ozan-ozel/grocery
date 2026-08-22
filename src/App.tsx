@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AppShoppingTabs } from "@/components/AppShoppingTabs";
 import { NutritionView } from "@/components/NutritionView";
 import { MealPlanView } from "@/components/MealPlanView";
+import { PersonalPlanView } from "@/components/PersonalPlanView";
 import { UndoToast } from "@/components/UndoToast";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
@@ -29,10 +30,17 @@ export function App() {
     setTab,
   } = useUiPrefs();
 
-  const { tenants, activeTenantId, selectTenant, addTenant, renameTenant, deleteTenant } =
-    useTenants();
+  const {
+    tenants,
+    activeTenantId,
+    selectTenant,
+    addTenant,
+    renameTenant,
+    deleteTenant,
+  } = useTenants();
 
-  const { state, setState, updateState, stateRef, syncStatus } = useListSync(activeTenantId);
+  const { state, setState, updateState, stateRef, syncStatus } =
+    useListSync(activeTenantId);
 
   const { undo, showUndo, restore } = useUndo(updateState, setState);
   useRollover(activeTenantId, stateRef, setState, showUndo);
@@ -48,9 +56,13 @@ export function App() {
     removeCategory,
   } = useCategoryOverlay();
 
-  const { itemCategories, rememberCategory } = useItemCategories(activeTenantId);
+  const { itemCategories, rememberCategory } =
+    useItemCategories(activeTenantId);
 
-  const catalog = useMemo(() => buildCatalog(state?.lists ?? []), [state?.lists]);
+  const catalog = useMemo(
+    () => buildCatalog(state?.lists ?? []),
+    [state?.lists],
+  );
 
   const selection = useSelection(state?.activeId ?? undefined);
 
@@ -59,8 +71,7 @@ export function App() {
       <div
         className="mx-auto flex min-h-dvh w-full max-w-[30rem] items-center justify-center px-5"
         role="status"
-        aria-label="Yükleniyor"
-      >
+        aria-label="Yükleniyor">
         <RefreshCw className="size-6 animate-spin text-muted-foreground" />
       </div>
     );
@@ -68,8 +79,9 @@ export function App() {
 
   // Everything past the guard runs only with a hydrated state, so
   // createListActions below can assume State (never null).
-  const active = state.lists.find((l) => l.id === state.activeId) ?? state.lists[0];
-  const past = state.lists.filter((l) => l.id !== active.id);
+  const active =
+    state.lists.find(l => l.id === state.activeId) ?? state.lists[0];
+  const past = state.lists.filter(l => l.id !== active.id);
   const groupByCategory = state.groupByCategory ?? false;
 
   const {
@@ -98,9 +110,8 @@ export function App() {
   return (
     <Tabs
       value={tab}
-      onValueChange={(v) => setTab(v as Tab)}
-      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-28"
-    >
+      onValueChange={v => setTab(v as Tab)}
+      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-28">
       <AppHeader
         tenants={tenants}
         activeTenantId={activeTenantId}
@@ -123,6 +134,8 @@ export function App() {
           <NutritionView items={active.items} />
         ) : section === "yemek" ? (
           <MealPlanView householdId={activeTenantId} />
+        ) : section === "kisisel" ? (
+          <PersonalPlanView />
         ) : (
           <AppShoppingTabs
             catalog={catalog}
@@ -136,7 +149,7 @@ export function App() {
             selectedIds={selection.selectedIds}
             onToggleSelect={selection.toggleSelectItem}
             onToggleSelectMode={selection.toggleSelectMode}
-            onSelectAll={() => selection.selectAll(active.items.map((i) => i.id))}
+            onSelectAll={() => selection.selectAll(active.items.map(i => i.id))}
             onSelectCategory={selection.selectCategory}
             onBulkRemove={bulkRemove}
             swipeMode={swipeMode}
