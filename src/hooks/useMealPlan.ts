@@ -56,6 +56,13 @@ export function useMealPlan(householdId: string | null) {
   const [entries, setEntries] = useState<MealEntry[]>([]);
   const unsyncedIdsRef = useRef<Set<string>>(new Set());
   const [errorIds, setErrorIds] = useState<Set<string>>(new Set());
+  // Bumped on every local write (create/edit/remove). Lets the window fetch
+  // below detect that it raced with a local write and resolved after it —
+  // in that case its result is stale and must not clobber the fresher local
+  // state (this was previously possible: a slow initial fetch landing after
+  // a just-created entry would silently wipe that entry from the UI, while
+  // it stayed orphaned on the server).
+  const writeVersionRef = useRef(0);
 
   useEffect(() => {
     writeMealDateToUrl(date);
@@ -66,10 +73,12 @@ export function useMealPlan(householdId: string | null) {
   useEffect(() => {
     if (!householdId) return;
     let cancelled = false;
+    const versionAtFetchStart = writeVersionRef.current;
     const from = addDaysStr(date, -WINDOW_DAYS);
     const to = addDaysStr(date, WINDOW_DAYS);
     fetchMealEntries(householdId, from, to).then((fetched) => {
       if (cancelled) return;
+      if (writeVersionRef.current !== versionAtFetchStart) return;
       setEntries(fetched);
       unsyncedIdsRef.current = new Set();
       setErrorIds(new Set());
@@ -115,6 +124,7 @@ export function useMealPlan(householdId: string | null) {
   }
 
   function upsertLocal(entry: MealEntry) {
+    writeVersionRef.current++;
     setEntries((prev) => {
       const idx = prev.findIndex((e) => e.id === entry.id);
       if (idx === -1) return [...prev, entry];
@@ -241,6 +251,7 @@ export function useMealPlan(householdId: string | null) {
   function removeEntry(id: string) {
     const existing = entries.find((e) => e.id === id);
     if (!existing) return;
+    writeVersionRef.current++;
     setEntries((prev) => prev.filter((e) => e.id !== id));
     setErrorIds((ids) => {
       const next = new Set(ids);

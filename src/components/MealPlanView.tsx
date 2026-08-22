@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -121,6 +121,16 @@ function FixedSlotRow({
 }) {
   const [text, setText] = useState(entry?.text ?? "");
 
+  // `entry` can arrive after this row's first mount — e.g. a page reload
+  // mounts the row before the meal-entries fetch resolves, or switching
+  // households / days changes the underlying entry without remounting this
+  // component (it's keyed by slot, not by entry id). Re-sync local text
+  // whenever the fetched value changes so the input doesn't stay stuck on
+  // its stale initial value.
+  useEffect(() => {
+    setText(entry?.text ?? "");
+  }, [entry?.text]);
+
   return (
     <div>
       <span className="text-xs uppercase tracking-widest text-muted-foreground">{label}</span>
@@ -218,6 +228,16 @@ function NutritionFields({
   entry: MealEntry;
   onSave: (values: NutritionValues) => void;
 }) {
+  // Unlike FixedSlotRow's <input> (which always renders, even before the
+  // owning entry has loaded), this component only ever mounts once its
+  // caller already has a defined `entry` (`{entry && <NutritionFields .../>}`
+  // in both call sites) — so these initializers are always correct at mount
+  // time and, deliberately, are NOT kept in sync with `entry` on every
+  // re-render: `commit()` below re-saves all 5 fields on every blur, so a
+  // resync effect keyed on entry's values would refire on each field's own
+  // commit and could race with the next field's in-progress edit, wiping a
+  // just-typed value before its blur fires. Local state is the source of
+  // truth for the lifetime of this mount.
   const [kcal, setKcal] = useState(str(entry.kcal));
   const [protein, setProtein] = useState(str(entry.proteinG));
   const [fat, setFat] = useState(str(entry.fatG));
