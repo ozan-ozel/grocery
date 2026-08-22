@@ -1,20 +1,15 @@
-import { useEffect, useRef, useState } from "react";
+// src/hooks/useMealPlan.ts
+import { useEffect, useState } from "react";
+import { defaultTitle, readMealDateFromUrl, writeMealDateToUrl } from "@/lib/store";
+import type { NutritionMap } from "@/lib/nutrition";
 import {
-  defaultTitle,
-  readMealDateFromUrl,
-  uid,
-  writeMealDateToUrl,
-} from "@/lib/store";
-import {
-  createMealEntry,
-  deleteMealEntry,
-  fetchMealEntries,
-  updateMealEntry,
-  type MealEntry,
+  MEAL_SLOTS,
+  calculateItemsNutrition,
+  createMealItem,
+  type MealItem,
   type MealSlot,
-} from "@/lib/mealPlan";
-
-const WINDOW_DAYS = 3;
+} from "@/lib/localMealPlan";
+import { sumMacros, type MacroTotals } from "@/lib/mealNutrition";
 
 function dateToStr(d: Date): string {
   const y = d.getFullYear();
@@ -43,50 +38,35 @@ function initialDate(): string {
   return fromUrl && /^\d{4}-\d{2}-\d{2}$/.test(fromUrl) ? fromUrl : todayDateStr();
 }
 
-export type NutritionValues = {
-  kcal: number | null;
-  proteinG: number | null;
-  fatG: number | null;
-  carbsG: number | null;
-  fiberG: number | null;
-};
+type DayPlan = Record<MealSlot, MealItem[]>;
 
-export function useMealPlan(householdId: string | null) {
+function emptyDayPlan(): DayPlan {
+  return { kahvalti: [], ogle: [], aksam: [], ara: [] };
+}
+
+// Local-only for this phase: nothing here ever calls the network. Plans are
+// keyed by household (so switching tenants doesn't bleed one household's
+// plan into another's view) and by date (so the existing prev/next-day
+// navigation keeps working) — but they live only in this component tree's
+// state and are lost on reload, matching "Meal Plan = local only" and the
+// explicit "do not implement saving Meal Plans" instruction for this phase.
+export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
   const [date, setDate] = useState<string>(initialDate);
-  const [entries, setEntries] = useState<MealEntry[]>([]);
-  const unsyncedIdsRef = useRef<Set<string>>(new Set());
-  const [errorIds, setErrorIds] = useState<Set<string>>(new Set());
-  // Bumped on every local write (create/edit/remove). Lets the window fetch
-  // below detect that it raced with a local write and resolved after it —
-  // in that case its result is stale and must not clobber the fresher local
-  // state (this was previously possible: a slow initial fetch landing after
-  // a just-created entry would silently wipe that entry from the UI, while
-  // it stayed orphaned on the server).
-  const writeVersionRef = useRef(0);
+  const [plans, setPlans] = useState<Record<string, DayPlan>>({});
 
   useEffect(() => {
     writeMealDateToUrl(date);
   }, [date]);
 
-  // Fetch a window around the viewed date so prev/next-day navigation
-  // doesn't hit the network on every click.
-  useEffect(() => {
-    if (!householdId) return;
-    let cancelled = false;
-    const versionAtFetchStart = writeVersionRef.current;
-    const from = addDaysStr(date, -WINDOW_DAYS);
-    const to = addDaysStr(date, WINDOW_DAYS);
-    fetchMealEntries(householdId, from, to).then((fetched) => {
-      if (cancelled) return;
-      if (writeVersionRef.current !== versionAtFetchStart) return;
-      setEntries(fetched);
-      unsyncedIdsRef.current = new Set();
-      setErrorIds(new Set());
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [householdId, date]);
+  const planKey = `${householdId ?? "local"}|${date}`;
+  const dayPlan = plans[planKey] ?? emptyDayPlan();
+
+  function updateDayPlan(updater: (plan: DayPlan) => DayPlan) {
+    setPlans((prev) => ({
+      ...prev,
+      [planKey]: updater(prev[planKey] ?? emptyDayPlan()),
+    }));
+  }
 
   function goToPrevDay() {
     setDate((d) => addDaysStr(d, -1));
@@ -96,197 +76,46 @@ export function useMealPlan(householdId: string | null) {
     setDate((d) => addDaysStr(d, 1));
   }
 
-  function entriesForSlot(slot: MealSlot): MealEntry[] {
-    return entries
-      .filter((e) => e.date === date && e.slot === slot)
-      .sort((a, b) => a.position - b.position);
+  function itemsForSlot(slot: MealSlot): MealItem[] {
+    return dayPlan[slot];
   }
 
-  function fixedEntry(slot: Exclude<MealSlot, "ara">): MealEntry | undefined {
-    return entriesForSlot(slot)[0];
+  function addItem(slot: MealSlot, foodId: string, quantityG: number) {
+    const item = createMealItem(foodId, quantityG);
+    updateDayPlan((plan) => ({ ...plan, [slot]: [...plan[slot], item] }));
   }
 
-  function araEntries(): MealEntry[] {
-    return entriesForSlot("ara");
+  function updateItemQuantity(slot: MealSlot, itemId: string, quantityG: number) {
+    updateDayPlan((plan) => ({
+      ...plan,
+      [slot]: plan[slot].map((item) => (item.id === itemId ? { ...item, quantityG } : item)),
+    }));
   }
 
-  function dayTotals() {
-    const todays = entries.filter((e) => e.date === date);
-    const totals = { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0 };
-    for (const e of todays) {
-      if (e.kcal != null) totals.kcal += e.kcal;
-      if (e.proteinG != null) totals.protein += e.proteinG;
-      if (e.fatG != null) totals.fat += e.fatG;
-      if (e.carbsG != null) totals.carbs += e.carbsG;
-      if (e.fiberG != null) totals.fiber += e.fiberG;
-    }
-    return totals;
+  function removeItem(slot: MealSlot, itemId: string) {
+    updateDayPlan((plan) => ({
+      ...plan,
+      [slot]: plan[slot].filter((item) => item.id !== itemId),
+    }));
   }
 
-  function upsertLocal(entry: MealEntry) {
-    writeVersionRef.current++;
-    setEntries((prev) => {
-      const idx = prev.findIndex((e) => e.id === entry.id);
-      if (idx === -1) return [...prev, entry];
-      const next = [...prev];
-      next[idx] = entry;
-      return next;
-    });
+  function slotNutrition(slot: MealSlot): MacroTotals {
+    return calculateItemsNutrition(dayPlan[slot], catalog);
   }
 
-  async function persistCreate(entry: MealEntry) {
-    if (!householdId) return;
-    const created = await createMealEntry({
-      id: entry.id,
-      householdId,
-      date: entry.date,
-      slot: entry.slot,
-      text: entry.text,
-      kcal: entry.kcal,
-      proteinG: entry.proteinG,
-      fatG: entry.fatG,
-      carbsG: entry.carbsG,
-      fiberG: entry.fiberG,
-      position: entry.position,
-    });
-    if (created) {
-      unsyncedIdsRef.current.delete(entry.id);
-      setErrorIds((ids) => {
-        const next = new Set(ids);
-        next.delete(entry.id);
-        return next;
-      });
-    } else {
-      setErrorIds((ids) => new Set(ids).add(entry.id));
-    }
-  }
-
-  async function persistUpdate(entry: MealEntry) {
-    const updated = await updateMealEntry(entry.id, {
-      text: entry.text,
-      kcal: entry.kcal,
-      proteinG: entry.proteinG,
-      fatG: entry.fatG,
-      carbsG: entry.carbsG,
-      fiberG: entry.fiberG,
-    });
-    if (updated) {
-      setErrorIds((ids) => {
-        const next = new Set(ids);
-        next.delete(entry.id);
-        return next;
-      });
-    } else {
-      setErrorIds((ids) => new Set(ids).add(entry.id));
-    }
-  }
-
-  function persist(entry: MealEntry) {
-    if (unsyncedIdsRef.current.has(entry.id)) {
-      void persistCreate(entry);
-    } else {
-      void persistUpdate(entry);
-    }
-  }
-
-  function saveFixedSlotText(slot: Exclude<MealSlot, "ara">, text: string) {
-    const trimmed = text.trim();
-    const existing = fixedEntry(slot);
-    if (!trimmed) {
-      if (existing) removeEntry(existing.id);
-      return;
-    }
-    if (existing) {
-      const updated: MealEntry = { ...existing, text: trimmed };
-      upsertLocal(updated);
-      persist(updated);
-      return;
-    }
-    const created: MealEntry = {
-      id: uid(),
-      date,
-      slot,
-      text: trimmed,
-      kcal: null,
-      proteinG: null,
-      fatG: null,
-      carbsG: null,
-      fiberG: null,
-      position: 0,
-    };
-    unsyncedIdsRef.current.add(created.id);
-    upsertLocal(created);
-    persist(created);
-  }
-
-  function addAraEntry(text: string) {
-    const trimmed = text.trim();
-    if (!trimmed) return;
-    const nextPosition = araEntries().length;
-    const created: MealEntry = {
-      id: uid(),
-      date,
-      slot: "ara",
-      text: trimmed,
-      kcal: null,
-      proteinG: null,
-      fatG: null,
-      carbsG: null,
-      fiberG: null,
-      position: nextPosition,
-    };
-    unsyncedIdsRef.current.add(created.id);
-    upsertLocal(created);
-    persist(created);
-  }
-
-  function saveEntryNutrition(id: string, values: NutritionValues) {
-    const existing = entries.find((e) => e.id === id);
-    if (!existing) return;
-    const updated: MealEntry = { ...existing, ...values };
-    upsertLocal(updated);
-    persist(updated);
-  }
-
-  function removeEntry(id: string) {
-    const existing = entries.find((e) => e.id === id);
-    if (!existing) return;
-    writeVersionRef.current++;
-    setEntries((prev) => prev.filter((e) => e.id !== id));
-    setErrorIds((ids) => {
-      const next = new Set(ids);
-      next.delete(id);
-      return next;
-    });
-    if (unsyncedIdsRef.current.has(id)) {
-      // Never made it to the server — nothing to delete remotely.
-      unsyncedIdsRef.current.delete(id);
-      return;
-    }
-    deleteMealEntry(id).then((ok) => {
-      // Deletion failed — put it back rather than silently losing it.
-      if (!ok) upsertLocal(existing);
-    });
-  }
-
-  function retrySave(id: string) {
-    const existing = entries.find((e) => e.id === id);
-    if (!existing) return;
-    persist(existing);
+  function dailyNutrition(): MacroTotals {
+    return sumMacros(MEAL_SLOTS.map(({ slot }) => slotNutrition(slot)));
   }
 
   return {
     dateLabel: defaultTitle(strToDate(date).getTime()),
     goToPrevDay,
     goToNextDay,
-    fixedEntry,
-    araEntries,
-    dayTotals,
-    saveFixedSlotText,
-    addAraEntry,
-    saveEntryNutrition,
-    removeEntry,
-    errorIds,
-    retrySave,
+    itemsForSlot,
+    addItem,
+    updateItemQuantity,
+    removeItem,
+    slotNutrition,
+    dailyNutrition,
   };
 }
