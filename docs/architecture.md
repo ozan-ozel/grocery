@@ -19,13 +19,13 @@ grows a second file.
 global store or context. `src/lib/*.ts` holds pure logic and localStorage I/O; components stay
 mostly presentational. Persistence is split across several independent layers with different scopes:
 
-| Layer | Key(s) / store | Scope | Synced to server? |
-|---|---|---|---|
-| Tenants (households) | Supabase `households` table, via `/api/households` | shared (Supabase) | yes |
-| List state (`{ lists, activeId, version }`) | `grocery.state.v1:<tenantId>` (local cache) + Netlify Blobs `state:<tenantId>` | per tenant | yes, via `netlify/functions/state.ts` |
-| Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1` | device | no |
-| Item name → category memory | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant | yes, via `netlify/functions/item-category-memory.ts` |
-| UI prefs (theme, swipe mode) | `grocery.theme.v1`, `grocery.swipeMode.v1` | device | no |
+| Layer                                          | Key(s) / store                                                                         | Scope             | Synced to server?                                    |
+| ---------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------- |
+| Tenants (households)                           | Supabase `households` table, via `/api/households`                                     | shared (Supabase) | yes                                                  |
+| List state (`{ lists, activeId, version }`)    | `grocery.state.v1:<tenantId>` (local cache) + Netlify Blobs `state:<tenantId>`         | per tenant        | yes, via `netlify/functions/state.ts`                |
+| Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1`                                                                | device            | no                                                   |
+| Item name → category memory                    | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant        | yes, via `netlify/functions/item-category-memory.ts` |
+| UI prefs (theme, swipe mode)                   | `grocery.theme.v1`, `grocery.swipeMode.v1`                                             | device            | no                                                   |
 
 Category customization stays device-local even though it's keyed by tenant. Item category memory
 now syncs across devices for the same tenant (NUT-13): the local cache paints instantly, then a
@@ -70,6 +70,7 @@ in `01-schema.sql`) is wired up — see the Categorization section below.
 ## Categorization
 
 **Categorization** is three layered pieces, in order of precedence when an item is added:
+
 1. `src/lib/categorization/itemCategories.ts` — if this item name was ever manually assigned a category before
    (in this tenant), reuse it. `useItemCategories()` (`src/hooks/`) paints from the local cache
    immediately on tenant switch, then merges in `item_category_memory` from Supabase in the
@@ -94,6 +95,28 @@ proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, w
 service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
 a copy-paste LLM prompt for turning free-form nutrition text into the row JSON the uploader/bulk-paste
 UI expects.
+
+## Personal meal planning
+
+The `Kişisel Plan` section is an additive, device-local personalization surface. It stores one
+adult profile in `grocery.personalPlan.v1` and does not write meal plans, shopping lists, or the
+legacy `meal_entries` API. The profile collects weight, height, age, an explicit sex-specific
+equation convention, activity level, goal, and optional waist measurement. Gender identity is not
+inferred from the equation convention.
+
+Targets are estimates: Mifflin-St Jeor estimates resting energy, an activity multiplier estimates
+maintenance energy, and maintenance/loss/gain targets apply conservative adjustments. BMI and waist
+are context signals only, not diagnoses or direct calorie formulas. The first version is limited to
+adults and does not provide automated targets for pregnancy, breastfeeding, minors, eating-disorder
+recovery, medical conditions, therapeutic diets, or micronutrient adequacy.
+
+The `Kaynakları göster` switch exposes a feature-to-source map. It links profile and energy
+planning to the [NIDDK Body Weight Planner](https://www.niddk.nih.gov/bwp) and
+[NCBI Endotext](https://www.ncbi.nlm.nih.gov/books/NBK278991/), activity to
+[WHO physical activity guidance](https://www.who.int/news-room/fact-sheets/detail/physical-activity),
+macro/fiber ranges to the [National Academies DRI tables](https://www.ncbi.nlm.nih.gov/books/NBK545442/)
+and Endotext, and BMI/waist context to Endotext. These references support the formulas and
+boundaries but do not turn the feature into medical advice.
 
 ## Environment variables
 

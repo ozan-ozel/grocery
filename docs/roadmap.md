@@ -24,6 +24,15 @@ halfway toward.
 
 ## Product-facing — build on what's there
 
+### Personal meal personalization
+
+The new `Kişisel Plan` tab provides an adult, device-local profile and explainable daily targets
+using body measurements, activity, goals, Mifflin-St Jeor, and DRI-informed macro/fiber ranges.
+Future work can add profile sync, verified ingredient/allergen metadata, transparent catalog
+recommendations, weight-trend calibration, and person-aware meal planning. Medical nutrition,
+pregnancy/lactation, pediatric plans, micronutrient adequacy, and automatic shopping-list changes
+remain out of scope until their data and safety contracts are defined.
+
 3. **Aisle-order learning.** Reorder the active list by where items actually tend to get
    checked off (a proxy for shop layout), not just by category. Distinct from categorization
    accuracy (#7) — this is about in-store sequence, not which category an item lands in.
@@ -50,18 +59,18 @@ halfway toward.
    compound/head-noun cases, graduate those specifically to an LLM call.
 
 8. **Multi-language taxonomy.** Categorization is Turkish-specific (Snowball
-    Turkish stemmer, Migros/CarrefourSA aisle layout). If this ever needs to serve
-    non-Turkish households, that's a real architectural fork, not a tweak.
+   Turkish stemmer, Migros/CarrefourSA aisle layout). If this ever needs to serve
+   non-Turkish households, that's a real architectural fork, not a tweak.
 
 9. **Native mobile app.** Currently a web app with light PWA aspirations at best.
-    If "an actual iOS/Android app" becomes a goal, that's a distinct, large
-    decision (Expo/React Native rewrite vs. wrapping the PWA) — flagged here, not
-    recommended.
+   If "an actual iOS/Android app" becomes a goal, that's a distinct, large
+   decision (Expo/React Native rewrite vs. wrapping the PWA) — flagged here, not
+   recommended.
 
 ## Infra / ops
 
-10. **Test suite.** `CLAUDE.md` is explicit: *"There is no test suite and no lint
-    script in this repo."* For a project with sync/conflict logic and a
+10. **Test suite.** `CLAUDE.md` is explicit: _"There is no test suite and no lint
+    script in this repo."_ For a project with sync/conflict logic and a
     category-merging system, this is the highest-leverage infra gap — bugs there
     are exactly the kind that stay silent until two devices disagree.
 
@@ -74,7 +83,7 @@ halfway toward.
 
 ## On tooling
 
-There's no single skill that *is* the roadmap tool — this list came from reading
+There's no single skill that _is_ the roadmap tool — this list came from reading
 the repo, not from a packaged planning tool. Once a direction here gets picked,
 the right skill follows from the choice itself: UI-heavy work (PWA polish,
 theming, mobile-first redesign) reaches for a design skill; nutrition/budget

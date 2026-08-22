@@ -43,7 +43,7 @@ export function AppHeader({
   onStartNewList,
 }: Props) {
   const total = active.items.length;
-  const done = active.items.filter((i) => i.checked).length;
+  const done = active.items.filter(i => i.checked).length;
   const progress = total ? (done / total) * 100 : 0;
 
   return (
@@ -65,8 +65,7 @@ export function AppHeader({
                   ? "Çevrimdışı — bağlantı gelince senkronize edilecek"
                   : "Senkronize ediliyor…"
               }
-              className="flex items-center px-1.5 text-muted-foreground"
-            >
+              className="flex items-center px-1.5 text-muted-foreground">
               {syncStatus === "offline" ? (
                 <CloudOff className="size-4 text-signal" />
               ) : (
@@ -78,7 +77,7 @@ export function AppHeader({
         </div>
       </div>
 
-      <div className="inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
+      <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-lg bg-accent/50 p-1">
         <button
           type="button"
           onClick={() => onSelectSection("alisveris")}
@@ -86,9 +85,8 @@ export function AppHeader({
             "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
             section === "alisveris"
               ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
+              : "text-muted-foreground hover:text-foreground",
+          )}>
           Alışveriş
         </button>
         <button
@@ -98,9 +96,8 @@ export function AppHeader({
             "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
             section === "besin"
               ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
+              : "text-muted-foreground hover:text-foreground",
+          )}>
           Besin değerleri
         </button>
         <button
@@ -110,10 +107,20 @@ export function AppHeader({
             "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
             section === "yemek"
               ? "bg-background text-foreground shadow-sm"
-              : "text-muted-foreground hover:text-foreground"
-          )}
-        >
+              : "text-muted-foreground hover:text-foreground",
+          )}>
           Yemek Planı
+        </button>
+        <button
+          type="button"
+          onClick={() => onSelectSection("kisisel")}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+            section === "kisisel"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground",
+          )}>
+          Kişisel Plan
         </button>
       </div>
 
@@ -127,15 +134,19 @@ export function AppHeader({
                 onRenameActive((e.target as HTMLInputElement).value)
               }
               onBlur={() => {
-                if (!active.title.trim()) onRenameActive(defaultTitle(active.createdAt));
+                if (!active.title.trim())
+                  onRenameActive(defaultTitle(active.createdAt));
               }}
               className="min-w-0 flex-1 border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight outline-none"
             />
             <span className="ledger shrink-0 text-lg">
-              <span className={done > 0 ? "text-signal" : "text-muted-foreground"}>
+              <span
+                className={done > 0 ? "text-signal" : "text-muted-foreground"}>
                 {String(done).padStart(2, "0")}
               </span>
-              <span className="text-muted-foreground">/{String(total).padStart(2, "0")}</span>
+              <span className="text-muted-foreground">
+                /{String(total).padStart(2, "0")}
+              </span>
             </span>
           </div>
 
@@ -165,8 +176,7 @@ export function AppHeader({
             onClick={onStartNewList}
             disabled={active.items.length === 0}
             title="Bu listeyi arşivle ve yenisini başlat"
-            className="shrink-0"
-          >
+            className="shrink-0">
             <FilePlus2 className="size-3.5" />
             Yeni liste
           </Button>
