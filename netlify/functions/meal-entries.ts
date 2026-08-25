@@ -227,7 +227,7 @@ async function handleUpdate(request: Request, user: AuthUser): Promise<Response>
   }
 
   const householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
-  if (householdId === null) return json({ error: "meal entry not found" }, 404);
+  if (householdId === null) return json({ error: "not found" }, 404);
   try {
     await requireHouseholdAccess(householdId, user);
   } catch (err) {
@@ -312,7 +312,7 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
   }
 
   const householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
-  if (householdId === null) return json({ error: "meal entry not found" }, 404);
+  if (householdId === null) return json({ error: "not found" }, 404);
   try {
     await requireHouseholdAccess(householdId, user);
   } catch (err) {
