@@ -3,14 +3,11 @@
 //
 // The read proxies to PostgREST so the anon key stays server-side. The write
 // uses the service_role key (also server-side) so RLS on
-// public.item_category_memory can stay locked to reads only.
-//
-// Anyone with the app URL can hit PUT. That is a deliberate trade-off for a
-// small household PWA; if this stops being personal, put the app behind
-// authentication.
+// public.item_category_memory can stay locked to reads only. Both are gated
+// by owner/invited household access.
 
 import type { Context } from "@netlify/functions";
-import { requireUser, authErrorResponse } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "./_auth";
 
 type Row = {
   name_lower: string;
@@ -29,18 +26,19 @@ function restBase(url: string): string {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
+  let user: AuthUser;
   try {
-    await requireUser(request);
+    user = await requireUser(request);
   } catch (err) {
     return authErrorResponse(err);
   }
   const method = request.method.toUpperCase();
-  if (method === "GET") return handleGet(request);
-  if (method === "PUT") return handleWrite(request);
+  if (method === "GET") return handleGet(request, user);
+  if (method === "PUT") return handleWrite(request, user);
   return json({ error: "method not allowed" }, 405);
 };
 
-async function handleGet(request: Request): Promise<Response> {
+async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
   if (!supabaseUrl || !anonKey) {
@@ -51,6 +49,12 @@ async function handleGet(request: Request): Promise<Response> {
   const householdId = url.searchParams.get("household_id")?.trim();
   if (!householdId) {
     return json({ error: "expected ?household_id=<id>" }, 400);
+  }
+
+  try {
+    await requireHouseholdAccess(householdId, user);
+  } catch (err) {
+    return authErrorResponse(err);
   }
 
   const headers = {
@@ -75,7 +79,7 @@ async function handleGet(request: Request): Promise<Response> {
   }
 }
 
-async function handleWrite(request: Request): Promise<Response> {
+async function handleWrite(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
@@ -94,6 +98,12 @@ async function handleWrite(request: Request): Promise<Response> {
   const category = typeof body.category === "string" ? body.category.trim() : "";
   if (!household_id || !name_lower || !category) {
     return json({ error: "expected { household_id, name_lower, category }" }, 400);
+  }
+
+  try {
+    await requireHouseholdAccess(household_id, user);
+  } catch (err) {
+    return authErrorResponse(err);
   }
 
   try {
