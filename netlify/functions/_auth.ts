@@ -56,6 +56,50 @@ export async function requireUser(request: Request): Promise<AuthUser> {
   }
 }
 
+function restBase(url: string): string {
+  return `${url.replace(/\/$/, "")}/rest/v1`;
+}
+
+type HouseholdOwnerRow = { owner_id: string | null };
+type ShareRow = { email: string };
+
+export async function requireHouseholdAccess(
+  householdId: string,
+  user: AuthUser,
+  opts: { ownerOnly?: boolean } = {}
+): Promise<void> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) throw new AuthError(500, "supabase not configured");
+
+  const headers = {
+    apikey: serviceKey,
+    authorization: `Bearer ${serviceKey}`,
+    accept: "application/json",
+  };
+
+  const householdRes = await fetch(
+    `${restBase(supabaseUrl)}/households?id=eq.${encodeURIComponent(householdId)}&select=owner_id`,
+    { headers }
+  );
+  if (!householdRes.ok) throw new AuthError(502, "household lookup failed");
+  const rows = (await householdRes.json()) as HouseholdOwnerRow[];
+  if (rows.length === 0) throw new AuthError(404, "not found");
+
+  if (rows[0].owner_id === user.userId) return;
+  if (opts.ownerOnly) throw new AuthError(404, "not found");
+
+  const shareRes = await fetch(
+    `${restBase(supabaseUrl)}/household_shares?household_id=eq.${encodeURIComponent(
+      householdId
+    )}&email=eq.${encodeURIComponent(user.email)}&select=email`,
+    { headers }
+  );
+  if (!shareRes.ok) throw new AuthError(502, "household share lookup failed");
+  const shares = (await shareRes.json()) as ShareRow[];
+  if (shares.length === 0) throw new AuthError(404, "not found");
+}
+
 export function authErrorResponse(err: unknown): Response {
   const status = err instanceof AuthError ? err.status : 401;
   const message = err instanceof AuthError ? err.message : "unauthorized";
