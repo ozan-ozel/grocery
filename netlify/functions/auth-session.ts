@@ -13,7 +13,7 @@ export default async (request: Request, _context: Context): Promise<Response> =>
     return authErrorResponse(err);
   }
 
-  return new Response(JSON.stringify({ email: user.email }), {
+  return new Response(JSON.stringify({ email: user.email, userId: user.userId }), {
     status: 200,
     headers: { "content-type": "application/json", "cache-control": "no-store" },
   });

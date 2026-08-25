@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-type Session = { email: string | null };
+type Session = { email: string | null; userId: string | null };
 
 // null = still checking; undefined = signed out; Session = signed in.
 export function useAuth() {
@@ -15,8 +15,8 @@ export function useAuth() {
     try {
       const res = await fetch("/api/auth-session", { credentials: "include" });
       if (res.ok) {
-        const data = (await res.json()) as { email: string | null };
-        setSession({ email: data.email });
+        const data = (await res.json()) as { email: string | null; userId: string | null };
+        setSession({ email: data.email, userId: data.userId });
       } else {
         setSession(undefined);
       }
