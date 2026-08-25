@@ -10,7 +10,7 @@
 // `state:default`.
 
 import type { Context } from "@netlify/functions";
-import { requireUser, authErrorResponse } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse } from "./_auth";
 import { getStore } from "@netlify/blobs";
 
 type Envelope = { version: number; state: unknown };
@@ -60,8 +60,15 @@ function keyFor(tenantId: string) {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
+  let user;
   try {
-    await requireUser(request);
+    user = await requireUser(request);
+  } catch (err) {
+    return authErrorResponse(err);
+  }
+  const tenantId = tenantIdFrom(request);
+  try {
+    await requireHouseholdAccess(tenantId, user);
   } catch (err) {
     return authErrorResponse(err);
   }
