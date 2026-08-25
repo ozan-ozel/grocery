@@ -38,10 +38,16 @@ export function App() {
     return <LoginGate onSignIn={signInWithGoogle} />;
   }
 
-  return <AppShell onSignOut={signOut} />;
+  return <AppShell onSignOut={signOut} currentUserId={session.userId} />;
 }
 
-function AppShell({ onSignOut }: { onSignOut: () => void }) {
+function AppShell({
+  onSignOut,
+  currentUserId,
+}: {
+  onSignOut: () => void;
+  currentUserId: string | null;
+}) {
   const {
     theme,
     setTheme,
@@ -141,6 +147,7 @@ function AppShell({ onSignOut }: { onSignOut: () => void }) {
         tenants={tenants}
         activeTenantId={activeTenantId}
         hiddenTenantIds={hiddenIds}
+        currentUserId={currentUserId}
         onSelectTenant={selectTenant}
         onAddTenant={addTenant}
         onRenameTenant={renameTenant}

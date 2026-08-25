@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Eye, EyeOff, Plus, Pencil, Trash2 } from "lucide-react";
+import { Check, ChevronDown, Eye, EyeOff, Plus, Pencil, Trash2, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Tenant } from "@/lib/store";
+import { inviteToHousehold, listHouseholdShares, revokeHouseholdShare } from "@/lib/householdShares";
 
 type Props = {
   tenants: Tenant[];
   activeId: string;
   hiddenIds: string[];
+  currentUserId: string | null;
   onSelect: (id: string) => void;
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
@@ -18,6 +20,7 @@ export function TenantSwitcher({
   tenants,
   activeId,
   hiddenIds,
+  currentUserId,
   onSelect,
   onAdd,
   onRename,
@@ -30,6 +33,10 @@ export function TenantSwitcher({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+  const [managingSharesId, setManagingSharesId] = useState<string | null>(null);
+  const [shareEmails, setShareEmails] = useState<string[]>([]);
+  const [shareDraft, setShareDraft] = useState("");
+  const [shareLoading, setShareLoading] = useState(false);
 
   const active = tenants.find((t) => t.id === activeId) ?? tenants[0];
 
@@ -41,6 +48,7 @@ export function TenantSwitcher({
         setAdding(false);
         setDraft("");
         setEditingId(null);
+        setManagingSharesId(null);
       }
     }
     function onKey(e: KeyboardEvent) {
@@ -48,6 +56,7 @@ export function TenantSwitcher({
         setOpen(false);
         setAdding(false);
         setEditingId(null);
+        setManagingSharesId(null);
       }
     }
     document.addEventListener("mousedown", onClick);
@@ -89,6 +98,40 @@ export function TenantSwitcher({
     setEditingId(null);
     setEditDraft("");
     setTimeout(() => (submittingRename.current = false), 0);
+  }
+
+  const submittingShare = useRef(false);
+
+  async function openShares(id: string) {
+    if (managingSharesId === id) {
+      setManagingSharesId(null);
+      return;
+    }
+    setManagingSharesId(id);
+    setShareDraft("");
+    setShareLoading(true);
+    const emails = await listHouseholdShares(id);
+    setShareLoading(false);
+    setShareEmails(emails);
+  }
+
+  async function commitInvite(householdId: string) {
+    if (submittingShare.current) return;
+    const email = shareDraft.trim();
+    if (!email) return;
+    submittingShare.current = true;
+    const ok = await inviteToHousehold(householdId, email);
+    if (ok) {
+      const normalized = email.toLowerCase();
+      setShareEmails((prev) => (prev.includes(normalized) ? prev : [...prev, normalized]));
+      setShareDraft("");
+    }
+    submittingShare.current = false;
+  }
+
+  async function removeShare(householdId: string, email: string) {
+    const ok = await revokeHouseholdShare(householdId, email);
+    if (ok) setShareEmails((prev) => prev.filter((e) => e !== email));
   }
 
   return (
@@ -175,7 +218,22 @@ export function TenantSwitcher({
                       >
                         <Pencil className="size-3.5" />
                       </button>
-                      {tenants.length > 1 && (
+                      {currentUserId != null && t.ownerId === currentUserId && (
+                        <button
+                          type="button"
+                          aria-label={`${t.name} paylaşımını yönet`}
+                          onClick={() => openShares(t.id)}
+                          className={cn(
+                            "rounded p-1 text-muted-foreground transition hover:text-foreground [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
+                            managingSharesId === t.id
+                              ? "text-foreground"
+                              : "[@media(pointer:fine)]:opacity-0"
+                          )}
+                        >
+                          <UserPlus className="size-3.5" />
+                        </button>
+                      )}
+                      {tenants.length > 1 && currentUserId != null && t.ownerId === currentUserId && (
                         <button
                           type="button"
                           aria-label={`${t.name} sil`}
@@ -193,6 +251,51 @@ export function TenantSwitcher({
                           <Trash2 className="size-3.5" />
                         </button>
                       )}
+                    </div>
+                  )}
+                  {managingSharesId === t.id && (
+                    <div className="border-t border-border bg-accent/30 px-3 py-2">
+                      <div className="mb-1.5 text-[11px] font-medium text-muted-foreground">
+                        Davetliler
+                      </div>
+                      {shareLoading ? (
+                        <div className="text-xs text-muted-foreground">Yükleniyor…</div>
+                      ) : (
+                        <div className="mb-2 flex flex-wrap gap-1.5">
+                          {shareEmails.length === 0 && (
+                            <span className="text-xs text-muted-foreground">
+                              Henüz kimse davet edilmedi.
+                            </span>
+                          )}
+                          {shareEmails.map((email) => (
+                            <span
+                              key={email}
+                              className="ledger flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-xs"
+                            >
+                              {email}
+                              <button
+                                type="button"
+                                aria-label={`${email} daveti kaldır`}
+                                onClick={() => removeShare(t.id, email)}
+                                className="rounded-full text-muted-foreground transition hover:text-signal"
+                              >
+                                <X className="size-3" />
+                              </button>
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      <input
+                        value={shareDraft}
+                        placeholder="email@ornek.com"
+                        onInput={(e: Event) =>
+                          setShareDraft((e.target as HTMLInputElement).value)
+                        }
+                        onKeyDown={(e: KeyboardEvent) => {
+                          if (e.key === "Enter") commitInvite(t.id);
+                        }}
+                        className="w-full rounded border border-input bg-background px-2 py-1 text-xs outline-none focus:border-foreground"
+                      />
                     </div>
                   )}
                 </li>

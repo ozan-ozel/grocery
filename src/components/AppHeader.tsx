@@ -13,6 +13,7 @@ type Props = {
   tenants: Tenant[];
   activeTenantId: string;
   hiddenTenantIds: string[];
+  currentUserId: string | null;
   onSelectTenant: (id: string) => void;
   onAddTenant: (name: string) => void;
   onRenameTenant: (id: string, name: string) => void;
@@ -33,6 +34,7 @@ export function AppHeader({
   tenants,
   activeTenantId,
   hiddenTenantIds,
+  currentUserId,
   onSelectTenant,
   onAddTenant,
   onRenameTenant,
@@ -59,6 +61,7 @@ export function AppHeader({
           tenants={tenants}
           activeId={activeTenantId}
           hiddenIds={hiddenTenantIds}
+          currentUserId={currentUserId}
           onSelect={onSelectTenant}
           onAdd={onAddTenant}
           onRename={onRenameTenant}
