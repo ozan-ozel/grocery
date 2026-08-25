@@ -1859,7 +1859,7 @@ with:
           </ul>
 ```
 
-- [ ] **Step 5: Pass `currentUserId` through `AppHeader.tsx`**
+- [ ] **Step 6: Pass `currentUserId` through `AppHeader.tsx`**
 
 Replace:
 
@@ -1924,7 +1924,7 @@ with:
           onSelect={onSelectTenant}
 ```
 
-- [ ] **Step 6: Thread `currentUserId` from `App.tsx`**
+- [ ] **Step 7: Thread `currentUserId` from `App.tsx`**
 
 Replace:
 
@@ -1971,12 +1971,12 @@ with:
         onSelectTenant={selectTenant}
 ```
 
-- [ ] **Step 7: Typecheck**
+- [ ] **Step 8: Typecheck**
 
 Run: `npm run build`
 Expected: succeeds with no type errors.
 
-- [ ] **Step 8: Manual smoke test**
+- [ ] **Step 9: Manual smoke test**
 
 Run: `npm run netlify:dev`
 As the owner of a household, open the tenant switcher, click the new user-plus
@@ -1987,7 +1987,7 @@ row you don't own (if you only have one household to test with, temporarily log
 in as a different `app_users` row, or verify by reading the render logic: the
 button is gated on `t.ownerId === currentUserId`).
 
-- [ ] **Step 9: Commit**
+- [ ] **Step 10: Commit**
 
 ```bash
 git add src/components/TenantSwitcher.tsx src/components/AppHeader.tsx src/App.tsx
