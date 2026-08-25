@@ -12,10 +12,12 @@ import type { Section } from "@/hooks/useUiPrefs";
 type Props = {
   tenants: Tenant[];
   activeTenantId: string;
+  hiddenTenantIds: string[];
   onSelectTenant: (id: string) => void;
   onAddTenant: (name: string) => void;
   onRenameTenant: (id: string, name: string) => void;
   onDeleteTenant: (id: string) => void;
+  onToggleHiddenTenant: (id: string) => void;
   syncStatus: SyncStatus;
   theme: Theme;
   onSelectTheme: (theme: Theme) => void;
@@ -29,10 +31,12 @@ type Props = {
 export function AppHeader({
   tenants,
   activeTenantId,
+  hiddenTenantIds,
   onSelectTenant,
   onAddTenant,
   onRenameTenant,
   onDeleteTenant,
+  onToggleHiddenTenant,
   syncStatus,
   theme,
   onSelectTheme,
@@ -52,10 +56,12 @@ export function AppHeader({
         <TenantSwitcher
           tenants={tenants}
           activeId={activeTenantId}
+          hiddenIds={hiddenTenantIds}
           onSelect={onSelectTenant}
           onAdd={onAddTenant}
           onRename={onRenameTenant}
           onDelete={onDeleteTenant}
+          onToggleHidden={onToggleHiddenTenant}
         />
         <div className="flex items-center gap-1">
           {syncStatus !== "synced" && (

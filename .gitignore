@@ -16,3 +16,9 @@ deno.lock
 
 # Subagent-driven-development scratch workspace (ledgers, task briefs/reports)
 .superpowers
+
+# Serena (optional MCP server). project.yml is checked in; everything else is
+# per-developer state (cached indexes, personal memories, local overrides).
+.serena/cache/
+.serena/memories/
+.serena/project.local.yml

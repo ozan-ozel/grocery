@@ -10,6 +10,7 @@
 // authentication.
 
 import type { Context } from "@netlify/functions";
+import { requireUser, authErrorResponse } from "./_auth";
 
 type Nutrition = {
   name_tr: string;
@@ -41,6 +42,11 @@ function restBase(url: string): string {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
+  try {
+    await requireUser(request);
+  } catch (err) {
+    return authErrorResponse(err);
+  }
   const method = request.method.toUpperCase();
   if (method === "GET") return handleBrowse(request);
   if (method === "POST") return handleRead(request);

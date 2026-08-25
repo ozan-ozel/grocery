@@ -10,6 +10,7 @@
 // `state:default`.
 
 import type { Context } from "@netlify/functions";
+import { requireUser, authErrorResponse } from "./_auth";
 import { getStore } from "@netlify/blobs";
 
 type Envelope = { version: number; state: unknown };
@@ -59,6 +60,11 @@ function keyFor(tenantId: string) {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
+  try {
+    await requireUser(request);
+  } catch (err) {
+    return authErrorResponse(err);
+  }
   const store = getStore({ name: "state", consistency: "strong" });
   const method = request.method.toUpperCase();
 
