@@ -23,10 +23,16 @@ create table if not exists public.household_shares (
 create index if not exists household_shares_email_idx on public.household_shares (email);
 
 -- Backfill: Evim (default) + Ayrancı (yxq8fr4k) -> Ozan; Akbük (6e5xkctg) -> Ege.
+-- The `exists` guard makes each statement a no-op if the target user hasn't
+-- logged in yet, instead of silently setting owner_id to NULL.
 update public.households
   set owner_id = (select id from public.app_users where email = 'ozandozel@gmail.com')
-  where id in ('default', 'yxq8fr4k') and owner_id is null;
+  where id in ('default', 'yxq8fr4k')
+    and owner_id is null
+    and exists (select 1 from public.app_users where email = 'ozandozel@gmail.com');
 
 update public.households
   set owner_id = (select id from public.app_users where email = 'egeozeldev@gmail.com')
-  where id = '6e5xkctg' and owner_id is null;
+  where id = '6e5xkctg'
+    and owner_id is null
+    and exists (select 1 from public.app_users where email = 'egeozeldev@gmail.com');

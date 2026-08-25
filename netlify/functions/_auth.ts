@@ -49,7 +49,7 @@ export async function requireUser(request: Request): Promise<AuthUser> {
   try {
     const payload = jwt.verify(token, secret) as SessionPayload;
     if (!payload.sub || !payload.email) throw new AuthError(401, "invalid session");
-    return { userId: payload.sub, email: payload.email };
+    return { userId: payload.sub, email: payload.email.toLowerCase() };
   } catch (err) {
     if (err instanceof AuthError) throw err;
     throw new AuthError(401, "invalid or expired session");

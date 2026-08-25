@@ -12,7 +12,6 @@ import {
 } from "@/lib/hiddenHouseholds";
 import { removeItemCategories } from "@/lib/categorization/itemCategories";
 import {
-  DEFAULT_TENANT_ID,
   readTenantFromUrl,
   writeTenantToUrl,
   uid,
@@ -49,7 +48,7 @@ export function useTenants() {
       // devices race and one 409s, re-fetch so the loser adopts the winner's
       // row instead of showing a blank tenant list.
       if (effective.length === 0) {
-        const created = await createHousehold(DEFAULT_TENANT_ID, "Evim");
+        const created = await createHousehold(uid(), "Evim");
         if (cancelled) return;
         if (created) {
           effective = [

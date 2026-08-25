@@ -87,11 +87,12 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
     if (!sharesRes.ok) return json({ error: `supabase ${sharesRes.status}` }, 502);
     const shareRows = (await sharesRes.json()) as { household_id: string }[];
     const invitedIds = shareRows.map((r) => r.household_id);
+    const safeInvitedIds = invitedIds.filter((i) => /^[a-zA-Z0-9_-]{1,64}$/.test(i));
 
     const filter =
-      invitedIds.length > 0
+      safeInvitedIds.length > 0
         ? `or=${encodeURIComponent(
-            `(owner_id.eq.${user.userId},id.in.(${invitedIds.map((i) => `"${i}"`).join(",")}))`
+            `(owner_id.eq.${user.userId},id.in.(${safeInvitedIds.map((i) => `"${i}"`).join(",")}))`
           )}`
         : `owner_id=eq.${encodeURIComponent(user.userId)}`;
 
@@ -119,8 +120,8 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
     return json({ error: "invalid json" }, 400);
   }
 
-  if (typeof body.id !== "string" || body.id.trim().length === 0) {
-    return json({ error: "expected id: string (non-empty)" }, 400);
+  if (typeof body.id !== "string" || !/^[a-zA-Z0-9_-]{1,64}$/.test(body.id.trim())) {
+    return json({ error: "expected id: string (alphanumeric, underscore, hyphen, 1-64 chars)" }, 400);
   }
   if (typeof body.name !== "string" || body.name.trim().length === 0) {
     return json({ error: "expected name: string (non-empty)" }, 400);

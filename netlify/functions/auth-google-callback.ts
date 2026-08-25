@@ -100,7 +100,7 @@ export default async (request: Request, _context: Context): Promise<Response> =>
     if (!payload?.sub || !payload.email) return badRequest("invalid id_token payload");
     if (payload.email_verified !== true) return badRequest("email not verified");
     sub = payload.sub;
-    email = payload.email;
+    email = payload.email.toLowerCase();
   } catch (e) {
     return badRequest(`id_token verification failed: ${e}`);
   }

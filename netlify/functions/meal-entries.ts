@@ -67,7 +67,7 @@ async function mealEntryHouseholdId(
     `${restBase(supabaseUrl)}/meal_entries?id=eq.${encodeURIComponent(entryId)}&select=household_id`,
     { headers }
   );
-  if (!res.ok) return null;
+  if (!res.ok) throw new Error(`supabase ${res.status}`);
   const rows = (await res.json()) as { household_id: string }[];
   return rows[0]?.household_id ?? null;
 }
@@ -226,7 +226,12 @@ async function handleUpdate(request: Request, user: AuthUser): Promise<Response>
     return json({ error: "expected ?id=<meal_entry_id>" }, 400);
   }
 
-  const householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+  let householdId: string | null;
+  try {
+    householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+  } catch (e) {
+    return json({ error: `failed to look up meal entry: ${e}` }, 502);
+  }
   if (householdId === null) return json({ error: "not found" }, 404);
   try {
     await requireHouseholdAccess(householdId, user);
@@ -311,7 +316,12 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
     return json({ error: "expected ?id=<meal_entry_id>" }, 400);
   }
 
-  const householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+  let householdId: string | null;
+  try {
+    householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+  } catch (e) {
+    return json({ error: `failed to look up meal entry: ${e}` }, 502);
+  }
   if (householdId === null) return json({ error: "not found" }, 404);
   try {
     await requireHouseholdAccess(householdId, user);
