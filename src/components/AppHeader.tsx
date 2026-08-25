@@ -1,4 +1,4 @@
-import { CloudOff, FilePlus2, RefreshCw } from "lucide-react";
+import { CloudOff, FilePlus2, LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TenantSwitcher } from "@/components/TenantSwitcher";
@@ -26,6 +26,7 @@ type Props = {
   active: List;
   onRenameActive: (title: string) => void;
   onStartNewList: () => void;
+  onSignOut: () => void;
 };
 
 export function AppHeader({
@@ -45,6 +46,7 @@ export function AppHeader({
   active,
   onRenameActive,
   onStartNewList,
+  onSignOut,
 }: Props) {
   const total = active.items.length;
   const done = active.items.filter(i => i.checked).length;
@@ -80,6 +82,15 @@ export function AppHeader({
             </span>
           )}
           <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
+          <Button
+            type="button"
+            variant="quiet"
+            size="icon"
+            aria-label="Çıkış yap"
+            title="Çıkış yap"
+            onClick={onSignOut}>
+            <LogOut className="size-4" />
+          </Button>
         </div>
       </div>
 

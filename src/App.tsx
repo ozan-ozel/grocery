@@ -7,6 +7,7 @@ import { NutritionView } from "@/components/NutritionView";
 import { MealPlanView } from "@/components/MealPlanView";
 import { PersonalPlanView } from "@/components/PersonalPlanView";
 import { UndoToast } from "@/components/UndoToast";
+import { LoginGate } from "@/components/LoginGate";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
 import { useUiPrefs, type Tab } from "@/hooks/useUiPrefs";
@@ -17,8 +18,30 @@ import { useUndo } from "@/hooks/useUndo";
 import { useCategoryOverlay } from "@/hooks/useCategoryOverlay";
 import { useItemCategories } from "@/hooks/useItemCategories";
 import { useSelection } from "@/hooks/useSelection";
+import { useAuth } from "@/hooks/useAuth";
 
 export function App() {
+  const { session, checked, signInWithGoogle, signOut } = useAuth();
+
+  if (!checked) {
+    return (
+      <div
+        className="mx-auto flex min-h-dvh w-full max-w-[30rem] items-center justify-center px-5"
+        role="status"
+        aria-label="Yükleniyor">
+        <RefreshCw className="size-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
+  if (!session) {
+    return <LoginGate onSignIn={signInWithGoogle} />;
+  }
+
+  return <AppShell onSignOut={signOut} />;
+}
+
+function AppShell({ onSignOut }: { onSignOut: () => void }) {
   const {
     theme,
     setTheme,
@@ -131,6 +154,7 @@ export function App() {
         active={active}
         onRenameActive={renameActive}
         onStartNewList={startNewList}
+        onSignOut={onSignOut}
       />
 
       <main className="pt-5">
