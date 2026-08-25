@@ -8,7 +8,7 @@
 // this is fine; if this stops being personal, put the app behind authentication.
 
 import type { Context } from "@netlify/functions";
-import { requireUser, authErrorResponse } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "./_auth";
 
 export type MealEntryRow = {
   id: string;
@@ -39,20 +39,40 @@ function restBase(url: string): string {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
+  let user: AuthUser;
   try {
-    await requireUser(request);
+    user = await requireUser(request);
   } catch (err) {
     return authErrorResponse(err);
   }
   const method = request.method.toUpperCase();
-  if (method === "GET") return handleGet(request);
-  if (method === "POST") return handleCreate(request);
-  if (method === "PATCH") return handleUpdate(request);
-  if (method === "DELETE") return handleDelete(request);
+  if (method === "GET") return handleGet(request, user);
+  if (method === "POST") return handleCreate(request, user);
+  if (method === "PATCH") return handleUpdate(request, user);
+  if (method === "DELETE") return handleDelete(request, user);
   return json({ error: "method not allowed" }, 405);
 };
 
-async function handleGet(request: Request): Promise<Response> {
+async function mealEntryHouseholdId(
+  supabaseUrl: string,
+  serviceKey: string,
+  entryId: string
+): Promise<string | null> {
+  const headers = {
+    apikey: serviceKey,
+    authorization: `Bearer ${serviceKey}`,
+    accept: "application/json",
+  };
+  const res = await fetch(
+    `${restBase(supabaseUrl)}/meal_entries?id=eq.${encodeURIComponent(entryId)}&select=household_id`,
+    { headers }
+  );
+  if (!res.ok) return null;
+  const rows = (await res.json()) as { household_id: string }[];
+  return rows[0]?.household_id ?? null;
+}
+
+async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
   if (!supabaseUrl || !anonKey) {
@@ -66,6 +86,12 @@ async function handleGet(request: Request): Promise<Response> {
 
   if (!householdId || !from || !to) {
     return json({ error: "expected ?householdId=<id>&from=<date>&to=<date>" }, 400);
+  }
+
+  try {
+    await requireHouseholdAccess(householdId, user);
+  } catch (err) {
+    return authErrorResponse(err);
   }
 
   const headers = {
@@ -92,7 +118,7 @@ async function handleGet(request: Request): Promise<Response> {
   }
 }
 
-async function handleCreate(request: Request): Promise<Response> {
+async function handleCreate(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
@@ -124,6 +150,13 @@ async function handleCreate(request: Request): Promise<Response> {
   if (typeof body.household_id !== "string" || body.household_id.trim().length === 0) {
     return json({ error: "expected household_id: string (non-empty)" }, 400);
   }
+
+  try {
+    await requireHouseholdAccess(body.household_id.trim(), user);
+  } catch (err) {
+    return authErrorResponse(err);
+  }
+
   if (typeof body.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(body.date)) {
     return json({ error: "expected date: string (YYYY-MM-DD)" }, 400);
   }
@@ -180,7 +213,7 @@ async function handleCreate(request: Request): Promise<Response> {
   }
 }
 
-async function handleUpdate(request: Request): Promise<Response> {
+async function handleUpdate(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
@@ -191,6 +224,14 @@ async function handleUpdate(request: Request): Promise<Response> {
   const id = url.searchParams.get("id")?.trim();
   if (!id) {
     return json({ error: "expected ?id=<meal_entry_id>" }, 400);
+  }
+
+  const householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+  if (householdId === null) return json({ error: "meal entry not found" }, 404);
+  try {
+    await requireHouseholdAccess(householdId, user);
+  } catch (err) {
+    return authErrorResponse(err);
   }
 
   let body: {
@@ -257,7 +298,7 @@ async function handleUpdate(request: Request): Promise<Response> {
   }
 }
 
-async function handleDelete(request: Request): Promise<Response> {
+async function handleDelete(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (!supabaseUrl || !serviceKey) {
@@ -268,6 +309,14 @@ async function handleDelete(request: Request): Promise<Response> {
   const id = url.searchParams.get("id")?.trim();
   if (!id) {
     return json({ error: "expected ?id=<meal_entry_id>" }, 400);
+  }
+
+  const householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+  if (householdId === null) return json({ error: "meal entry not found" }, 404);
+  try {
+    await requireHouseholdAccess(householdId, user);
+  } catch (err) {
+    return authErrorResponse(err);
   }
 
   const headers = {
