@@ -42,6 +42,7 @@ export function useTenants() {
         id: h.id,
         name: h.name,
         createdAt: Date.parse(h.created_at),
+        ownerId: h.owner_id,
       }));
       // If the server has no households at all, seed the default one so the
       // app still boots. This should only happen on a fresh Supabase; if two
@@ -52,7 +53,12 @@ export function useTenants() {
         if (cancelled) return;
         if (created) {
           effective = [
-            { id: created.id, name: created.name, createdAt: Date.parse(created.created_at) },
+            {
+              id: created.id,
+              name: created.name,
+              createdAt: Date.parse(created.created_at),
+              ownerId: created.owner_id,
+            },
           ];
         } else {
           const refetched = await listHouseholds();
@@ -61,6 +67,7 @@ export function useTenants() {
             id: h.id,
             name: h.name,
             createdAt: Date.parse(h.created_at),
+            ownerId: h.owner_id,
           }));
         }
       }
@@ -108,6 +115,7 @@ export function useTenants() {
       id: created.id,
       name: created.name,
       createdAt: Date.parse(created.created_at),
+      ownerId: created.owner_id,
     };
     setTenants((prev) => [...(prev ?? []), t]);
     setActiveTenantId(t.id);

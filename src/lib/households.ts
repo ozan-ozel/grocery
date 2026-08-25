@@ -2,6 +2,7 @@ export type Household = {
   id: string;
   name: string;
   created_at: string;
+  owner_id: string | null;
 };
 
 function apiUrl(path: string): string {

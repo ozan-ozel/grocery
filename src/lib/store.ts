@@ -30,6 +30,7 @@ export type Tenant = {
   id: string;
   name: string;
   createdAt: number;
+  ownerId: string | null;
 };
 
 export const uid = () => Math.random().toString(36).slice(2, 10);
@@ -131,7 +132,7 @@ export function writeMealDateToUrl(date: string) {
 }
 
 export function newTenant(name: string): Tenant {
-  return { id: uid(), name: name.trim() || "Ev", createdAt: Date.now() };
+  return { id: uid(), name: name.trim() || "Ev", createdAt: Date.now(), ownerId: null };
 }
 
 /**
