@@ -8,6 +8,7 @@
 // authentication.
 
 import type { Context } from "@netlify/functions";
+import { requireUser, authErrorResponse } from "./_auth";
 import { getStore } from "@netlify/blobs";
 
 export type Household = {
@@ -26,6 +27,11 @@ function restBase(url: string): string {
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
+  try {
+    await requireUser(request);
+  } catch (err) {
+    return authErrorResponse(err);
+  }
   const method = request.method.toUpperCase();
   if (method === "GET") return handleGet(request);
   if (method === "POST") return handleCreate(request);

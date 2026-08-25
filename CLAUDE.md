@@ -71,3 +71,23 @@ node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.t
 ```
 Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (see `.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`.
+
+## Serena (optional MCP server)
+
+[Serena](https://github.com/oraios/serena) is an optional semantic-code MCP server. Claude Code
+picks it up automatically from `.mcp.json`; other MCP-capable clients can point at it themselves.
+It's optional — the repo is fully usable without it — but it gives faster and more accurate
+symbol-level edits than plain grep/read.
+
+Requirements: [`uvx`](https://docs.astral.sh/uv/) on your `PATH`. First run of `uvx --from
+git+https://github.com/oraios/serena serena ...` fetches Serena into the uv cache; nothing to
+install manually.
+
+Files in this repo:
+- `.mcp.json` — MCP server registration, uses `"."` for the project path so it works from any
+  checkout location.
+- `.serena/project.yml` — checked-in project config (language server: typescript, etc.).
+- `.serena/cache/`, `.serena/memories/`, `.serena/project.local.yml` — per-developer state,
+  gitignored.
+
+If you don't want it running, delete or gitignore `.mcp.json` locally.

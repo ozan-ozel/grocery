@@ -32,11 +32,13 @@ export function App() {
 
   const {
     tenants,
+    hiddenIds,
     activeTenantId,
     selectTenant,
     addTenant,
     renameTenant,
     deleteTenant,
+    toggleHiddenTenant,
   } = useTenants();
 
   const { state, setState, updateState, stateRef, syncStatus } =
@@ -115,10 +117,12 @@ export function App() {
       <AppHeader
         tenants={tenants}
         activeTenantId={activeTenantId}
+        hiddenTenantIds={hiddenIds}
         onSelectTenant={selectTenant}
         onAddTenant={addTenant}
         onRenameTenant={renameTenant}
         onDeleteTenant={deleteTenant}
+        onToggleHiddenTenant={toggleHiddenTenant}
         syncStatus={syncStatus}
         theme={theme}
         onSelectTheme={setTheme}
