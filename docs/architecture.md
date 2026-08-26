@@ -22,7 +22,7 @@ mostly presentational. Persistence is split across several independent layers wi
 | Layer                                          | Key(s) / store                                                                         | Scope             | Synced to server?                                    |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------- |
 | Tenants (households)                           | Supabase `households` table, via `/api/households`                                     | shared (Supabase) | yes                                                  |
-| List state (`{ lists, activeId, version }`)    | `grocery.state.v1:<tenantId>` (local cache) + Netlify Blobs `state:<tenantId>`         | per tenant        | yes, via `netlify/functions/state.ts`                |
+| List state (`{ lists, activeId, version }`)    | `grocery.state.v1:<tenantId>` (local cache) + Supabase `sync_state` table              | per tenant        | yes, via `netlify/functions/state.ts`                |
 | Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1`                                                                | device            | no                                                   |
 | Item name → category memory                    | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant        | yes, via `netlify/functions/item-category-memory.ts` |
 | UI prefs (theme, swipe mode)                   | `grocery.theme.v1`, `grocery.swipeMode.v1`                                             | device            | no                                                   |
@@ -53,10 +53,10 @@ push from tenant A can never land on tenant B.
 scheme, not a websocket: the client polls `GET /api/state?tenant=<id>` every 15s and on tab focus,
 and pushes `PUT` 500ms after any local change; a `PUT` with a stale `version` gets rejected with 409
 and the current server state, which the client adopts. Last-write-wins by design — deliberately good
-enough for a household of 2-4, not a CRDT. The backing store is **Netlify Blobs**
-(`getStore({ name: "state", consistency: "strong" })`), one key per tenant (`state:<tenantId>`), with
-a legacy `state:global` fallback for `"default"` on its first sync. If Blobs has nothing for a tenant
-yet, `state.ts` tries a one-time hydration from the Supabase `lists`/`items` tables
+enough for a household of 2-4, not a CRDT. The backing store is the Supabase `sync_state` table
+(one row per tenant — `household_id`, `version`, `state jsonb`; see `supabase/06-sync-state.sql`),
+with the version check done via a conditional PostgREST `PATCH`. If `sync_state` has nothing for a
+tenant yet, `state.ts` tries a one-time hydration from the Supabase `lists`/`items` tables
 (`hydrateFromSupabase()`) before falling back to `state: null` — this only fires for a household that
 exists via `/api/households` but has never had a first `/api/state` PUT.
 

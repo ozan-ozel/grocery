@@ -10,7 +10,6 @@
 
 import type { Context } from "@netlify/functions";
 import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "./_auth";
-import { getStore } from "@netlify/blobs";
 
 export type Household = {
   id: string;
@@ -261,15 +260,8 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
     const data = (await response.json()) as unknown[];
     if (data.length === 0) return json({ error: "household not found" }, 404);
 
-    // The household row cascades to lists/items/item_category_memory at the
-    // DB level (FK ON DELETE CASCADE), but the actively-synced list state
-    // lives in Blobs — a separate store the FK cascade can't reach. Clean it
-    // up too so a future household re-created with the same id can't
-    // resurrect stale state.
-    const store = getStore({ name: "state", consistency: "strong" });
-    await store.delete(`state:${id}`);
-    if (id === "default") await store.delete("state:global");
-
+    // sync_state cascades automatically (FK ON DELETE CASCADE) — no manual
+    // cleanup needed here, unlike the old Blobs-backed store.
     return json({ ok: true }, 200);
   } catch (e) {
     return json({ error: `failed to delete household: ${e}` }, 500);
