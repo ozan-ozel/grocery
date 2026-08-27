@@ -56,10 +56,13 @@ export default {
 };
 
 // -------- BROWSE / SEARCH ------------------------------------------------------
-// GET /api/nutrition?q=<text>&limit=<n> -> Nutrition[]
+// GET /api/nutrition?q=<text>&limit=<n>&offset=<n> -> Nutrition[]
 // Powers the "Tümü" (all foods) panel: a name search over the whole table,
 // not just the caller-supplied names handleRead handles. Empty q still
 // returns a page (alphabetical) so the panel isn't blank before typing.
+// offset paginates the alphabetical list past the first page (the panel's
+// "daha fazla göster" button) — without it, rows past `limit` (e.g. "tavuk
+// göğsü") never appear when just scrolling, only when searched.
 
 async function handleBrowse(request: Request): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
@@ -74,6 +77,8 @@ async function handleBrowse(request: Request): Promise<Response> {
   const limit = Number.isFinite(rawLimit) && rawLimit > 0
     ? Math.min(Math.floor(rawLimit), BROWSE_LIMIT_MAX)
     : BROWSE_LIMIT_DEFAULT;
+  const rawOffset = Number(url.searchParams.get("offset"));
+  const offset = Number.isFinite(rawOffset) && rawOffset > 0 ? Math.floor(rawOffset) : 0;
 
   const headers = {
     apikey: anonKey,
@@ -81,7 +86,7 @@ async function handleBrowse(request: Request): Promise<Response> {
     accept: "application/json",
   };
 
-  let queryUrl = `${restBase(supabaseUrl)}/nutrition?select=${SELECT_COLS}&order=name_tr.asc&limit=${limit}`;
+  let queryUrl = `${restBase(supabaseUrl)}/nutrition?select=${SELECT_COLS}&order=name_tr.asc&limit=${limit}&offset=${offset}`;
   if (q) {
     queryUrl += `&name_tr=ilike.*${encodeURIComponent(q)}*`;
   }
