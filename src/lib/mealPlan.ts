@@ -4,12 +4,8 @@ export type MealEntry = {
   id: string;
   date: string; // YYYY-MM-DD
   slot: MealSlot;
-  text: string;
-  kcal: number | null;
-  proteinG: number | null;
-  fatG: number | null;
-  carbsG: number | null;
-  fiberG: number | null;
+  foodId: string; // Nutrition.name_tr
+  quantityG: number;
   position: number;
 };
 
@@ -18,12 +14,8 @@ type MealEntryRow = {
   household_id: string;
   date: string;
   slot: string;
-  text: string;
-  kcal: number | null;
-  protein_g: number | null;
-  fat_g: number | null;
-  carbs_g: number | null;
-  fiber_g: number | null;
+  food_id: string;
+  quantity_g: number;
   position: number;
 };
 
@@ -32,12 +24,8 @@ function fromRow(row: MealEntryRow): MealEntry {
     id: row.id,
     date: row.date,
     slot: row.slot as MealSlot,
-    text: row.text,
-    kcal: row.kcal,
-    proteinG: row.protein_g,
-    fatG: row.fat_g,
-    carbsG: row.carbs_g,
-    fiberG: row.fiber_g,
+    foodId: row.food_id,
+    quantityG: row.quantity_g,
     position: row.position,
   };
 }
@@ -76,12 +64,8 @@ export type NewMealEntry = {
   householdId: string;
   date: string;
   slot: MealSlot;
-  text: string;
-  kcal?: number | null;
-  proteinG?: number | null;
-  fatG?: number | null;
-  carbsG?: number | null;
-  fiberG?: number | null;
+  foodId: string;
+  quantityG: number;
   position: number;
 };
 
@@ -95,12 +79,8 @@ export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | 
         household_id: entry.householdId,
         date: entry.date,
         slot: entry.slot,
-        text: entry.text,
-        kcal: entry.kcal ?? null,
-        protein_g: entry.proteinG ?? null,
-        fat_g: entry.fatG ?? null,
-        carbs_g: entry.carbsG ?? null,
-        fiber_g: entry.fiberG ?? null,
+        food_id: entry.foodId,
+        quantity_g: entry.quantityG,
         position: entry.position,
       }),
     });
@@ -116,12 +96,7 @@ export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | 
 }
 
 export type MealEntryPatch = Partial<{
-  text: string;
-  kcal: number | null;
-  proteinG: number | null;
-  fatG: number | null;
-  carbsG: number | null;
-  fiberG: number | null;
+  quantityG: number;
   position: number;
 }>;
 
@@ -131,12 +106,7 @@ export async function updateMealEntry(
 ): Promise<MealEntry | null> {
   try {
     const body: Record<string, unknown> = {};
-    if (patch.text !== undefined) body.text = patch.text;
-    if (patch.kcal !== undefined) body.kcal = patch.kcal;
-    if (patch.proteinG !== undefined) body.protein_g = patch.proteinG;
-    if (patch.fatG !== undefined) body.fat_g = patch.fatG;
-    if (patch.carbsG !== undefined) body.carbs_g = patch.carbsG;
-    if (patch.fiberG !== undefined) body.fiber_g = patch.fiberG;
+    if (patch.quantityG !== undefined) body.quantity_g = patch.quantityG;
     if (patch.position !== undefined) body.position = patch.position;
 
     const res = await fetch(apiUrl(`/api/meal-entries?id=${encodeURIComponent(id)}`), {

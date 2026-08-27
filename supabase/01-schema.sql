@@ -50,20 +50,25 @@ create table if not exists public.item_category_memory (
   primary key (household_id, name_lower)
 );
 
+-- Meal plan entries: a food + quantity per slot per day. Nutrition is always
+-- derived from public.nutrition at render time, never stored here (see
+-- src/lib/localMealPlan.ts) — food_id has no FK so a nutrition row can be
+-- renamed/removed independently of past meal entries.
 create table if not exists public.meal_entries (
   id           text primary key,
   household_id text not null references public.households(id) on delete cascade,
-  date         date not null,        -- local calendar day, e.g. 2026-08-21
+  date         date not null,        -- local calendar day, e.g. 2026-08-27
   slot         text not null,        -- 'kahvalti' | 'ogle' | 'aksam' | 'ara'
-  text         text not null,
-  kcal         numeric,
-  protein_g    numeric,
-  fat_g        numeric,
-  carbs_g      numeric,
-  fiber_g      numeric,
-  position     integer not null default 0,  -- orders multiple 'ara' entries
+  food_id      text not null,        -- nutrition.name_tr
+  quantity_g   numeric not null,
+  position     integer not null default 0,  -- orders multiple items within a slot
   created_at   timestamptz not null default now()
 );
 
 create index if not exists meal_entries_household_date_idx
   on public.meal_entries (household_id, date);
+
+-- Kişisel Plan (personal_plan) is NOT defined here: it references
+-- public.app_users(id), which only exists after 03-app-users.sql runs —
+-- defining it in this file would break a fresh install run in numbered
+-- order. See 08-personal-plan.sql, which runs after 03.

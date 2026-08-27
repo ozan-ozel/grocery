@@ -3,9 +3,11 @@
 // PATCH  /api/meal-entries?id=<id>                                  -> MealEntryRow    (update)
 // DELETE /api/meal-entries?id=<id>                                  -> { ok: true }    (delete)
 //
-// Uses PostgREST anon key for reads and service_role key for writes.
-// Anyone with the app URL can hit POST/PATCH/DELETE. For a small household PWA
-// this is fine; if this stops being personal, put the app behind authentication.
+// Persists the Meal Plan tab's daily food+quantity entries (see
+// src/lib/localMealPlan.ts and src/hooks/useMealPlan.ts). Nutrition is never
+// stored here — always derived client-side from food_id + quantity_g against
+// the nutrition catalog. Uses PostgREST anon key for reads and service_role
+// key for writes, both gated by owner/invited household access.
 
 import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
@@ -14,12 +16,8 @@ export type MealEntryRow = {
   household_id: string;
   date: string;
   slot: string;
-  text: string;
-  kcal: number | null;
-  protein_g: number | null;
-  fat_g: number | null;
-  carbs_g: number | null;
-  fiber_g: number | null;
+  food_id: string;
+  quantity_g: number;
   position: number;
 };
 
@@ -28,8 +26,7 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
 };
 
-const SELECT_COLS =
-  "id,household_id,date,slot,text,kcal,protein_g,fat_g,carbs_g,fiber_g,position";
+const SELECT_COLS = "id,household_id,date,slot,food_id,quantity_g,position";
 
 const VALID_SLOTS = ["kahvalti", "ogle", "aksam", "ara"];
 
@@ -39,18 +36,18 @@ function restBase(url: string): string {
 
 export default {
   async fetch(request: Request): Promise<Response> {
-  let user: AuthUser;
-  try {
-    user = await requireUser(request);
-  } catch (err) {
-    return authErrorResponse(err);
-  }
-  const method = request.method.toUpperCase();
-  if (method === "GET") return handleGet(request, user);
-  if (method === "POST") return handleCreate(request, user);
-  if (method === "PATCH") return handleUpdate(request, user);
-  if (method === "DELETE") return handleDelete(request, user);
-  return json({ error: "method not allowed" }, 405);
+    let user: AuthUser;
+    try {
+      user = await requireUser(request);
+    } catch (err) {
+      return authErrorResponse(err);
+    }
+    const method = request.method.toUpperCase();
+    if (method === "GET") return handleGet(request, user);
+    if (method === "POST") return handleCreate(request, user);
+    if (method === "PATCH") return handleUpdate(request, user);
+    if (method === "DELETE") return handleDelete(request, user);
+    return json({ error: "method not allowed" }, 405);
   },
 };
 
@@ -131,12 +128,8 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
     household_id?: unknown;
     date?: unknown;
     slot?: unknown;
-    text?: unknown;
-    kcal?: unknown;
-    protein_g?: unknown;
-    fat_g?: unknown;
-    carbs_g?: unknown;
-    fiber_g?: unknown;
+    food_id?: unknown;
+    quantity_g?: unknown;
     position?: unknown;
   };
   try {
@@ -164,12 +157,12 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
   if (typeof body.slot !== "string" || !VALID_SLOTS.includes(body.slot)) {
     return json({ error: "expected slot: 'kahvalti' | 'ogle' | 'aksam' | 'ara'" }, 400);
   }
-  if (typeof body.text !== "string" || body.text.trim().length === 0) {
-    return json({ error: "expected text: string (non-empty)" }, 400);
+  if (typeof body.food_id !== "string" || body.food_id.trim().length === 0) {
+    return json({ error: "expected food_id: string (non-empty)" }, 400);
   }
-
-  const num = (v: unknown): number | null =>
-    typeof v === "number" && Number.isFinite(v) ? v : null;
+  if (typeof body.quantity_g !== "number" || !Number.isFinite(body.quantity_g) || body.quantity_g <= 0) {
+    return json({ error: "expected quantity_g: positive number" }, 400);
+  }
 
   const headers = {
     apikey: serviceKey,
@@ -184,12 +177,8 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
     household_id: body.household_id.trim(),
     date: body.date,
     slot: body.slot,
-    text: body.text.trim(),
-    kcal: num(body.kcal),
-    protein_g: num(body.protein_g),
-    fat_g: num(body.fat_g),
-    carbs_g: num(body.carbs_g),
-    fiber_g: num(body.fiber_g),
+    food_id: body.food_id.trim(),
+    quantity_g: body.quantity_g,
     position: typeof body.position === "number" ? body.position : 0,
   };
 
@@ -240,40 +229,24 @@ async function handleUpdate(request: Request, user: AuthUser): Promise<Response>
     return authErrorResponse(err);
   }
 
-  let body: {
-    text?: unknown;
-    kcal?: unknown;
-    protein_g?: unknown;
-    fat_g?: unknown;
-    carbs_g?: unknown;
-    fiber_g?: unknown;
-    position?: unknown;
-  };
+  let body: { quantity_g?: unknown; position?: unknown };
   try {
     body = (await request.json()) as typeof body;
   } catch {
     return json({ error: "invalid json" }, 400);
   }
 
-  const num = (v: unknown): number | null =>
-    typeof v === "number" && Number.isFinite(v) ? v : null;
-
   const payload: Record<string, unknown> = {};
-  if (typeof body.text === "string" && body.text.trim().length > 0) {
-    payload.text = body.text.trim();
+  if (body.quantity_g !== undefined) {
+    if (typeof body.quantity_g !== "number" || !Number.isFinite(body.quantity_g) || body.quantity_g <= 0) {
+      return json({ error: "quantity_g must be a positive number" }, 400);
+    }
+    payload.quantity_g = body.quantity_g;
   }
-  if (body.kcal !== undefined) payload.kcal = num(body.kcal);
-  if (body.protein_g !== undefined) payload.protein_g = num(body.protein_g);
-  if (body.fat_g !== undefined) payload.fat_g = num(body.fat_g);
-  if (body.carbs_g !== undefined) payload.carbs_g = num(body.carbs_g);
-  if (body.fiber_g !== undefined) payload.fiber_g = num(body.fiber_g);
   if (typeof body.position === "number") payload.position = body.position;
 
   if (Object.keys(payload).length === 0) {
-    return json(
-      { error: "no fields to update (text, kcal, protein_g, fat_g, carbs_g, fiber_g, position)" },
-      400
-    );
+    return json({ error: "no fields to update (quantity_g, position)" }, 400);
   }
 
   const headers = {

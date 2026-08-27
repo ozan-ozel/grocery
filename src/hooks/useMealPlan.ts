@@ -1,15 +1,15 @@
 // src/hooks/useMealPlan.ts
 import { useEffect, useState } from "react";
-import { defaultTitle, readMealDateFromUrl, writeMealDateToUrl } from "@/lib/store";
+import { defaultTitle, readMealDateFromUrl, writeMealDateToUrl, uid } from "@/lib/store";
 import type { NutritionMap } from "@/lib/nutrition";
 import {
   MEAL_SLOTS,
   calculateItemsNutrition,
-  createMealItem,
   type MealItem,
   type MealSlot,
 } from "@/lib/localMealPlan";
 import { sumMacros, type MacroTotals } from "@/lib/mealNutrition";
+import { createMealEntry, deleteMealEntry, fetchMealEntries, updateMealEntry } from "@/lib/mealPlan";
 
 function dateToStr(d: Date): string {
   const y = d.getFullYear();
@@ -44,12 +44,11 @@ function emptyDayPlan(): DayPlan {
   return { kahvalti: [], ogle: [], aksam: [], ara: [] };
 }
 
-// Local-only for this phase: nothing here ever calls the network. Plans are
-// keyed by household (so switching tenants doesn't bleed one household's
-// plan into another's view) and by date (so the existing prev/next-day
-// navigation keeps working) — but they live only in this component tree's
-// state and are lost on reload, matching "Meal Plan = local only" and the
-// explicit "do not implement saving Meal Plans" instruction for this phase.
+// Persisted per household+date via netlify/functions/meal-entries.ts (Supabase
+// meal_entries table) — see supabase/07-meal-entries.sql. Nutrition is never
+// stored server-side, only { foodId, quantityG }; calculateItemsNutrition
+// always derives it from the live catalog. Without a household (no tenant
+// selected yet) the plan stays in-memory only, same as before this landed.
 export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
   const [date, setDate] = useState<string>(initialDate);
   const [plans, setPlans] = useState<Record<string, DayPlan>>({});
@@ -60,6 +59,23 @@ export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
 
   const planKey = `${householdId ?? "local"}|${date}`;
   const dayPlan = plans[planKey] ?? emptyDayPlan();
+
+  useEffect(() => {
+    if (!householdId) return;
+    let cancelled = false;
+    fetchMealEntries(householdId, date, date).then((entries) => {
+      if (cancelled) return;
+      const plan = emptyDayPlan();
+      for (const entry of entries) {
+        plan[entry.slot].push({ id: entry.id, foodId: entry.foodId, quantityG: entry.quantityG });
+      }
+      setPlans((prev) => ({ ...prev, [`${householdId}|${date}`]: plan }));
+    });
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [householdId, date]);
 
   function updateDayPlan(updater: (plan: DayPlan) => DayPlan) {
     setPlans((prev) => ({
@@ -81,8 +97,14 @@ export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
   }
 
   function addItem(slot: MealSlot, foodId: string, quantityG: number) {
-    const item = createMealItem(foodId, quantityG);
-    updateDayPlan((plan) => ({ ...plan, [slot]: [...plan[slot], item] }));
+    const id = uid();
+    const position = dayPlan[slot].length;
+    updateDayPlan((plan) => ({ ...plan, [slot]: [...plan[slot], { id, foodId, quantityG }] }));
+    if (householdId) {
+      createMealEntry({ id, householdId, date, slot, foodId, quantityG, position }).then((saved) => {
+        if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", id);
+      });
+    }
   }
 
   function updateItemQuantity(slot: MealSlot, itemId: string, quantityG: number) {
@@ -90,6 +112,11 @@ export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
       ...plan,
       [slot]: plan[slot].map((item) => (item.id === itemId ? { ...item, quantityG } : item)),
     }));
+    if (householdId) {
+      updateMealEntry(itemId, { quantityG }).then((saved) => {
+        if (!saved) console.warn("[mealPlan] quantity updated locally but failed to persist:", itemId);
+      });
+    }
   }
 
   function removeItem(slot: MealSlot, itemId: string) {
@@ -97,6 +124,11 @@ export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
       ...plan,
       [slot]: plan[slot].filter((item) => item.id !== itemId),
     }));
+    if (householdId) {
+      deleteMealEntry(itemId).then((ok) => {
+        if (!ok) console.warn("[mealPlan] entry removed locally but failed to delete remotely:", itemId);
+      });
+    }
   }
 
   function slotNutrition(slot: MealSlot): MacroTotals {
