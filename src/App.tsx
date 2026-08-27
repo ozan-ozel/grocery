@@ -170,7 +170,7 @@ function AppShell({
         ) : section === "yemek" ? (
           <MealPlanView householdId={activeTenantId} />
         ) : section === "kisisel" ? (
-          <PersonalPlanView />
+          <PersonalPlanView userId={currentUserId} />
         ) : (
           <AppShoppingTabs
             catalog={catalog}

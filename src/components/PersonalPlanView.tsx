@@ -79,9 +79,11 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
   },
 ];
 
-export function PersonalPlanView() {
+type Props = { userId: string | null };
+
+export function PersonalPlanView({ userId }: Props) {
   const { profile, targets, update, setActivity, setEquationSex, setGoal } =
-    useMealPersonalization();
+    useMealPersonalization(userId);
   const [showSources, setShowSources] = useState(false);
 
   return (
