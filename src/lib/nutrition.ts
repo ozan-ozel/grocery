@@ -144,15 +144,19 @@ export async function fetchNutrition(names: string[]): Promise<NutritionMap> {
 
 // Browses/searches the whole nutrition table (not just names on the active
 // list) — backs the "Tümü" panel. Empty query still returns a page so the
-// panel isn't blank before the user types anything.
+// panel isn't blank before the user types anything. offset pages past the
+// first `limit` rows (alphabetical order) — without it, anything past the
+// first page silently never renders in list mode, only when searched.
 export async function browseNutrition(
   query: string,
-  limit = 60
+  limit = 60,
+  offset = 0
 ): Promise<Nutrition[]> {
   const params = new URLSearchParams();
   const trimmed = query.trim();
   if (trimmed) params.set("q", trimmed);
   params.set("limit", String(limit));
+  if (offset > 0) params.set("offset", String(offset));
 
   // Unlike fetchNutrition (which is asked for specific known names, so an
   // empty result is a normal "no match"), a failed browse and a genuinely
@@ -168,20 +172,24 @@ export async function browseNutrition(
 }
 
 // Cached wrapper around browseNutrition, keyed by query+limit. Makes the
-// "Tümü" panel's default (empty-query) page — and any repeated search — not
-// hit the network again on a page reload or a Besin/Alışveriş tab switch
-// within the TTL window.
+// "Tümü" panel's default (empty-query) first page — and any repeated search
+// — not hit the network again on a page reload or a Besin/Alışveriş tab
+// switch within the TTL window. Only the first page (offset 0) is cached;
+// "daha fazla göster" pages always hit the network since caching every
+// offset would grow the cache unbounded for little benefit.
 export async function browseNutritionCached(
   query: string,
-  limit = 60
+  limit = 60,
+  offset = 0
 ): Promise<Nutrition[]> {
+  if (offset > 0) return browseNutrition(query, limit, offset);
   const key = `${query.trim().toLocaleLowerCase("tr-TR")}|${limit}`;
   const cache = loadBrowseCache();
   const entry = cache[key];
   if (entry && Date.now() - entry.ts < BROWSE_CACHE_TTL_MS) {
     return entry.rows;
   }
-  const rows = await browseNutrition(query, limit);
+  const rows = await browseNutrition(query, limit, 0);
   cache[key] = { rows, ts: Date.now() };
   saveBrowseCache(cache);
   return rows;

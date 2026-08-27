@@ -16,6 +16,10 @@ export function AllFoodsBrowser() {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Nutrition[]>([]);
   const [status, setStatus] = useState<BrowseStatus>("idle");
+  // True once a page comes back shorter than BROWSE_LIMIT — the signal that
+  // there's nothing left to page in for the current query.
+  const [hasMore, setHasMore] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -25,6 +29,7 @@ export function AllFoodsBrowser() {
         .then((next) => {
           if (cancelled) return;
           setRows(next);
+          setHasMore(next.length === BROWSE_LIMIT);
           setStatus("ready");
         })
         .catch((err) => {
@@ -41,6 +46,20 @@ export function AllFoodsBrowser() {
       window.clearTimeout(handle);
     };
   }, [query]);
+
+  function loadMore() {
+    setLoadingMore(true);
+    browseNutritionCached(query, BROWSE_LIMIT, rows.length)
+      .then((next) => {
+        setRows((prev) => [...prev, ...next]);
+        setHasMore(next.length === BROWSE_LIMIT);
+      })
+      .catch((err) => {
+        console.warn("[nutrition] browse (load more) failed:", err);
+        setHasMore(false);
+      })
+      .finally(() => setLoadingMore(false));
+  }
 
   return (
     <div>
@@ -100,6 +119,17 @@ export function AllFoodsBrowser() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {hasMore && (
+        <button
+          type="button"
+          onClick={loadMore}
+          disabled={loadingMore}
+          className="mt-3 w-full rounded-md border border-border py-2 text-xs text-muted-foreground transition hover:text-foreground disabled:opacity-60"
+        >
+          {loadingMore ? "Yükleniyor…" : "Daha fazla göster"}
+        </button>
       )}
     </div>
   );
