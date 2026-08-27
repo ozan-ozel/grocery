@@ -7,7 +7,7 @@
 // Anyone with the app URL can hit POST/PATCH/DELETE. For a small household PWA
 // this is fine; if this stops being personal, put the app behind authentication.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
 export type MealEntryRow = {
   id: string;

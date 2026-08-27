@@ -22,3 +22,5 @@ deno.lock
 .serena/cache/
 .serena/memories/
 .serena/project.local.yml
+.vercel
+.env*

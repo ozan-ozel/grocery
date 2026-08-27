@@ -9,7 +9,7 @@
 // small household PWA; if this stops being personal, put the app behind
 // authentication.
 
-import { requireUser, authErrorResponse } from "./_auth";
+import { requireUser, authErrorResponse } from "../lib/auth.js";
 
 type Nutrition = {
   name_tr: string;

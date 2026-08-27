@@ -8,7 +8,7 @@
 
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import { parseCookies } from "./_auth";
+import { parseCookies } from "../lib/auth.js";
 
 const OAUTH_STATE_COOKIE = "oauth_state";
 const SESSION_COOKIE = "session";

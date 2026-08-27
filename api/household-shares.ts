@@ -5,7 +5,7 @@
 // Owner-only management of who else can access a household. See
 // docs/superpowers/specs/2026-08-25-household-ownership-sharing-design.md.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
 type ShareRow = { email: string };
 

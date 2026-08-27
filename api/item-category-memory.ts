@@ -6,7 +6,7 @@
 // public.item_category_memory can stay locked to reads only. Both are gated
 // by owner/invited household access.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
 type Row = {
   name_lower: string;

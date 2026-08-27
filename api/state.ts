@@ -7,7 +7,7 @@
 // Previously backed by Netlify Blobs — see scripts/migrate-blobs-to-supabase.ts
 // for the one-off data migration and supabase/06-sync-state.sql for the schema.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse } from "./_auth";
+import { requireUser, requireHouseholdAccess, authErrorResponse } from "../lib/auth.js";
 
 type Envelope = { version: number; state: unknown };
 

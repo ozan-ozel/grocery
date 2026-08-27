@@ -4,7 +4,7 @@
 //
 // Per-user preference. Requires auth (Stream A's requireUser).
 
-import { requireUser, authErrorResponse, type AuthUser } from "./_auth";
+import { requireUser, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
 type HiddenRow = { household_id: string };
 

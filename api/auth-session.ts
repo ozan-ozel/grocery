@@ -2,7 +2,7 @@
 // Lets the frontend ask "am I logged in" without needing to read the
 // httpOnly cookie itself.
 
-import { requireUser, authErrorResponse } from "./_auth";
+import { requireUser, authErrorResponse } from "../lib/auth.js";
 
 export default {
   async fetch(request: Request): Promise<Response> {
