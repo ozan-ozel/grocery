@@ -37,6 +37,9 @@ export function TenantSwitcher({
   const [shareEmails, setShareEmails] = useState<string[]>([]);
   const [shareDraft, setShareDraft] = useState("");
   const [shareLoading, setShareLoading] = useState(false);
+  // Email currently armed for removal — tapping ✕ once shows a confirm/
+  // cancel pair instead of revoking immediately.
+  const [confirmingRevokeEmail, setConfirmingRevokeEmail] = useState<string | null>(null);
 
   const active = tenants.find((t) => t.id === activeId) ?? tenants[0];
 
@@ -49,6 +52,7 @@ export function TenantSwitcher({
         setDraft("");
         setEditingId(null);
         setManagingSharesId(null);
+        setConfirmingRevokeEmail(null);
       }
     }
     function onKey(e: KeyboardEvent) {
@@ -57,6 +61,7 @@ export function TenantSwitcher({
         setAdding(false);
         setEditingId(null);
         setManagingSharesId(null);
+        setConfirmingRevokeEmail(null);
       }
     }
     document.addEventListener("mousedown", onClick);
@@ -103,6 +108,7 @@ export function TenantSwitcher({
   const submittingShare = useRef(false);
 
   async function openShares(id: string) {
+    setConfirmingRevokeEmail(null);
     if (managingSharesId === id) {
       setManagingSharesId(null);
       return;
@@ -130,6 +136,7 @@ export function TenantSwitcher({
   }
 
   async function removeShare(householdId: string, email: string) {
+    setConfirmingRevokeEmail(null);
     const ok = await revokeHouseholdShare(householdId, email);
     if (ok) setShareEmails((prev) => prev.filter((e) => e !== email));
   }
@@ -267,22 +274,47 @@ export function TenantSwitcher({
                               Henüz kimse davet edilmedi.
                             </span>
                           )}
-                          {shareEmails.map((email) => (
-                            <span
-                              key={email}
-                              className="ledger flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-xs"
-                            >
-                              {email}
-                              <button
-                                type="button"
-                                aria-label={`${email} daveti kaldır`}
-                                onClick={() => removeShare(t.id, email)}
-                                className="rounded-full text-muted-foreground transition hover:text-signal"
+                          {shareEmails.map((email) =>
+                            confirmingRevokeEmail === email ? (
+                              <span
+                                key={email}
+                                className="ledger flex items-center gap-1.5 rounded-full border border-signal/40 bg-background px-2 py-0.5 text-xs"
                               >
-                                <X className="size-3" />
-                              </button>
-                            </span>
-                          ))}
+                                <span className="text-muted-foreground">Kaldırılsın mı?</span>
+                                <button
+                                  type="button"
+                                  aria-label={`${email} daveti kaldırmayı onayla`}
+                                  onClick={() => removeShare(t.id, email)}
+                                  className="rounded-full text-signal transition hover:text-signal/80"
+                                >
+                                  <Check className="size-3" />
+                                </button>
+                                <button
+                                  type="button"
+                                  aria-label="Vazgeç"
+                                  onClick={() => setConfirmingRevokeEmail(null)}
+                                  className="rounded-full text-muted-foreground transition hover:text-foreground"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              </span>
+                            ) : (
+                              <span
+                                key={email}
+                                className="ledger flex items-center gap-1 rounded-full border border-border bg-background px-2 py-0.5 text-xs"
+                              >
+                                {email}
+                                <button
+                                  type="button"
+                                  aria-label={`${email} daveti kaldır`}
+                                  onClick={() => setConfirmingRevokeEmail(email)}
+                                  className="rounded-full text-muted-foreground transition hover:text-signal"
+                                >
+                                  <X className="size-3" />
+                                </button>
+                              </span>
+                            )
+                          )}
                         </div>
                       )}
                       <input
