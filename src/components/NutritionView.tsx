@@ -14,6 +14,7 @@ import {
 } from "@/lib/nutrition";
 import { cn } from "@/lib/utils";
 import { AllFoodsBrowser } from "@/components/NutritionAllFoodsBrowser";
+import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { EditorRow } from "@/components/NutritionEditorRow";
 import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
 import { Cell } from "@/components/NutritionTableCell";
@@ -23,10 +24,11 @@ type Props = {
 };
 
 type Status = "idle" | "loading" | "ready" | "error";
-type Scope = "list" | "all";
+type Scope = "list" | "all" | "compare";
 
 function initialScope(): Scope {
-  return readNutritionScopeFromUrl() === "all" ? "all" : "list";
+  const fromUrl = readNutritionScopeFromUrl();
+  return fromUrl === "all" || fromUrl === "compare" ? fromUrl : "list";
 }
 
 export function NutritionView({ items }: Props) {
@@ -147,6 +149,18 @@ export function NutritionView({ items }: Props) {
       >
         Tümü
       </button>
+      <button
+        type="button"
+        onClick={() => setScope("compare")}
+        className={cn(
+          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+          scope === "compare"
+            ? "bg-background text-foreground shadow-sm"
+            : "text-muted-foreground hover:text-foreground"
+        )}
+      >
+        Karşılaştır
+      </button>
     </div>
   );
 
@@ -155,6 +169,15 @@ export function NutritionView({ items }: Props) {
       <div>
         {scopeToggle}
         <AllFoodsBrowser />
+      </div>
+    );
+  }
+
+  if (scope === "compare") {
+    return (
+      <div>
+        {scopeToggle}
+        <NutritionCompareView />
       </div>
     );
   }
