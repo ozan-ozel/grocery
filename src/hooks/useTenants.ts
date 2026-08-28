@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   createHousehold,
   deleteHousehold,
@@ -25,6 +25,16 @@ export function useTenants() {
   const [tenants, setTenants] = useState<Tenant[] | null>(null);
   const [activeTenantId, setActiveTenantId] = useState<string | null>(null);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
+  // Set by addTenant right before switching into a brand-new (definitely
+  // empty) household. useListSync consumes this once, on the switch it was
+  // set for, to skip its normal clear-and-repull cycle — see its comment.
+  const freshTenantIdRef = useRef<string | null>(null);
+
+  function consumeFreshTenantId(id: string): boolean {
+    if (freshTenantIdRef.current !== id) return false;
+    freshTenantIdRef.current = null;
+    return true;
+  }
 
   // First mount: load tenants + per-user hidden list from server, resolve
   // active from URL or first, then let the sync effect (see useListSync) pull
@@ -117,6 +127,7 @@ export function useTenants() {
       ownerId: created.owner_id,
     };
     setTenants((prev) => [...(prev ?? []), t]);
+    freshTenantIdRef.current = t.id;
     setActiveTenantId(t.id);
   }
 
@@ -181,5 +192,6 @@ export function useTenants() {
     renameTenant,
     deleteTenant,
     toggleHiddenTenant,
+    consumeFreshTenantId,
   };
 }

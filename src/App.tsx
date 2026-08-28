@@ -68,10 +68,13 @@ function AppShell({
     renameTenant,
     deleteTenant,
     toggleHiddenTenant,
+    consumeFreshTenantId,
   } = useTenants();
 
-  const { state, setState, updateState, stateRef, syncStatus } =
-    useListSync(activeTenantId);
+  const { state, setState, updateState, stateRef, syncStatus } = useListSync(
+    activeTenantId,
+    consumeFreshTenantId
+  );
 
   const { undo, showUndo, restore } = useUndo(updateState, setState);
   useRollover(activeTenantId, stateRef, setState, showUndo);
