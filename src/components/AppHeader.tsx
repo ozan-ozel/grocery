@@ -1,3 +1,4 @@
+import { useEffect, useRef, useState } from "react";
 import { CloudOff, FilePlus2, LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -53,6 +54,30 @@ export function AppHeader({
   const total = active.items.length;
   const done = active.items.filter(i => i.checked).length;
   const progress = total ? (done / total) * 100 : 0;
+
+  const tabScrollRef = useRef<HTMLDivElement>(null);
+  const [tabScrollFade, setTabScrollFade] = useState({ left: false, right: false });
+
+  const updateTabScrollFade = () => {
+    const el = tabScrollRef.current;
+    if (!el) return;
+    setTabScrollFade({
+      left: el.scrollLeft > 1,
+      right: el.scrollLeft + el.clientWidth < el.scrollWidth - 1,
+    });
+  };
+
+  useEffect(() => {
+    updateTabScrollFade();
+    window.addEventListener("resize", updateTabScrollFade);
+    return () => window.removeEventListener("resize", updateTabScrollFade);
+  }, [section]);
+
+  // Only fades the edge that actually has more tabs to reveal, so the mask
+  // stays a no-op (fully opaque) once there's nothing left to scroll to.
+  const tabScrollMask = `linear-gradient(to right, ${
+    tabScrollFade.left ? "transparent, black 24px" : "black"
+  }, ${tabScrollFade.right ? "black calc(100% - 24px), transparent" : "black"})`;
 
   return (
     <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-6 backdrop-blur">
@@ -182,7 +207,11 @@ export function AppHeader({
 
       {section === "alisveris" ? (
         <div className="flex items-center gap-2 pt-3">
-          <div className="-mx-1 flex-1 overflow-x-auto">
+          <div
+            ref={tabScrollRef}
+            onScroll={updateTabScrollFade}
+            className="-mx-1 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ maskImage: tabScrollMask, WebkitMaskImage: tabScrollMask }}>
             <TabsList className="px-1">
               <TabsTrigger value="list">Liste</TabsTrigger>
               <TabsTrigger value="history">Geçmiş</TabsTrigger>
@@ -196,7 +225,7 @@ export function AppHeader({
             onClick={onStartNewList}
             disabled={active.items.length === 0}
             title="Bu listeyi arşivle ve yenisini başlat"
-            className="shrink-0">
+            className="h-auto shrink-0 items-start border-b-2 border-transparent px-2 pb-2 pt-0">
             <FilePlus2 className="size-3.5" />
             Yeni liste
           </Button>
