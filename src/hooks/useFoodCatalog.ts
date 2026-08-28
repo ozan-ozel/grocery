@@ -1,5 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
-import { browseNutritionCached, type Nutrition, type NutritionMap } from "@/lib/nutrition";
+import { useEffect, useMemo } from "react";
+import { useQuery } from "@tanstack/preact-query";
+import {
+  browseNutritionCached,
+  BROWSE_CACHE_TTL_MS,
+  type NutritionMap,
+} from "@/lib/nutrition";
 
 type Status = "idle" | "loading" | "ready" | "error";
 
@@ -10,35 +15,37 @@ type Status = "idle" | "loading" | "ready" | "error";
 const CATALOG_LIMIT = 200;
 
 export function useFoodCatalog() {
-  const [foods, setFoods] = useState<Nutrition[]>([]);
-  const [status, setStatus] = useState<Status>("idle");
+  const query = useQuery({
+    queryKey: ["foodCatalog", CATALOG_LIMIT],
+    queryFn: () => browseNutritionCached("", CATALOG_LIMIT),
+    // browseNutritionCached already owns a localStorage TTL cache of its
+    // own — this just mirrors that TTL so the two layers agree on when a
+    // remount/refocus should re-run the fetcher, instead of TanStack
+    // Query's default (treat data stale immediately) fighting it.
+    staleTime: BROWSE_CACHE_TTL_MS,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    setStatus("loading");
-    browseNutritionCached("", CATALOG_LIMIT)
-      .then((rows) => {
-        if (cancelled) return;
-        setFoods(rows);
-        setStatus("ready");
-      })
-      .catch((err) => {
-        if (cancelled) return;
-        console.warn(
-          "[mealPlan] food catalog fetch failed — if you're running locally, npm run netlify:dev serves /api/*, npm run dev does not:",
-          err
-        );
-        setStatus("error");
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const foods = useMemo(() => query.data ?? [], [query.data]);
 
   const catalogMap: NutritionMap = useMemo(
     () => new Map(foods.map((f) => [f.name_tr, f])),
     [foods]
   );
+
+  const status: Status = query.isError
+    ? "error"
+    : query.isPending
+      ? "loading"
+      : "ready";
+
+  useEffect(() => {
+    if (query.isError) {
+      console.warn(
+        "[mealPlan] food catalog fetch failed — if you're running locally, npm run netlify:dev serves /api/*, npm run dev does not:",
+        query.error
+      );
+    }
+  }, [query.isError, query.error]);
 
   return { foods, catalogMap, status };
 }
