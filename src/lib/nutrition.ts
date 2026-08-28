@@ -85,7 +85,7 @@ const BROWSE_CACHE_KEY = "grocery.nutrition.browse.v1";
 // (typically the default alphabetical listing) from refetching on every
 // reload or Alışveriş/Besin tab switch, without risking stale-looking data
 // for long after an edit elsewhere.
-const BROWSE_CACHE_TTL_MS = 5 * 60 * 1000;
+export const BROWSE_CACHE_TTL_MS = 5 * 60 * 1000;
 
 function loadBrowseCache(): Record<string, BrowseCacheEntry> {
   try {
