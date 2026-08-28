@@ -93,7 +93,11 @@ export function UploadPanel({ onClose, onSaved }: UploadProps) {
             {status === "done" ? "Kapat" : "Vazgeç"}
           </Button>
           {status !== "done" && (
-            <Button type="submit" size="sm" disabled={status === "saving" || !text.trim()}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={status === "saving" || !text.trim()}
+              className="active:bg-primary/80">
               {status === "saving" ? "Kaydediliyor…" : "Kaydet"}
             </Button>
           )}

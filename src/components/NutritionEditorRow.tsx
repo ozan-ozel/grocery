@@ -86,7 +86,12 @@ export function EditorRow({ itemName, initial, onCancel, onSaved }: EditorProps)
             >
               Vazgeç
             </Button>
-            <Button type="submit" size="sm" disabled={saving}>
+            <Button
+              type="submit"
+              size="sm"
+              disabled={saving}
+              className="active:bg-primary/80"
+            >
               {saving ? "Kaydediliyor…" : "Kaydet"}
             </Button>
           </div>

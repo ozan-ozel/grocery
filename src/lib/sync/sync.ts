@@ -16,7 +16,7 @@ type Options = {
   onEmpty?: () => State;
 };
 
-const POLL_MS = 15_000;
+const POLL_MS = 30_000;
 const PUSH_DEBOUNCE_MS = 500;
 const BACKOFF_START_MS = 1_000;
 const BACKOFF_MAX_MS = 30_000;

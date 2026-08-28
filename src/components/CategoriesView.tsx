@@ -215,6 +215,7 @@ export function CategoriesView({
           size="sm"
           onClick={commitNew}
           disabled={!newLabel.trim()}
+          className="active:text-foreground"
         >
           <Plus className="size-3.5" />
           Ekle
@@ -269,7 +270,7 @@ function RenameRow({
       <button
         type="button"
         onClick={commit}
-        className="ledger rounded-md border border-input px-2.5 py-1.5 text-xs transition-colors hover:bg-accent"
+        className="ledger rounded-md border border-input px-2.5 py-1.5 text-xs transition-colors hover:bg-accent active:bg-accent"
       >
         kaydet
       </button>

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Eye, EyeOff, Plus, Pencil, Trash2, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ConfirmModal } from "@/components/ConfirmModal";
 import type { Tenant } from "@/lib/store";
 import { inviteToHousehold, listHouseholdShares, revokeHouseholdShare } from "@/lib/householdShares";
 
@@ -40,6 +41,9 @@ export function TenantSwitcher({
   // Email currently armed for removal — tapping ✕ once shows a confirm/
   // cancel pair instead of revoking immediately.
   const [confirmingRevokeEmail, setConfirmingRevokeEmail] = useState<string | null>(null);
+  // Tenant armed for deletion — shows a full-screen confirm modal before
+  // the destructive onDelete call actually fires.
+  const [confirmingDeleteId, setConfirmingDeleteId] = useState<string | null>(null);
 
   const active = tenants.find((t) => t.id === activeId) ?? tenants[0];
 
@@ -53,6 +57,7 @@ export function TenantSwitcher({
         setEditingId(null);
         setManagingSharesId(null);
         setConfirmingRevokeEmail(null);
+        setConfirmingDeleteId(null);
       }
     }
     function onKey(e: KeyboardEvent) {
@@ -62,6 +67,7 @@ export function TenantSwitcher({
         setEditingId(null);
         setManagingSharesId(null);
         setConfirmingRevokeEmail(null);
+        setConfirmingDeleteId(null);
       }
     }
     document.addEventListener("mousedown", onClick);
@@ -244,15 +250,7 @@ export function TenantSwitcher({
                         <button
                           type="button"
                           aria-label={`${t.name} sil`}
-                          onClick={() => {
-                            if (
-                              window.confirm(
-                                `"${t.name}" evini ve tüm listelerini silmek istediğine emin misin?`
-                              )
-                            ) {
-                              onDelete(t.id);
-                            }
-                          }}
+                          onClick={() => setConfirmingDeleteId(t.id)}
                           className="rounded p-1 text-muted-foreground transition hover:text-signal [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
                         >
                           <Trash2 className="size-3.5" />
@@ -360,7 +358,7 @@ export function TenantSwitcher({
               <button
                 type="button"
                 onClick={() => setAdding(true)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground active:bg-accent active:text-foreground"
               >
                 <Plus className="size-3.5" />
                 Yeni ev ekle
@@ -369,6 +367,24 @@ export function TenantSwitcher({
           </div>
         </div>
       )}
+      {confirmingDeleteId && (() => {
+        const target = tenants.find((t) => t.id === confirmingDeleteId);
+        if (!target) return null;
+        return (
+          <ConfirmModal
+            title={`"${target.name}" silinsin mi?`}
+            description="Bu evi ve tüm listelerini kalıcı olarak sileceksin. Bu işlem geri alınamaz."
+            confirmLabel="Sil"
+            cancelLabel="Vazgeç"
+            destructive
+            onConfirm={() => {
+              setConfirmingDeleteId(null);
+              onDelete(target.id);
+            }}
+            onCancel={() => setConfirmingDeleteId(null)}
+          />
+        );
+      })()}
     </div>
   );
 }

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { MEAL_SLOTS, type MealItem } from "@/lib/localMealPlan";
@@ -228,13 +229,12 @@ function MealItemRow({
         className="ledger h-9 w-16 px-2 text-right tabular-nums"
       />
       <span className="text-xs text-muted-foreground">g</span>
-      <button
-        type="button"
-        aria-label={`${name} kaldır`}
-        onClick={onRemove}
-        className="rounded p-1 text-muted-foreground hover:text-signal">
-        <X className="size-4" />
-      </button>
+      <ConfirmDeleteButton
+        onConfirm={onRemove}
+        label={`${name} kaldır`}
+        triggerIcon={X}
+        iconClassName="size-4"
+      />
     </li>
   );
 }

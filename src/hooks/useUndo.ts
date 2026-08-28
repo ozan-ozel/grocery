@@ -1,9 +1,10 @@
 import { useRef, useState } from "react";
-import type { Item, State } from "@/lib/store";
+import type { Item, List, State } from "@/lib/store";
 
 export type Undo =
   | { kind: "remove"; item: Item; listId: string }
   | { kind: "bulkRemove"; items: Item[]; listId: string }
+  | { kind: "deleteList"; list: List }
   | { kind: "rollover"; previous: State };
 
 export function useUndo(
@@ -39,6 +40,9 @@ export function useUndo(
             : l
         ),
       }));
+    } else if (undo.kind === "deleteList") {
+      const target = undo;
+      updateState((s) => ({ ...s, lists: [target.list, ...s.lists] }));
     } else {
       setState(undo.previous);
     }

@@ -1,15 +1,17 @@
 import { useState } from "react";
 import { ChevronDown, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { cn } from "@/lib/utils";
 import { relativeDay, type List } from "@/lib/store";
 
 type Props = {
   lists: List[];
   onReuse: (listId: string) => void;
+  onDelete: (listId: string) => void;
 };
 
-export function HistoryView({ lists, onReuse }: Props) {
+export function HistoryView({ lists, onReuse, onDelete }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
 
   if (lists.length === 0) {
@@ -57,10 +59,16 @@ export function HistoryView({ lists, onReuse }: Props) {
                 size="sm"
                 onClick={() => onReuse(list.id)}
                 title="Bu ürünleri güncel listeye kopyala"
+                className="active:text-foreground"
               >
                 <RotateCcw className="size-3.5" />
                 Tekrar kullan
               </Button>
+
+              <ConfirmDeleteButton
+                onConfirm={() => onDelete(list.id)}
+                label="Bu listeyi geçmişten sil"
+              />
             </div>
 
             {open && (

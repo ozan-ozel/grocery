@@ -30,10 +30,12 @@ mostly presentational. Persistence is split across several independent layers wi
 Category customization stays device-local even though it's keyed by tenant. Item category memory
 now syncs across devices for the same tenant (NUT-13): the local cache paints instantly, then a
 background fetch merges in the server copy (server wins on conflict), and every explicit category
-correction pushes to Supabase in addition to localStorage. Lists are never deleted — starting a new
-list stamps the old one with `closedAt` and files it into History; `buildCatalog()` (`src/lib/store.ts`)
-collapses every item ever added across all lists into a name/count/last-bought table that backs both
-the add-field autocomplete and the Find tab.
+correction pushes to Supabase in addition to localStorage. Starting a new list stamps the old one with
+`closedAt` and files it into History rather than deleting it; a list only goes away if the user
+explicitly deletes it from History (`deleteList()` in `src/lib/listActions.ts`, undoable like any other
+removal). `buildCatalog()` (`src/lib/store.ts`) collapses every item ever added across all *remaining*
+lists into a name/count/last-bought table that backs both the add-field autocomplete and the Find tab —
+so deleting a History entry also drops its items' contribution to that aggregate.
 
 ## Tenants
 

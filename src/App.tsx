@@ -126,6 +126,7 @@ function AppShell({
     bulkRemove,
     startNewList,
     reuseList,
+    deleteList,
     renameActive,
     toggleGrouping,
     categorizeActive,
@@ -198,6 +199,7 @@ function AppShell({
             onCategorize={categorizeActive}
             onToggleGrouping={toggleGrouping}
             onReuseList={reuseList}
+            onDeleteList={deleteList}
             isOnList={isOnList}
             onRenameCategory={renameCat}
             onToggleHiddenCategory={toggleHidden}

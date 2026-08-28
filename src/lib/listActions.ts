@@ -133,6 +133,16 @@ export function createListActions(params: {
     updateActive((items) => [...items, ...additions]);
   }
 
+  function deleteList(listId: string) {
+    const target = state.lists.find((l) => l.id === listId);
+    if (!target || target.id === active.id) return;
+    updateState((s) => ({
+      ...s,
+      lists: s.lists.filter((l) => l.id !== listId),
+    }));
+    showUndo({ kind: "deleteList", list: target }, 6000);
+  }
+
   function renameActive(title: string) {
     updateState((s) => ({
       ...s,
@@ -161,6 +171,7 @@ export function createListActions(params: {
     bulkRemove,
     startNewList,
     reuseList,
+    deleteList,
     renameActive,
     toggleGrouping,
     categorizeActive,

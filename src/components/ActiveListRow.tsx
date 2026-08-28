@@ -294,7 +294,7 @@ function EditRow({
         <button
           type="button"
           onClick={commit}
-          className="ledger rounded-md border border-input px-2.5 py-1.5 text-xs transition-colors hover:bg-accent">
+          className="ledger rounded-md border border-input px-2.5 py-1.5 text-xs transition-colors hover:bg-accent active:bg-accent">
           kaydet
         </button>
         <button

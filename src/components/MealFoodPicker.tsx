@@ -44,7 +44,7 @@ export function MealFoodPicker({ foods, onAdd }: Props) {
         variant="quiet"
         size="sm"
         onClick={() => setOpen(true)}
-        className="mt-2">
+        className="mt-2 active:text-foreground">
         <Plus className="size-3.5" />
         Besin ekle
       </Button>
@@ -69,7 +69,11 @@ export function MealFoodPicker({ foods, onAdd }: Props) {
             className="ledger h-9 w-20 px-2 text-right tabular-nums"
           />
           <span className="text-xs text-muted-foreground">g</span>
-          <Button type="button" size="sm" onClick={confirmAdd}>
+          <Button
+            type="button"
+            size="sm"
+            onClick={confirmAdd}
+            className="active:bg-primary/80">
             Ekle
           </Button>
           <Button type="button" variant="quiet" size="sm" onClick={reset}>

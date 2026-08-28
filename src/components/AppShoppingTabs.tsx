@@ -30,6 +30,7 @@ type Props = {
   onCategorize: () => void;
   onToggleGrouping: () => void;
   onReuseList: (listId: string) => void;
+  onDeleteList: (listId: string) => void;
   isOnList: (name: string) => boolean;
   onRenameCategory: (id: AnyCategoryId, label: string) => void;
   onToggleHiddenCategory: (id: string, hidden: boolean) => void;
@@ -62,6 +63,7 @@ export function AppShoppingTabs({
   onCategorize,
   onToggleGrouping,
   onReuseList,
+  onDeleteList,
   isOnList,
   onRenameCategory,
   onToggleHiddenCategory,
@@ -99,7 +101,7 @@ export function AppShoppingTabs({
       </TabsContent>
 
       <TabsContent value="history">
-        <HistoryView lists={past} onReuse={onReuseList} />
+        <HistoryView lists={past} onReuse={onReuseList} onDelete={onDeleteList} />
       </TabsContent>
 
       <TabsContent value="find">

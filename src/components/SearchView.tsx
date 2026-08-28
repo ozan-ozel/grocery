@@ -61,7 +61,7 @@ export function SearchView({ catalog, onAdd, isOnList }: Props) {
                   disabled={already}
                   onClick={() => onAdd(entry.name, entry.lastQty)}
                   aria-label={`${entry.name} listeye ekle`}
-                  className="ledger flex items-center gap-1 rounded-md border border-input px-2.5 py-1.5 text-xs transition-colors hover:bg-accent disabled:border-transparent disabled:text-muted-foreground disabled:hover:bg-transparent"
+                  className="ledger flex items-center gap-1 rounded-md border border-input px-2.5 py-1.5 text-xs transition-colors hover:bg-accent active:bg-accent disabled:border-transparent disabled:text-muted-foreground disabled:hover:bg-transparent"
                 >
                   {already ? (
                     "listede"

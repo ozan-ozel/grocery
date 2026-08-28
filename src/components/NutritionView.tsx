@@ -275,7 +275,7 @@ export function NutritionView({ items }: Props) {
                       <button
                         type="button"
                         onClick={() => setEditingId(item.id)}
-                        className="text-muted-foreground hover:text-foreground"
+                        className="text-muted-foreground hover:text-foreground active:text-foreground"
                         aria-label={
                           nutrition
                             ? `${item.name} değerlerini düzenle`

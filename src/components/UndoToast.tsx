@@ -13,7 +13,9 @@ export function UndoToast({ undo, onRestore }: Props) {
           ? `${undo.item.name} kaldırıldı`
           : undo.kind === "bulkRemove"
             ? `${undo.items.length} ürün kaldırıldı`
-            : "Bugün için yeni liste başlatıldı"}
+            : undo.kind === "deleteList"
+              ? `${undo.list.title} silindi`
+              : "Bugün için yeni liste başlatıldı"}
       </span>
       <button
         type="button"
