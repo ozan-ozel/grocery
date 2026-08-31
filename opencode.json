@@ -1,70 +1,66 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "permissions": [
-    {
-      "action": "read",
-      "resource": "*",
-      "effect": "allow"
-    },
-    {
-      "action": "read",
-      "resource": "*.env",
-      "effect": "deny"
-    },
-    {
-      "action": "read",
-      "resource": "*.env.*",
-      "effect": "deny"
-    },
-    {
-      "action": "read",
-      "resource": ".dev.vars*",
-      "effect": "deny"
+
+  "permission": {
+    "read": {
+      "*": "allow",
+
+      "*.env": "deny",
+      "*.env.*": "deny",
+      ".env*": "deny",
+
+      ".dev.vars": "deny",
+      ".dev.vars*": "deny",
+
+      "secrets/**": "deny",
+      "secret/**": "deny",
+      "**/secrets/**": "deny",
+      "**/secret/**": "deny",
+
+      "**/*credentials*": "deny",
+      "**/*credential*": "deny",
+
+      "**/*password*": "deny",
+      "**/*passwd*": "deny",
+
+      "**/*token*": "deny",
+      "**/*private-key*": "deny",
+      "**/*private_key*": "deny"
     },
 
-    {
-      "action": "edit",
-      "resource": "*",
-      "effect": "deny"
+    "edit": "deny",
+
+    "bash": {
+      "git push *": "deny",
+      "git remote *": "deny",
+
+      "rm *": "deny",
+      "rmdir *": "deny",
+
+      "del *": "deny",
+      "erase *": "deny",
+
+      "format *": "deny",
+
+      "*": "ask"
     },
 
-    {
-      "action": "glob",
-      "resource": "*",
-      "effect": "allow"
-    },
-    {
-      "action": "grep",
-      "resource": "*",
-      "effect": "allow"
-    },
+    "task": "ask",
 
-    {
-      "action": "shell",
-      "resource": "git push *",
-      "effect": "deny"
-    },
-    {
-      "action": "shell",
-      "resource": "*",
-      "effect": "ask"
-    },
+    "skill": "ask",
 
-    {
-      "action": "subagent",
-      "resource": "*",
-      "effect": "ask"
-    },
+    "webfetch": "ask",
 
-    {
-      "action": "webfetch",
-      "resource": "*",
-      "effect": "ask"
-    },
-    {
-      "action": "websearch",
-      "resource": "*",
-      "effect": "ask"
-    }
-  ]
+    "websearch": "ask",
+
+    "external_directory": "deny",
+
+    "question": "allow",
+
+    "glob": "allow",
+
+    "grep": "allow",
+
+    "lsp": "allow"
+  }
 }
