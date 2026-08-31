@@ -42,6 +42,20 @@
 
       "format *": "deny",
 
+      "*Set-Content*": "deny",
+      "*Add-Content*": "deny",
+      "*Out-File*": "deny",
+      "*New-Item*": "deny",
+      "*tee *": "deny",
+      "* > *": "deny",
+      "* >> *": "deny",
+
+      "*curl*": "deny",
+      "*wget*": "deny",
+      "*Invoke-WebRequest*": "deny",
+      "*Invoke-RestMethod*": "deny",
+      "*iwr *": "deny",
+
       "*": "ask"
     },
 
