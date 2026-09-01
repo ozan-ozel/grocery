@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, LayoutList, MoreHorizontal, Tags, Trash2 } from "lucide-react";
+import { Check, LayoutList, MoreHorizontal, ShoppingBasket, Tags, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -287,7 +287,8 @@ export function ActiveList({
       {done.length > 0 && (
         <>
           <div className="flex items-center gap-3 pb-1 pt-6">
-            <span className="ledger text-xs uppercase tracking-widest text-muted-foreground">
+            <span className="flex items-center gap-1.5 ledger text-xs uppercase tracking-widest text-muted-foreground">
+              <ShoppingBasket className="size-4 shrink-0 rounded-full bg-secondary p-0.5 text-secondary-foreground" />
               sepette
             </span>
             <span className="h-px flex-1 bg-border" />
