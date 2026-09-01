@@ -3,12 +3,23 @@ import {
   type ItemCategoryMap,
 } from "@/lib/categorization/itemCategories";
 import type { AnyCategoryId } from "@/lib/categorization/userCategories";
-import { categorizeItems, newList, uid, type Item, type List, type State } from "@/lib/store";
+import {
+  categorizeItems,
+  findCanonicalName,
+  newList,
+  uid,
+  type CatalogEntry,
+  type Item,
+  type List,
+  type State,
+} from "@/lib/store";
+import { isCloseMatch } from "@/lib/fuzzyMatch";
 import type { Undo } from "@/hooks/useUndo";
 
 export function createListActions(params: {
   state: State;
   active: List;
+  catalog: CatalogEntry[];
   updateState: (fn: (s: State) => State) => void;
   itemCategories: ItemCategoryMap;
   rememberCategory: (name: string, category: AnyCategoryId) => void;
@@ -16,7 +27,7 @@ export function createListActions(params: {
   selectedIds: Set<string>;
   exitSelectMode: () => void;
 }) {
-  const { state, active, updateState, itemCategories, rememberCategory, showUndo, selectedIds, exitSelectMode } =
+  const { state, active, catalog, updateState, itemCategories, rememberCategory, showUndo, selectedIds, exitSelectMode } =
     params;
 
   function updateActive(fn: (items: Item[]) => Item[]) {
@@ -27,8 +38,16 @@ export function createListActions(params: {
   }
 
   function addItem(name: string, qty: string) {
-    const existing = active.items.find(
-      (i) => i.name.toLocaleLowerCase("tr-TR") === name.toLocaleLowerCase("tr-TR")
+    // A typo like "maydonoz" resolves to the household's already-established
+    // "Maydanoz" instead of minting a new catalog entry; a genuinely new
+    // name (no close match) passes through unchanged.
+    const canonicalName = findCanonicalName(name, catalog) ?? name;
+
+    const existing = active.items.find((i) =>
+      isCloseMatch(
+        i.name.toLocaleLowerCase("tr-TR"),
+        canonicalName.toLocaleLowerCase("tr-TR")
+      )
     );
     // Re-adding something already on the list just un-checks it rather
     // than creating a confusing duplicate row.
@@ -38,12 +57,12 @@ export function createListActions(params: {
       );
       return;
     }
-    const remembered = lookupItemCategory(itemCategories, name);
+    const remembered = lookupItemCategory(itemCategories, canonicalName);
     updateActive((items) => [
       ...items,
       {
         id: uid(),
-        name,
+        name: canonicalName,
         qty,
         checked: false,
         addedAt: Date.now(),

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { relativeDay, type CatalogEntry } from "@/lib/store";
+import { isCloseMatch } from "@/lib/fuzzyMatch";
 
 type Props = {
   catalog: CatalogEntry[];
@@ -15,7 +16,15 @@ export function SearchView({ catalog, onAdd, isOnList }: Props) {
   const results = useMemo(() => {
     const q = query.trim().toLocaleLowerCase("tr-TR");
     if (!q) return catalog.slice(0, 30);
-    return catalog.filter((entry) => entry.name.toLocaleLowerCase("tr-TR").includes(q));
+    const substringMatches = catalog.filter((entry) =>
+      entry.name.toLocaleLowerCase("tr-TR").includes(q)
+    );
+    const fuzzyMatches = catalog.filter(
+      (entry) =>
+        !substringMatches.includes(entry) &&
+        isCloseMatch(q, entry.name.toLocaleLowerCase("tr-TR"))
+    );
+    return [...substringMatches, ...fuzzyMatches];
   }, [query, catalog]);
 
   return (

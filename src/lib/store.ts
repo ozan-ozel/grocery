@@ -1,5 +1,6 @@
 import { categorize } from "./categorization/categories";
 import { isCustomId, type AnyCategoryId } from "./categorization/userCategories";
+import { isCloseMatch, levenshteinDistance } from "./fuzzyMatch";
 
 export type Item = {
   id: string;
@@ -172,6 +173,11 @@ export type CatalogEntry = {
 /**
  * Every item ever added, collapsed by name. This one derivation backs
  * both the add-field autocomplete and the search tab.
+ *
+ * Near-duplicate spellings (a one-off typo like "Maydonoz" next to the
+ * established "Maydanoz") are folded into whichever spelling has been used
+ * more, so a single mistyped entry can't camp on the suggestion list
+ * forever under its own key. See fuzzyMatch.ts for the distance rules.
  */
 export function buildCatalog(lists: List[]): CatalogEntry[] {
   const map = new Map<string, CatalogEntry>();
@@ -196,9 +202,71 @@ export function buildCatalog(lists: List[]): CatalogEntry[] {
       }
     }
   }
-  return [...map.values()].sort(
+  return mergeNearDuplicates([...map.values()]);
+}
+
+/**
+ * Single-linkage merge of catalog entries whose names are within the
+ * fuzzy-match distance of each other. Processes the most-established
+ * spellings (highest count, then most recent) first, so they anchor the
+ * cluster and absorb rarer near-duplicates rather than the other way
+ * around — a typo entered once shouldn't out-rank the real word.
+ */
+function mergeNearDuplicates(entries: CatalogEntry[]): CatalogEntry[] {
+  const sorted = [...entries].sort(
     (a, b) => b.count - a.count || b.lastAt - a.lastAt
   );
+  const merged: CatalogEntry[] = [];
+  for (const entry of sorted) {
+    const canonical = merged.find((m) =>
+      isCloseMatch(
+        m.name.toLocaleLowerCase("tr-TR"),
+        entry.name.toLocaleLowerCase("tr-TR")
+      )
+    );
+    if (!canonical) {
+      merged.push({ ...entry });
+      continue;
+    }
+    canonical.count += entry.count;
+    if (entry.lastAt > canonical.lastAt) {
+      canonical.lastAt = entry.lastAt;
+      canonical.lastQty = entry.lastQty;
+      // Spelling itself is left alone even if the typo'd entry is more
+      // recent — the established name is what should keep surfacing.
+    }
+  }
+  return merged.sort((a, b) => b.count - a.count || b.lastAt - a.lastAt);
+}
+
+/**
+ * Given a freshly typed name, returns the catalog's existing spelling if
+ * one matches exactly or closely enough (see fuzzyMatch.ts), so a typo
+ * like "maydonoz" resolves to the already-established "Maydanoz" instead
+ * of minting a new, separate catalog entry. Returns undefined for a
+ * genuinely new item, which the caller should add as typed.
+ */
+export function findCanonicalName(
+  name: string,
+  catalog: CatalogEntry[]
+): string | undefined {
+  const q = name.toLocaleLowerCase("tr-TR").trim();
+  if (!q) return undefined;
+
+  let best: CatalogEntry | undefined;
+  let bestDistance = Infinity;
+  for (const entry of catalog) {
+    const key = entry.name.toLocaleLowerCase("tr-TR");
+    if (key === q) return entry.name;
+    if (!isCloseMatch(q, key)) continue;
+    const distance = levenshteinDistance(q, key);
+    // Closer match wins; a tie goes to the more established spelling.
+    if (distance < bestDistance || (distance === bestDistance && entry.count > (best?.count ?? -1))) {
+      best = entry;
+      bestDistance = distance;
+    }
+  }
+  return best?.name;
 }
 
 export function relativeDay(at: number) {

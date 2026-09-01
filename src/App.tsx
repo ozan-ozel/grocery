@@ -134,6 +134,7 @@ function AppShell({
   } = createListActions({
     state,
     active,
+    catalog,
     updateState,
     itemCategories,
     rememberCategory,

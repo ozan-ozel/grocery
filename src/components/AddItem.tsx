@@ -3,6 +3,7 @@ import { Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { parseEntry, type CatalogEntry } from "@/lib/store";
+import { isCloseMatch } from "@/lib/fuzzyMatch";
 
 type Props = {
   catalog: CatalogEntry[];
@@ -16,11 +17,22 @@ export function AddItem({ catalog, onAdd }: Props) {
 
   // Suggest from what has actually been bought before, most-bought first.
   // Turkish-aware casing so "İzmir"/"izmir" and "ŞEKER"/"şeker" match.
+  // Substring matches come first (existing behavior); a typo like "maydonoz"
+  // isn't a substring of "Maydanoz", so close-but-not-substring matches are
+  // appended after, letting the user pick the correct spelling before it's
+  // ever committed as a new item.
   const suggestions = useMemo(() => {
     const q = parseEntry(value).name.toLocaleLowerCase("tr-TR").trim();
     if (!q) return [];
-    return catalog
-      .filter((entry) => entry.name.toLocaleLowerCase("tr-TR").includes(q))
+    const substringMatches = catalog.filter((entry) =>
+      entry.name.toLocaleLowerCase("tr-TR").includes(q)
+    );
+    const fuzzyMatches = catalog.filter(
+      (entry) =>
+        !substringMatches.includes(entry) &&
+        isCloseMatch(q, entry.name.toLocaleLowerCase("tr-TR"))
+    );
+    return [...substringMatches, ...fuzzyMatches]
       .filter((entry) => entry.name.toLocaleLowerCase("tr-TR") !== q)
       .slice(0, 5);
   }, [value, catalog]);
