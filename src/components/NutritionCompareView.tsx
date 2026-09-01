@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { format } from "@/components/NutritionTableCell";
 import { NutritionRadarChart } from "@/components/NutritionRadarChart";
+import { NutritionBarChart } from "@/components/NutritionBarChart";
 import { cn } from "@/lib/utils";
 import type { Nutrition } from "@/lib/nutrition";
 
@@ -23,6 +24,7 @@ export function NutritionCompareView() {
   const { foods, status } = useFoodCatalog();
   const [foodA, setFoodA] = useState<Nutrition | null>(null);
   const [foodB, setFoodB] = useState<Nutrition | null>(null);
+  const [chartType, setChartType] = useState<"radar" | "bar">("radar");
 
   if (status === "error") {
     return (
@@ -97,7 +99,39 @@ export function NutritionCompareView() {
             })}
           </tbody>
         </table>
-        <NutritionRadarChart foodA={foodA} foodB={foodB} />
+
+        <div className="mt-4 inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
+          <button
+            type="button"
+            onClick={() => setChartType("radar")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              chartType === "radar"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Radar
+          </button>
+          <button
+            type="button"
+            onClick={() => setChartType("bar")}
+            className={cn(
+              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              chartType === "bar"
+                ? "bg-background text-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground"
+            )}
+          >
+            Sütun
+          </button>
+        </div>
+
+        {chartType === "radar" ? (
+          <NutritionRadarChart foodA={foodA} foodB={foodB} />
+        ) : (
+          <NutritionBarChart foodA={foodA} foodB={foodB} />
+        )}
         </>
       ) : (
         <p className="px-1 pt-6 text-sm text-muted-foreground">

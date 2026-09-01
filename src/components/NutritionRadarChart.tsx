@@ -1,18 +1,6 @@
 import { useMemo } from "react";
 import type { Nutrition } from "@/lib/nutrition";
-
-type Axis = { key: keyof Nutrition; label: string; unit: string };
-
-// Same five nutrients as NutritionCompareView's table, in the same order —
-// the only ones the data model tracks (see src/lib/nutrition.ts), so there's
-// nothing else reliable to add as a sixth axis.
-const AXES: Axis[] = [
-  { key: "kcal_per_100", label: "Kalori", unit: "kcal" },
-  { key: "protein_g", label: "Protein", unit: "g" },
-  { key: "fat_g", label: "Yağ", unit: "g" },
-  { key: "carbs_g", label: "Karbonhidrat", unit: "g" },
-  { key: "fiber_g", label: "Lif", unit: "g" },
-];
+import { NUTRITION_AXES as AXES, computeMaxByKey, fractionOf, formatNutritionValue } from "@/lib/nutritionChart";
 
 const SIZE = 240;
 const CENTER = SIZE / 2;
@@ -32,29 +20,12 @@ function pointAt(index: number, fraction: number): { x: number; y: number } {
   };
 }
 
-// Non-negative and finite by construction (guards a value that's somehow
-// missing/NaN rather than trusting the data model). A true zero stays at
-// dead center; any nonzero value gets a small floor so it doesn't collapse
-// to the same point and read as "no data".
-function fractionOf(value: number, max: number): number {
-  const v = Number.isFinite(value) ? Math.max(0, value) : 0;
-  if (v <= 0) return 0;
-  if (!Number.isFinite(max) || max <= 0) return 0;
-  return Math.min(1, Math.max(0.04, v / max));
-}
-
 function polygonPoints(food: Nutrition, maxByKey: Record<string, number>): string {
   return AXES.map((axis, i) => {
     const value = food[axis.key] as number;
     const { x, y } = pointAt(i, fractionOf(value, maxByKey[axis.key]));
     return `${x.toFixed(1)},${y.toFixed(1)}`;
   }).join(" ");
-}
-
-function formatValue(value: number, unit: string): string {
-  if (!Number.isFinite(value)) return "—";
-  const rounded = value >= 100 ? Math.round(value) : Math.round(value * 10) / 10;
-  return `${rounded} ${unit}`;
 }
 
 // Caller only renders this when at least one of foodA/foodB is picked — the
@@ -68,27 +39,7 @@ export function NutritionRadarChart({
   foodA: Nutrition | null;
   foodB: Nutrition | null;
 }) {
-  // Reference scale: each axis is normalized against whichever of the two
-  // compared foods is higher on that nutrient — not a catalog-wide max.
-  // A catalog-wide reference sounds more "consistent," but in practice a
-  // single outlier (sunflower oil's 100g fat) flattens every ordinary
-  // comparison's fat axis to near-invisible. Scaling to the visible pair
-  // means the larger of the two always reaches the outer ring, so every
-  // comparison is legible on its own terms. With only one food selected,
-  // it's normalized against itself (full pentagon) as a placeholder until
-  // a second food gives it something to compare against.
-  const maxByKey = useMemo(() => {
-    const max: Record<string, number> = {};
-    for (const axis of AXES) {
-      const a = foodA ? (foodA[axis.key] as number) : 0;
-      const b = foodB ? (foodB[axis.key] as number) : 0;
-      max[axis.key] = Math.max(
-        Number.isFinite(a) ? a : 0,
-        Number.isFinite(b) ? b : 0
-      );
-    }
-    return max;
-  }, [foodA, foodB]);
+  const maxByKey = useMemo(() => computeMaxByKey(foodA, foodB), [foodA, foodB]);
 
   const pointsA = foodA ? polygonPoints(foodA, maxByKey) : null;
   const pointsB = foodB ? polygonPoints(foodB, maxByKey) : null;
@@ -171,12 +122,12 @@ export function NutritionRadarChart({
               <g key={axis.key}>
                 {a && foodA && (
                   <circle cx={a.x} cy={a.y} r={3} fill="var(--color-signal)">
-                    <title>{`${foodA.name_tr} · ${axis.label}: ${formatValue(foodA[axis.key] as number, axis.unit)}`}</title>
+                    <title>{`${foodA.name_tr} · ${axis.label}: ${formatNutritionValue(foodA[axis.key] as number, axis.unit)}`}</title>
                   </circle>
                 )}
                 {b && foodB && (
                   <circle cx={b.x} cy={b.y} r={3} fill="var(--color-primary)">
-                    <title>{`${foodB.name_tr} · ${axis.label}: ${formatValue(foodB[axis.key] as number, axis.unit)}`}</title>
+                    <title>{`${foodB.name_tr} · ${axis.label}: ${formatNutritionValue(foodB[axis.key] as number, axis.unit)}`}</title>
                   </circle>
                 )}
               </g>
