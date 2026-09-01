@@ -8,6 +8,7 @@ import {
   type PersonalGoal,
 } from "@/lib/mealPersonalization";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
+import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 
 type Source = { label: string; href: string; badge: string };
 
@@ -85,6 +86,33 @@ export function PersonalPlanView({ userId }: Props) {
   const { profile, targets, update, setActivity, setEquationSex, setGoal } =
     useMealPersonalization(userId);
   const [showSources, setShowSources] = useState(false);
+
+  const { foods } = useFoodCatalog();
+  const [excludeQuery, setExcludeQuery] = useState("");
+
+  const excludeMatches = excludeQuery.trim()
+    ? foods
+        .filter(
+          (f) =>
+            f.name_tr
+              .toLocaleLowerCase("tr-TR")
+              .includes(excludeQuery.trim().toLocaleLowerCase("tr-TR")) &&
+            !profile.excludedFoodIds.includes(f.name_tr)
+        )
+        .slice(0, 5)
+    : [];
+
+  function addExclusion(nameTr: string) {
+    update("excludedFoodIds", [...profile.excludedFoodIds, nameTr]);
+    setExcludeQuery("");
+  }
+
+  function removeExclusion(nameTr: string) {
+    update(
+      "excludedFoodIds",
+      profile.excludedFoodIds.filter((id) => id !== nameTr)
+    );
+  }
 
   return (
     <div className="space-y-5">
@@ -191,6 +219,54 @@ export function PersonalPlanView({ userId }: Props) {
           Denklem seçimi yalnızca enerji tahminindeki biyolojik katsayıyı
           belirtir; cinsiyet kimliğinden otomatik olarak çıkarılmaz.
         </p>
+      </section>
+
+      <section className="rounded-lg border border-border p-3">
+        <h2 className="text-sm font-semibold">Önerilmesin</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Sevmediğin veya yiyemediğin besinleri işaretle — öneriler bunları hiç
+          göstermez.
+        </p>
+        <Input
+          className="mt-2"
+          placeholder="Besin ara..."
+          value={excludeQuery}
+          onInput={(event: Event) =>
+            setExcludeQuery((event.target as HTMLInputElement).value)
+          }
+        />
+        {excludeMatches.length > 0 && (
+          <ul className="mt-1 divide-y divide-border rounded-md border border-border">
+            {excludeMatches.map((f) => (
+              <li key={f.name_tr}>
+                <button
+                  type="button"
+                  className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                  onClick={() => addExclusion(f.name_tr)}>
+                  {f.name_tr}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {profile.excludedFoodIds.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {profile.excludedFoodIds.map((id) => (
+              <span
+                key={id}
+                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs">
+                {id}
+                <button
+                  type="button"
+                  onClick={() => removeExclusion(id)}
+                  aria-label={`${id} hariç tutmayı kaldır`}
+                  className="text-muted-foreground">
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
       </section>
 
       {targets && (

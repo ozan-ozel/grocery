@@ -20,6 +20,7 @@ export type PersonalPlanRow = {
   activity: string;
   goal: string;
   waist_cm: number | null;
+  excluded_food_ids: string[] | null;
 };
 
 const JSON_HEADERS = {
@@ -28,7 +29,7 @@ const JSON_HEADERS = {
 };
 
 const SELECT_COLS =
-  "user_id,name,equation_sex,age_years,height_cm,weight_kg,activity,goal,waist_cm";
+  "user_id,name,equation_sex,age_years,height_cm,weight_kg,activity,goal,waist_cm,excluded_food_ids";
 
 const VALID_SEX = ["female", "male"];
 const VALID_ACTIVITY = ["sedentary", "light", "moderate", "high", "very_high"];
@@ -93,6 +94,7 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     activity?: unknown;
     goal?: unknown;
     waist_cm?: unknown;
+    excluded_food_ids?: unknown;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -120,6 +122,9 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     return json({ error: "age_years, height_cm, weight_kg must be numbers" }, 400);
   }
   const waistCm = body.waist_cm === undefined || body.waist_cm === null ? null : num(body.waist_cm);
+  const excludedFoodIds = Array.isArray(body.excluded_food_ids)
+    ? body.excluded_food_ids.filter((v): v is string => typeof v === "string")
+    : [];
 
   const headers = {
     apikey: serviceKey,
@@ -139,6 +144,7 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     activity: body.activity,
     goal: body.goal,
     waist_cm: waistCm,
+    excluded_food_ids: excludedFoodIds,
     updated_at: new Date().toISOString(),
   };
 

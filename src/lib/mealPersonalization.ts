@@ -16,6 +16,7 @@ export type PersonalProfile = {
   activity: ActivityLevel;
   goal: PersonalGoal;
   waistCm?: number;
+  excludedFoodIds: string[];
 };
 
 export type PersonalTargets = {

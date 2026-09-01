@@ -10,6 +10,7 @@ type PersonalPlanRow = {
   activity: string;
   goal: string;
   waist_cm: number | null;
+  excluded_food_ids: string[] | null;
 };
 
 function fromRow(row: PersonalPlanRow): PersonalProfile {
@@ -22,6 +23,7 @@ function fromRow(row: PersonalPlanRow): PersonalProfile {
     activity: row.activity as PersonalProfile["activity"],
     goal: row.goal as PersonalProfile["goal"],
     waistCm: row.waist_cm ?? undefined,
+    excludedFoodIds: row.excluded_food_ids ?? [],
   };
 }
 
@@ -64,6 +66,7 @@ export async function savePersonalPlan(profile: PersonalProfile): Promise<boolea
         activity: profile.activity,
         goal: profile.goal,
         waist_cm: profile.waistCm ?? null,
+        excluded_food_ids: profile.excludedFoodIds,
       }),
     });
     if (!res.ok) {

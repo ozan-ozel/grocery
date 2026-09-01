@@ -18,6 +18,7 @@ const DEFAULT_PROFILE: PersonalProfile = {
   weightKg: 70,
   activity: "moderate",
   goal: "maintain",
+  excludedFoodIds: [],
 };
 
 // Not synced yet (session not ready) falls back to a bare device-local key,
