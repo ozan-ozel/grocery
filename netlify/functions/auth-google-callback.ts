@@ -9,9 +9,7 @@
 import type { Context } from "@netlify/functions";
 import { OAuth2Client } from "google-auth-library";
 import jwt from "jsonwebtoken";
-import { parseCookies } from "./_auth";
 
-const OAUTH_STATE_COOKIE = "oauth_state";
 const SESSION_COOKIE = "session";
 const SESSION_MAX_AGE_S = 60 * 60 * 24 * 30; // 30 days — no refresh flow in v1
 
@@ -19,18 +17,23 @@ function isProd(): boolean {
   return process.env.CONTEXT === "production";
 }
 
+// See the matching comment in auth-google-start.ts — must derive the same
+// scheme there and here, since Google requires the redirect_uri used in the
+// token exchange to exactly match the one from the authorization request.
+function originOf(request: Request, url: URL): string {
+  const proto = request.headers.get("x-forwarded-proto")?.split(",")[0]?.trim();
+  return proto ? `${proto}://${url.host}` : url.origin;
+}
+
 function restBase(url: string): string {
   return `${url.replace(/\/$/, "")}/rest/v1`;
 }
 
-function clearedStateCookie(): string {
-  return `${OAUTH_STATE_COOKIE}=; Max-Age=0; Path=/`;
-}
-
 function badRequest(message: string): Response {
-  const headers = new Headers({ "content-type": "application/json" });
-  headers.append("set-cookie", clearedStateCookie());
-  return new Response(JSON.stringify({ error: message }), { status: 400, headers });
+  return new Response(JSON.stringify({ error: message }), {
+    status: 400,
+    headers: { "content-type": "application/json" },
+  });
 }
 
 export default async (request: Request, _context: Context): Promise<Response> => {
@@ -51,19 +54,15 @@ export default async (request: Request, _context: Context): Promise<Response> =>
   const state = url.searchParams.get("state");
   if (!code || !state) return badRequest("missing code or state");
 
-  const stateCookieRaw = parseCookies(request.headers.get("cookie"))[OAUTH_STATE_COOKIE];
-  if (!stateCookieRaw) return badRequest("missing oauth state cookie");
-
-  let stashed: { csrf?: unknown; returnTo?: unknown };
+  let returnTo = "/";
   try {
-    stashed = JSON.parse(decodeURIComponent(stateCookieRaw));
+    const payload = jwt.verify(state, jwtSecret) as { returnTo?: unknown };
+    if (typeof payload.returnTo === "string") returnTo = payload.returnTo;
   } catch {
-    return badRequest("invalid oauth state cookie");
+    return badRequest("invalid or expired oauth state");
   }
-  if (stashed.csrf !== state) return badRequest("state mismatch");
-  const returnTo = typeof stashed.returnTo === "string" ? stashed.returnTo : "/";
 
-  const redirectUri = `${url.origin}/api/auth-google-callback`;
+  const redirectUri = `${originOf(request, url)}/api/auth-google-callback`;
 
   // Exchange the authorization code for Google's tokens.
   let idToken: string;
@@ -137,8 +136,6 @@ export default async (request: Request, _context: Context): Promise<Response> =>
     .filter(Boolean)
     .join("; ");
 
-  const headers = new Headers({ location: returnTo });
-  headers.append("set-cookie", sessionCookie);
-  headers.append("set-cookie", clearedStateCookie());
+  const headers = new Headers({ location: returnTo, "set-cookie": sessionCookie });
   return new Response(null, { status: 302, headers });
 };

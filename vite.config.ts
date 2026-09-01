@@ -10,4 +10,9 @@ export default defineConfig({
   resolve: {
     alias: { "@": path.resolve(__dirname, "./src") },
   },
+  server: {
+    // Lets the ngrok tunnel (mobile testing, see docs/ if this sticks around)
+    // reach the dev server — Vite blocks unrecognized Host headers by default.
+    allowedHosts: ["unframed-kindness-selection.ngrok-free.dev"],
+  },
 });
