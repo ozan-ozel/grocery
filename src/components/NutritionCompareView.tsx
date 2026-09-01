@@ -53,14 +53,15 @@ export function NutritionCompareView() {
         />
       </div>
 
-      {foodA ? (
+      {foodA || foodB ? (
         <>
-        <NutritionRadarChart foodA={foodA} foodB={foodB} />
         <table className="mt-4 w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-xs text-muted-foreground">
               <th className="py-2 pr-2 text-left font-normal">100g</th>
-              <th className="py-2 px-1 text-right font-normal">{foodA.name_tr}</th>
+              <th className="py-2 px-1 text-right font-normal">
+                {foodA ? foodA.name_tr : "—"}
+              </th>
               <th className="py-2 pl-1 text-right font-normal">
                 {foodB ? foodB.name_tr : "—"}
               </th>
@@ -68,25 +69,25 @@ export function NutritionCompareView() {
           </thead>
           <tbody>
             {ROWS.map(({ key, label }) => {
-              const a = foodA[key] as number;
+              const a = foodA ? (foodA[key] as number) : undefined;
               const b = foodB ? (foodB[key] as number) : undefined;
-              const aHigher = b !== undefined && a > b;
-              const bHigher = b !== undefined && b > a;
+              const aHigher = a !== undefined && b !== undefined && a > b;
+              const bHigher = a !== undefined && b !== undefined && b > a;
               return (
                 <tr key={key} className="border-b border-border/60">
                   <td className="py-2 pr-2 text-muted-foreground">{label}</td>
                   <td
                     className={cn(
                       "ledger px-1 py-2 text-right tabular-nums",
-                      aHigher && "rounded bg-secondary text-secondary-foreground"
+                      aHigher && "rounded bg-secondary text-amber-600"
                     )}
                   >
-                    {format(a)}
+                    {a !== undefined ? format(a) : "—"}
                   </td>
                   <td
                     className={cn(
                       "ledger pl-1 py-2 text-right tabular-nums",
-                      bHigher && "rounded bg-secondary text-secondary-foreground"
+                      bHigher && "rounded bg-secondary text-amber-600"
                     )}
                   >
                     {b !== undefined ? format(b) : "—"}
@@ -96,6 +97,7 @@ export function NutritionCompareView() {
             })}
           </tbody>
         </table>
+        <NutritionRadarChart foodA={foodA} foodB={foodB} />
         </>
       ) : (
         <p className="px-1 pt-6 text-sm text-muted-foreground">

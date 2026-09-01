@@ -57,11 +57,15 @@ function formatValue(value: number, unit: string): string {
   return `${rounded} ${unit}`;
 }
 
+// Caller only renders this when at least one of foodA/foodB is picked — the
+// two slots fill independently (either can be chosen first), so both are
+// nullable here and the chart degrades to a single placeholder pentagon for
+// whichever one is actually set.
 export function NutritionRadarChart({
   foodA,
   foodB,
 }: {
-  foodA: Nutrition;
+  foodA: Nutrition | null;
   foodB: Nutrition | null;
 }) {
   // Reference scale: each axis is normalized against whichever of the two
@@ -76,7 +80,7 @@ export function NutritionRadarChart({
   const maxByKey = useMemo(() => {
     const max: Record<string, number> = {};
     for (const axis of AXES) {
-      const a = foodA[axis.key] as number;
+      const a = foodA ? (foodA[axis.key] as number) : 0;
       const b = foodB ? (foodB[axis.key] as number) : 0;
       max[axis.key] = Math.max(
         Number.isFinite(a) ? a : 0,
@@ -86,8 +90,17 @@ export function NutritionRadarChart({
     return max;
   }, [foodA, foodB]);
 
-  const pointsA = polygonPoints(foodA, maxByKey);
+  const pointsA = foodA ? polygonPoints(foodA, maxByKey) : null;
   const pointsB = foodB ? polygonPoints(foodB, maxByKey) : null;
+
+  const ariaLabel =
+    foodA && foodB
+      ? `${foodA.name_tr} ve ${foodB.name_tr} besin profili karşılaştırması`
+      : foodA
+        ? `${foodA.name_tr} besin profili`
+        : foodB
+          ? `${foodB.name_tr} besin profili`
+          : "besin profili";
 
   return (
     <div className="mt-4">
@@ -95,12 +108,9 @@ export function NutritionRadarChart({
         <svg
           viewBox={`0 0 ${SIZE} ${SIZE}`}
           className="w-full"
+          style={{ overflow: "visible" }}
           role="img"
-          aria-label={
-            foodB
-              ? `${foodA.name_tr} ve ${foodB.name_tr} besin profili karşılaştırması`
-              : `${foodA.name_tr} besin profili`
-          }
+          aria-label={ariaLabel}
         >
           {RINGS.map((ring) => (
             <polygon
@@ -140,24 +150,30 @@ export function NutritionRadarChart({
               strokeDasharray="4 3"
             />
           )}
-          <polygon
-            points={pointsA}
-            fill="var(--color-signal)"
-            fillOpacity={0.28}
-            stroke="var(--color-signal)"
-            strokeWidth={2}
-          />
+          {pointsA && (
+            <polygon
+              points={pointsA}
+              fill="var(--color-signal)"
+              fillOpacity={0.28}
+              stroke="var(--color-signal)"
+              strokeWidth={2}
+            />
+          )}
 
           {AXES.map((axis, i) => {
-            const a = pointAt(i, fractionOf(foodA[axis.key] as number, maxByKey[axis.key]));
+            const a = foodA
+              ? pointAt(i, fractionOf(foodA[axis.key] as number, maxByKey[axis.key]))
+              : null;
             const b = foodB
               ? pointAt(i, fractionOf(foodB[axis.key] as number, maxByKey[axis.key]))
               : null;
             return (
               <g key={axis.key}>
-                <circle cx={a.x} cy={a.y} r={3} fill="var(--color-signal)">
-                  <title>{`${foodA.name_tr} · ${axis.label}: ${formatValue(foodA[axis.key] as number, axis.unit)}`}</title>
-                </circle>
+                {a && foodA && (
+                  <circle cx={a.x} cy={a.y} r={3} fill="var(--color-signal)">
+                    <title>{`${foodA.name_tr} · ${axis.label}: ${formatValue(foodA[axis.key] as number, axis.unit)}`}</title>
+                  </circle>
+                )}
                 {b && foodB && (
                   <circle cx={b.x} cy={b.y} r={3} fill="var(--color-primary)">
                     <title>{`${foodB.name_tr} · ${axis.label}: ${formatValue(foodB[axis.key] as number, axis.unit)}`}</title>
@@ -189,10 +205,14 @@ export function NutritionRadarChart({
       </div>
 
       <div className="mt-2 flex items-center justify-center gap-4 text-xs text-muted-foreground">
-        <span className="flex items-center gap-1.5">
-          <span className="inline-block size-2.5 rounded-full" style={{ background: "var(--color-signal)" }} />
-          {foodA.name_tr}
-        </span>
+        {foodA ? (
+          <span className="flex items-center gap-1.5">
+            <span className="inline-block size-2.5 rounded-full" style={{ background: "var(--color-signal)" }} />
+            {foodA.name_tr}
+          </span>
+        ) : (
+          <span className="text-muted-foreground/70">1. besin seç →</span>
+        )}
         {foodB ? (
           <span className="flex items-center gap-1.5">
             <span
