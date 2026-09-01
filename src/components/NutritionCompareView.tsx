@@ -3,6 +3,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { format } from "@/components/NutritionTableCell";
+import { NutritionRadarChart } from "@/components/NutritionRadarChart";
 import { cn } from "@/lib/utils";
 import type { Nutrition } from "@/lib/nutrition";
 
@@ -52,21 +53,25 @@ export function NutritionCompareView() {
         />
       </div>
 
-      {foodA && foodB ? (
+      {foodA ? (
+        <>
+        <NutritionRadarChart foodA={foodA} foodB={foodB} />
         <table className="mt-4 w-full border-collapse text-sm">
           <thead>
             <tr className="border-b border-border text-xs text-muted-foreground">
               <th className="py-2 pr-2 text-left font-normal">100g</th>
               <th className="py-2 px-1 text-right font-normal">{foodA.name_tr}</th>
-              <th className="py-2 pl-1 text-right font-normal">{foodB.name_tr}</th>
+              <th className="py-2 pl-1 text-right font-normal">
+                {foodB ? foodB.name_tr : "—"}
+              </th>
             </tr>
           </thead>
           <tbody>
             {ROWS.map(({ key, label }) => {
               const a = foodA[key] as number;
-              const b = foodB[key] as number;
-              const aHigher = a > b;
-              const bHigher = b > a;
+              const b = foodB ? (foodB[key] as number) : undefined;
+              const aHigher = b !== undefined && a > b;
+              const bHigher = b !== undefined && b > a;
               return (
                 <tr key={key} className="border-b border-border/60">
                   <td className="py-2 pr-2 text-muted-foreground">{label}</td>
@@ -84,16 +89,17 @@ export function NutritionCompareView() {
                       bHigher && "rounded bg-secondary text-secondary-foreground"
                     )}
                   >
-                    {format(b)}
+                    {b !== undefined ? format(b) : "—"}
                   </td>
                 </tr>
               );
             })}
           </tbody>
         </table>
+        </>
       ) : (
         <p className="px-1 pt-6 text-sm text-muted-foreground">
-          Karşılaştırmak için iki besin seç.
+          Karşılaştırmak için besin seç.
         </p>
       )}
     </div>
