@@ -80,7 +80,7 @@ export function AppShoppingTabs({
   return (
     <>
       <TabsContent value="today">
-        <TodayView userId={userId} householdId={householdId} />
+        <TodayView userId={userId} householdId={householdId} onAddItem={onAddItem} />
       </TabsContent>
 
       <TabsContent value="list">
