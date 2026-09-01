@@ -1,5 +1,5 @@
 import { useMealPersonalization } from "./useMealPersonalization";
-import { useMealPlan } from "./useMealPlan";
+import { todayDateStr, useMealPlan } from "./useMealPlan";
 import { useFoodCatalog } from "./useFoodCatalog";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import type { PersonalTargets } from "@/lib/mealPersonalization";
@@ -10,6 +10,17 @@ export type RemainingToday =
   | {
       status: "no-profile";
       catalogMap: NutritionMap;
+      logConsumption: (foodId: string, grams: number) => void;
+    }
+  // Without the catalog every combo's totals lookup fails and matchCombos
+  // returns [] — indistinguishable from an honest "nothing fits your budget"
+  // unless the loading/error state is carried through to the view.
+  | {
+      status: "loading-catalog";
+      logConsumption: (foodId: string, grams: number) => void;
+    }
+  | {
+      status: "catalog-error";
       logConsumption: (foodId: string, grams: number) => void;
     }
   | {
@@ -59,16 +70,33 @@ export function useRemainingToday(
   userId: string | null,
   householdId: string | null
 ): RemainingToday {
-  const { targets, profile } = useMealPersonalization(userId);
-  const { catalogMap } = useFoodCatalog();
-  const { dailyNutrition, addItem } = useMealPlan(householdId, catalogMap);
+  const { targets, profile, hasSavedProfile } = useMealPersonalization(userId);
+  const { catalogMap, status: catalogStatus } = useFoodCatalog();
+  // Bugün always means today, whatever day Yemek Planı is currently browsing
+  // (both read the same ?date URL param, so this instance opts out of it).
+  const { dailyNutrition, addItem } = useMealPlan(householdId, catalogMap, {
+    pinnedDate: todayDateStr(),
+  });
 
   function logConsumption(foodId: string, grams: number) {
     addItem(inferSlot(), foodId, grams);
   }
 
-  if (!targets) {
+  // `targets` alone can't answer this: calculateTargets(DEFAULT_PROFILE)
+  // returns valid numbers for a body nobody entered.
+  if (!hasSavedProfile || !targets) {
     return { status: "no-profile", catalogMap, logConsumption };
+  }
+
+  if (catalogStatus === "error") {
+    return { status: "catalog-error", logConsumption };
+  }
+
+  // Anything short of "ready" (today: "loading"; "idle" is in useFoodCatalog's
+  // Status union but unreachable) means an empty catalogMap, so no combo could
+  // score even if one fit.
+  if (catalogStatus !== "ready") {
+    return { status: "loading-catalog", logConsumption };
   }
 
   const target = targetToMacros(targets);

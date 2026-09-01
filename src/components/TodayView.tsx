@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { useRemainingToday } from "@/hooks/useRemainingToday";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, type ScoredCombo } from "@/lib/comboMatch";
@@ -26,6 +26,9 @@ const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
   tags: raw.tags,
 }));
 
+// How long a combo's "Listeye ekle" button stays on "Eklendi".
+const ADDED_FEEDBACK_MS = 1500;
+
 type Props = {
   userId: string | null;
   householdId: string | null;
@@ -34,6 +37,9 @@ type Props = {
 
 export function TodayView({ userId, householdId, onAddItem }: Props) {
   const remaining = useRemainingToday(userId, householdId);
+  // The shopping list lives on another tab, so a combo that was just added
+  // shows its own transient confirmation here instead.
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
 
   const suggestions = useMemo<ScoredCombo[]>(() => {
     if (remaining.status !== "ready") return [];
@@ -54,10 +60,34 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     );
   }
 
+  if (remaining.status === "loading-catalog") {
+    return (
+      <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+        Yükleniyor…
+      </div>
+    );
+  }
+
+  if (remaining.status === "catalog-error") {
+    return (
+      <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
+        Besin verilerine ulaşılamadı. Sayfayı yenile.
+      </div>
+    );
+  }
+
   function addComboToList(combo: ScoredCombo) {
     for (const item of combo.items) {
       onAddItem(item.foodId, `${item.grams}g`);
     }
+    setAddedIds((prev) => new Set(prev).add(combo.id));
+    window.setTimeout(() => {
+      setAddedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(combo.id);
+        return next;
+      });
+    }, ADDED_FEEDBACK_MS);
   }
 
   function logComboEaten(combo: ScoredCombo) {
@@ -93,7 +123,7 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
                   type="button"
                   onClick={() => addComboToList(combo)}
                   className="rounded-md border border-border px-2 py-1 text-xs">
-                  Listeye ekle
+                  {addedIds.has(combo.id) ? "Eklendi" : "Listeye ekle"}
                 </button>
                 <button
                   type="button"
@@ -120,15 +150,21 @@ function RemainingSummary({ remaining }: { remaining: MacroTotals }) {
   ];
   return (
     <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
-      {rows.map(([label, value]) => (
-        <div key={label} className="rounded-lg border border-border p-2">
-          <p className="text-xs text-muted-foreground">{label}</p>
-          <p
-            className={`ledger text-lg font-semibold ${value < 0 ? "text-signal" : ""}`}>
-            {Math.round(value)}
-          </p>
-        </div>
-      ))}
+      {rows.map(([label, value]) => {
+        // Style off the rounded number, not the raw one: -0.3 renders as "0"
+        // (Math.round gives -0, which stringifies to "0"), and a "0" tile in
+        // over-budget red reads as a bug.
+        const rounded = Math.round(value);
+        return (
+          <div key={label} className="rounded-lg border border-border p-2">
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p
+              className={`ledger text-lg font-semibold ${rounded < 0 ? "text-signal" : ""}`}>
+              {rounded}
+            </p>
+          </div>
+        );
+      })}
     </div>
   );
 }

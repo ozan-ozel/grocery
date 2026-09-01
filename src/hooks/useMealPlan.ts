@@ -29,7 +29,7 @@ function addDaysStr(dateStr: string, delta: number): string {
   return dateToStr(dt);
 }
 
-function todayDateStr(): string {
+export function todayDateStr(): string {
   return dateToStr(new Date());
 }
 
@@ -49,13 +49,31 @@ function emptyDayPlan(): DayPlan {
 // stored server-side, only { foodId, quantityG }; calculateItemsNutrition
 // always derives it from the live catalog. Without a household (no tenant
 // selected yet) the plan stays in-memory only, same as before this landed.
-export function useMealPlan(householdId: string | null, catalog: NutritionMap) {
-  const [date, setDate] = useState<string>(initialDate);
+//
+// `options.pinnedDate` opts a caller out of the shared ?date URL param entirely:
+// the plan is fixed to that date and never reads or writes the URL. Bugün needs
+// this — it must always mean today, while Yemek Planı's prev/next-day navigation
+// keeps steering the URL param for its own instance.
+export function useMealPlan(
+  householdId: string | null,
+  catalog: NutritionMap,
+  options?: { pinnedDate?: string },
+) {
+  const [date, setDate] = useState<string>(() => options?.pinnedDate ?? initialDate());
   const [plans, setPlans] = useState<Record<string, DayPlan>>({});
 
   useEffect(() => {
+    if (options?.pinnedDate) return;
     writeMealDateToUrl(date);
-  }, [date]);
+  }, [date, options?.pinnedDate]);
+
+  // Re-pin when the caller's date moves under us (midnight rollover while mounted).
+  useEffect(() => {
+    if (options?.pinnedDate && options.pinnedDate !== date) {
+      setDate(options.pinnedDate);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [options?.pinnedDate]);
 
   const planKey = `${householdId ?? "local"}|${date}`;
   const dayPlan = plans[planKey] ?? emptyDayPlan();
