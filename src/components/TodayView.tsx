@@ -60,6 +60,12 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     }
   }
 
+  function logComboEaten(combo: ScoredCombo) {
+    for (const item of combo.items) {
+      remaining.logConsumption(item.foodId, item.grams);
+    }
+  }
+
   return (
     <div className="space-y-4">
       <RemainingSummary remaining={remaining.remaining} />
@@ -88,6 +94,12 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
                   onClick={() => addComboToList(combo)}
                   className="rounded-md border border-border px-2 py-1 text-xs">
                   Listeye ekle
+                </button>
+                <button
+                  type="button"
+                  onClick={() => logComboEaten(combo)}
+                  className="rounded-md border border-border px-2 py-1 text-xs">
+                  Yedim de
                 </button>
               </div>
             </li>
