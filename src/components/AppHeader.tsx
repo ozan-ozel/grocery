@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { CloudOff, FilePlus2, LogOut, RefreshCw } from "lucide-react";
+import { CloudOff, FilePlus2, LogOut, RefreshCw, ShoppingBasket } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -131,11 +131,12 @@ export function AppHeader({
             type="button"
             onClick={() => onSelectSection("alisveris")}
             className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+              "inline-flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               section === "alisveris"
                 ? "bg-background text-foreground shadow-sm"
                 : "text-muted-foreground hover:text-foreground",
             )}>
+            <ShoppingBasket className="size-4 shrink-0 rounded-full bg-secondary p-0.5 text-secondary-foreground" />
             Alışveriş
           </button>
           <button
