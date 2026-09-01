@@ -1,0 +1,177 @@
+[
+  {
+    "id": "tavuk-pirinc-brokoli",
+    "name_tr": "Tavuklu pirinç ve brokoli",
+    "items": [
+      { "food_id": "tavuk göğsü", "grams": 150 },
+      { "food_id": "pirinç", "grams": 150 },
+      { "food_id": "brokoli", "grams": 100 }
+    ],
+    "prep_minutes": 20,
+    "tags": ["hizli", "yuksek-protein"]
+  },
+  {
+    "id": "somon-brokoli-zeytinyagi",
+    "name_tr": "Somon ve brokoli",
+    "items": [
+      { "food_id": "somon", "grams": 150 },
+      { "food_id": "brokoli", "grams": 100 },
+      { "food_id": "zeytinyağı", "grams": 10 }
+    ],
+    "prep_minutes": 20,
+    "tags": ["yuksek-protein", "omega3"]
+  },
+  {
+    "id": "yogurt-muz-ceviz",
+    "name_tr": "Yoğurt, muz ve ceviz",
+    "items": [
+      { "food_id": "yoğurt", "grams": 200 },
+      { "food_id": "muz", "grams": 100 },
+      { "food_id": "ceviz", "grams": 20 }
+    ],
+    "prep_minutes": 3,
+    "tags": ["hizli", "kahvalti"]
+  },
+  {
+    "id": "yumurta-tam-bugday-domates",
+    "name_tr": "Yumurta ve tam buğday ekmeği",
+    "items": [
+      { "food_id": "yumurta", "grams": 100 },
+      { "food_id": "tam buğday ekmeği", "grams": 60 },
+      { "food_id": "domates", "grams": 80 }
+    ],
+    "prep_minutes": 10,
+    "tags": ["hizli", "kahvalti"]
+  },
+  {
+    "id": "mercimek-corbasi",
+    "name_tr": "Mercimek çorbası malzemeleri",
+    "items": [
+      { "food_id": "kırmızı mercimek", "grams": 100 },
+      { "food_id": "soğan", "grams": 50 },
+      { "food_id": "havuç", "grams": 50 }
+    ],
+    "prep_minutes": 30,
+    "tags": ["vejetaryen", "yuksek-lif"]
+  },
+  {
+    "id": "nohutlu-salata",
+    "name_tr": "Nohutlu salata",
+    "items": [
+      { "food_id": "nohut", "grams": 150 },
+      { "food_id": "domates", "grams": 100 },
+      { "food_id": "salatalık", "grams": 100 },
+      { "food_id": "zeytinyağı", "grams": 15 }
+    ],
+    "prep_minutes": 10,
+    "tags": ["hizli", "vejetaryen"]
+  },
+  {
+    "id": "karides-kabak-mantar",
+    "name_tr": "Karides ve sebze sote",
+    "items": [
+      { "food_id": "karides", "grams": 150 },
+      { "food_id": "kabak", "grams": 100 },
+      { "food_id": "mantar", "grams": 80 }
+    ],
+    "prep_minutes": 15,
+    "tags": ["yuksek-protein", "dusuk-kalori"]
+  },
+  {
+    "id": "hindi-bulgur-patlican",
+    "name_tr": "Hindi ve bulgur pilavı",
+    "items": [
+      { "food_id": "hindi göğsü", "grams": 150 },
+      { "food_id": "bulgur", "grams": 150 },
+      { "food_id": "patlıcan", "grams": 100 }
+    ],
+    "prep_minutes": 25,
+    "tags": ["yuksek-protein"]
+  },
+  {
+    "id": "beyaz-peynir-tabagi",
+    "name_tr": "Beyaz peynirli kahvaltı tabağı",
+    "items": [
+      { "food_id": "beyaz peynir", "grams": 60 },
+      { "food_id": "domates", "grams": 80 },
+      { "food_id": "salatalık", "grams": 80 },
+      { "food_id": "tam buğday ekmeği", "grams": 50 }
+    ],
+    "prep_minutes": 5,
+    "tags": ["hizli", "kahvalti"]
+  },
+  {
+    "id": "kiyma-makarna-domates",
+    "name_tr": "Dana kıyma ve makarna",
+    "items": [
+      { "food_id": "dana kıyma", "grams": 120 },
+      { "food_id": "makarna", "grams": 150 },
+      { "food_id": "domates", "grams": 100 }
+    ],
+    "prep_minutes": 25,
+    "tags": ["yuksek-protein"]
+  },
+  {
+    "id": "kuru-fasulye-pirinc",
+    "name_tr": "Kuru fasulye ve pirinç",
+    "items": [
+      { "food_id": "kuru fasulye", "grams": 150 },
+      { "food_id": "pirinç", "grams": 100 }
+    ],
+    "prep_minutes": 15,
+    "tags": ["vejetaryen", "yuksek-lif"]
+  },
+  {
+    "id": "somon-patates-ispanak",
+    "name_tr": "Somon, patates ve ıspanak",
+    "items": [
+      { "food_id": "somon", "grams": 150 },
+      { "food_id": "patates", "grams": 200 },
+      { "food_id": "ıspanak", "grams": 80 }
+    ],
+    "prep_minutes": 30,
+    "tags": ["yuksek-protein"]
+  },
+  {
+    "id": "badem-kuru-uzum",
+    "name_tr": "Badem ve kuru üzüm",
+    "items": [
+      { "food_id": "badem", "grams": 30 },
+      { "food_id": "kuru üzüm", "grams": 30 }
+    ],
+    "prep_minutes": 1,
+    "tags": ["hizli", "ara-ogun", "atistirmalik"]
+  },
+  {
+    "id": "kasarli-omlet",
+    "name_tr": "Kaşarlı omlet",
+    "items": [
+      { "food_id": "yumurta", "grams": 150 },
+      { "food_id": "kaşar peyniri", "grams": 30 },
+      { "food_id": "yeşil biber", "grams": 50 }
+    ],
+    "prep_minutes": 10,
+    "tags": ["hizli", "kahvalti"]
+  },
+  {
+    "id": "tavuk-karnabahar",
+    "name_tr": "Tavuk ve karnabahar",
+    "items": [
+      { "food_id": "tavuk göğsü", "grams": 150 },
+      { "food_id": "karnabahar", "grams": 150 },
+      { "food_id": "zeytinyağı", "grams": 10 }
+    ],
+    "prep_minutes": 20,
+    "tags": ["dusuk-karbon", "yuksek-protein"]
+  },
+  {
+    "id": "elma-ceviz",
+    "name_tr": "Elma ve ceviz",
+    "items": [
+      { "food_id": "elma", "grams": 150 },
+      { "food_id": "ceviz", "grams": 20 }
+    ],
+    "prep_minutes": 1,
+    "tags": ["hizli", "ara-ogun"]
+  }
+]
