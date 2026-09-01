@@ -32,9 +32,12 @@ Hand-authored meal-combo suggestions used by the "Bugün" recommendation engine
 
 - `id` — stable string id.
 - `name_tr` — display name.
-- `items` — `{ food_id, grams }[]`. `food_id` must be an existing `name_tr` value in
-  `nutrition.json` (checked at suggestion time via `lookupNutrition`; a combo with an
-  unmatched `food_id` is silently skipped rather than shown with wrong totals).
+- `items` — `{ food_id, grams }[]`. `food_id` is checked at suggestion time against the
+  live Supabase `nutrition` table (fetched via `/api/nutrition`, looked up with
+  `lookupNutrition`), not directly against this repo's `nutrition.json` — that file only
+  seeds the table and can drift from it. A combo whose `food_id` has no live match is
+  silently skipped rather than shown with wrong totals, so a name that's correct in
+  `nutrition.json` but was later renamed/removed in Supabase would quietly drop that combo.
 - `prep_minutes` — rough hands-on time.
 - `tags` — free-form, not filtered on yet; informational only for now.
 

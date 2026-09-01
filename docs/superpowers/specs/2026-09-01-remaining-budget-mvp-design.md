@@ -147,10 +147,19 @@ export type Combo = {
 
 ### `src/lib/comboMatch.ts` (new)
 
-Pure function, no I/O: `matchCombos(combos: Combo[], remaining: Macros, excludedFoodIds:
-string[]): ScoredCombo[]`. Filters out any combo containing an excluded `food_id`, scores
-the rest by fit-to-remaining (penalize combos that exceed remaining kcal/protein, prefer
-close-but-under), returns the top 3–5.
+Pure function, no I/O: `matchCombos(combos: Combo[], remaining: MacroTotals, excludedFoodIds:
+string[], catalog: NutritionMap): ScoredCombo[]` (the plan added the `catalog` parameter
+during implementation, needed to look up each ingredient's actual macros — this spec's
+earlier draft omitted it). Filters out any combo containing an excluded `food_id`, hard-
+filters to combos whose total kcal doesn't exceed `remaining.kcal` (a combo that's over
+budget on calories is dropped outright, not merely penalized), then ranks the survivors by
+protein descending — protein was chosen over a full weighted fit-to-remaining score as the
+simpler MVP heuristic, since it's the macro this app's target persona finds hardest to hit
+without deliberate planning. Returns the top 5. Corrected here after the final whole-branch
+review found this spec's original wording ("penalize combos that exceed... prefer
+close-but-under") described a softer, multi-macro scoring approach that was never actually
+implemented — the simpler kcal-filter-then-protein-sort approach that shipped is a
+deliberate, approved MVP choice (see Task 4 in the implementation plan), not a shortfall.
 
 ### `src/hooks/useRemainingToday.ts` (new)
 
@@ -204,10 +213,14 @@ ingredients, so no bulk endpoint is needed at this scale).
 - No Kişisel Plan profile → setup prompt, not fabricated numbers.
 - No combo fits the remaining budget → honest empty state, not an irrelevant suggestion.
 - Remaining goes negative → shown as a negative/over-budget value, not clamped or hidden.
-- "Yedim de" partial failure (one ingredient's POST fails mid-sequence) → same
-  optimistic-with-inline-retry posture as `useMealPlan`'s existing mutators (per the meal
-  planner spec precedent): the entries that succeeded stay, the failed one surfaces a retry
-  affordance rather than rolling everything back.
+- "Yedim de" partial failure (one ingredient's POST fails mid-sequence) → matches
+  `useMealPlan`'s actual existing mutator behavior, not the meal-planner spec's original
+  aspiration: the optimistic local update stays regardless of API outcome, and a failed
+  `createMealEntry` call only `console.warn`s — there is no retry-UI affordance anywhere in
+  `useMealPlan` today. The entries that succeeded stay either way; a failed one silently
+  doesn't persist server-side rather than rolling back. Corrected here after the final
+  whole-branch review found this spec's original wording claimed a retry affordance that
+  was never actually built — implementing one is deferred, not a defect in what shipped.
 
 ## Testing
 

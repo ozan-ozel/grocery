@@ -934,22 +934,12 @@ export function TodayView({ userId, householdId }: Props) {
 
   return (
     <div className="space-y-4">
-      <RemainingSummary
-        target={remaining.target}
-        consumed={remaining.consumed}
-        remaining={remaining.remaining}
-      />
+      <RemainingSummary remaining={remaining.remaining} />
     </div>
   );
 }
 
-function RemainingSummary({
-  remaining,
-}: {
-  target: MacroTotals;
-  consumed: MacroTotals;
-  remaining: MacroTotals;
-}) {
+function RemainingSummary({ remaining }: { remaining: MacroTotals }) {
   const rows: [string, number][] = [
     ["Kalori", remaining.kcal],
     ["Protein", remaining.proteinG],
@@ -1134,11 +1124,7 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
 
   return (
     <div className="space-y-4">
-      <RemainingSummary
-        target={remaining.target}
-        consumed={remaining.consumed}
-        remaining={remaining.remaining}
-      />
+      <RemainingSummary remaining={remaining.remaining} />
       {suggestions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Bugünkü bütçene uyan hazır bir kombinasyon yok — az kaldıysa bu
