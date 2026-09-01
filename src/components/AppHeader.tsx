@@ -217,6 +217,7 @@ export function AppHeader({
               className="-mx-1 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               style={{ maskImage: tabScrollMask, WebkitMaskImage: tabScrollMask }}>
               <TabsList className="px-1">
+                <TabsTrigger value="today">Bugün</TabsTrigger>
                 <TabsTrigger value="list">Liste</TabsTrigger>
                 <TabsTrigger value="history">Geçmiş</TabsTrigger>
                 <TabsTrigger value="find">Bul</TabsTrigger>

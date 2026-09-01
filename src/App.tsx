@@ -180,6 +180,8 @@ function AppShell({
           <AppShoppingTabs
             catalog={catalog}
             onAddItem={addItem}
+            userId={currentUserId}
+            householdId={activeTenantId}
             active={active}
             past={past}
             groupByCategory={groupByCategory}

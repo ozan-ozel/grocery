@@ -4,12 +4,15 @@ import { ActiveList } from "@/components/ActiveList";
 import { CategoriesView } from "@/components/CategoriesView";
 import { HistoryView } from "@/components/HistoryView";
 import { SearchView } from "@/components/SearchView";
+import { TodayView } from "@/components/TodayView";
 import type { AnyCategoryId, CatalogEntry, List } from "@/lib/store";
 import type { CategoryOverlay, MergedCategory } from "@/lib/categorization/userCategories";
 
 type Props = {
   catalog: CatalogEntry[];
   onAddItem: (name: string, qty: string) => void;
+  userId: string | null;
+  householdId: string | null;
   active: List;
   past: List[];
   groupByCategory: boolean;
@@ -43,6 +46,8 @@ type Props = {
 export function AppShoppingTabs({
   catalog,
   onAddItem,
+  userId,
+  householdId,
   active,
   past,
   groupByCategory,
@@ -74,6 +79,10 @@ export function AppShoppingTabs({
 }: Props) {
   return (
     <>
+      <TabsContent value="today">
+        <TodayView userId={userId} householdId={householdId} />
+      </TabsContent>
+
       <TabsContent value="list">
         <AddItem catalog={catalog} onAdd={onAddItem} />
         <div className="pt-2">
