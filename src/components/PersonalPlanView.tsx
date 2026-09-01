@@ -142,21 +142,6 @@ export function PersonalPlanView({ userId }: Props) {
               }
             />
           </Field>
-          <Field label="Denklem seçimi">
-            <select
-              value={profile.equationSex}
-              onChange={event =>
-                setEquationSex(
-                  (event.target as HTMLSelectElement).value as
-                    | "female"
-                    | "male",
-                )
-              }
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
-              <option value="female">Kadın katsayısı</option>
-              <option value="male">Erkek katsayısı</option>
-            </select>
-          </Field>
           <Field label="Yaş (yıl)">
             <NumberInput
               value={profile.ageYears}
@@ -175,46 +160,68 @@ export function PersonalPlanView({ userId }: Props) {
               onChange={value => update("weightKg", value)}
             />
           </Field>
-          <Field label="Bel (cm), isteğe bağlı">
-            <NumberInput
-              value={profile.waistCm ?? ""}
-              onChange={value => update("waistCm", value || undefined)}
-            />
-          </Field>
-          <Field
-            label="Günlük aktivite"
-            sourceBadge={showSources ? "WHO" : undefined}>
-            <select
-              value={profile.activity}
-              onChange={event =>
-                setActivity(
-                  (event.target as HTMLSelectElement)
-                    .value as typeof profile.activity,
-                )
-              }
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
-              {ACTIVITY_OPTIONS.map(option => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </Field>
-          <Field label="Hedef" sourceBadge={showSources ? "NIDDK" : undefined}>
-            <select
-              value={profile.goal}
-              onChange={event =>
-                setGoal(
-                  (event.target as HTMLSelectElement).value as PersonalGoal,
-                )
-              }
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
-              <option value="maintain">Kilomu korumak</option>
-              <option value="loss">Kademeli kilo kaybı</option>
-              <option value="gain">Kilo almak / performans</option>
-            </select>
-          </Field>
         </div>
+        <details className="mt-3" open>
+          <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+            Varsayılan olarak dolduruldu — istersen değiştir
+          </summary>
+          <div className="mt-2 grid grid-cols-2 gap-3">
+            <Field label="Denklem seçimi">
+              <select
+                value={profile.equationSex}
+                onChange={event =>
+                  setEquationSex(
+                    (event.target as HTMLSelectElement).value as
+                      | "female"
+                      | "male",
+                  )
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
+                <option value="female">Kadın katsayısı</option>
+                <option value="male">Erkek katsayısı</option>
+              </select>
+            </Field>
+            <Field label="Bel (cm), isteğe bağlı">
+              <NumberInput
+                value={profile.waistCm ?? ""}
+                onChange={value => update("waistCm", value || undefined)}
+              />
+            </Field>
+            <Field
+              label="Günlük aktivite"
+              sourceBadge={showSources ? "WHO" : undefined}>
+              <select
+                value={profile.activity}
+                onChange={event =>
+                  setActivity(
+                    (event.target as HTMLSelectElement)
+                      .value as typeof profile.activity,
+                  )
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
+                {ACTIVITY_OPTIONS.map(option => (
+                  <option key={option.value} value={option.value}>
+                    {option.label}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Hedef" sourceBadge={showSources ? "NIDDK" : undefined}>
+              <select
+                value={profile.goal}
+                onChange={event =>
+                  setGoal(
+                    (event.target as HTMLSelectElement).value as PersonalGoal,
+                  )
+                }
+                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
+                <option value="maintain">Kilomu korumak</option>
+                <option value="loss">Kademeli kilo kaybı</option>
+                <option value="gain">Kilo almak / performans</option>
+              </select>
+            </Field>
+          </div>
+        </details>
         <p className="mt-3 text-xs text-muted-foreground">
           Denklem seçimi yalnızca enerji tahminindeki biyolojik katsayıyı
           belirtir; cinsiyet kimliğinden otomatik olarak çıkarılmaz.
