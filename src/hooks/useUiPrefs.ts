@@ -28,7 +28,7 @@ function initialSection(): Section {
 
 function initialTab(): Tab {
   const fromUrl = readTabFromUrl();
-  return (TABS as string[]).includes(fromUrl ?? "") ? (fromUrl as Tab) : "list";
+  return (TABS as string[]).includes(fromUrl ?? "") ? (fromUrl as Tab) : "today";
 }
 
 export function useUiPrefs() {
