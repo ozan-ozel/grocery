@@ -201,8 +201,8 @@ export function TodayView({
       <RemainingSummary remaining={remaining.remaining} />
       {visibleSuggestions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
-          Bugünkü bütçene uyan hazır bir kombinasyon yok — az kaldıysa bu
-          normal.
+          Bugünkü kalan makrolarına uyan hazır bir kombinasyon yok — az
+          kaldıysa bu normal.
         </p>
       ) : (
         <ul className="space-y-2">
@@ -343,7 +343,7 @@ function SuggestionCard({
       </p>
       {!!overBudgetBy && overBudgetBy > 0 && (
         <p className="mt-1 text-xs text-signal">
-          Bütçenin {Math.round(overBudgetBy)} kcal üzerinde
+          Kalan makronun {Math.round(overBudgetBy)} kcal üzerinde
         </p>
       )}
       <div className="mt-2 flex flex-wrap gap-2">
