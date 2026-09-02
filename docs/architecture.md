@@ -34,8 +34,11 @@ correction pushes to Supabase in addition to localStorage. Starting a new list s
 `closedAt` and files it into History rather than deleting it; a list only goes away if the user
 explicitly deletes it from History (`deleteList()` in `src/lib/listActions.ts`, undoable like any other
 removal). `buildCatalog()` (`src/lib/store.ts`) collapses every item ever added across all *remaining*
-lists into a name/count/last-bought table that backs both the add-field autocomplete and the Find tab —
-so deleting a History entry also drops its items' contribution to that aggregate.
+lists into a name/count/last-bought table that backs the "Ürün ekle" autocomplete (`AddItem.tsx`) —
+so deleting a History entry also drops its items' contribution to that aggregate. There is no
+separate "Bul" tab/search view anymore: it was a near-duplicate of the same catalog-backed
+suggestion list, so it was folded into `AddItem.tsx` (shows "en çok alınan" on focus even before
+typing, with a "Tümünü göster" expand) rather than kept as its own tab.
 
 ## Tenants
 
@@ -120,6 +123,27 @@ macro/fiber ranges to the [National Academies DRI tables](https://www.ncbi.nlm.n
 and Endotext, and BMI/waist context to Endotext. These references support the formulas and
 boundaries but do not turn the feature into medical advice.
 
+## Deployment
+
+**`git push origin master` auto-deploys to Netlify production** — Netlify's GitHub integration
+rebuilds and ships on every push to `master`, with no manual step and no confirmation prompt. There
+is no separate "staging" push; merging into `master` and pushing it *is* the production release.
+Treat a push to `master` with the same weight as clicking "deploy to prod" — because it is one.
+
+A Vercel project (`grocery`, linked via `.vercel/project.json`) also exists from the in-progress
+Netlify→Vercel migration (`docs/netlify-vercel-migration-plan.md`, NUT-29). It is **not** wired to
+auto-deploy on push — there's no GitHub App access to this repo under that account, so every deploy
+is a manual CLI invocation, run from whatever the local working tree looks like at that moment
+(uncommitted changes and all — the CLI deploys the filesystem, not a git ref):
+
+- `npx vercel link` — one-time, links this directory to the Vercel project
+- `npx vercel dev` — local dev server running Vite + `api/*.ts` together (Vercel's equivalent of `npm run netlify:dev`)
+- `npx vercel` — preview deploy to a throwaway `*.vercel.app` URL, doesn't touch production
+- `npx vercel --prod` — deploys to `https://grocery-five-ecru.vercel.app`
+
+Until the migration finishes, Netlify is the one auto-deploying platform; Vercel deploys only happen
+when someone runs one of the commands above by hand.
+
 ## Environment variables
 
 **Required env vars** (Netlify site settings for production; `.env.local` or `netlify link` for local
@@ -151,8 +175,10 @@ for both the progress fill and destructive actions — `--color-destructive` is 
 `--color-signal` there. That single-accent look was never meant to be a rule the rest of the palette
 has to follow, though: newer themes are free to give destructive its own hue where it reads better
 (a red "Sil" against a blue or violet primary accent, for instance) — check each theme's own block
-rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility (DM
-Mono, tabular-nums, right-aligned) so they read as a stacked ledger column.
+rather than assuming they all match. Quantities, counts, and dates use the `.ledger` utility
+(`tabular-nums`, right-aligned, app's normal sans font) so they read as a stacked ledger column —
+deliberately not a monospace font: most monospace stacks render a slashed zero to disambiguate it
+from "O" in source code, which reads as a stray mark in a consumer nutrition/shopping context.
 
 **Theming** is a 9-way picker (`src/lib/preferences.ts`'s `THEME_OPTIONS`), not a light/dark toggle —
 2 original themes (`light`/"Nane", `dark`/"Çam") plus 7 added later: `grafit`, `arduvaz`, `karbon`

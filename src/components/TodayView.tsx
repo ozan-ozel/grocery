@@ -198,6 +198,9 @@ export function TodayView({
 
   return (
     <div className="space-y-4">
+      <h3 className="text-sm font-medium text-muted-foreground">
+        Kalan Makrolar
+      </h3>
       <RemainingSummary remaining={remaining.remaining} />
       {visibleSuggestions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
