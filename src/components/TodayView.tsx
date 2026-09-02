@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
-import { useRemainingToday } from "@/hooks/useRemainingToday";
+import { ChefHat, Undo2 } from "lucide-react";
+import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, type ScoredCombo } from "@/lib/comboMatch";
 import combosData from "../../data/combos.json";
@@ -29,6 +30,16 @@ const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
 // How long a combo's "Listeye ekle" button stays on "Eklendi".
 const ADDED_FEEDBACK_MS = 1500;
 
+// A logged combo, kept around so "Bugün yediklerin" can render it and Geri al
+// can undo it. Not persisted anywhere — which meal_entries rows belong to
+// which combo only exists in this component's memory, so it resets on
+// reload. The meal_entries themselves are real and permanent either way.
+type EatenCombo = {
+  key: string;
+  combo: ScoredCombo;
+  entries: LoggedEntry[];
+};
+
 type Props = {
   userId: string | null;
   householdId: string | null;
@@ -40,6 +51,11 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
   // The shopping list lives on another tab, so a combo that was just added
   // shows its own transient confirmation here instead.
   const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  // Purely a visual "I'm cooking this right now" flag — no timer, no
+  // backend write, resets on reload. A real cook-time tracker is a later
+  // idea, not this one.
+  const [preparingIds, setPreparingIds] = useState<Set<string>>(new Set());
+  const [eatenCombos, setEatenCombos] = useState<EatenCombo[]>([]);
 
   const suggestions = useMemo<ScoredCombo[]>(() => {
     if (remaining.status !== "ready") return [];
@@ -50,6 +66,12 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
       remaining.catalogMap
     );
   }, [remaining]);
+
+  // Yedim moves a combo here instead of just letting it fall out of
+  // matchCombos' results — otherwise it can vanish mid-tap with no
+  // confirmation the moment the shrunk budget no longer fits it.
+  const eatenComboIds = new Set(eatenCombos.map((e) => e.combo.id));
+  const visibleSuggestions = suggestions.filter((combo) => !eatenComboIds.has(combo.id));
 
   if (remaining.status === "no-profile") {
     return (
@@ -90,53 +112,167 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     }, ADDED_FEEDBACK_MS);
   }
 
-  function logComboEaten(combo: ScoredCombo) {
-    for (const item of combo.items) {
-      remaining.logConsumption(item.foodId, item.grams);
-    }
+  function togglePreparing(comboId: string) {
+    setPreparingIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(comboId)) next.delete(comboId);
+      else next.add(comboId);
+      return next;
+    });
+  }
+
+  function eatCombo(combo: ScoredCombo) {
+    const entries = combo.items.map((item) =>
+      remaining.logConsumption(item.foodId, item.grams)
+    );
+    setEatenCombos((prev) => [...prev, { key: `${combo.id}-${Date.now()}`, combo, entries }]);
+    setPreparingIds((prev) => {
+      if (!prev.has(combo.id)) return prev;
+      const next = new Set(prev);
+      next.delete(combo.id);
+      return next;
+    });
+  }
+
+  function undoEaten(key: string) {
+    const entry = eatenCombos.find((e) => e.key === key);
+    if (!entry) return;
+    remaining.undoConsumption(entry.entries);
+    setEatenCombos((prev) => prev.filter((e) => e.key !== key));
   }
 
   return (
     <div className="space-y-4">
       <RemainingSummary remaining={remaining.remaining} />
-      {suggestions.length === 0 ? (
+      {visibleSuggestions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
           Bugünkü bütçene uyan hazır bir kombinasyon yok — az kaldıysa bu
           normal.
         </p>
       ) : (
         <ul className="space-y-2">
-          {suggestions.map((combo) => (
-            <li key={combo.id} className="rounded-lg border border-border p-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium">{combo.nameTr}</span>
-                <span className="text-xs text-muted-foreground">
-                  {combo.prepMinutes} dk
-                </span>
-              </div>
-              <p className="ledger mt-1 text-xs text-muted-foreground">
-                {Math.round(combo.totals.kcal)} kcal ·{" "}
-                {Math.round(combo.totals.proteinG)}g protein
-              </p>
-              <div className="mt-2 flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => addComboToList(combo)}
-                  className="rounded-md border border-border px-2 py-1 text-xs">
-                  {addedIds.has(combo.id) ? "Eklendi" : "Listeye ekle"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => logComboEaten(combo)}
-                  className="rounded-md border border-border px-2 py-1 text-xs">
-                  Yedim de
-                </button>
-              </div>
-            </li>
+          {visibleSuggestions.map((combo) => (
+            <SuggestionCard
+              key={combo.id}
+              combo={combo}
+              preparing={preparingIds.has(combo.id)}
+              added={addedIds.has(combo.id)}
+              onAdd={() => addComboToList(combo)}
+              onTogglePreparing={() => togglePreparing(combo.id)}
+              onEat={() => eatCombo(combo)}
+            />
           ))}
         </ul>
       )}
+
+      {eatenCombos.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Bugün yediklerin
+          </h3>
+          <ul className="space-y-2">
+            {eatenCombos.map(({ key, combo }) => (
+              <li key={key}>
+                <div className="gradient-edge rounded-lg p-1">
+                  <div className="rounded-[calc(0.5rem-4px)] bg-background p-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{combo.nameTr}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {combo.prepMinutes} dk
+                      </span>
+                    </div>
+                    <p className="ledger mt-1 text-xs text-muted-foreground">
+                      {Math.round(combo.totals.kcal)} kcal ·{" "}
+                      {Math.round(combo.totals.proteinG)}g protein
+                    </p>
+                    <div className="mt-2">
+                      <button
+                        type="button"
+                        onClick={() => undoEaten(key)}
+                        className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs">
+                        <Undo2 className="size-3.5" />
+                        Geri al
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </div>
+  );
+}
+
+function SuggestionCard({
+  combo,
+  preparing,
+  added,
+  onAdd,
+  onTogglePreparing,
+  onEat,
+}: {
+  combo: ScoredCombo;
+  preparing: boolean;
+  added: boolean;
+  onAdd: () => void;
+  onTogglePreparing: () => void;
+  onEat: () => void;
+}) {
+  const content = (
+    <div
+      className={
+        preparing
+          ? "rounded-[calc(0.5rem-4px)] bg-background p-3"
+          : "rounded-lg border border-border p-3"
+      }>
+      <div className="flex items-center justify-between">
+        <span className="font-medium">{combo.nameTr}</span>
+        <span className="text-xs text-muted-foreground">
+          {combo.prepMinutes} dk
+        </span>
+      </div>
+      <p className="ledger mt-1 text-xs text-muted-foreground">
+        {Math.round(combo.totals.kcal)} kcal ·{" "}
+        {Math.round(combo.totals.proteinG)}g protein
+      </p>
+      <div className="mt-2 flex flex-wrap gap-2">
+        <button
+          type="button"
+          onClick={onAdd}
+          className="rounded-md border border-border px-2 py-1 text-xs">
+          {added ? "Eklendi" : "Listeye ekle"}
+        </button>
+        <button
+          type="button"
+          aria-pressed={preparing}
+          onClick={onTogglePreparing}
+          className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs ${
+            preparing
+              ? "border-transparent bg-primary/10 font-medium"
+              : "border-border"
+          }`}>
+          <ChefHat className="size-3.5" />
+          Hazırlanıyor
+        </button>
+        <button
+          type="button"
+          onClick={onEat}
+          className="rounded-md border border-border px-2 py-1 text-xs">
+          Yedim
+        </button>
+      </div>
+    </div>
+  );
+
+  if (!preparing) {
+    return <li>{content}</li>;
+  }
+  return (
+    <li>
+      <div className="gradient-edge rounded-lg p-1">{content}</div>
+    </li>
   );
 }
 

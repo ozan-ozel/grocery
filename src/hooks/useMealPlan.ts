@@ -114,7 +114,7 @@ export function useMealPlan(
     return dayPlan[slot];
   }
 
-  function addItem(slot: MealSlot, foodId: string, quantityG: number) {
+  function addItem(slot: MealSlot, foodId: string, quantityG: number): string {
     const id = uid();
     const position = dayPlan[slot].length;
     updateDayPlan((plan) => ({ ...plan, [slot]: [...plan[slot], { id, foodId, quantityG }] }));
@@ -123,6 +123,7 @@ export function useMealPlan(
         if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", id);
       });
     }
+    return id;
   }
 
   function updateItemQuantity(slot: MealSlot, itemId: string, quantityG: number) {

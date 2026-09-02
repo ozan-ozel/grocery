@@ -1,10 +1,10 @@
 # Remaining budget MVP ("Kalan Bütçe") — design
 
-**Status:** approved, not yet implemented
+**Status:** implemented, reviewed, and QA'd (2026-09-02) — not yet merged to `master`
 **Author:** Ege Özel (with Claude)
 **Date:** 2026-09-01
-**Context:** Follows the 2026-09-01 product strategy review (published as an artifact; not
-yet filed as a Linear issue — see Open items).
+**Context:** Follows the 2026-09-01 product strategy review (published as an artifact).
+Tracked in Linear as [NUT-46](https://linear.app/nutrition-grocery-planner/issue/NUT-46).
 
 ## Problem
 
@@ -52,9 +52,16 @@ the implementation plan (next step, via writing-plans) will sequence them as ord
   household's logged Yemek Planı consumption for today.
 - Below that, up to 5 combo suggestions that fit the remaining budget, each showing a name,
   prep time, and per-serving macros.
-- Tapping "Listeye ekle" on a suggestion adds its ingredients to the active shopping list.
-  Tapping "Yedim de" logs its ingredients as meal entries in an inferred slot, and the
-  remaining-budget numbers update immediately without navigating away.
+- Each suggestion has three actions: "Listeye ekle" adds its ingredients to the active
+  shopping list; "Hazırlanıyor" is a purely visual, non-persisted toggle marking a combo as
+  mid-prep (no timer, resets on reload); "Yedim" logs its ingredients as meal entries in an
+  inferred slot, and the remaining-budget numbers update immediately without navigating away.
+  Renamed from "Yedim de" and given the "Hazırlanıyor" toggle post-launch, per user feedback —
+  see the TodayView section below for the full rationale.
+- A combo that's been logged as eaten does not just disappear from suggestions the instant
+  the shrunk budget no longer fits it — it moves to a "Bugün yediklerin" section below, with a
+  persistent "Geri al" that actually deletes the `meal_entries` rows it created (not a
+  UI-only revert).
 - A user with no Kişisel Plan profile sees a setup prompt instead of blank or fabricated
   numbers.
 - A user can mark foods as excluded from their Kişisel Plan profile; excluded foods never
@@ -84,14 +91,20 @@ comboMatch.matchCombos(combos, remaining, excludedFoodIds)
         │                          ▲
         │                          └── data/combos.json (static, bundled at build time)
         ▼
-Suggestion cards, each with two actions:
+Suggestion cards, each with three actions:
         │
-        ├─ "Listeye ekle" ──► listActions.addItem() once per ingredient      (existing, reused)
+        ├─ "Listeye ekle"  ──► listActions.addItem() once per ingredient      (existing, reused)
         │
-        └─ "Yedim de"     ──► POST /api/meal-entries once per ingredient    (existing, reused)
+        ├─ "Hazırlanıyor"  ──► local component state only, no request (visual toggle)
+        │
+        └─ "Yedim"         ──► POST /api/meal-entries once per ingredient    (existing, reused)
                                        │
                                        ▼
-                          useRemainingToday re-derives → numbers update in place
+                          useRemainingToday re-derives → numbers update in place,
+                          combo moves to "Bugün yediklerin" (client-side only — see below)
+                                       │
+                                       ▼
+                          "Geri al" ──► DELETE /api/meal-entries per logged entry
 ```
 
 No changes to the shopping-list sync engine, auth, or categorization. No new Netlify
@@ -177,9 +190,31 @@ rows.
 ### `src/components/TodayView.tsx` (new)
 
 Renders the remaining-macro summary, then up to 5 suggestion cards from `comboMatch`, each
-with "Listeye ekle" / "Yedim de" actions. Three states: no profile (setup prompt, linking to
-Kişisel Plan), ready with matches, ready with no matches (honest empty state explaining the
-budget is too tight for any authored combo today — not a forced irrelevant suggestion).
+with "Listeye ekle" / "Hazırlanıyor" / "Yedim" actions. Three states: no profile (setup
+prompt, linking to Kişisel Plan), ready with matches, ready with no matches (honest empty
+state explaining the budget is too tight for any authored combo today — not a forced
+irrelevant suggestion).
+
+Post-launch revision, from user feedback on the shipped copy/flow: "Yedim de" read awkwardly
+and tapping it made the combo vanish from the suggestion list the instant the shrunk
+remaining budget no longer fit it — no confirmation, no way back. Now:
+
+- The button reads "Yedim" (single word).
+- A "Hazırlanıyor" toggle sits to its left — purely a visual "I'm cooking this now" flag
+  (reuses the app's `.gradient-edge` accent as a thick card border), no backend write, no
+  timer, resets on reload. A real cook-time tracker is a later idea, not this one.
+- Logging a combo as eaten moves it — rather than deletes it — into a new "Bugün yediklerin"
+  section below the suggestions, rendered with the same `.gradient-edge` treatment. Each
+  entry there has a persistent "Geri al" that calls `DELETE /api/meal-entries` for every
+  entry that combo created, via a new `undoConsumption` on `useRemainingToday` (and a new
+  `LoggedEntry` return value from `logConsumption`/`addItem` so the ids are known). This is a
+  real undo — the meal_entries rows are actually removed and the budget recalculates
+  accordingly — not a client-side-only revert.
+- Which `meal_entries` rows belong to which eaten combo is tracked only in `TodayView`'s
+  component state, not persisted anywhere: reloading the page loses the "Bugün yediklerin"
+  grouping (the combo simply reappears in suggestions if it still fits), but the underlying
+  meal_entries rows it wrote are real and permanent either way. Making that grouping durable
+  would need a new backend concept and was explicitly out of scope for this pass.
 
 ### `src/components/AppShoppingTabs.tsx` (modify)
 
@@ -205,15 +240,16 @@ mirroring how the other profile fields are already handled.
 ### `src/lib/listActions.ts`, `netlify/functions/meal-entries.ts` (unchanged)
 
 Both reused as-is: `addItem` for the "Listeye ekle" action, the existing `POST
-/api/meal-entries` for "Yedim de" (called once per combo ingredient — combos are 2–4
-ingredients, so no bulk endpoint is needed at this scale).
+/api/meal-entries` for "Yedim" (called once per combo ingredient — combos are 2–4
+ingredients, so no bulk endpoint is needed at this scale) and `DELETE /api/meal-entries` for
+"Geri al" (also existing, already used elsewhere in Yemek Planı).
 
 ## Error handling
 
 - No Kişisel Plan profile → setup prompt, not fabricated numbers.
 - No combo fits the remaining budget → honest empty state, not an irrelevant suggestion.
 - Remaining goes negative → shown as a negative/over-budget value, not clamped or hidden.
-- "Yedim de" partial failure (one ingredient's POST fails mid-sequence) → matches
+- "Yedim" partial failure (one ingredient's POST fails mid-sequence) → matches
   `useMealPlan`'s actual existing mutator behavior, not the meal-planner spec's original
   aspiration: the optimistic local update stays regardless of API outcome, and a failed
   `createMealEntry` call only `console.warn`s — there is no retry-UI affordance anywhere in
@@ -225,24 +261,49 @@ ingredients, so no bulk endpoint is needed at this scale).
 ## Testing
 
 No automated test suite in this repo (per `CLAUDE.md`); `npm run build` is the only
-automated check. Manual QA via `npm run netlify:dev` (real Supabase + meal-entries writes):
+automated check. Manual QA via `npm run netlify:dev` (real Supabase + meal-entries writes) —
+**completed 2026-09-02**, all items below passed, via a dev-only test-login route
+(`netlify/functions/auth-test-login.ts`, disabled in production) plus a Playwright MCP
+browser, since the app has no other way to reach an authenticated session in an automated
+session:
 
-- Fresh user, no Kişisel Plan profile → Bugün shows the setup prompt, not zeros.
-- After setting a profile with no meals logged, remaining equals the target exactly.
-- Logging a meal in Yemek Planı updates Bugün's remaining numbers.
-- "Listeye ekle" adds the right items and quantities to the active list.
-- "Yedim de" creates the right `meal_entries` rows in the inferred slot and updates
-  remaining immediately, in place.
-- Excluding a food in Kişisel Plan removes any combo containing it from suggestions.
-- Two users sharing one household, each with their own profile: confirm the documented
-  limitation behaves as expected (each sees their own target against the shared log) rather
-  than crashing or showing the wrong person's target.
+- Fresh user, no Kişisel Plan profile → Bugün shows the setup prompt, not zeros. ✅
+- After setting a profile with no meals logged, remaining equals the target exactly. ✅
+- Logging a meal in Yemek Planı updates Bugün's remaining numbers, and vice versa. ✅
+- "Listeye ekle" adds the right items and quantities to the active list. ✅
+- "Yedim" creates the right `meal_entries` rows in the inferred slot and updates remaining
+  immediately, in place; "Geri al" deletes them again and the budget recovers. ✅
+- Excluding a food in Kişisel Plan removes any combo containing it from suggestions. ✅
+- Two users sharing one household, each with their own profile: each sees their own target
+  against the shared log, no crash, no cross-contamination. ✅
+- Browsing a stale date in Yemek Planı, then switching to Bugün → "Yedim"/logging still
+  writes against today's date, not the stale one (the final review's fix, re-verified). ✅
+- Cold/loading catalog state renders a distinct "Yükleniyor…" message, never a false "no
+  combo fits" empty state (verified by code inspection of the status union in
+  `useRemainingToday`, exercised live via a full page reload). ✅
+
+**This QA pass also surfaced a critical, pre-existing bug unrelated to this feature's own
+code:** the live Supabase project had row level security enabled on `meal_entries` and
+`personal_plan` with zero policies — not set by any migration in this repo — which silently
+returned empty reads to the anon key used by `netlify/functions/meal-entries.ts` and
+`personal-plan.ts`. Writes (service_role, bypasses RLS) kept working, so the bug was
+invisible within a single browser tab's optimistic UI state but meant no consumption or
+profile data survived a reload, a tab switch, or a second device. Fixed by
+`supabase/11-fix-anon-read-rls-drift.sql` (disables RLS on both tables, matching every other
+table in this schema) and confirmed fixed by re-running this QA pass end to end after
+applying it.
 
 ## Deployment
 
 - Apply `supabase/10-personal-plan-exclusions.sql` against the same Supabase project.
-- No new environment variables.
-- No new Netlify function.
+- Apply `supabase/11-fix-anon-read-rls-drift.sql` — an equally real pre-deploy blocker,
+  discovered during this pass's manual QA (see Testing above), not present when this spec
+  was first written.
+- No new environment variables in production. `TEST_LOGIN_SECRET` is local-dev-only, must
+  never be set on the deployed site (see `netlify/functions/auth-test-login.ts`'s own
+  comment and `docs/architecture.md`).
+- No new Netlify function shipped to production; `auth-test-login.ts` is dev QA tooling and
+  is inert (404s) whenever `CONTEXT === "production"`.
 
 ## Migration / rollout
 
@@ -252,9 +313,8 @@ separately.
 
 ## Open items post-approval
 
-- No Linear issue filed yet for this work. Recommend creating one before merging, per the
-  repo's LCMP convention, so the branch/PR can link back to it.
+- Filed as [NUT-46](https://linear.app/nutrition-grocery-planner/issue/NUT-46).
 - The combo catalog launches hand-authored (~15–20 entries); the strategy review's V1 phase
   is where this becomes data-driven from real usage instead of curated by hand.
-- The time-of-day → meal-slot mapping for "Yedim de" is a starting guess (morning →
+- The time-of-day → meal-slot mapping for "Yedim" is a starting guess (morning →
   kahvaltı, etc.); tune once real usage shows how people actually use it.
