@@ -130,6 +130,12 @@ Most `netlify/functions/*.ts` GETs use the anon key and writes use the service_r
 it's scoped to the one-off `scripts/upload-nutrition.ts` seeding script — it does not cover
 `SUPABASE_ANON_KEY`, which the functions also need.
 
+`TEST_LOGIN_SECRET` (local-only, optional) enables `netlify/functions/auth-test-login.ts` — a
+Google-OAuth bypass that mints a real session cookie for a synthetic test user, for browser-driven
+QA without ever touching a real Google account. It only works when unset in production and when
+`CONTEXT !== "production"` (Netlify's own build-context var), so it's inert on the deployed site
+even if accidentally left set. **Never set it in the production Netlify site's env vars.**
+
 ## Daily rollover
 
 **Daily rollover** (`rolloverIfNeeded` in `store.ts`) is client-triggered, not a cron: it runs on

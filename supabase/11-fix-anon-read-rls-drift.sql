@@ -1,0 +1,33 @@
+-- supabase/11-fix-anon-read-rls-drift.sql
+--
+-- Fixes a live-database configuration drift discovered via browser QA on
+-- 2026-09-02 (feature/remaining-today-mvp): both meal_entries and
+-- personal_plan currently have row level security ENABLED with zero
+-- policies, even though neither 07-meal-entries.sql, 08-personal-plan.sql,
+-- nor 09-personal-plan-user-scoped.sql ever ran `enable row level security`
+-- on them (checked directly). RLS-enabled-with-no-policy silently denies ALL
+-- rows to any role but service_role — Supabase's own "Security Advisor"
+-- one-click "Enable RLS" nudge is the likely source, applied to these two
+-- tables at some point outside of any file in this repo.
+--
+-- Practical effect confirmed live: netlify/functions/meal-entries.ts and
+-- personal-plan.ts both read via SUPABASE_ANON_KEY (writes use
+-- service_role, which bypasses RLS and so kept working) — every GET
+-- returns [] / null, in production, RIGHT NOW, even for rows that were
+-- just written. Yemek Planı's day view and Bugün's remaining-budget
+-- calculation both silently look "empty" on any real fetch (page load, tab
+-- switch, another device) — only the current tab's in-memory optimistic
+-- state ever showed correct numbers.
+--
+-- This app enforces all authorization at the Netlify function layer
+-- (requireUser / requireHouseholdAccess in _auth.ts), not via Postgres RLS
+-- + auth.uid() — this app doesn't use Supabase Auth at all, so auth.uid()
+-- is always null and no RLS policy referencing it could ever match anyway.
+-- Every other table in this schema (households, lists, items, app_users
+-- being the sole deliberate exception) relies on that same model with RLS
+-- off. Bringing these two back in line is the fix, not writing policies.
+--
+-- Idempotent: safe to re-run.
+
+alter table public.meal_entries disable row level security;
+alter table public.personal_plan disable row level security;
