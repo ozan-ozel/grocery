@@ -86,7 +86,13 @@ export function useRemainingToday(
   const { catalogMap, status: catalogStatus } = useFoodCatalog();
   // Bugün always means today, whatever day Yemek Planı is currently browsing
   // (both read the same ?date URL param, so this instance opts out of it).
-  const { dailyNutrition, addItem, removeItem, allItems } = useMealPlan(householdId, catalogMap, {
+  const {
+    dailyNutrition,
+    addItem,
+    removeItem,
+    allItems,
+    isLoading: entriesLoading,
+  } = useMealPlan(householdId, catalogMap, {
     pinnedDate: todayDateStr(),
   });
 
@@ -112,8 +118,10 @@ export function useRemainingToday(
 
   // Anything short of "ready" (today: "loading"; "idle" is in useFoodCatalog's
   // Status union but unreachable) means an empty catalogMap, so no combo could
-  // score even if one fit.
-  if (catalogStatus !== "ready") {
+  // score even if one fit. Today's meal_entries still loading gets the same
+  // treatment — otherwise remaining would flash the full target before
+  // dropping to the real (already-consumed) value a moment later.
+  if (catalogStatus !== "ready" || entriesLoading) {
     return { status: "loading-catalog", logConsumption, undoConsumption };
   }
 

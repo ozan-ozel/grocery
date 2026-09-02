@@ -1,5 +1,6 @@
 // src/hooks/useMealPlan.ts
 import { useEffect, useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/preact-query";
 import { defaultTitle, readMealDateFromUrl, writeMealDateToUrl, uid } from "@/lib/store";
 import type { NutritionMap } from "@/lib/nutrition";
 import {
@@ -9,7 +10,13 @@ import {
   type MealSlot,
 } from "@/lib/localMealPlan";
 import { sumMacros, type MacroTotals } from "@/lib/mealNutrition";
-import { createMealEntry, deleteMealEntry, fetchMealEntries, updateMealEntry } from "@/lib/mealPlan";
+import {
+  createMealEntry,
+  deleteMealEntry,
+  fetchMealEntries,
+  updateMealEntry,
+  type MealEntry,
+} from "@/lib/mealPlan";
 
 function dateToStr(d: Date): string {
   const y = d.getFullYear();
@@ -44,11 +51,31 @@ function emptyDayPlan(): DayPlan {
   return { kahvalti: [], ogle: [], aksam: [], ara: [] };
 }
 
+function toDayPlan(entries: MealEntry[]): DayPlan {
+  const plan = emptyDayPlan();
+  for (const entry of entries) {
+    plan[entry.slot].push({
+      id: entry.id,
+      foodId: entry.foodId,
+      quantityG: entry.quantityG,
+      comboId: entry.comboId ?? undefined,
+    });
+  }
+  return plan;
+}
+
 // Persisted per household+date via netlify/functions/meal-entries.ts (Supabase
 // meal_entries table) — see supabase/07-meal-entries.sql. Nutrition is never
 // stored server-side, only { foodId, quantityG }; calculateItemsNutrition
 // always derives it from the live catalog. Without a household (no tenant
 // selected yet) the plan stays in-memory only, same as before this landed.
+//
+// Backed by TanStack Query rather than a bare useEffect+useState: Bugün
+// (pinned to today) and Yemek Planı (browsing today) end up with the exact
+// same queryKey when they overlap, so they share one fetch and one cache
+// entry — a mutation from either is instantly visible in the other, and
+// switching tabs away and back repaints from cache instead of flashing
+// empty while a fresh request round-trips.
 //
 // `options.pinnedDate` opts a caller out of the shared ?date URL param entirely:
 // the plan is fixed to that date and never reads or writes the URL. Bugün needs
@@ -60,7 +87,7 @@ export function useMealPlan(
   options?: { pinnedDate?: string },
 ) {
   const [date, setDate] = useState<string>(() => options?.pinnedDate ?? initialDate());
-  const [plans, setPlans] = useState<Record<string, DayPlan>>({});
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (options?.pinnedDate) return;
@@ -75,36 +102,22 @@ export function useMealPlan(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options?.pinnedDate]);
 
-  const planKey = `${householdId ?? "local"}|${date}`;
-  const dayPlan = plans[planKey] ?? emptyDayPlan();
+  const queryKey = ["mealEntries", householdId ?? "local", date] as const;
 
-  useEffect(() => {
-    if (!householdId) return;
-    let cancelled = false;
-    fetchMealEntries(householdId, date, date).then((entries) => {
-      if (cancelled) return;
-      const plan = emptyDayPlan();
-      for (const entry of entries) {
-        plan[entry.slot].push({
-          id: entry.id,
-          foodId: entry.foodId,
-          quantityG: entry.quantityG,
-          comboId: entry.comboId ?? undefined,
-        });
-      }
-      setPlans((prev) => ({ ...prev, [`${householdId}|${date}`]: plan }));
-    });
-    return () => {
-      cancelled = true;
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [householdId, date]);
+  const query = useQuery({
+    queryKey,
+    queryFn: () => fetchMealEntries(householdId as string, date, date),
+    enabled: !!householdId,
+    // Edits happen via this same UI far more often than from elsewhere, so a
+    // short staleTime avoids a refetch-flash on every tab switch while still
+    // catching a change made on another device within half a minute or so.
+    staleTime: 30_000,
+  });
 
-  function updateDayPlan(updater: (plan: DayPlan) => DayPlan) {
-    setPlans((prev) => ({
-      ...prev,
-      [planKey]: updater(prev[planKey] ?? emptyDayPlan()),
-    }));
+  const dayPlan = toDayPlan(householdId ? (query.data ?? []) : []);
+
+  function setEntries(updater: (prev: MealEntry[]) => MealEntry[]) {
+    queryClient.setQueryData<MealEntry[]>(queryKey, (prev) => updater(prev ?? []));
   }
 
   function goToPrevDay() {
@@ -129,10 +142,10 @@ export function useMealPlan(
   function addItem(slot: MealSlot, foodId: string, quantityG: number, comboId?: string): string {
     const id = uid();
     const position = dayPlan[slot].length;
-    updateDayPlan((plan) => ({
-      ...plan,
-      [slot]: [...plan[slot], { id, foodId, quantityG, comboId }],
-    }));
+    setEntries((prev) => [
+      ...prev,
+      { id, date, slot, foodId, quantityG, position, comboId: comboId ?? null },
+    ]);
     if (householdId) {
       createMealEntry({ id, householdId, date, slot, foodId, quantityG, position, comboId }).then(
         (saved) => {
@@ -144,10 +157,11 @@ export function useMealPlan(
   }
 
   function updateItemQuantity(slot: MealSlot, itemId: string, quantityG: number) {
-    updateDayPlan((plan) => ({
-      ...plan,
-      [slot]: plan[slot].map((item) => (item.id === itemId ? { ...item, quantityG } : item)),
-    }));
+    setEntries((prev) =>
+      prev.map((entry) =>
+        entry.slot === slot && entry.id === itemId ? { ...entry, quantityG } : entry
+      )
+    );
     if (householdId) {
       updateMealEntry(itemId, { quantityG }).then((saved) => {
         if (!saved) console.warn("[mealPlan] quantity updated locally but failed to persist:", itemId);
@@ -156,10 +170,7 @@ export function useMealPlan(
   }
 
   function removeItem(slot: MealSlot, itemId: string) {
-    updateDayPlan((plan) => ({
-      ...plan,
-      [slot]: plan[slot].filter((item) => item.id !== itemId),
-    }));
+    setEntries((prev) => prev.filter((entry) => !(entry.slot === slot && entry.id === itemId)));
     if (householdId) {
       deleteMealEntry(itemId).then((ok) => {
         if (!ok) console.warn("[mealPlan] entry removed locally but failed to delete remotely:", itemId);
@@ -177,6 +188,10 @@ export function useMealPlan(
 
   return {
     dateLabel: defaultTitle(strToDate(date).getTime()),
+    // True only on a cold load (no cached data yet for this household+date).
+    // Background revalidation after that never flips this back on, so
+    // already-shown data doesn't flash back to a loading state.
+    isLoading: !!householdId && query.isLoading,
     goToPrevDay,
     goToNextDay,
     itemsForSlot,

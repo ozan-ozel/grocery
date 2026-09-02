@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight, Info, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
+import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { MEAL_SLOTS, type MealItem } from "@/lib/localMealPlan";
@@ -18,6 +19,7 @@ export function MealPlanView({ householdId }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
   const {
     dateLabel,
+    isLoading,
     goToPrevDay,
     goToNextDay,
     itemsForSlot,
@@ -64,21 +66,28 @@ export function MealPlanView({ householdId }: Props) {
         </p>
       )}
       <div className="flex flex-col gap-4">
-        {MEAL_SLOTS.map(({ slot, label }) => (
-          <MealSection
-            key={slot}
-            label={label}
-            items={itemsForSlot(slot)}
-            foods={foods}
-            catalog={catalogMap}
-            macros={slotNutrition(slot)}
-            onAddItem={(foodId, quantityG) => addItem(slot, foodId, quantityG)}
-            onUpdateQuantity={(itemId, quantityG) =>
-              updateItemQuantity(slot, itemId, quantityG)
-            }
-            onRemoveItem={itemId => removeItem(slot, itemId)}
-          />
-        ))}
+        {isLoading ? (
+          // One fetch covers every slot for the day — there's no such thing
+          // as "just kahvaltı is still loading," so one set of placeholders
+          // for the whole list is honest about that, not four independent ones.
+          MEAL_SLOTS.map(({ slot }) => <LoadingBlock key={slot} className="h-28" />)
+        ) : (
+          MEAL_SLOTS.map(({ slot, label }) => (
+            <MealSection
+              key={slot}
+              label={label}
+              items={itemsForSlot(slot)}
+              foods={foods}
+              catalog={catalogMap}
+              macros={slotNutrition(slot)}
+              onAddItem={(foodId, quantityG) => addItem(slot, foodId, quantityG)}
+              onUpdateQuantity={(itemId, quantityG) =>
+                updateItemQuantity(slot, itemId, quantityG)
+              }
+              onRemoveItem={itemId => removeItem(slot, itemId)}
+            />
+          ))
+        )}
       </div>
       {hasTotals && (
         <div className="mt-6 rounded-lg border border-border px-3 py-2">

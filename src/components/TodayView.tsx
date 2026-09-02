@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { ChefHat, ChevronDown, Undo2 } from "lucide-react";
 import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
+import { LoadingBlock } from "@/components/LoadingBlock";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 import { calculateItemsNutrition, type MealItem } from "@/lib/localMealPlan";
@@ -128,8 +129,10 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
 
   if (remaining.status === "loading-catalog") {
     return (
-      <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
-        Yükleniyor…
+      <div className="space-y-2">
+        <LoadingBlock className="h-24" />
+        <LoadingBlock className="h-24" />
+        <LoadingBlock className="h-24" />
       </div>
     );
   }
