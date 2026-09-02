@@ -1,8 +1,8 @@
 import { useMemo, useState } from "react";
-import { ChefHat, Undo2 } from "lucide-react";
+import { ChefHat, ChevronDown, Undo2 } from "lucide-react";
 import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
 import type { MacroTotals } from "@/lib/mealNutrition";
-import { matchCombos, type ScoredCombo } from "@/lib/comboMatch";
+import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 import combosData from "../../data/combos.json";
 import type { Combo } from "@/lib/combos";
 
@@ -67,11 +67,22 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     );
   }, [remaining]);
 
+  // The full catalog, budget-unfiltered — backs "Diğer kombinasyonlar" so a
+  // combo that doesn't fit today never just vanishes; it's still browsable.
+  const allCombos = useMemo<ScoredCombo[]>(() => {
+    if (remaining.status !== "ready") return [];
+    return scoreAllCombos(COMBOS, remaining.excludedFoodIds, remaining.catalogMap);
+  }, [remaining]);
+
   // Yedim moves a combo here instead of just letting it fall out of
   // matchCombos' results — otherwise it can vanish mid-tap with no
   // confirmation the moment the shrunk budget no longer fits it.
   const eatenComboIds = new Set(eatenCombos.map((e) => e.combo.id));
   const visibleSuggestions = suggestions.filter((combo) => !eatenComboIds.has(combo.id));
+  const visibleSuggestionIds = new Set(visibleSuggestions.map((combo) => combo.id));
+  const otherCombos = allCombos.filter(
+    (combo) => !eatenComboIds.has(combo.id) && !visibleSuggestionIds.has(combo.id)
+  );
 
   if (remaining.status === "no-profile") {
     return (
@@ -165,6 +176,29 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
         </ul>
       )}
 
+      {otherCombos.length > 0 && (
+        <details className="rounded-lg border border-border p-3">
+          <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-muted-foreground [&::-webkit-details-marker]:hidden">
+            Diğer kombinasyonlar ({otherCombos.length})
+            <ChevronDown className="size-4" />
+          </summary>
+          <ul className="mt-3 space-y-2">
+            {otherCombos.map((combo) => (
+              <SuggestionCard
+                key={combo.id}
+                combo={combo}
+                preparing={preparingIds.has(combo.id)}
+                added={addedIds.has(combo.id)}
+                overBudgetBy={Math.max(0, combo.totals.kcal - remaining.remaining.kcal)}
+                onAdd={() => addComboToList(combo)}
+                onTogglePreparing={() => togglePreparing(combo.id)}
+                onEat={() => eatCombo(combo)}
+              />
+            ))}
+          </ul>
+        </details>
+      )}
+
       {eatenCombos.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">
@@ -209,6 +243,7 @@ function SuggestionCard({
   combo,
   preparing,
   added,
+  overBudgetBy,
   onAdd,
   onTogglePreparing,
   onEat,
@@ -216,6 +251,10 @@ function SuggestionCard({
   combo: ScoredCombo;
   preparing: boolean;
   added: boolean;
+  // Only set for "Diğer kombinasyonlar" entries that don't fit today's
+  // remaining kcal — how far over, so it reads as an honest heads-up
+  // rather than hiding why it wasn't in the top suggestions.
+  overBudgetBy?: number;
   onAdd: () => void;
   onTogglePreparing: () => void;
   onEat: () => void;
@@ -242,6 +281,11 @@ function SuggestionCard({
         {Math.round(combo.totals.kcal)} kcal ·{" "}
         {Math.round(combo.totals.proteinG)}g protein
       </p>
+      {!!overBudgetBy && overBudgetBy > 0 && (
+        <p className="mt-1 text-xs text-signal">
+          Bütçenin {Math.round(overBudgetBy)} kcal üzerinde
+        </p>
+      )}
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="button"
