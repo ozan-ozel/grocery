@@ -2,6 +2,11 @@
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
+> **Historical record — task 8's "Yedim de" was later renamed to "Yedim" and given a
+> "Hazırlanıyor" toggle plus a "Bugün yediklerin"/"Geri al" undo flow (2026-09-02, post-QA
+> feedback). This doc describes what was originally planned and built; the current behavior
+> is documented in `docs/superpowers/specs/2026-09-01-remaining-budget-mvp-design.md`.
+
 **Goal:** Wire the existing Kişisel Plan targets and Yemek Planı consumption log into a
 "remaining today" value, surfaced on a new default home screen ("Bugün") with rule-based
 suggestions and one-tap list/log actions.

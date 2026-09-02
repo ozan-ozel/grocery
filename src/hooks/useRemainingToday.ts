@@ -6,22 +6,29 @@ import type { PersonalTargets } from "@/lib/mealPersonalization";
 import type { NutritionMap } from "@/lib/nutrition";
 import type { MealSlot } from "@/lib/localMealPlan";
 
+// One ingredient logged via logConsumption — enough to undo it later
+// (removeItem needs both the entry id and the slot it was filed under).
+export type LoggedEntry = { id: string; slot: MealSlot };
+
 export type RemainingToday =
   | {
       status: "no-profile";
       catalogMap: NutritionMap;
-      logConsumption: (foodId: string, grams: number) => void;
+      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      undoConsumption: (entries: LoggedEntry[]) => void;
     }
   // Without the catalog every combo's totals lookup fails and matchCombos
   // returns [] — indistinguishable from an honest "nothing fits your budget"
   // unless the loading/error state is carried through to the view.
   | {
       status: "loading-catalog";
-      logConsumption: (foodId: string, grams: number) => void;
+      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      undoConsumption: (entries: LoggedEntry[]) => void;
     }
   | {
       status: "catalog-error";
-      logConsumption: (foodId: string, grams: number) => void;
+      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      undoConsumption: (entries: LoggedEntry[]) => void;
     }
   | {
       status: "ready";
@@ -30,7 +37,8 @@ export type RemainingToday =
       remaining: MacroTotals;
       excludedFoodIds: string[];
       catalogMap: NutritionMap;
-      logConsumption: (foodId: string, grams: number) => void;
+      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      undoConsumption: (entries: LoggedEntry[]) => void;
     };
 
 // Target ranges (protein/fat/carbs/fiber) collapse to their midpoint for a
@@ -74,29 +82,35 @@ export function useRemainingToday(
   const { catalogMap, status: catalogStatus } = useFoodCatalog();
   // Bugün always means today, whatever day Yemek Planı is currently browsing
   // (both read the same ?date URL param, so this instance opts out of it).
-  const { dailyNutrition, addItem } = useMealPlan(householdId, catalogMap, {
+  const { dailyNutrition, addItem, removeItem } = useMealPlan(householdId, catalogMap, {
     pinnedDate: todayDateStr(),
   });
 
-  function logConsumption(foodId: string, grams: number) {
-    addItem(inferSlot(), foodId, grams);
+  function logConsumption(foodId: string, grams: number): LoggedEntry {
+    const slot = inferSlot();
+    const id = addItem(slot, foodId, grams);
+    return { id, slot };
+  }
+
+  function undoConsumption(entries: LoggedEntry[]) {
+    for (const entry of entries) removeItem(entry.slot, entry.id);
   }
 
   // `targets` alone can't answer this: calculateTargets(DEFAULT_PROFILE)
   // returns valid numbers for a body nobody entered.
   if (!hasSavedProfile || !targets) {
-    return { status: "no-profile", catalogMap, logConsumption };
+    return { status: "no-profile", catalogMap, logConsumption, undoConsumption };
   }
 
   if (catalogStatus === "error") {
-    return { status: "catalog-error", logConsumption };
+    return { status: "catalog-error", logConsumption, undoConsumption };
   }
 
   // Anything short of "ready" (today: "loading"; "idle" is in useFoodCatalog's
   // Status union but unreachable) means an empty catalogMap, so no combo could
   // score even if one fit.
   if (catalogStatus !== "ready") {
-    return { status: "loading-catalog", logConsumption };
+    return { status: "loading-catalog", logConsumption, undoConsumption };
   }
 
   const target = targetToMacros(targets);
@@ -111,5 +125,6 @@ export function useRemainingToday(
     excludedFoodIds: profile.excludedFoodIds,
     catalogMap,
     logConsumption,
+    undoConsumption,
   };
 }
