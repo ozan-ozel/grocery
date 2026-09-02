@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { parseEntry, type CatalogEntry } from "@/lib/store";
 import { isCloseMatch } from "@/lib/fuzzyMatch";
+import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 
 type Props = {
   catalog: CatalogEntry[];
@@ -25,6 +26,21 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  // Once the user's actually searching, widen the pool beyond "stuff this
+  // household has bought before" to the whole nutrition catalog — otherwise
+  // a household with no purchase history for e.g. "yulaf ezmesi" never sees
+  // it suggested even though it's a real, known product.
+  const { foods: nutritionFoods } = useFoodCatalog();
+  const searchCatalog = useMemo(() => {
+    const historyNames = new Set(
+      catalog.map((entry) => entry.name.toLocaleLowerCase("tr-TR"))
+    );
+    const nutritionOnly: CatalogEntry[] = nutritionFoods
+      .filter((food) => !historyNames.has(food.name_tr.toLocaleLowerCase("tr-TR")))
+      .map((food) => ({ name: food.name_tr, count: 0, lastAt: 0, lastQty: "" }));
+    return [...catalog, ...nutritionOnly];
+  }, [catalog, nutritionFoods]);
+
   // Turkish-aware casing so "İzmir"/"izmir" and "ŞEKER"/"şeker" match.
   // Substring matches come first; a typo like "maydonoz" isn't a substring
   // of "Maydanoz", so close-but-not-substring matches are appended after,
@@ -32,11 +48,13 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
   // as a new item.
   const query = parseEntry(value).name.toLocaleLowerCase("tr-TR").trim();
   const matches = useMemo(() => {
+    // No query: "en çok alınan" must stay honest, so it's history-only —
+    // a never-bought item can't claim to be most-bought.
     if (!query) return catalog;
-    const substringMatches = catalog.filter((entry) =>
+    const substringMatches = searchCatalog.filter((entry) =>
       entry.name.toLocaleLowerCase("tr-TR").includes(query)
     );
-    const fuzzyMatches = catalog.filter(
+    const fuzzyMatches = searchCatalog.filter(
       (entry) =>
         !substringMatches.includes(entry) &&
         isCloseMatch(query, entry.name.toLocaleLowerCase("tr-TR"))
@@ -44,7 +62,7 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
     return [...substringMatches, ...fuzzyMatches].filter(
       (entry) => entry.name.toLocaleLowerCase("tr-TR") !== query
     );
-  }, [query, catalog]);
+  }, [query, catalog, searchCatalog]);
 
   const visibleCount = query || expanded ? EXPANDED_SUGGESTIONS : DEFAULT_SUGGESTIONS;
   const suggestions = matches.slice(0, visibleCount);
@@ -136,6 +154,8 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
                     <span className="text-xs text-muted-foreground">
                       {already ? (
                         "listede"
+                      ) : entry.count === 0 ? (
+                        "besin listesi"
                       ) : (
                         <>
                           {entry.lastQty && (
