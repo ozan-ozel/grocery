@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { ChefHat, ChevronDown, Undo2 } from "lucide-react";
+import { ChefHat, ChevronRight, Undo2 } from "lucide-react";
 import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
+import { useDetailsTransition } from "@/hooks/useDetailsTransition";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
@@ -31,9 +32,6 @@ const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
 
 const COMBO_BY_ID = new Map(COMBOS.map((c) => [c.id, c]));
 
-// How long a combo's "Listeye ekle" button stays on "Eklendi".
-const ADDED_FEEDBACK_MS = 1500;
-
 // A combo eaten today, reconstructed from real meal_entries (grouped by the
 // comboId "Yedim" tags each ingredient with) rather than kept in component
 // state — so "Bugün yediklerin" survives a reload instead of resetting.
@@ -51,17 +49,23 @@ type Props = {
   userId: string | null;
   householdId: string | null;
   onAddItem: (name: string, qty: string) => void;
+  isOnList: (name: string) => boolean;
+  onRemoveItemByName: (name: string) => void;
 };
 
-export function TodayView({ userId, householdId, onAddItem }: Props) {
+export function TodayView({
+  userId,
+  householdId,
+  onAddItem,
+  isOnList,
+  onRemoveItemByName,
+}: Props) {
   const remaining = useRemainingToday(userId, householdId);
-  // The shopping list lives on another tab, so a combo that was just added
-  // shows its own transient confirmation here instead.
-  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
   // Purely a visual "I'm cooking this right now" flag — no timer, no
   // backend write, resets on reload. A real cook-time tracker is a later
   // idea, not this one.
   const [preparingIds, setPreparingIds] = useState<Set<string>>(new Set());
+  const otherCombosDetails = useDetailsTransition<HTMLElement>("nearest");
 
   const suggestions = useMemo<ScoredCombo[]>(() => {
     if (remaining.status !== "ready") return [];
@@ -149,14 +153,20 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     for (const item of combo.items) {
       onAddItem(item.foodId, `${item.grams}g`);
     }
-    setAddedIds((prev) => new Set(prev).add(combo.id));
-    window.setTimeout(() => {
-      setAddedIds((prev) => {
-        const next = new Set(prev);
-        next.delete(combo.id);
-        return next;
-      });
-    }, ADDED_FEEDBACK_MS);
+  }
+
+  function removeComboFromList(combo: ScoredCombo) {
+    for (const item of combo.items) {
+      onRemoveItemByName(item.foodId);
+    }
+  }
+
+  // A combo counts as "on the list" only once every one of its ingredients
+  // is — if the shopping list side removed just one, re-showing "Listeye
+  // ekle" is the honest state (and clicking it just re-adds what's missing,
+  // addItem no-ops on ones already there).
+  function isComboOnList(combo: ScoredCombo) {
+    return combo.items.every((item) => isOnList(item.foodId));
   }
 
   function togglePreparing(comboId: string) {
@@ -201,8 +211,9 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
               key={combo.id}
               combo={combo}
               preparing={preparingIds.has(combo.id)}
-              added={addedIds.has(combo.id)}
+              added={isComboOnList(combo)}
               onAdd={() => addComboToList(combo)}
+              onRemove={() => removeComboFromList(combo)}
               onTogglePreparing={() => togglePreparing(combo.id)}
               onEat={() => eatCombo(combo)}
             />
@@ -211,10 +222,24 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
       )}
 
       {otherCombos.length > 0 && (
-        <details className="rounded-lg border border-border p-3">
-          <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-muted-foreground [&::-webkit-details-marker]:hidden">
-            Diğer kombinasyonlar ({otherCombos.length})
-            <ChevronDown className="size-4" />
+        <details
+          className="group rounded-lg border border-border p-3"
+          onToggle={event =>
+            otherCombosDetails.onToggle(
+              (event.target as HTMLDetailsElement).open
+            )
+          }>
+          <summary
+            ref={otherCombosDetails.ref}
+            className="flex cursor-pointer list-none items-center gap-2 text-sm font-medium text-muted-foreground [&::-webkit-details-marker]:hidden">
+            <span
+              aria-hidden="true"
+              className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
+              <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
+            </span>
+            <span className="flex-1">
+              Diğer kombinasyonlar ({otherCombos.length})
+            </span>
           </summary>
           <ul className="mt-3 space-y-2">
             {otherCombos.map((combo) => (
@@ -222,9 +247,10 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
                 key={combo.id}
                 combo={combo}
                 preparing={preparingIds.has(combo.id)}
-                added={addedIds.has(combo.id)}
+                added={isComboOnList(combo)}
                 overBudgetBy={Math.max(0, combo.totals.kcal - remaining.remaining.kcal)}
                 onAdd={() => addComboToList(combo)}
+                onRemove={() => removeComboFromList(combo)}
                 onTogglePreparing={() => togglePreparing(combo.id)}
                 onEat={() => eatCombo(combo)}
               />
@@ -241,27 +267,25 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
           <ul className="space-y-2">
             {eatenGroups.map((group) => (
               <li key={group.comboId}>
-                <div className="gradient-edge rounded-lg p-1">
-                  <div className="rounded-[calc(0.5rem-4px)] bg-background p-3">
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{group.nameTr}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {group.prepMinutes} dk
-                      </span>
-                    </div>
-                    <p className="ledger mt-1 text-xs text-muted-foreground">
-                      {Math.round(group.totals.kcal)} kcal ·{" "}
-                      {Math.round(group.totals.proteinG)}g protein
-                    </p>
-                    <div className="mt-2">
-                      <button
-                        type="button"
-                        onClick={() => undoEaten(group.comboId)}
-                        className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs">
-                        <Undo2 className="size-3.5" />
-                        Geri al
-                      </button>
-                    </div>
+                <div className="rounded-lg border border-border bg-signal/10 p-3">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{group.nameTr}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {group.prepMinutes} dk
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {Math.round(group.totals.kcal)} kcal ·{" "}
+                    {Math.round(group.totals.proteinG)}g protein
+                  </p>
+                  <div className="mt-2">
+                    <button
+                      type="button"
+                      onClick={() => undoEaten(group.comboId)}
+                      className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs">
+                      <Undo2 className="size-3.5" />
+                      Geri al
+                    </button>
                   </div>
                 </div>
               </li>
@@ -279,6 +303,7 @@ function SuggestionCard({
   added,
   overBudgetBy,
   onAdd,
+  onRemove,
   onTogglePreparing,
   onEat,
 }: {
@@ -290,6 +315,7 @@ function SuggestionCard({
   // rather than hiding why it wasn't in the top suggestions.
   overBudgetBy?: number;
   onAdd: () => void;
+  onRemove: () => void;
   onTogglePreparing: () => void;
   onEat: () => void;
 }) {
@@ -311,7 +337,7 @@ function SuggestionCard({
           {combo.prepMinutes} dk
         </span>
       </div>
-      <p className="ledger mt-1 text-xs text-muted-foreground">
+      <p className="mt-1 text-xs text-muted-foreground">
         {Math.round(combo.totals.kcal)} kcal ·{" "}
         {Math.round(combo.totals.proteinG)}g protein
       </p>
@@ -323,9 +349,12 @@ function SuggestionCard({
       <div className="mt-2 flex flex-wrap gap-2">
         <button
           type="button"
-          onClick={onAdd}
-          className="rounded-md border border-border px-2 py-1 text-xs">
-          {added ? "Eklendi" : "Listeye ekle"}
+          aria-pressed={added}
+          onClick={added ? onRemove : onAdd}
+          className={`rounded-md border px-2 py-1 text-xs ${
+            added ? "border-signal/70 bg-signal/10 text-signal" : "border-border"
+          }`}>
+          {added ? "Listeden çıkar" : "Listeye ekle"}
         </button>
         <button
           type="button"

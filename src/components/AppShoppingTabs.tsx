@@ -3,7 +3,6 @@ import { AddItem } from "@/components/AddItem";
 import { ActiveList } from "@/components/ActiveList";
 import { CategoriesView } from "@/components/CategoriesView";
 import { HistoryView } from "@/components/HistoryView";
-import { SearchView } from "@/components/SearchView";
 import { TodayView } from "@/components/TodayView";
 import type { AnyCategoryId, CatalogEntry, List } from "@/lib/store";
 import type { CategoryOverlay, MergedCategory } from "@/lib/categorization/userCategories";
@@ -35,6 +34,7 @@ type Props = {
   onReuseList: (listId: string) => void;
   onDeleteList: (listId: string) => void;
   isOnList: (name: string) => boolean;
+  onRemoveItemByName: (name: string) => void;
   onRenameCategory: (id: AnyCategoryId, label: string) => void;
   onToggleHiddenCategory: (id: string, hidden: boolean) => void;
   onMoveCategory: (id: AnyCategoryId, direction: "up" | "down") => void;
@@ -70,6 +70,7 @@ export function AppShoppingTabs({
   onReuseList,
   onDeleteList,
   isOnList,
+  onRemoveItemByName,
   onRenameCategory,
   onToggleHiddenCategory,
   onMoveCategory,
@@ -80,11 +81,17 @@ export function AppShoppingTabs({
   return (
     <>
       <TabsContent value="today">
-        <TodayView userId={userId} householdId={householdId} onAddItem={onAddItem} />
+        <TodayView
+          userId={userId}
+          householdId={householdId}
+          onAddItem={onAddItem}
+          isOnList={isOnList}
+          onRemoveItemByName={onRemoveItemByName}
+        />
       </TabsContent>
 
       <TabsContent value="list">
-        <AddItem catalog={catalog} onAdd={onAddItem} />
+        <AddItem catalog={catalog} onAdd={onAddItem} isOnList={isOnList} />
         <div className="pt-2">
           <ActiveList
             list={active}
@@ -111,10 +118,6 @@ export function AppShoppingTabs({
 
       <TabsContent value="history">
         <HistoryView lists={past} onReuse={onReuseList} onDelete={onDeleteList} />
-      </TabsContent>
-
-      <TabsContent value="find">
-        <SearchView catalog={catalog} onAdd={onAddItem} isOnList={isOnList} />
       </TabsContent>
 
       <TabsContent value="cats">

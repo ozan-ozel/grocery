@@ -1,10 +1,11 @@
 import { useState } from "react";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { useFoodCatalog, type Status } from "@/hooks/useFoodCatalog";
 import { format } from "@/components/NutritionTableCell";
 import { NutritionRadarChart } from "@/components/NutritionRadarChart";
 import { NutritionBarChart } from "@/components/NutritionBarChart";
+import { LoadingBlock } from "@/components/LoadingBlock";
 import { cn } from "@/lib/utils";
 import type { Nutrition } from "@/lib/nutrition";
 
@@ -40,6 +41,7 @@ export function NutritionCompareView() {
         <FoodSlot
           label="1. besin"
           foods={foods}
+          catalogStatus={status}
           selected={foodA}
           otherSelected={foodB}
           onSelect={setFoodA}
@@ -48,6 +50,7 @@ export function NutritionCompareView() {
         <FoodSlot
           label="2. besin"
           foods={foods}
+          catalogStatus={status}
           selected={foodB}
           otherSelected={foodA}
           onSelect={setFoodB}
@@ -145,6 +148,7 @@ export function NutritionCompareView() {
 function FoodSlot({
   label,
   foods,
+  catalogStatus,
   selected,
   otherSelected,
   onSelect,
@@ -152,6 +156,7 @@ function FoodSlot({
 }: {
   label: string;
   foods: Nutrition[];
+  catalogStatus: Status;
   selected: Nutrition | null;
   otherSelected: Nutrition | null;
   onSelect: (food: Nutrition) => void;
@@ -160,10 +165,16 @@ function FoodSlot({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
 
-  if (selected) {
+  if (!open && selected) {
     return (
       <div className="flex items-center justify-between gap-1 rounded-md border border-border bg-card px-2 py-2">
-        <span className="truncate text-sm">{selected.name_tr}</span>
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="min-w-0 flex-1 truncate text-left text-sm"
+        >
+          {selected.name_tr}
+        </button>
         <button
           type="button"
           aria-label={`${selected.name_tr} seçimini kaldır`}
@@ -180,7 +191,7 @@ function FoodSlot({
   const results = (
     queryLower
       ? foods.filter((f) => f.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower))
-      : foods.slice(0, 30)
+      : foods
   ).filter((f) => f.name_tr !== otherSelected?.name_tr);
 
   if (!open) {
@@ -212,10 +223,17 @@ function FoodSlot({
         />
       </div>
       <ul className="mt-1 max-h-48 overflow-y-auto">
-        {results.length === 0 && (
+        {catalogStatus === "loading" && (
+          <li className="space-y-1 p-1">
+            <LoadingBlock className="h-7" />
+            <LoadingBlock className="h-7" />
+            <LoadingBlock className="h-7" />
+          </li>
+        )}
+        {catalogStatus !== "loading" && results.length === 0 && (
           <li className="px-2 py-2 text-xs text-muted-foreground">Eşleşen besin yok.</li>
         )}
-        {results.map((food) => (
+        {catalogStatus !== "loading" && results.map((food) => (
           <li key={food.name_tr}>
             <button
               type="button"

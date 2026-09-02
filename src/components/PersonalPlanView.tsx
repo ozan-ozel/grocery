@@ -1,4 +1,4 @@
-import { BookOpen, Info } from "lucide-react";
+import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,6 +9,8 @@ import {
 } from "@/lib/mealPersonalization";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { useDetailsTransition } from "@/hooks/useDetailsTransition";
+import { cn } from "@/lib/utils";
 
 type Source = { label: string; href: string; badge: string };
 
@@ -86,6 +88,9 @@ export function PersonalPlanView({ userId }: Props) {
   const { profile, targets, update, setActivity, setEquationSex, setGoal } =
     useMealPersonalization(userId);
   const [showSources, setShowSources] = useState(false);
+  const [howOpen, setHowOpen] = useState(false);
+  const howDetails = useDetailsTransition<HTMLElement>();
+  const sourcesDetails = useDetailsTransition<HTMLElement>();
 
   const { foods } = useFoodCatalog();
   const [excludeQuery, setExcludeQuery] = useState("");
@@ -161,8 +166,13 @@ export function PersonalPlanView({ userId }: Props) {
             />
           </Field>
         </div>
-        <details className="mt-3" open>
-          <summary className="cursor-pointer text-xs font-medium text-muted-foreground">
+        <details className="group mt-3" open>
+          <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium text-muted-foreground">
+            <span
+              aria-hidden="true"
+              className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
+              <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
+            </span>
             Varsayılan olarak dolduruldu — istersen değiştir
           </summary>
           <div className="mt-2 grid grid-cols-2 gap-3">
@@ -284,52 +294,120 @@ export function PersonalPlanView({ userId }: Props) {
         />
       )}
 
-      <details className="rounded-lg border border-border p-3">
-        <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold">
-          <Info className="size-4 text-muted-foreground" />
-          Nasıl hesaplanıyor?
-        </summary>
-        <div className="mt-3 space-y-2 text-xs text-muted-foreground">
-          <p>
-            Mifflin-St Jeor ile bazal metabolizma, aktivite katsayısı ile günlük
-            koruma tahmini hesaplanır. Hedef değeri bunun üzerine ölçülü bir
-            değişiklik uygular.
-          </p>
-          <p>
-            Bu sonuçlar klinik ölçüm veya tıbbi tavsiye değildir. İlaç, kronik
-            hastalık, gebelik, emzirme veya yeme bozukluğu durumlarında
-            diyetisyen ya da hekimle görüş.
-          </p>
-        </div>
-      </details>
-
-      <div className="gradient-edge rounded-lg p-px">
-        <label className="flex cursor-pointer items-center justify-between rounded-[calc(0.5rem-1px)] bg-background px-3 py-2 text-sm">
-          <span className="flex items-center gap-2">
-            <BookOpen className="size-4 text-muted-foreground" />
-            Kaynakları göster
-          </span>
-          <span className="relative inline-flex items-center">
-            <input
-              type="checkbox"
-              checked={showSources}
-              onChange={event =>
-                setShowSources((event.target as HTMLInputElement).checked)
-              }
-              className="peer sr-only"
-            />
-            <span className="h-5 w-9 rounded-full bg-signal/10 transition-colors peer-checked:bg-signal" />
-            <span className="pointer-events-none absolute left-0.5 size-4 rounded-full bg-background shadow transition-transform peer-checked:translate-x-4" />
-          </span>
-        </label>
+      <div
+        className="glow-signal rounded-lg">
+        <details
+          open={howOpen}
+          onToggle={event => {
+            const opened = (event.target as HTMLDetailsElement).open;
+            setHowOpen(opened);
+            howDetails.onToggle(opened);
+          }}
+          className={cn(
+            "rounded-lg",
+            howOpen && howDetails.settled
+              ? "gradient-edge-flow p-px"
+              : "border-signal-solid"
+          )}>
+          <summary
+            ref={howDetails.ref}
+            className={`flex cursor-pointer list-none items-center gap-2 bg-background p-3 text-sm font-semibold ${
+              howOpen
+                ? "rounded-t-[calc(0.5rem-1px)]"
+                : "rounded-[calc(0.5rem-1px)]"
+            }`}>
+            <span
+              aria-hidden="true"
+              className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 font-serif text-xs font-bold italic leading-none text-signal shadow-sm">
+              i
+            </span>
+            Nasıl hesaplanıyor?
+          </summary>
+          <div className="space-y-2 rounded-b-[calc(0.5rem-1px)] bg-background px-3 pb-3 text-xs text-muted-foreground">
+            <ul className="space-y-1.5">
+              <li>
+                <span className="font-medium text-foreground">
+                  Bazal metabolizma (BMR):
+                </span>{" "}
+                Mifflin-St Jeor formülü — 9.99×Kilo + 6.25×Boy − 4.92×Yaş,
+                artı denklem seçimine göre erkek katsayısı (+5) ya da kadın
+                katsayısı (−161).
+              </li>
+              <li>
+                <span className="font-medium text-foreground">
+                  Koruma kalorisi:
+                </span>{" "}
+                BMR × aktivite katsayısı — Hareketsiz için 1.4, Az aktif 1.55,
+                Orta aktif 1.7, Aktif 1.9, Çok aktif 2.1 ("Günlük aktivite"
+                seçimine göre).
+              </li>
+              <li>
+                <span className="font-medium text-foreground">
+                  Günlük enerji hedefi:
+                </span>{" "}
+                Kademeli kilo kaybında koruma −400 kcal, kilo
+                alma/performansta +250 kcal; kilomu korumak seçiliyse
+                değişmez. Hedef hiçbir zaman 1200 kcal'in altına inmez.
+              </li>
+              <li>
+                <span className="font-medium text-foreground">
+                  Protein / Yağ / Karbonhidrat / Lif aralıkları:
+                </span>{" "}
+                hedef kaloriye göre DRI aralıklarından türetilir — yağ
+                hedefin %20-35'i, karbonhidrat %45-65'i, protein kilo başına
+                1.2-1.6g (aktif/çok aktif ya da kilo alma hedefinde üst uç),
+                lif her 1000 kcal için ~14g.
+              </li>
+            </ul>
+            <p>
+              Bu sonuçlar klinik ölçüm veya tıbbi tavsiye değildir. İlaç,
+              kronik hastalık, gebelik, emzirme veya yeme bozukluğu
+              durumlarında diyetisyen ya da hekimle görüş.
+            </p>
+          </div>
+        </details>
       </div>
 
-      {showSources && (
-        <>
-          <SourceConnector />
-          <SourceMap />
-        </>
-      )}
+      <div
+        className="glow-signal rounded-lg">
+        <details
+          open={showSources}
+          onToggle={event => {
+            const opened = (event.target as HTMLDetailsElement).open;
+            setShowSources(opened);
+            sourcesDetails.onToggle(opened);
+          }}
+          className={cn(
+            "group rounded-lg",
+            showSources ? "border-gradient-edge" : "border-signal-solid"
+          )}>
+          <summary
+            ref={sourcesDetails.ref}
+            className={`flex cursor-pointer list-none items-center justify-between bg-background p-3 text-sm font-semibold ${
+              showSources
+                ? "rounded-t-[calc(0.5rem-1px)]"
+                : "rounded-[calc(0.5rem-1px)]"
+            }`}>
+            <span className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
+                <BookOpen className="size-3" />
+              </span>
+              Kaynakları göster
+            </span>
+            <span
+              aria-hidden="true"
+              className="relative inline-flex items-center">
+              <span className="h-5 w-9 rounded-full bg-signal/10 transition-colors group-open:bg-signal" />
+              <span className="pointer-events-none absolute left-0.5 size-4 rounded-full bg-background shadow transition-transform group-open:translate-x-4" />
+            </span>
+          </summary>
+          <div className="rounded-b-[calc(0.5rem-1px)] bg-background px-3 pb-3">
+            <SourceMap />
+          </div>
+        </details>
+      </div>
     </div>
   );
 }
@@ -435,45 +513,29 @@ function TargetSummary({
 
 function SourceMap() {
   return (
-    <div className="gradient-edge rounded-lg p-px">
-      <div className="space-y-2 rounded-[calc(0.5rem-1px)] bg-background p-3">
-        <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
-          <BookOpen className="size-4" /> Özellik kaynakları
-        </div>
-        {SOURCE_GROUPS.map(group => (
-          <div
-            key={group.feature}
-            className="border-t border-border pt-2 text-xs">
-            <p className="font-medium text-foreground">{group.feature}</p>
-            <div className="mt-1 flex flex-wrap gap-x-3 gap-y-1">
-              {group.sources.map(source => (
-                <a
-                  key={`${group.feature}-${source.href}-${source.label}`}
-                  className="underline underline-offset-2"
-                  href={source.href}
-                  target="_blank"
-                  rel="noreferrer">
-                  <span className="inline-flex items-center gap-1">
-                    <SourceBadge label={source.badge} />
-                    {source.label}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </div>
-        ))}
+    <div className="space-y-2 border-t border-border pt-3 text-xs">
+      <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+        <BookOpen className="size-4" /> Özellik kaynakları
       </div>
-    </div>
-  );
-}
-
-function SourceConnector() {
-  return (
-    <div
-      className="flex h-5 items-stretch justify-around px-8"
-      aria-hidden="true">
-      <span className="w-0.5 border-l-2 border-dashed border-signal/70 bg-signal/10" />
-      <span className="w-0.5 border-l-2 border-dashed border-signal/70 bg-signal/10" />
+      {SOURCE_GROUPS.map(group => (
+        <div key={group.feature} className="border-t border-border pt-2">
+          <p className="font-medium text-foreground">{group.feature}</p>
+          <div className="mt-1.5 space-y-1">
+            {group.sources.map(source => (
+              <a
+                key={`${group.feature}-${source.href}-${source.label}`}
+                className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-foreground/80 underline decoration-dotted underline-offset-2 transition-colors hover:bg-accent hover:text-signal hover:decoration-solid"
+                href={source.href}
+                target="_blank"
+                rel="noreferrer">
+                <SourceBadge label={source.badge} />
+                <span className="flex-1">{source.label}</span>
+                <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }

@@ -49,5 +49,10 @@ export function useUndo(
     setUndo(null);
   }
 
-  return { undo, showUndo, restore };
+  function dismiss() {
+    window.clearTimeout(undoTimer.current);
+    setUndo(null);
+  }
+
+  return { undo, showUndo, restore, dismiss };
 }

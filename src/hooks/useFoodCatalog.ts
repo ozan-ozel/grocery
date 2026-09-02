@@ -6,12 +6,12 @@ import {
   type NutritionMap,
 } from "@/lib/nutrition";
 
-type Status = "idle" | "loading" | "ready" | "error";
+export type Status = "idle" | "loading" | "ready" | "error";
 
 // There are ~64 rows total, so loading them all once (rather than the
 // debounced server-side search AllFoodsBrowser uses) and filtering
-// client-side — same pattern as SearchView.tsx — is simpler and avoids a
-// network round trip per keystroke in the Add Food picker.
+// client-side — same pattern as AddItem.tsx's catalog suggestions — is
+// simpler and avoids a network round trip per keystroke in the Add Food picker.
 const CATALOG_LIMIT = 200;
 
 export function useFoodCatalog() {

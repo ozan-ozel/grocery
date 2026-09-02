@@ -296,6 +296,30 @@
 
   html {
     -webkit-text-size-adjust: 100%;
+    /* Lets height/block-size transition to and from "auto" below —
+       otherwise a details panel could only ever snap open instantly. */
+    interpolate-size: allow-keywords;
+  }
+
+  /* Every <details> in the app opens/closes with a smooth height transition
+     instead of the native instant snap. Progressive enhancement: browsers
+     without ::details-content support just keep the old instant toggle,
+     so this never breaks anything, it only improves where supported.
+     prefers-reduced-motion is handled globally below (caps
+     transition-duration to ~0). */
+  details::details-content {
+    height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition:
+      height 0.32s ease,
+      opacity 0.26s ease,
+      content-visibility 0.32s ease allow-discrete;
+  }
+
+  details[open]::details-content {
+    height: auto;
+    opacity: 1;
   }
 
   body {
@@ -322,24 +346,60 @@
 }
 
 @layer utilities {
-  /* The ledger column: quantities and counts are always mono,
-     tabular, and right-aligned so they stack into a column. */
+  /* The ledger column: quantities and counts stay tabular (digits are
+     fixed-width so they stack into an aligned column) and right-aligned.
+     Deliberately NOT font-mono — most monospace stacks (Roboto Mono
+     included, depending on fallback) render 0 with a diagonal slash to
+     disambiguate it from O in source code, which reads as a stray mark in a
+     consumer nutrition/shopping context. tabular-nums alone gets the
+     alignment without that side effect, in the app's one normal font. */
   .ledger {
-    font-family: var(--font-mono);
     font-variant-numeric: tabular-nums;
     letter-spacing: -0.01em;
   }
 
-  /* Hairline gradient frame: ink fading into the theme's single signal
-     accent. Stays on-brand across every theme since both stops are
-     already theme-aware custom properties. */
+  /* Hairline gradient frame: the theme's signal accent starting at the top-left
+     corner, fading into the grayish secondary tone. Stays on-brand across every
+     theme since both stops are already theme-aware custom properties. */
   .gradient-edge {
     background: linear-gradient(
       135deg,
-      var(--color-primary),
-      color-mix(in oklab, var(--color-primary) 30%, var(--color-signal)) 55%,
-      var(--color-signal)
+      var(--color-signal),
+      color-mix(in oklab, var(--color-signal) 30%, var(--color-secondary)) 55%,
+      var(--color-secondary)
     );
+  }
+
+  /* A genuine solid-color border (the CSS `border` property), not the
+     padding+background-fill trick above. Use this instead of .gradient-edge
+     wherever the box's height can be animating (e.g. an open/closing
+     <details>) — the padding trick only stays a hairline if the inner
+     opaque content box precisely covers the outer fill every single frame,
+     which an animating height doesn't guarantee, so it can flash as a full
+     color fill instead of a border. A real border is its own box-model
+     layer, entirely independent of the content's background, so it can't. */
+  .border-signal-solid {
+    border: 1px solid color-mix(in oklab, var(--color-signal) 70%, transparent);
+  }
+
+  /* Same idea, but gradient: a real border via the two-background trick
+     (opaque fill on the padding-box, gradient on the border-box) instead of
+     .gradient-edge's padding-and-cover trick. Bleed-proof for the same
+     reason as .border-signal-solid — safe to use even while the element's
+     height is actively animating. */
+  .border-gradient-edge {
+    border: 1px solid transparent;
+    background:
+      linear-gradient(var(--color-background), var(--color-background))
+        padding-box,
+      linear-gradient(
+          135deg,
+          var(--color-signal),
+          color-mix(in oklab, var(--color-signal) 30%, var(--color-secondary))
+            55%,
+          var(--color-secondary)
+        )
+        border-box;
   }
 
   /* Loading placeholder: a low-opacity signal-tinted band sweeps across a
@@ -365,6 +425,63 @@
     }
     100% {
       background-position: -40% 0;
+    }
+  }
+
+  /* Soft colored shadow beneath an element, like light spilling out from
+     under a card. Static — no animation, negligible cost either way. */
+  .glow-signal {
+    box-shadow: 0 6px 18px -6px
+      color-mix(in oklab, var(--color-signal) 35%, transparent);
+  }
+
+  /* Same signal→secondary formula as .gradient-edge, but the gradient itself
+     breathes back and forth for a "living" edge. Animates transform (not
+     background-position like .loading-flow above) so it's compositor-only —
+     no per-frame repaint, safe on low-power devices. The pseudo-element is a
+     single (not tiled) gradient wider than its container, so each end of the
+     ping-pong lands on a genuinely different, fully-resolved composition
+     (signal pinned at the left corner vs. secondary pinned at the right)
+     instead of two frames that happen to look alike. prefers-reduced-motion
+     is handled globally below (caps animation-duration to ~0). */
+  .gradient-edge-flow {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .gradient-edge-flow::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    width: 250%;
+    background-image: linear-gradient(
+      135deg,
+      var(--color-signal) 0%,
+      var(--color-signal) 38%,
+      var(--color-secondary) 48%,
+      var(--color-secondary) 62%,
+      var(--color-signal) 72%,
+      var(--color-signal) 100%
+    );
+    animation: gradient-edge-flow 3s linear infinite alternate;
+  }
+
+  /* from: pure signal sits at the left corner (matches .gradient-edge's
+     static look). to: shifted left by 60% of the pseudo's own width, so the
+     window has scrolled to the far end of the gradient — a second signal
+     band there means the right/bottom corner brightens too, dipping through
+     secondary in between rather than fading to a flat, hard-to-see end.
+     animation-direction: alternate plays this forward then backward — still
+     just transform, so a ping-pong sweep costs the browser nothing extra
+     over a one-way loop: same compositor-only interpolation, just played in
+     both directions instead of restarting. */
+  @keyframes gradient-edge-flow {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-60%);
     }
   }
 }

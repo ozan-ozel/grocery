@@ -15,8 +15,8 @@ import {
 } from "@/lib/preferences";
 
 export type Section = "alisveris" | "besin" | "yemek" | "kisisel";
-export type Tab = "today" | "list" | "history" | "find" | "cats";
-const TABS: Tab[] = ["today", "list", "history", "find", "cats"];
+export type Tab = "today" | "list" | "history" | "cats";
+const TABS: Tab[] = ["today", "list", "history", "cats"];
 
 function initialSection(): Section {
   const fromUrl = readSectionFromUrl();

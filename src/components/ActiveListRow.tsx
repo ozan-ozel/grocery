@@ -123,6 +123,7 @@ export function Row({
           </div>
         )}
         <div
+          data-swipe-row={swipeActive ? "" : undefined}
           className={cn(
             "flex items-center gap-3 bg-background py-3.5",
             swipeActive && "touch-pan-y pr-3",

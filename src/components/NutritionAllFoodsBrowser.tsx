@@ -8,10 +8,10 @@ type BrowseStatus = "idle" | "loading" | "ready" | "error";
 const BROWSE_LIMIT = 60;
 
 // Browses/searches the whole nutrition table, independent of the active
-// list. Same interaction as the Alışveriş > Bul tab (SearchView) — icon
-// inside the input, no separate search button, live as you type — but this
-// one is backed by the DB instead of an already-loaded local catalog, so
-// typing is debounced (300ms) to avoid firing a request per keystroke.
+// list. Same interaction as the Alışveriş > Liste tab's "Ürün ekle" input —
+// icon inside the input, no separate search button, live as you type — but
+// this one is backed by the DB instead of an already-loaded local catalog,
+// so typing is debounced (300ms) to avoid firing a request per keystroke.
 export function AllFoodsBrowser() {
   const [query, setQuery] = useState("");
   const [rows, setRows] = useState<Nutrition[]>([]);

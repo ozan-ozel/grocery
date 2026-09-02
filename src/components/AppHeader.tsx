@@ -220,7 +220,6 @@ export function AppHeader({
                 <TabsTrigger value="today">Bugün</TabsTrigger>
                 <TabsTrigger value="list">Liste</TabsTrigger>
                 <TabsTrigger value="history">Geçmiş</TabsTrigger>
-                <TabsTrigger value="find">Bul</TabsTrigger>
                 <TabsTrigger value="cats">Kategoriler</TabsTrigger>
               </TabsList>
             </div>

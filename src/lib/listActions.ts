@@ -182,11 +182,21 @@ export function createListActions(params: {
       (i) => i.name.toLocaleLowerCase("tr-TR") === name.toLocaleLowerCase("tr-TR")
     );
 
+  // Same exact-match rule as isOnList, so "is this on the list" and "remove
+  // it" always agree on which row they mean.
+  function removeItemByName(name: string) {
+    const item = active.items.find(
+      (i) => i.name.toLocaleLowerCase("tr-TR") === name.toLocaleLowerCase("tr-TR")
+    );
+    if (item) removeItem(item.id);
+  }
+
   return {
     addItem,
     toggleItem,
     editItem,
     removeItem,
+    removeItemByName,
     bulkRemove,
     startNewList,
     reuseList,

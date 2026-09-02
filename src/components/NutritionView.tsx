@@ -18,6 +18,7 @@ import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { EditorRow } from "@/components/NutritionEditorRow";
 import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
 import { Cell } from "@/components/NutritionTableCell";
+import { LoadingBlock } from "@/components/LoadingBlock";
 
 type Props = {
   items: Item[];
@@ -237,7 +238,7 @@ export function NutritionView({ items }: Props) {
                 <tr key={item.id} className="border-b border-border/60">
                   <td className="py-2 pr-2">{item.name}</td>
                   <td colSpan={6} className="py-2">
-                    <div className="ml-auto h-3 w-24 animate-pulse rounded bg-border" />
+                    <LoadingBlock className="ml-auto h-3 w-24" />
                   </td>
                 </tr>
               ))
