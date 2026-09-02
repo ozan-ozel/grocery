@@ -7,6 +7,7 @@ export type MealEntry = {
   foodId: string; // Nutrition.name_tr
   quantityG: number;
   position: number;
+  comboId: string | null;
 };
 
 type MealEntryRow = {
@@ -17,6 +18,7 @@ type MealEntryRow = {
   food_id: string;
   quantity_g: number;
   position: number;
+  combo_id: string | null;
 };
 
 function fromRow(row: MealEntryRow): MealEntry {
@@ -27,6 +29,7 @@ function fromRow(row: MealEntryRow): MealEntry {
     foodId: row.food_id,
     quantityG: row.quantity_g,
     position: row.position,
+    comboId: row.combo_id,
   };
 }
 
@@ -67,6 +70,7 @@ export type NewMealEntry = {
   foodId: string;
   quantityG: number;
   position: number;
+  comboId?: string;
 };
 
 export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | null> {
@@ -82,6 +86,7 @@ export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | 
         food_id: entry.foodId,
         quantity_g: entry.quantityG,
         position: entry.position,
+        combo_id: entry.comboId ?? null,
       }),
     });
     if (!res.ok) {

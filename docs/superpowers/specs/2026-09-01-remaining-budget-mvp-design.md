@@ -210,11 +210,20 @@ remaining budget no longer fit it — no confirmation, no way back. Now:
   `LoggedEntry` return value from `logConsumption`/`addItem` so the ids are known). This is a
   real undo — the meal_entries rows are actually removed and the budget recalculates
   accordingly — not a client-side-only revert.
-- Which `meal_entries` rows belong to which eaten combo is tracked only in `TodayView`'s
-  component state, not persisted anywhere: reloading the page loses the "Bugün yediklerin"
-  grouping (the combo simply reappears in suggestions if it still fits), but the underlying
-  meal_entries rows it wrote are real and permanent either way. Making that grouping durable
-  would need a new backend concept and was explicitly out of scope for this pass.
+- Update, 2026-09-02: which `meal_entries` rows belong to which eaten combo turned out to
+  need persisting after all — the client-state-only version above meant "Bugün yediklerin"
+  reset on every reload while the real consumption numbers didn't, which read as a bug in
+  practice. `supabase/12-meal-entries-combo-id.sql` adds a nullable `combo_id` column;
+  `netlify/functions/meal-entries.ts`'s `POST` accepts and stores it (manual "Besin ekle"
+  entries from Yemek Planı leave it `null`, unaffected). `TodayView` no longer keeps
+  `eatenCombos` in `useState` — it derives the grouping every render from
+  `useRemainingToday`'s new `todaysItems` (today's real meal_entries, slot + comboId
+  attached), grouped by `combo_id` and summed via `calculateItemsNutrition` against each
+  group's actual logged quantities (not the catalog combo's nominal ones, so a later
+  quantity edit in Yemek Planı stays reflected). Eating the same combo twice in one day
+  without undoing in between now merges into one "Bugün yediklerin" card showing the
+  combined totals, rather than two separate cards — a deliberate simplification enabled by
+  keying the grouping on `combo_id` alone.
 
 ### `src/components/AppShoppingTabs.tsx` (modify)
 
@@ -237,7 +246,10 @@ multi-select, writing to the new `excludedFoodIds` field.
 Extend the profile type and the read/write path to include `excludedFoodIds: string[]`,
 mirroring how the other profile fields are already handled.
 
-### `src/lib/listActions.ts`, `netlify/functions/meal-entries.ts` (unchanged)
+### `src/lib/listActions.ts` (unchanged), `netlify/functions/meal-entries.ts` (modify, 2026-09-02)
+
+`meal-entries.ts` now accepts an optional `combo_id` on `POST` and returns/selects it
+everywhere — see the "Bugün yediklerin" update above.
 
 Both reused as-is: `addItem` for the "Listeye ekle" action, the existing `POST
 /api/meal-entries` for "Yedim" (called once per combo ingredient — combos are 2–4

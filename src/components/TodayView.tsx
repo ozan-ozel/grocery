@@ -3,6 +3,7 @@ import { ChefHat, ChevronDown, Undo2 } from "lucide-react";
 import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
+import { calculateItemsNutrition, type MealItem } from "@/lib/localMealPlan";
 import combosData from "../../data/combos.json";
 import type { Combo } from "@/lib/combos";
 
@@ -27,16 +28,21 @@ const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
   tags: raw.tags,
 }));
 
+const COMBO_BY_ID = new Map(COMBOS.map((c) => [c.id, c]));
+
 // How long a combo's "Listeye ekle" button stays on "Eklendi".
 const ADDED_FEEDBACK_MS = 1500;
 
-// A logged combo, kept around so "Bugün yediklerin" can render it and Geri al
-// can undo it. Not persisted anywhere — which meal_entries rows belong to
-// which combo only exists in this component's memory, so it resets on
-// reload. The meal_entries themselves are real and permanent either way.
-type EatenCombo = {
-  key: string;
-  combo: ScoredCombo;
+// A combo eaten today, reconstructed from real meal_entries (grouped by the
+// comboId "Yedim" tags each ingredient with) rather than kept in component
+// state — so "Bugün yediklerin" survives a reload instead of resetting.
+// totals sum the entries' actual logged quantities, not the catalog combo's
+// nominal ones, so a later quantity edit in Yemek Planı stays reflected.
+type EatenGroup = {
+  comboId: string;
+  nameTr: string;
+  prepMinutes: number;
+  totals: MacroTotals;
   entries: LoggedEntry[];
 };
 
@@ -55,7 +61,6 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
   // backend write, resets on reload. A real cook-time tracker is a later
   // idea, not this one.
   const [preparingIds, setPreparingIds] = useState<Set<string>>(new Set());
-  const [eatenCombos, setEatenCombos] = useState<EatenCombo[]>([]);
 
   const suggestions = useMemo<ScoredCombo[]>(() => {
     if (remaining.status !== "ready") return [];
@@ -74,10 +79,38 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     return scoreAllCombos(COMBOS, remaining.excludedFoodIds, remaining.catalogMap);
   }, [remaining]);
 
+  // Reconstructed from today's real meal_entries (grouped by comboId) rather
+  // than kept in local state, so it's correct on first paint and after a
+  // reload — not just immediately after a "Yedim" click in this tab.
+  const eatenGroups = useMemo<EatenGroup[]>(() => {
+    if (remaining.status !== "ready") return [];
+    const byCombo = new Map<string, { entries: LoggedEntry[]; items: MealItem[] }>();
+    for (const item of remaining.todaysItems) {
+      if (!item.comboId) continue;
+      const bucket = byCombo.get(item.comboId) ?? { entries: [], items: [] };
+      bucket.entries.push({ id: item.id, slot: item.slot });
+      bucket.items.push(item);
+      byCombo.set(item.comboId, bucket);
+    }
+    const groups: EatenGroup[] = [];
+    for (const [comboId, bucket] of byCombo) {
+      const raw = COMBO_BY_ID.get(comboId);
+      if (!raw) continue; // combo removed from the catalog since it was logged
+      groups.push({
+        comboId,
+        nameTr: raw.nameTr,
+        prepMinutes: raw.prepMinutes,
+        totals: calculateItemsNutrition(bucket.items, remaining.catalogMap),
+        entries: bucket.entries,
+      });
+    }
+    return groups;
+  }, [remaining]);
+
   // Yedim moves a combo here instead of just letting it fall out of
   // matchCombos' results — otherwise it can vanish mid-tap with no
   // confirmation the moment the shrunk budget no longer fits it.
-  const eatenComboIds = new Set(eatenCombos.map((e) => e.combo.id));
+  const eatenComboIds = new Set(eatenGroups.map((g) => g.comboId));
   const visibleSuggestions = suggestions.filter((combo) => !eatenComboIds.has(combo.id));
   const visibleSuggestionIds = new Set(visibleSuggestions.map((combo) => combo.id));
   const otherCombos = allCombos.filter(
@@ -133,10 +166,9 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
   }
 
   function eatCombo(combo: ScoredCombo) {
-    const entries = combo.items.map((item) =>
-      remaining.logConsumption(item.foodId, item.grams)
-    );
-    setEatenCombos((prev) => [...prev, { key: `${combo.id}-${Date.now()}`, combo, entries }]);
+    for (const item of combo.items) {
+      remaining.logConsumption(item.foodId, item.grams, combo.id);
+    }
     setPreparingIds((prev) => {
       if (!prev.has(combo.id)) return prev;
       const next = new Set(prev);
@@ -145,11 +177,10 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
     });
   }
 
-  function undoEaten(key: string) {
-    const entry = eatenCombos.find((e) => e.key === key);
-    if (!entry) return;
-    remaining.undoConsumption(entry.entries);
-    setEatenCombos((prev) => prev.filter((e) => e.key !== key));
+  function undoEaten(comboId: string) {
+    const group = eatenGroups.find((g) => g.comboId === comboId);
+    if (!group) return;
+    remaining.undoConsumption(group.entries);
   }
 
   return (
@@ -199,30 +230,30 @@ export function TodayView({ userId, householdId, onAddItem }: Props) {
         </details>
       )}
 
-      {eatenCombos.length > 0 && (
+      {eatenGroups.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">
             Bugün yediklerin
           </h3>
           <ul className="space-y-2">
-            {eatenCombos.map(({ key, combo }) => (
-              <li key={key}>
+            {eatenGroups.map((group) => (
+              <li key={group.comboId}>
                 <div className="gradient-edge rounded-lg p-1">
                   <div className="rounded-[calc(0.5rem-4px)] bg-background p-3">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{combo.nameTr}</span>
+                      <span className="font-medium">{group.nameTr}</span>
                       <span className="text-xs text-muted-foreground">
-                        {combo.prepMinutes} dk
+                        {group.prepMinutes} dk
                       </span>
                     </div>
                     <p className="ledger mt-1 text-xs text-muted-foreground">
-                      {Math.round(combo.totals.kcal)} kcal ·{" "}
-                      {Math.round(combo.totals.proteinG)}g protein
+                      {Math.round(group.totals.kcal)} kcal ·{" "}
+                      {Math.round(group.totals.proteinG)}g protein
                     </p>
                     <div className="mt-2">
                       <button
                         type="button"
-                        onClick={() => undoEaten(key)}
+                        onClick={() => undoEaten(group.comboId)}
                         className="flex items-center gap-1 rounded-md border border-border px-2 py-1 text-xs">
                         <Undo2 className="size-3.5" />
                         Geri al

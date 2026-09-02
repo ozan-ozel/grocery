@@ -4,7 +4,7 @@ import { useFoodCatalog } from "./useFoodCatalog";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import type { PersonalTargets } from "@/lib/mealPersonalization";
 import type { NutritionMap } from "@/lib/nutrition";
-import type { MealSlot } from "@/lib/localMealPlan";
+import type { MealItem, MealSlot } from "@/lib/localMealPlan";
 
 // One ingredient logged via logConsumption — enough to undo it later
 // (removeItem needs both the entry id and the slot it was filed under).
@@ -14,7 +14,7 @@ export type RemainingToday =
   | {
       status: "no-profile";
       catalogMap: NutritionMap;
-      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     }
   // Without the catalog every combo's totals lookup fails and matchCombos
@@ -22,12 +22,12 @@ export type RemainingToday =
   // unless the loading/error state is carried through to the view.
   | {
       status: "loading-catalog";
-      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     }
   | {
       status: "catalog-error";
-      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     }
   | {
@@ -37,7 +37,11 @@ export type RemainingToday =
       remaining: MacroTotals;
       excludedFoodIds: string[];
       catalogMap: NutritionMap;
-      logConsumption: (foodId: string, grams: number) => LoggedEntry;
+      // Every ingredient logged today, slot attached — TodayView groups
+      // whichever of these carry a comboId to reconstruct "Bugün
+      // yediklerin" from real data, so it survives a reload.
+      todaysItems: (MealItem & { slot: MealSlot })[];
+      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     };
 
@@ -82,13 +86,13 @@ export function useRemainingToday(
   const { catalogMap, status: catalogStatus } = useFoodCatalog();
   // Bugün always means today, whatever day Yemek Planı is currently browsing
   // (both read the same ?date URL param, so this instance opts out of it).
-  const { dailyNutrition, addItem, removeItem } = useMealPlan(householdId, catalogMap, {
+  const { dailyNutrition, addItem, removeItem, allItems } = useMealPlan(householdId, catalogMap, {
     pinnedDate: todayDateStr(),
   });
 
-  function logConsumption(foodId: string, grams: number): LoggedEntry {
+  function logConsumption(foodId: string, grams: number, comboId?: string): LoggedEntry {
     const slot = inferSlot();
-    const id = addItem(slot, foodId, grams);
+    const id = addItem(slot, foodId, grams, comboId);
     return { id, slot };
   }
 
@@ -124,6 +128,7 @@ export function useRemainingToday(
     remaining,
     excludedFoodIds: profile.excludedFoodIds,
     catalogMap,
+    todaysItems: allItems(),
     logConsumption,
     undoConsumption,
   };

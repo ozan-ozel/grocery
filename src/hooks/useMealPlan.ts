@@ -85,7 +85,12 @@ export function useMealPlan(
       if (cancelled) return;
       const plan = emptyDayPlan();
       for (const entry of entries) {
-        plan[entry.slot].push({ id: entry.id, foodId: entry.foodId, quantityG: entry.quantityG });
+        plan[entry.slot].push({
+          id: entry.id,
+          foodId: entry.foodId,
+          quantityG: entry.quantityG,
+          comboId: entry.comboId ?? undefined,
+        });
       }
       setPlans((prev) => ({ ...prev, [`${householdId}|${date}`]: plan }));
     });
@@ -114,14 +119,26 @@ export function useMealPlan(
     return dayPlan[slot];
   }
 
-  function addItem(slot: MealSlot, foodId: string, quantityG: number): string {
+  // Every item across all slots for the pinned date, slot attached — backs
+  // TodayView's reconstruction of "Bugün yediklerin" from real data (grouped
+  // by comboId) instead of only component state that resets on reload.
+  function allItems(): (MealItem & { slot: MealSlot })[] {
+    return MEAL_SLOTS.flatMap(({ slot }) => dayPlan[slot].map((item) => ({ ...item, slot })));
+  }
+
+  function addItem(slot: MealSlot, foodId: string, quantityG: number, comboId?: string): string {
     const id = uid();
     const position = dayPlan[slot].length;
-    updateDayPlan((plan) => ({ ...plan, [slot]: [...plan[slot], { id, foodId, quantityG }] }));
+    updateDayPlan((plan) => ({
+      ...plan,
+      [slot]: [...plan[slot], { id, foodId, quantityG, comboId }],
+    }));
     if (householdId) {
-      createMealEntry({ id, householdId, date, slot, foodId, quantityG, position }).then((saved) => {
-        if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", id);
-      });
+      createMealEntry({ id, householdId, date, slot, foodId, quantityG, position, comboId }).then(
+        (saved) => {
+          if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", id);
+        }
+      );
     }
     return id;
   }
@@ -163,6 +180,7 @@ export function useMealPlan(
     goToPrevDay,
     goToNextDay,
     itemsForSlot,
+    allItems,
     addItem,
     updateItemQuantity,
     removeItem,
