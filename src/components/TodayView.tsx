@@ -220,13 +220,18 @@ function SuggestionCard({
   onTogglePreparing: () => void;
   onEat: () => void;
 }) {
+  // Both states share the exact same box model (1px frame + p-3 content) so
+  // toggling "Hazırlanıyor" only swaps backgrounds, never the layout — a
+  // gradient border of a different thickness than the plain one would shift
+  // the card size on toggle. The background wash is signal-only (not the
+  // border's primary→signal blend) and low-opacity so it reads as a subtle
+  // tint rather than a loud color in every theme, light or dark, without
+  // touching text contrast.
   const content = (
     <div
-      className={
-        preparing
-          ? "rounded-[calc(0.5rem-4px)] bg-background p-3"
-          : "rounded-lg border border-border p-3"
-      }>
+      className={`rounded-[calc(0.5rem-1px)] bg-background p-3 ${
+        preparing ? "bg-gradient-to-br from-signal/10 to-transparent" : ""
+      }`}>
       <div className="flex items-center justify-between">
         <span className="font-medium">{combo.nameTr}</span>
         <span className="text-xs text-muted-foreground">
@@ -249,9 +254,7 @@ function SuggestionCard({
           aria-pressed={preparing}
           onClick={onTogglePreparing}
           className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs ${
-            preparing
-              ? "border-transparent bg-primary/10 font-medium"
-              : "border-border"
+            preparing ? "border-signal bg-signal/10" : "border-border"
           }`}>
           <ChefHat className="size-3.5" />
           Hazırlanıyor
@@ -266,12 +269,11 @@ function SuggestionCard({
     </div>
   );
 
-  if (!preparing) {
-    return <li>{content}</li>;
-  }
   return (
     <li>
-      <div className="gradient-edge rounded-lg p-1">{content}</div>
+      <div className={`rounded-lg p-px ${preparing ? "gradient-edge" : "bg-border"}`}>
+        {content}
+      </div>
     </li>
   );
 }
