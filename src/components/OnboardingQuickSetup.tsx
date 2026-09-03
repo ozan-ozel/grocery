@@ -3,6 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Field, NumberInput } from "@/components/PersonalPlanView";
 import {
   ACTIVITY_OPTIONS,
+  validateProfile,
   type PersonalProfile,
 } from "@/lib/mealPersonalization";
 
@@ -36,7 +37,26 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
 
   const isLastStep = step === STEP_COUNT - 1;
 
+  // Reuses validateProfile's bounds (age 18-100, height 120-230cm, weight
+  // 35-300kg) instead of re-declaring them, so step 0 can't silently drift
+  // from what the server-side save will actually accept. `name` and
+  // `excludedFoodIds` are filled with non-triggering placeholders since
+  // step 0 doesn't collect them — only the age/height/weight messages are
+  // relevant here.
+  const step0Errors = validateProfile({
+    name: "-",
+    equationSex: answers.equationSex,
+    ageYears: answers.ageYears,
+    heightCm: answers.heightCm,
+    weightKg: answers.weightKg,
+    activity: answers.activity,
+    goal: answers.goal,
+    excludedFoodIds: [],
+  });
+  const step0Invalid = step === 0 && step0Errors.length > 0;
+
   function next() {
+    if (step0Invalid) return;
     if (isLastStep) {
       onFinish(answers);
       return;
@@ -91,6 +111,13 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
                   />
                 </Field>
               </div>
+              {step0Errors.length > 0 && (
+                <ul className="mt-3 space-y-1 text-xs text-destructive">
+                  {step0Errors.map((message) => (
+                    <li key={message}>{message}</li>
+                  ))}
+                </ul>
+              )}
             </StepBody>
           )}
 
@@ -160,7 +187,12 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
         </div>
       </div>
 
-      <Button type="button" size="lg" className="w-full" onClick={next}>
+      <Button
+        type="button"
+        size="lg"
+        className="w-full"
+        onClick={next}
+        disabled={step0Invalid}>
         {isLastStep ? "Bitir" : "İleri"}
       </Button>
     </div>

@@ -72,16 +72,28 @@ export function useMealPersonalization(userId: string | null) {
   const [hasSavedProfile, setHasSavedProfile] = useState<boolean>(() =>
     hasSavedProfileLocally(userId),
   );
+  // Whether the server has been asked about a profile yet. Starts false
+  // whenever there's a userId to check (there's nothing to wait on
+  // otherwise), and flips true once fetchPersonalPlan() settles — success or
+  // its already-existing null-on-failure path both count as "checked".
+  // Callers that must not treat "no local cache yet" as "confirmed no
+  // profile" (the onboarding wizard's render gate) key off this instead of
+  // hasSavedProfile, since a returning user on a fresh device or hitting a
+  // network blip would otherwise look identical to a genuine first run.
+  const [remoteChecked, setRemoteChecked] = useState<boolean>(() => !userId);
   const saveTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
     setProfile(loadProfile(userId));
     setHasSavedProfile(hasSavedProfileLocally(userId));
+    setRemoteChecked(!userId);
     if (!userId) return;
 
     let cancelled = false;
     fetchPersonalPlan().then((server) => {
-      if (cancelled || !server) return;
+      if (cancelled) return;
+      setRemoteChecked(true);
+      if (!server) return;
       setProfile(server);
       setHasSavedProfile(true);
       saveProfileCache(userId, server);
@@ -123,6 +135,7 @@ export function useMealPersonalization(userId: string | null) {
   return {
     profile,
     hasSavedProfile,
+    remoteChecked,
     targets: calculateTargets(profile),
     update,
     setEquationSex: (value: EquationSex) => update("equationSex", value),

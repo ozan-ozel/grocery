@@ -10,7 +10,7 @@ import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
-import { useUiPrefs, type Tab } from "@/hooks/useUiPrefs";
+import { useUiPrefs, type Tab, type Section } from "@/hooks/useUiPrefs";
 import { useTenants } from "@/hooks/useTenants";
 import { useListSync } from "@/hooks/useListSync";
 import { useRollover } from "@/hooks/useRollover";
@@ -195,6 +195,16 @@ function AppShell({
 
   const selection = useSelection(state?.activeId ?? undefined);
 
+  // While onboarding is showing, any section pill tap is treated as if the
+  // user had tapped "Atla" — it's a clearer read of intent than leaving the
+  // pill silently inert, and the wizard would otherwise sit above app chrome
+  // that looks interactive but does nothing (see Finding 3 of the
+  // 2026-09-03 final review).
+  function selectSection(next: Section) {
+    if (onboarding.status === "unseen") onboarding.skip();
+    setSection(next);
+  }
+
   if (!tenants || !activeTenantId || !state) {
     return <AppBootSkeleton />;
   }
@@ -251,7 +261,7 @@ function AppShell({
         theme={theme}
         onSelectTheme={setTheme}
         section={section}
-        onSelectSection={setSection}
+        onSelectSection={selectSection}
         active={active}
         onRenameActive={renameActive}
         onStartNewList={startNewList}
@@ -262,7 +272,7 @@ function AppShell({
         className="pt-5"
         onTouchStart={swipeTabs.onTouchStart as never}
         onTouchEnd={swipeTabs.onTouchEnd as never}>
-        {onboarding.status === "unseen" ? (
+        {onboarding.status === "unseen" && personalization.remoteChecked ? (
           <OnboardingQuickSetup
             initialProfile={personalization.profile}
             onFinish={(answers) => {

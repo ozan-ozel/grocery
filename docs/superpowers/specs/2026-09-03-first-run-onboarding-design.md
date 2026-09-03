@@ -1,6 +1,6 @@
 # First-run onboarding ("Hızlı kurulum") — design
 
-**Status:** approved, not yet implemented
+**Status:** implemented (2026-09-03)
 **Author:** Ege Özel (with Claude)
 **Date:** 2026-09-03
 **Context:** Follow-up to the 2026-09-01 [Kalan Makrolar Birleşik Roadmap](https://linear.app/nutrition-grocery-planner/document/urun-yol-haritasi-kalan-makrolar-birlesik-roadmap-c917755d08f2)
