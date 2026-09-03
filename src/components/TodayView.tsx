@@ -122,15 +122,6 @@ export function TodayView({
     (combo) => !eatenComboIds.has(combo.id) && !visibleSuggestionIds.has(combo.id)
   );
 
-  if (remaining.status === "no-profile") {
-    return (
-      <div className="rounded-lg border border-border p-4 text-sm text-muted-foreground">
-        Bugün için önerilerin olsun diye önce Kişisel Plan'ını doldurman
-        gerekiyor.
-      </div>
-    );
-  }
-
   if (remaining.status === "loading-catalog") {
     return (
       <div className="space-y-2">
@@ -198,9 +189,16 @@ export function TodayView({
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-muted-foreground">
-        Kalan Makrolar
-      </h3>
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-medium text-muted-foreground">
+          Kalan Makrolar
+        </h3>
+        {remaining.status === "ready" && remaining.isEstimated && (
+          <span className="rounded-full border border-border px-2 py-0.5 text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+            Tahmini
+          </span>
+        )}
+      </div>
       <RemainingSummary remaining={remaining.remaining} />
       {visibleSuggestions.length === 0 ? (
         <p className="text-sm text-muted-foreground">
