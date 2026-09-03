@@ -10,7 +10,7 @@ import { fetchPersonalPlan, savePersonalPlan } from "@/lib/personalPlan";
 
 const STORAGE_PREFIX = "grocery.personalPlan.v1";
 
-const DEFAULT_PROFILE: PersonalProfile = {
+export const DEFAULT_PROFILE: PersonalProfile = {
   name: "Benim profilim",
   equationSex: "female",
   ageYears: 30,
