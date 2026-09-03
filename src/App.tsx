@@ -19,6 +19,9 @@ import { useCategoryOverlay } from "@/hooks/useCategoryOverlay";
 import { useItemCategories } from "@/hooks/useItemCategories";
 import { useSelection } from "@/hooks/useSelection";
 import { useAuth } from "@/hooks/useAuth";
+import { useMealPersonalization } from "@/hooks/useMealPersonalization";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
 
 export function App() {
   const { session, checked, signInWithGoogle, signOut } = useAuth();
@@ -182,6 +185,9 @@ function AppShell({
   const { itemCategories, rememberCategory } =
     useItemCategories(activeTenantId);
 
+  const personalization = useMealPersonalization(currentUserId);
+  const onboarding = useOnboarding(currentUserId, personalization.hasSavedProfile);
+
   const catalog = useMemo(
     () => buildCatalog(state?.lists ?? []),
     [state?.lists],
@@ -256,7 +262,20 @@ function AppShell({
         className="pt-5"
         onTouchStart={swipeTabs.onTouchStart as never}
         onTouchEnd={swipeTabs.onTouchEnd as never}>
-        {section === "besin" ? (
+        {onboarding.status === "unseen" ? (
+          <OnboardingQuickSetup
+            initialProfile={personalization.profile}
+            onFinish={(answers) => {
+              personalization.update("ageYears", answers.ageYears);
+              personalization.update("heightCm", answers.heightCm);
+              personalization.update("weightKg", answers.weightKg);
+              personalization.setEquationSex(answers.equationSex);
+              personalization.setActivity(answers.activity);
+              personalization.setGoal(answers.goal);
+            }}
+            onSkip={onboarding.skip}
+          />
+        ) : section === "besin" ? (
           <NutritionView items={active.items} />
         ) : section === "yemek" ? (
           <MealPlanView householdId={activeTenantId} />
