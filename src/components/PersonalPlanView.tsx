@@ -412,7 +412,7 @@ export function PersonalPlanView({ userId }: Props) {
   );
 }
 
-function Field({
+export function Field({
   label,
   children,
   sourceBadge,
@@ -431,7 +431,7 @@ function Field({
   );
 }
 
-function NumberInput({
+export function NumberInput({
   value,
   onChange,
 }: {
