@@ -24,7 +24,7 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
 
 export function App() {
-  const { session, checked, signInWithGoogle, signOut } = useAuth();
+  const { session, checked, signInWithGoogle, signOut, deleteAccount } = useAuth();
 
   if (!checked) {
     return <AppBootSkeleton />;
@@ -34,7 +34,13 @@ export function App() {
     return <LoginGate onSignIn={signInWithGoogle} />;
   }
 
-  return <AppShell onSignOut={signOut} currentUserId={session.userId} />;
+  return (
+    <AppShell
+      onSignOut={signOut}
+      onDeleteAccount={deleteAccount}
+      currentUserId={session.userId}
+    />
+  );
 }
 
 // Mimics AppHeader + AppShoppingTabs' actual layout (tenant chip, section
@@ -133,9 +139,11 @@ function useSwipeTabs(section: string, tab: Tab, setTab: (t: Tab) => void) {
 
 function AppShell({
   onSignOut,
+  onDeleteAccount,
   currentUserId,
 }: {
   onSignOut: () => void;
+  onDeleteAccount: () => void;
   currentUserId: string | null;
 }) {
   const {
@@ -266,6 +274,7 @@ function AppShell({
         onRenameActive={renameActive}
         onStartNewList={startNewList}
         onSignOut={onSignOut}
+        onDeleteAccount={onDeleteAccount}
       />
 
       <main

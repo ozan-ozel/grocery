@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
-import { CloudOff, FilePlus2, LogOut, RefreshCw } from "lucide-react";
+import { CloudOff, FilePlus2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AccountMenu } from "@/components/AccountMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TenantSwitcher } from "@/components/TenantSwitcher";
@@ -30,6 +31,7 @@ type Props = {
   onRenameActive: (title: string) => void;
   onStartNewList: () => void;
   onSignOut: () => void;
+  onDeleteAccount: () => void;
 };
 
 export function AppHeader({
@@ -51,6 +53,7 @@ export function AppHeader({
   onRenameActive,
   onStartNewList,
   onSignOut,
+  onDeleteAccount,
 }: Props) {
   const total = active.items.length;
   const done = active.items.filter(i => i.checked).length;
@@ -86,17 +89,20 @@ export function AppHeader({
     <>
       <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-6 backdrop-blur">
         <div className="flex items-center justify-between gap-2 pb-2">
-          <TenantSwitcher
-            tenants={tenants}
-            activeId={activeTenantId}
-            hiddenIds={hiddenTenantIds}
-            currentUserId={currentUserId}
-            onSelect={onSelectTenant}
-            onAdd={onAddTenant}
-            onRename={onRenameTenant}
-            onDelete={onDeleteTenant}
-            onToggleHidden={onToggleHiddenTenant}
-          />
+          <div className="flex items-center gap-1">
+            <AccountMenu onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} />
+            <TenantSwitcher
+              tenants={tenants}
+              activeId={activeTenantId}
+              hiddenIds={hiddenTenantIds}
+              currentUserId={currentUserId}
+              onSelect={onSelectTenant}
+              onAdd={onAddTenant}
+              onRename={onRenameTenant}
+              onDelete={onDeleteTenant}
+              onToggleHidden={onToggleHiddenTenant}
+            />
+          </div>
           <div className="flex items-center gap-1">
             {syncStatus !== "synced" && (
               <span
@@ -114,15 +120,6 @@ export function AppHeader({
               </span>
             )}
             <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
-            <Button
-              type="button"
-              variant="quiet"
-              size="icon"
-              aria-label="Çıkış yap"
-              title="Çıkış yap"
-              onClick={onSignOut}>
-              <LogOut className="size-4" />
-            </Button>
           </div>
         </div>
 

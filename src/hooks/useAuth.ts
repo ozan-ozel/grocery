@@ -39,5 +39,10 @@ export function useAuth() {
     setSession(undefined);
   }
 
-  return { session, checked, signInWithGoogle, signOut };
+  async function deleteAccount() {
+    await fetch("/api/auth-delete-account", { method: "DELETE", credentials: "include" });
+    setSession(undefined);
+  }
+
+  return { session, checked, signInWithGoogle, signOut, deleteAccount };
 }
