@@ -107,11 +107,13 @@ export function calculateTargets(
   const safeTarget = Math.max(MIN_CALORIES, target);
   const protein =
     profile.weightKg *
-    (profile.goal === "gain" ||
-    profile.activity === "high" ||
-    profile.activity === "very_high"
-      ? 1.6
-      : 1.2);
+    (profile.goal === "loss"
+      ? 2.0
+      : profile.goal === "gain" ||
+          profile.activity === "high" ||
+          profile.activity === "very_high"
+        ? 1.6
+        : 1.2);
   const fatMin = (safeTarget * 0.2) / 9;
   const fatMax = (safeTarget * 0.35) / 9;
   const carbsMin = (safeTarget * 0.45) / 4;
