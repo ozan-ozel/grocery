@@ -1,0 +1,2813 @@
+# Krause and Mahan's Food and the Nutrition Care Process
+
+## Bibliographic Information
+
+- **Authors/Editors:** Janice L. Raymond, MS, RDN, CD, CSG and Kelly Morrow, MS, RDN, FAND
+- **Edition:** 16th Edition (Sixteenth Edition)
+- **Publication Year:** 2023 (per copyright page — see discrepancy note below); previous editions copyrighted 2021, 2017, 2012, 2008, 2004, 2000, 1996, 1992, 1984, 1979, 1972, 1966, 1961, 1957, 1952
+- **ISBN:** 978-0-323-81025-8
+- **Publisher:** Elsevier, St. Louis, Missouri
+- **Source File:** `Krause and Mahan's Food and the Nutrition Care Process, 16E{Janice L. Raymond, Kelly Morrow}(2022, Elsevier){105470595).pdf`
+
+## Verification
+
+- **Edition verified from:** Copyright page (PDF p. 3) — "KRAUSE AND MAHAN'S FOOD AND THE NUTRITION CARE PROCESS ... SIXTEENTH EDITION"; also confirmed in the Preface (PDF p. 9), which explicitly names "Krause and Mahan's Food and the Nutrition Care Process, 16th Edition, by the authors Janice L. Raymond and Kelly Morrow."
+- **Year verified from:** Copyright page — "Copyright © 2023 by Elsevier, Inc." with a full list of 15 previous-edition copyright years back to 1952.
+- **TOC source:** PDF bookmarks/outline (2,772 raw entries, 7 levels deep), cross-checked against the book's printed "Contents" page (PDF p. 13, bookmarked but not separately transcribed since it only lists chapter/appendix titles and page numbers that are already present, and match, in the bookmark tree) and against direct inspection of numerous chapter- and appendix-opening pages.
+- **Bookmarks/outline available:** Yes — very rich (2,772 entries), but only the top level (the 45 numbered chapters + 50 appendices + a handful of front-matter items) carries real page-number destinations. All deeper levels (sections, subsections, and further nested headings — 2,669 entries) have broken/empty destinations in this particular PDF export (each resolves to a page value of `null` at the file level — confirmed by inspecting the raw PDF destination objects, not a bug in the extraction method), so **no page number is available for anything below chapter/appendix level**, and none has been invented.
+- **Any discrepancy:**
+  1. **Publication year.** The filename says "2022," but the book's own copyright page states **2023**. The copyright page is treated as authoritative, so 2023 is used above; this is flagged rather than silently corrected.
+  2. **Producer metadata.** This PDF's `/Producer` field is "Foxit PhantomPDF Printer" and it carries no `/Title` or `/Author` document-info fields — consistent with this file being a print-to-PDF export (e.g., from an e-reader/VitalSource-style viewer) rather than the publisher's original production PDF. This most likely explains why the deeper bookmark levels lost their page destinations while the top-level chapter/appendix bookmarks kept theirs.
+  3. **Duplicate chapter/appendix "wrapper" bookmarks.** For nearly every one of the 45 chapters and most of the 50 appendices, the outline contains an inner bookmark immediately below the outer (page-linked) chapter/appendix bookmark that just repeats the same title with no page destination of its own (e.g., outer "`1 Intake: Gastrointestinal Digestion, Absorption, and Excretion of Nutrients`" followed by an inner "`1  Intake: Gastrointestinal Digestion, Absorption, and Excretion of Nutrients*`"). These redundant wrapper bookmarks were detected programmatically and collapsed into the single chapter/appendix heading below — this is a structural artifact of the source file, not a real second heading, and nothing was lost: the wrapper's own real children (Key Terms, the chapter's actual sections, etc.) are preserved underneath.
+  4. **Two truncated appendix titles.** The very last two bookmarks in the file are both literally titled just "`Appendix`" (page 1210 and page 1214), with no number or subject in the bookmark text itself — a title-corruption bug in the source PDF's own outline, not an extraction error. Their actual subject matter was confirmed by directly reading the page content: page 1210 begins "DIETARY REFERENCE INTAKES (DRIS): RECOMMENDED DIETARY ALLOWANCES AND ADEQUATE INTAKES, VITAMINS" and page 1214 begins "DIETARY REFERENCE INTAKES (DRIS): TOLERABLE UPPER INTAKE LEVELS, ELEMENTS." They are listed below as Appendix 49 and Appendix 50 respectively, with the verified subject line, and the truncation is flagged inline in each entry's title rather than silently fixed.
+  5. **No separate "Index" bookmark.** The outline ends at the last appendix (page 1214), which is also the PDF's final page (1214 of 1214 total). No bookmarked Index entry exists in this file — either this print export omits a separate index section, or an index exists in the source book but has no bookmark here. This is noted rather than assumed.
+
+## Table of Contents
+
+### Front Matter
+
+- Foreword — Page: 9
+- Preface — Page: 10
+- Acknowledgments — Page: 12
+
+### Main Content
+
+**1 Intake: Gastrointestinal Digestion, Absorption, and Excretion of Nutrients** — Page: 18
+  - Key Terms — Page: —
+  - The Gastrointestinal Tract — Page: —
+  - Brief Overview of Digestive and Absorptive Processes — Page: —
+    - Enzymes in Digestion — Page: —
+    - Regulators of Gastrointestinal Activity: Neural and Hormonal Mechanisms — Page: —
+      - Gastrointestinal Hormones — Page: —
+    - Digestion in the Mouth — Page: —
+    - Digestion in the Stomach — Page: —
+    - Digestion in the Small Intestine — Page: —
+  - The Small Intestine: Primary Site of Nutrient Absorption — Page: —
+    - Absorptive and Transport Mechanisms — Page: —
+  - The Large Intestine — Page: —
+    - Intestinal Microbiota: The Microbiome — Page: —
+      - Colonic Salvage of Malabsorbed Energy Sources and Short-chain Fatty Acids — Page: —
+    - Digestion and Absorption of Specific Types of Nutrients — Page: —
+      - Carbohydrates and Fiber — Page: —
+      - Proteins — Page: —
+      - Lipids — Page: —
+      - Vitamins and Minerals — Page: —
+  - Summary — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**2 Intake: Energy** — Page: 33
+  - Key Terms — Page: —
+  - Energy Requirements — Page: —
+  - Components Of Energy Expenditure — Page: —
+    - Basal and Resting Energy Expenditure — Page: —
+      - Factors Affecting Resting Energy Expenditure — Page: —
+        - Age. — Page: —
+        - Body Composition. — Page: —
+        - Body Size. — Page: —
+        - Climate. — Page: —
+        - Gender. — Page: —
+        - Hormonal Status. — Page: —
+        - Temperature. — Page: —
+        - Other Factors. — Page: —
+    - Thermic Effect of Food — Page: —
+    - Activity Thermogenesis — Page: —
+      - Additional Considerations in Energy Expenditure — Page: —
+    - Measurement of Energy Expenditure — Page: —
+      - Direct Calorimetry — Page: —
+      - Indirect Calorimetry — Page: —
+      - Respiratory Quotient — Page: —
+      - Other Methods of Measuring Energy Expenditure — Page: —
+        - Doubly Labeled Water. — Page: —
+      - Measuring Activity-Related Energy Expenditure — Page: —
+        - Triaxial Monitors. — Page: —
+      - Physical Activity Questionnaire — Page: —
+  - Estimating Energy Requirements — Page: —
+    - Equations for Estimating Resting Energy Expenditure — Page: —
+      - Determining Total Energy Expenditure — Page: —
+    - Estimating Energy Requirements From Energy Intake — Page: —
+    - Other Prediction Equations — Page: —
+    - Estimated Energy Expended in Physical Activity — Page: —
+      - Estimating Energy Expenditure of Selected Activities Using Metabolic Equivalents — Page: —
+  - Physical Activity In Children — Page: —
+  - Calculating Food Energy — Page: —
+  - Useful Websites/Apps — Page: —
+  - References — Page: —
+
+**3 Clinical: Water, Electrolytes, and Acid-Base Balance** — Page: 44
+  - Key terms — Page: —
+  - Body Water — Page: —
+    - Functions — Page: —
+    - Distribution — Page: —
+    - Water Balance — Page: —
+      - Water Intake — Page: —
+      - Water Intoxication and Fluid Overload — Page: —
+    - Water Elimination — Page: —
+    - Clinical Assessment of Fluid Status — Page: —
+  - Electrolytes — Page: —
+    - Calcium — Page: —
+      - Functions — Page: —
+      - Absorption and Excretion — Page: —
+      - Sources — Page: —
+      - Recommended Intakes — Page: —
+    - Sodium — Page: —
+      - Functions — Page: —
+        - Hyponatremia. — Page: —
+        - Hypernatremia. — Page: —
+      - Absorption and Excretion — Page: —
+      - Dietary Reference Intake — Page: —
+      - Sources — Page: —
+    - Magnesium — Page: —
+      - Function — Page: —
+      - Absorption/Excretion — Page: —
+      - Sources — Page: —
+      - Dietary Reference Intakes — Page: —
+    - Phosphorus — Page: —
+      - Functions — Page: —
+      - Absorption and Excretion — Page: —
+      - Sources — Page: —
+      - Dietary Reference Intakes — Page: —
+    - Potassium — Page: —
+      - Functions — Page: —
+      - Absorption and Excretion — Page: —
+      - Sources — Page: —
+      - Dietary Reference Intakes — Page: —
+  - Acid-Base Balance — Page: —
+  - Acid Generation — Page: —
+    - Regulation — Page: —
+  - Acid-Base Disorders — Page: —
+    - Metabolic Acidosis — Page: —
+    - Metabolic Alkalosis — Page: —
+    - Respiratory Acidosis — Page: —
+    - Respiratory Alkalosis — Page: —
+    - Compensation — Page: —
+      - Acid-Base Balance: Guidelines and Applications to Dietetics Practice — Page: —
+  - References — Page: —
+
+**4 Intake: Assessment of Food- and Nutrition-Related History** — Page: 57
+  - Key Terms — Page: —
+  - Nutritional Status — Page: —
+  - Nutrition Screening — Page: —
+  - Nutrition Assessment — Page: —
+  - Nutrition-Related History — Page: —
+  - Food And Nutrient Intake — Page: —
+    - Assessment and Interpretation of Energy Intake — Page: —
+    - Assessment and Interpretation of Food Group Quantity and Balance — Page: —
+    - Assessment and Interpretation of Food Quality — Page: —
+    - Assessment and Interpretation of Beverages (Water, Alcohol, and Caffeine) — Page: —
+    - Assessment and Interpretation of Macronutrients — Page: —
+    - Assessment and Interpretation of Micronutrients — Page: —
+    - Assessment and Interpretation of Other Bioactive Dietary Components — Page: —
+  - Food and Nutrient Administration — Page: —
+  - Nutrition Knowledge, Beliefs, and Attitudes — Page: —
+  - Nutrition Behaviors — Page: —
+  - Medication and Complementary or Alternative Medicines — Page: —
+  - Nutrition Access — Page: —
+  - Physical Activity and Physical Function — Page: —
+  - Nutrition Quality Of Life — Page: —
+  - References — Page: —
+
+**5 Clinical: Biochemical, Physical, and Functional Assessment** — Page: 73
+  - Key Terms — Page: —
+  - Biochemical Assessment of Nutrition Status — Page: —
+    - Definitions and Applications of Laboratory Test Results — Page: —
+    - Specimen Types — Page: —
+  - Nutrition Interpretation of Routine Medical Laboratory Tests — Page: —
+    - Clinical Chemistry Panels — Page: —
+    - Complete Blood Count — Page: —
+    - Stool Testing — Page: —
+    - Urinalysis — Page: —
+  - Assessment of Hydration Status — Page: —
+    - Inflammation and Biochemical Assessment — Page: —
+    - Markers of Inflammation — Page: —
+    - Positive Acute-Phase Reactants — Page: —
+      - C-Reactive Protein — Page: —
+      - Ferritin — Page: —
+      - Erythrocyte Sedimentation Rate — Page: —
+    - Negative Acute-Phase Reactants — Page: —
+      - Albumin — Page: —
+      - Prealbumin (Transthyretin) — Page: —
+      - Retinol-Binding Protein — Page: —
+      - Transferrin — Page: —
+    - Immunocompetence — Page: —
+  - Assessment for Nutritional Anemias — Page: —
+    - Classification of Anemia — Page: —
+    - Markers of Iron Deficiency Anemias — Page: —
+      - Hematocrit or Packed Cell Volume and Hemoglobin — Page: —
+      - Serum Ferritin — Page: —
+      - Serum Iron — Page: —
+      - Total Iron-Binding Capacity and Transferrin Saturation — Page: —
+    - Tests for Macrocytic Anemias From B Vitamin Deficiencies — Page: —
+      - Assessing Folate and Vitamin B12 Status — Page: —
+        - Folate Assessment. — Page: —
+        - Vitamin B12 Assessment. — Page: —
+        - Vitamin B12 and Methylmalonic Acid. — Page: —
+  - Fat-Soluble Vitamins — Page: —
+    - Vitamin A — Page: —
+    - Vitamin D — Page: —
+    - Vitamin E — Page: —
+    - Vitamin K — Page: —
+  - Water-Soluble Vitamins and Trace Minerals — Page: —
+    - Ascorbic Acid — Page: —
+    - B-Vitamins — Page: —
+    - Markers of Body Composition — Page: —
+      - Creatinine — Page: —
+      - Nitrogen Balance — Page: —
+  - Chronic Disease Risk Assessment — Page: —
+    - Lipid Indices of Cardiovascular Risk — Page: —
+    - Diabetes — Page: —
+    - C-Peptide — Page: —
+  - Physical Assessments — Page: —
+    - Anthropometry — Page: —
+    - Interpretation of Height and Weight in Children and Teens — Page: —
+    - Length and Height — Page: —
+    - Weight — Page: —
+    - Interpretation of Height and Weight in Adults — Page: —
+    - Body Mass Index — Page: —
+    - Body Composition — Page: —
+    - Subcutaneous Fat in Skinfold Thickness — Page: —
+    - Circumference Measurements — Page: —
+      - Bioelectrical Impedance Analysis — Page: —
+    - Circumference Measurements in Children — Page: —
+    - Measuring Circumference — Page: —
+    - Circumference Measurements in Adults — Page: —
+    - Waist and Hip Circumference, Waist-to-Hip Ratio, and Waist-to-Height Ratio — Page: —
+    - Other Methods of Measuring Body Composition — Page: —
+      - Dual-Energy X-Ray Absorptiometry — Page: —
+    - Air Displacement Plethysmogram — Page: —
+    - Indirect Calorimetry — Page: —
+  - Nutrition-Focused Physical Examination — Page: —
+    - Approach — Page: —
+      - Equipment — Page: —
+    - Examination Techniques and Findings — Page: —
+    - Guidelines for Assessing Malnutrition in Children — Page: —
+    - Guidelines for Assessing Malnutrition in Adults — Page: —
+    - Measures of Functionality — Page: —
+    - Physical Activity Assessment — Page: —
+    - Measures of Strength — Page: —
+    - Functional Medicine — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**6 Clinical: Nutritional Genomics** — Page: 97
+  - Key Terms — Page: —
+  - Genetic and Genomic Fundamentals — Page: —
+    - Gene Expression: Transcription and Translation — Page: —
+    - Genomic Regulation of Gene Expression — Page: —
+    - Epigenomics and Gene Expression — Page: —
+  - Modes of Inheritance — Page: —
+    - Mendelian Inheritance — Page: —
+    - Mitochondrial Inheritance — Page: —
+    - Epigenetic Inheritance — Page: —
+    - Genomic Imprinting — Page: —
+    - X-Inactivation — Page: —
+  - Genetic Variation, Inheritance, and Disease — Page: —
+    - Disease at the Chromosomal Level — Page: —
+    - Disease at the Mitochondrial Level — Page: —
+    - Disease at the Molecular Level — Page: —
+    - Disease at the Epigenetic Level — Page: —
+  - Nutritional Genomics and Chronic Disease — Page: —
+    - Genetic Testing and Nutrition Care Process — Page: —
+    - Inflammation — Page: —
+    - Biotransformation (Detoxification) — Page: —
+    - Cancer — Page: —
+      - Gene Variants and Cancer — Page: —
+      - Epigenetics and Cancer — Page: —
+    - Type 2 Diabetes — Page: —
+      - Gene Variants and Type 2 Diabetes Mellitus — Page: —
+      - Epigenetics and T2DM — Page: —
+    - Obesity — Page: —
+      - Gene Variants and Obesity — Page: —
+      - Epigenetics and Obesity — Page: —
+    - Vascular Disease — Page: —
+      - Gene Variants and Vascular Disease — Page: —
+      - Epigenetics and Vascular Disease — Page: —
+  - Summary — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**7 Inflammation and the Pathophysiology of Chronic Disease** — Page: 120
+  - Key Terms — Page: —
+  - Epidemic of Chronic Disease — Page: —
+  - Concepts of Chronic Disease Pathophysiology — Page: —
+    - Systems Biology — Page: —
+    - Allostasis — Page: —
+    - Autophagy — Page: —
+    - Health Continuum — Page: —
+    - Genesis of Disease — Page: —
+    - Long-Latency Nutrient Insufficiencies — Page: —
+    - Nutrient-Partner Principle — Page: —
+    - Triage Theory — Page: —
+  - Inflammation: Common Denominator of Chronic Disease — Page: —
+    - Prolonged Inflammation — Page: —
+      - Antigens — Page: —
+      - Genomics — Page: —
+      - Body Composition — Page: —
+      - Energy Dysregulation — Page: —
+      - Microbiome — Page: —
+      - Hypercoagulation — Page: —
+      - Infection — Page: —
+  - Nutrient Modulators of Inflammation — Page: —
+    - Omega-6 Linoleic Acid and Omega-3 Alpha-Linolenic Acid (Essential Fatty Acids) — Page: —
+    - Prostaglandin 1 Series (PGE1): Antiinflammatory — Page: —
+    - Prostaglandin 2 Series (PGE2): Proinflammatory When in Excess — Page: —
+    - Prostaglandin 3 Series (PGE3): Antiinflammatory — Page: —
+    - Lipoxygenases — Page: —
+    - Cyclooxygenases — Page: —
+    - Specialized Proresolving Mediators — Page: —
+      - Cytochrome P450 Enzymes — Page: —
+      - Vitamin D — Page: —
+  - Reducing Inflammation in the Body — Page: —
+    - Minerals — Page: —
+      - Magnesium — Page: —
+      - Zinc — Page: —
+      - Flavonoids and Antioxidant Nutrients — Page: —
+    - Gut Ecology and the Microbiome — Page: —
+      - Lifestyle — Page: —
+      - Sleep: Circadian Rhythm — Page: —
+    - Clinical Insight — Page: —
+      - The Role of the Vagus Nerve in Inflammation — Page: —
+      - Physical Activity — Page: —
+      - Stress of Life — Page: —
+      - Toxin Load — Page: —
+    - Assessment and Reducing Prolonged Inflammation in Chronic Diseases — Page: —
+      - The Patient's Story — Page: —
+      - Medical History and Data — Page: —
+    - Developmental Inflammatory-Related Conditions — Page: —
+  - Summary — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**8 Behavioral-Environmental: The Individual in the Community** — Page: 143
+  - Key Terms — Page: —
+  - Social Determinants of Health — Page: —
+  - Nutrition Practice in the Community — Page: —
+    - A Framework for Public Health Action: Friedan's Pyramid — Page: —
+    - Government's Role in Public Health — Page: —
+  - Needs Assessment for Community-Based Nutrition Services — Page: —
+    - Community Needs Assessment — Page: —
+    - Sources for Assessment Information — Page: —
+  - National Nutrition Surveys — Page: —
+    - National Health and Nutrition Examination Survey — Page: —
+    - Continuing Survey of Food Intake of Individuals: Diet and Health Knowledge Survey — Page: —
+    - National Food and Nutrition Survey: What We Eat in America — Page: —
+    - National Nutrition Monitoring and Related Research Act — Page: —
+    - National Nutrient Databank — Page: —
+    - The Centers for Disease Control and Prevention — Page: —
+  - National Nutrition Guidelines and Goals — Page: —
+    - Dietary Guidelines for Americans — Page: —
+    - Food Guides — Page: —
+    - Healthy People and the Surgeon General's Report on Nutrition and Health — Page: —
+      - National School Lunch Program and School Breakfast Program — Page: —
+    - The Recommended Dietary Allowances and Dietary Reference Intakes — Page: —
+  - Food Assistance and Nutrition Programs — Page: —
+  - Foodborne Illness — Page: —
+    - Hazard Analysis Critical Control Points — Page: —
+  - Food and Water Safety — Page: —
+    - Contamination — Page: —
+    - Organic Foods and Pesticide Use — Page: —
+    - Genetic Modification/Genetic Engineering — Page: —
+    - Bioterrorism and Food-Water Safety — Page: —
+  - Disaster Planning — Page: —
+  - Healthy Food and Water Systems and Sustainability — Page: —
+  - Summary: A Work in Progress — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**9 Overview of Nutrition Diagnosis and Intervention** — Page: 162
+  - Key Terms — Page: —
+  - The Nutrition Care Process — Page: —
+    - Nutrition Screening — Page: —
+    - Nutrition Assessment and Reassessment — Page: —
+    - Nutrition Diagnosis — Page: —
+    - Nutrition Intervention — Page: —
+    - Monitoring and Evaluation of Nutrition Care — Page: —
+    - Evidence-Based Guidelines — Page: —
+    - Accreditation and Surveys — Page: —
+  - Documentation in the Nutrition Care Record — Page: —
+    - Medical Record Charting — Page: —
+    - Electronic Health Records and Nutrition Informatics — Page: —
+  - Influences on Nutrition and Health Care — Page: —
+    - Confidentiality and the Health Insurance Portability and Accountability Act — Page: —
+    - Payment Systems — Page: —
+    - Quality Management — Page: —
+    - Patient-Centered Care and Case Management — Page: —
+    - Staffing — Page: —
+  - Nutrition Interventions — Page: —
+    - Interventions: Food and Nutrient Delivery — Page: —
+    - Modifications of the Normal Diet — Page: —
+    - Diet Modifications in Hospitalized Clients — Page: —
+      - Regular or General Diet — Page: —
+      - Consistency Modifications — Page: —
+      - Food Intake — Page: —
+      - Acceptance and Psychologic Factors — Page: —
+    - Interventions: Nutrition Education and Counseling — Page: —
+    - Intervention: Coordination of Care — Page: —
+  - Nutrition for the Terminally Ill or Hospice Client — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**10 Food-Nutrient Delivery: Planning the Diet With Cultural Competency** — Page: 178
+  - Key Terms — Page: —
+  - Determining Nutrient Needs — Page: —
+  - Worldwide Guidelines — Page: —
+    - Dietary Reference Intakes — Page: —
+    - DRI Components — Page: —
+    - Target Population — Page: —
+    - Age and Gender Groups — Page: —
+    - Reference Men and Women — Page: —
+  - Nutritional Status of Americans — Page: —
+    - Food and Nutrient Intake Data — Page: —
+    - Healthy Eating Index — Page: —
+  - National Guidelines for Diet Planning — Page: —
+    - Current Dietary Guidance — Page: —
+    - Implementing the Guidelines — Page: —
+  - Food and Nutrient Labeling — Page: —
+    - Mandatory Nutrition Labeling — Page: —
+    - Standardized Serving Sizes on Food Labels — Page: —
+    - Nutrition Facts Label — Page: —
+    - Nutrient Content Claims — Page: —
+    - Health Claims — Page: —
+  - Dietary Patterns and Counseling Tips — Page: —
+    - Vegetarian Diet Patterns — Page: —
+  - Cultural Aspects of Dietary Planning — Page: —
+    - Religion and Food — Page: —
+    - Health Literacy — Page: —
+    - Cultural Context — Page: —
+    - Models of Cultural Competence — Page: —
+    - Culturally Specific Education Tools — Page: —
+    - Oral Literacy — Page: —
+    - Oral Communication Tools — Page: —
+    - Print Literacy — Page: —
+    - Written Communication Tools — Page: —
+    - Include Engaging Content in your Reading Materials — Page: —
+    - Numeracy in Health and Nutrition — Page: —
+    - Measuring Numeracy Skills — Page: —
+    - Numeracy Skills Tools — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**11 Food and Nutrient Delivery: Complementary and Integrative Medicine and Dietary Supplements** — Page: 202
+  - Key Terms — Page: —
+  - Complementary and Integrative Medicine — Page: —
+  - Use of Complementary and Integrative Therapies — Page: —
+  - Dietary Supplementation — Page: —
+    - Defining Dietary Supplements — Page: —
+    - Herbal Medicine — Page: —
+    - Trends in the Dietary Supplement Industry — Page: —
+    - Multivitamin Efficacy — Page: —
+    - Antioxidant Supplements — Page: —
+    - Potentially At-Risk Populations — Page: —
+  - Dietary Supplement Regulation — Page: —
+    - Ensuring Dietary Supplement Safety — Page: —
+    - Third Party Certification — Page: —
+    - Quality Issues in Dietary Supplements — Page: —
+      - Quantity of Ingredients — Page: —
+      - Formulations — Page: —
+    - Excipients — Page: —
+    - Vitamins — Page: —
+    - Minerals — Page: —
+  - Assessment of Dietary Supplement Use in Patients — Page: —
+    - Recommendation and Sale of Dietary Supplements — Page: —
+    - Resources for Clinicians — Page: —
+  - Useful Websites — Page: —
+    - Free Sites — Page: —
+    - Subscription Sites — Page: —
+    - Text/Print — Page: —
+    - Resources for Herbal Medicine — Page: —
+  - References — Page: —
+
+**12 Food and Nutrient Delivery: Nutrition Support Methods** — Page: 226
+  - Key Terms — Page: —
+  - Rationale and Criteria for Appropriate Nutrition Support — Page: —
+  - Enteral Nutrition — Page: —
+  - Enteral Nutrition Access — Page: —
+    - Short-Term Enteral Nutrition Support — Page: —
+      - Nasogastric Access — Page: —
+      - Gastric Versus Small-Bowel Access — Page: —
+      - Nasoduodenal or Nasojejunal Access — Page: —
+    - Long-Term Enteral Access — Page: —
+      - Gastrostomy or Jejunostomy — Page: —
+      - Other Minimally Invasive Techniques — Page: —
+    - Formula Content and Selection — Page: —
+      - Blenderized (Homemade) Tube Feedings — Page: —
+      - Protein — Page: —
+      - Carbohydrate — Page: —
+      - Lipid — Page: —
+      - Vitamins, Minerals, and Electrolytes — Page: —
+      - Fluid — Page: —
+    - Administration — Page: —
+      - Bolus — Page: —
+      - Intermittent and Cyclic — Page: —
+      - Continuous — Page: —
+    - Monitoring and Evaluation — Page: —
+      - Monitoring for Complications — Page: —
+      - Monitoring for Tolerance and Nutrient Intake Goals — Page: —
+  - Parenteral Nutrition — Page: —
+    - Getting Started with Parenteral Nutrition — Page: —
+    - Access — Page: —
+      - Peripheral Access — Page: —
+      - Short-Term Central Access — Page: —
+      - Long-Term Central Access — Page: —
+    - Parenteral Solutions — Page: —
+      - Protein — Page: —
+      - Carbohydrates — Page: —
+      - Lipids — Page: —
+      - Electrolytes, Vitamins, Trace Elements — Page: —
+      - Fluid — Page: —
+      - Compounding Methods — Page: —
+    - Administration — Page: —
+      - Continuous Infusion — Page: —
+      - Cyclic Infusion — Page: —
+      - Monitoring and Evaluation — Page: —
+  - Complications — Page: —
+    - Infection — Page: —
+  - Refeeding Syndrome — Page: —
+  - Transitional Feeding — Page: —
+    - Parenteral to Enteral Feeding — Page: —
+    - Parenteral to Oral Feeding — Page: —
+    - Enteral to Oral Feeding — Page: —
+    - Oral Supplements — Page: —
+  - Nutrition Support in Long-Term and Home Care — Page: —
+    - Long-Term Care — Page: —
+    - Home Care — Page: —
+    - Ethical Issues — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**13 Education and Counseling: Behavioral Change** — Page: 243
+  - Key Terms — Page: —
+  - Behavior Change — Page: —
+    - Factors Affecting the Ability to Change — Page: —
+  - Models for Behavior Change — Page: —
+    - Health Belief Model — Page: —
+    - Social Cognitive Theory — Page: —
+    - Theory of Planned Behavior — Page: —
+    - Transtheoretical Model of Change — Page: —
+  - Models For Counseling Strategies — Page: —
+    - Partnership — Page: —
+    - Acceptance — Page: —
+    - Compassion — Page: —
+    - Evocation — Page: —
+  - Models for Educational Program Development — Page: —
+  - Skills and Attributes of the Nutrition Educator or Counselor — Page: —
+    - Cultural Competency — Page: —
+      - Cultural Competency — Page: —
+      - Client's Perspective — Page: —
+      - Informed Negotiation — Page: —
+      - Empathy and Rapport — Page: —
+    - Asking Questions — Page: —
+    - Building Rapport — Page: —
+    - Reflective Listening — Page: —
+    - Affirming — Page: —
+    - Summarizing — Page: —
+  - Assessment Results: Choosing Focus Areas — Page: —
+    - Health and Nutrition Literacy — Page: —
+    - Assessing Readiness to Change — Page: —
+  - Counseling Approaches After the Assessment — Page: —
+    - Not-Ready-To-Change Counseling Sessions — Page: —
+      - Problem Recognition — Page: —
+      - Concern — Page: —
+      - Intention to Change — Page: —
+      - Optimism — Page: —
+      - Ending the Session — Page: —
+    - Unsure-About-Change Counseling Sessions — Page: —
+      - Resistance Behaviors and Strategies to Modify Them — Page: —
+        - Reflecting. — Page: —
+        - Double-sided reflection. — Page: —
+        - Shifting focus. — Page: —
+        - Agreeing with a twist. — Page: —
+        - Reframing. — Page: —
+        - Ending the session. — Page: —
+    - Ready-To-Change Counseling Sessions — Page: —
+      - Setting Goals — Page: —
+      - Action Plan — Page: —
+  - Evaluation of Effectiveness — Page: —
+    - Counseling — Page: —
+    - Educational Programs — Page: —
+  - Summary — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**14 Nutrition in Pregnancy and Lactation** — Page: 255
+  - Key Terms — Page: —
+  - Preconception and Fertility — Page: —
+    - Toxins — Page: —
+    - Obesity and Endocrine Conditions — Page: —
+  - Conception — Page: —
+  - Pregnancy — Page: —
+    - Physiologic Changes of Pregnancy — Page: —
+      - Blood Volume and Composition — Page: —
+      - Cardiovascular and Pulmonary Function — Page: —
+      - Gastrointestinal Function — Page: —
+      - Immune Function — Page: —
+      - Metabolic Responses — Page: —
+      - Renal Function — Page: —
+      - Placenta and Uterine Environment — Page: —
+    - Effects of Nutritional Status on Pregnancy Outcome — Page: —
+      - Fetal Growth and Development — Page: —
+      - Epigenetic Effects — Page: —
+    - Nutrient Requirements During Pregnancy — Page: —
+      - Energy — Page: —
+      - Protein — Page: —
+      - Carbohydrates — Page: —
+      - Fiber — Page: —
+      - Lipids — Page: —
+      - Vitamins — Page: —
+      - Minerals — Page: —
+    - Pregnancy Weight Gain Recommendations — Page: —
+      - General Weight Gain Recommendations — Page: —
+      - Obesity Weight Gain Recommendations — Page: —
+      - Multiple Births — Page: —
+      - Adolescent Pregnancy — Page: —
+    - Complications and Nutritional Implications — Page: —
+      - Constipation, Hemorrhoids, and Diarrhea — Page: —
+      - Cravings, Aversions, and Pica — Page: —
+      - Diabetes Mellitus — Page: —
+      - Eating Disorders — Page: —
+      - Edema and Leg Cramps — Page: —
+      - Heartburn — Page: —
+      - Hypertension — Page: —
+      - Nausea and Vomiting, Hyperemesis Gravidarum, and Ptyalism — Page: —
+      - Oral Health — Page: —
+      - Preexisting Medical Conditions — Page: —
+    - Food Safety during Pregnancy — Page: —
+      - Alcohol — Page: —
+      - Allergens — Page: —
+      - Artificial Sweeteners — Page: —
+      - Bisphenol-A, Phthalates, and Other Environmental Toxins — Page: —
+      - Caffeine and Energy Drinks — Page: —
+      - Lead and Cadmium — Page: —
+      - Listeria monocytogenes — Page: —
+      - Mercury and Polychlorinated Biphenyls (PCBs) — Page: —
+      - Other Foodborne Pathogens and Probiotics — Page: —
+      - Toxoplasma gondii — Page: —
+    - Guide for Eating during Pregnancy — Page: —
+      - Recommended Food Intake — Page: —
+      - Fluids — Page: —
+      - Nutrient Supplementation During Pregnancy — Page: —
+    - Nutrition Education — Page: —
+  - Postpartum Period = Preconceptual Period — Page: —
+  - Lactation — Page: —
+    - Contraindications — Page: —
+    - Nutritional Requirements of Lactation — Page: —
+      - Energy — Page: —
+      - Protein — Page: —
+      - Carbohydrates — Page: —
+      - Lipids — Page: —
+      - Vitamins and Minerals — Page: —
+      - Fluids — Page: —
+    - Prenatal Breastfeeding Education — Page: —
+    - Physiology and Management of Lactation — Page: —
+      - Stages of Milk and Variations in Composition — Page: —
+      - Initiation of Breastfeeding — Page: —
+      - Galactagogues — Page: —
+      - Sustaining Maternal Milk Supply and Preservation of Successful Breastfeeding — Page: —
+    - Concerns During Lactation — Page: —
+      - Transfer of Drugs and Toxins into Human Milk — Page: —
+      - Overweight or Obesity — Page: —
+      - Exercise and Breastfeeding — Page: —
+      - Breast Augmentation — Page: —
+      - Reduction Mammoplasty — Page: —
+      - Postpartum Depression — Page: —
+      - Birth Control and Breastfeeding — Page: —
+      - Breastfeeding during Pregnancy — Page: —
+      - Tandem Nursing — Page: —
+      - Weaning — Page: —
+      - Return to Work or School — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**15 Nutrition in Infancy** — Page: 326
+  - Key Terms — Page: —
+  - Physiologic Development — Page: —
+  - Nutrient Requirements — Page: —
+    - Energy — Page: —
+    - Protein — Page: —
+    - Lipids — Page: —
+    - Carbohydrates — Page: —
+    - Water — Page: —
+    - Minerals — Page: —
+      - Calcium — Page: —
+      - Fluoride — Page: —
+      - Iron — Page: —
+      - Zinc — Page: —
+    - Vitamins — Page: —
+      - Vitamin B12 — Page: —
+      - Vitamin D — Page: —
+      - Vitamin K — Page: —
+    - Supplementation — Page: —
+  - Milk — Page: —
+    - Human Milk — Page: —
+    - Composition of Human and Cow's Milk — Page: —
+    - Antiinfective Factors — Page: —
+    - The Microbiome and Probiotics and Prebiotics — Page: —
+    - Formulas — Page: —
+    - Whole Cow's Milk — Page: —
+    - Formula Preparation — Page: —
+  - Food — Page: —
+  - Feeding — Page: —
+    - Early Feeding Patterns — Page: —
+    - Development of Feeding Skills — Page: —
+    - Addition of Semisolid Foods — Page: —
+    - Weaning From Breast or Bottle to Cup — Page: —
+    - Early Childhood Caries — Page: —
+    - Feeding Older Infants — Page: —
+      - Type of Food — Page: —
+      - Serving Size — Page: —
+      - Forced Feeding — Page: —
+      - Eating Environment — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**16 Nutrition in Childhood** — Page: 340
+  - Key Terms — Page: —
+  - Growth and Development — Page: —
+    - Growth Patterns — Page: —
+    - Assessing Growth — Page: —
+    - Catch-Up Growth — Page: —
+  - Nutrient Requirements — Page: —
+    - Energy — Page: —
+    - Protein — Page: —
+    - Minerals and Vitamins — Page: —
+      - Iron — Page: —
+      - Calcium — Page: —
+      - Zinc — Page: —
+      - Vitamin D — Page: —
+      - Vitamin-Mineral Supplements — Page: —
+  - Providing an Adequate Diet — Page: —
+    - Intake Patterns — Page: —
+    - Factors Influencing Food Intake — Page: —
+      - Family Environment — Page: —
+      - Socioeconomic Influences — Page: —
+      - Media Messages — Page: —
+      - Peer Influence — Page: —
+      - Illness or Disease — Page: —
+    - Feeding Preschool Children — Page: —
+    - Feeding School-Age Children — Page: —
+    - Nutrition Education — Page: —
+  - Nutritional Concerns — Page: —
+    - Overweight and Obesity — Page: —
+    - Underweight and Failure to Thrive — Page: —
+    - Iron Deficiency — Page: —
+    - Dental Caries — Page: —
+    - Allergies — Page: —
+    - Attention-Deficit/Hyperactivity Disorder and Autism Spectrum Disorder — Page: —
+  - Preventing Chronic Disease — Page: —
+    - Cardiovascular Health — Page: —
+    - Calcium and Bone Health — Page: —
+    - Fiber — Page: —
+    - The Gut Microbiome — Page: —
+    - Physical Activity — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**17 Nutrition in Adolescence** — Page: 357
+  - Key Terms — Page: —
+  - Growth and Development — Page: —
+    - Psychological Changes — Page: —
+    - Sexual Maturity — Page: —
+    - Linear Growth — Page: —
+  - Nutrient Requirements — Page: —
+    - Energy — Page: —
+    - Protein — Page: —
+    - Carbohydrates and Fiber — Page: —
+    - Fat — Page: —
+    - Minerals and Vitamins — Page: —
+      - Calcium — Page: —
+      - Iron — Page: —
+      - Folate — Page: —
+      - Vitamin D — Page: —
+      - Supplement Use by Adolescents — Page: —
+  - Food Habits and Eating Behaviors — Page: —
+    - Irregular Meals and Snacking — Page: —
+    - Fast Foods and Convenience Foods — Page: —
+    - Family Meals — Page: —
+    - Media and Advertising — Page: —
+    - Dieting and Body Image — Page: —
+  - Nutrition Screening, Assessment, and Counseling — Page: —
+  - Special Topics — Page: —
+    - Vegetarian Dietary Patterns — Page: —
+    - Skin Health — Page: —
+    - Promoting Healthy Weight-Related Attitudes and Behaviors — Page: —
+    - Promoting a Healthy Weight Status — Page: —
+    - Promoting Cardiovascular Health — Page: —
+    - Preventing and Screening for Diabetes — Page: —
+    - Promoting Physical Activity — Page: —
+    - Meeting Nutritional Needs During Pregnancy — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**18 Nutrition for Transgender People** — Page: 378
+  - Key Terms — Page: —
+  - Aspects of Transitioning — Page: —
+    - Social Transition — Page: —
+    - Legal Transition — Page: —
+    - Medical and Surgical Interventions — Page: —
+    - Other Interventions — Page: —
+  - Health Disparities — Page: —
+    - Poverty, Homelessness, and Unemployment — Page: —
+    - Mental Health Conditions and Substance Abuse — Page: —
+    - Health Care and Insurance — Page: —
+  - Challenges to Providing Optimal Gender-Affirming Nutrition Care — Page: —
+    - Research — Page: —
+    - Standards of Care — Page: —
+    - Education and Training — Page: —
+  - Common Nutrition-Related Considerations — Page: —
+    - Body Image Concerns and Disordered Eating — Page: —
+    - Food Insecurity — Page: —
+    - Human Immunodeficiency Virus — Page: —
+  - Nutritionally Relevant Effects of Gender-Affirming Interventions — Page: —
+    - Weight, Shape, and Body Composition — Page: —
+    - Lipid Profile and Cardiovascular Impact — Page: —
+    - Insulin Sensitivity and Diabetes — Page: —
+    - Bone Mineral Density — Page: —
+    - Hematologic, Hepatic, and Renal Disturbances — Page: —
+      - Hematologic Effects — Page: —
+      - Hepatic Laboratory Values — Page: —
+      - Renal Laboratory Values — Page: —
+  - Approaches to Nutrition Care — Page: —
+    - Gender-Affirming Communication — Page: —
+    - Interdisciplinary Care — Page: —
+    - The Nutrition Care Process — Page: —
+    - The Nutrition-Focused Physical Exam — Page: —
+  - Additional Resources — Page: —
+  - References — Page: —
+
+**19 Nutrition in the Adult Years** — Page: 394
+  - Key Terms — Page: —
+  - Setting the Stage: Nutrition in the Adult Years — Page: —
+  - Setting the Stage: Messages — Page: —
+  - Information Sources — Page: —
+    - Nutrition Information and Education for Adults — Page: —
+      - The Wellness Years and Food Security — Page: —
+    - Quality of Life and Work-Life Balance — Page: —
+  - Lifestyle and Health Risk Factors — Page: —
+  - Health Disparities and Global Health — Page: —
+    - World Health — Page: —
+      - WHO: Key Facts (WHO, 2018) — Page: —
+  - Nutritional Factors Affecting Adults — Page: —
+    - Women's Health — Page: —
+    - Men's Health — Page: —
+  - Interventions, Nutrition, and Prevention — Page: —
+  - Food Trends and Patterns — Page: —
+  - Nutritional Supplementation — Page: —
+  - Functional Foods — Page: —
+  - Adult Health Next Steps — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**20 Nutrition in Aging** — Page: 406
+  - Key Terms — Page: —
+  - The Older Population — Page: —
+    - Classification — Page: —
+  - Gerontology, Geriatrics, and the Spectrum of Aging — Page: —
+  - Nutrition in Health Promotion and Disease Prevention — Page: —
+  - Theories on Aging — Page: —
+  - Physiologic Changes — Page: —
+    - Body Composition — Page: —
+    - Taste and Smell — Page: —
+    - Hearing and Eyesight — Page: —
+      - Levels of Severity — Page: —
+      - Impact — Page: —
+      - Hearing Loss by Gender — Page: —
+      - Treatment — Page: —
+      - Hearing Loss Can be Difficult to Spot — Page: —
+    - Immunocompetence — Page: —
+    - Oral — Page: —
+    - Gastrointestinal — Page: —
+    - Cardiovascular — Page: —
+    - Renal — Page: —
+    - Neurologic — Page: —
+    - Pressure Injuries — Page: —
+  - Quality of Life — Page: —
+    - Depression — Page: —
+    - Functionality — Page: —
+    - Frailty and Failure to Thrive — Page: —
+    - Weight Maintenance — Page: —
+      - Obesity — Page: —
+      - Underweight and Malnutrition — Page: —
+  - Nutrition Screening and Assessment — Page: —
+  - Nutrition Needs — Page: —
+  - Medicare Benefits — Page: —
+  - Nutrition Support Services — Page: —
+    - U.S. Department of Health and Human Services Older Americans Act Nutrition Program — Page: —
+    - U.S. Department of Agriculture Food Assistance Programs — Page: —
+    - Commodity Supplemental Food Program — Page: —
+    - Seniors Farmers' Market Nutrition Program — Page: —
+    - Medicaid and Nutrition Services — Page: —
+  - Community and Residential Facilities for Older Adults — Page: —
+    - Palliative Care and Hospice — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**21 Nutrition in Weight Management** — Page: 423
+  - Key Terms — Page: —
+  - Weight Management and Obesity: Its Foundation in Nutritional Medicine — Page: —
+  - Body Weight Components — Page: —
+    - Body Fat — Page: —
+    - Adipose Tissue Composition — Page: —
+    - Adipocyte Size and Number — Page: —
+    - Fat Storage — Page: —
+    - Lipoprotein Lipase — Page: —
+  - Regulation of Body Weight — Page: —
+    - Hunger, Appetite, and Satiety — Page: —
+    - Metabolic Rate and Voluntary Activity — Page: —
+  - Overweight and Obesity — Page: —
+    - Prevalence — Page: —
+  - Elements of Energy Balance Dysregulation — Page: —
+    - Genetics — Page: —
+    - Inadequate Physical Activity — Page: —
+    - Medication Usage and Weight Gain — Page: —
+    - Sleep, Stress, and Circadian Rhythms — Page: —
+    - Taste, Satiety, and Portion Sizes — Page: —
+    - Obesogens — Page: —
+    - Viruses and Pathogens — Page: —
+    - Gut Microflora and Diet — Page: —
+    - Assessment — Page: —
+    - Health Risks and Longevity — Page: —
+    - Inflammation — Page: —
+    - Fat Deposition and the Metabolic Syndrome — Page: —
+    - Obesity and COVID-19 — Page: —
+    - Weight Discrimination — Page: —
+  - Management of Obesity in Adults — Page: —
+    - Goals of Treatment — Page: —
+    - Rate and Extent of Weight Loss — Page: —
+    - Lifestyle Modification — Page: —
+    - Dietary Modification Recommendations — Page: —
+      - Restricted-Energy Eating Plan — Page: —
+    - Weight Loss Programs — Page: —
+      - Commercial and Self-Help Programs — Page: —
+      - Very-Low-Calorie Diets — Page: —
+    - Popular Diets and Practices — Page: —
+    - Intermittent Fasting — Page: —
+    - Low-Carbohydrate and Ketogenic Diets — Page: —
+    - Very-Low-Fat (High-Carbohydrate) Diets — Page: —
+    - Balanced Lower Calorie Diets — Page: —
+    - Physical Activity — Page: —
+    - Pharmaceutical Management — Page: —
+    - Nondiet Approach — Page: —
+    - Bariatric Surgery — Page: —
+    - Sleeve Gastrectomy, Gastric Bypass, and Laparoscopic Adjustable Gastric Banding — Page: —
+    - Non Surgical Weight Loss Procedures — Page: —
+    - Maintaining Reduced Body Weight — Page: —
+    - Plateau Effect — Page: —
+    - Weight Cycling — Page: —
+  - Weight Management in Children and Adolescents — Page: —
+  - Excessive Leanness or Unintentional Weight Loss — Page: —
+    - Cause — Page: —
+    - Assessment — Page: —
+    - Management — Page: —
+    - Appetite Enhancers — Page: —
+    - High-Energy Diets — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**22 Nutrition in Eating Disorders** — Page: 452
+  - Key Terms — Page: —
+    - Anorexia Nervosa — Page: —
+    - Bulimia Nervosa — Page: —
+    - Binge Eating Disorder — Page: —
+    - Other Specified Feeding or Eating Disorder — Page: —
+    - Avoidant/Restrictive Food Intake Disorder — Page: —
+  - Clinical Characteristics and Medical Complications — Page: —
+    - Anorexia Nervosa — Page: —
+    - Bulimia Nervosa — Page: —
+    - Binge Eating Disorder — Page: —
+  - Treatment Approach — Page: —
+  - Psychologic Management — Page: —
+  - Nutrition Management — Page: —
+    - Nutrition Assessment — Page: —
+      - Diet History — Page: —
+      - Anorexia Nervosa — Page: —
+      - Bulimia Nervosa — Page: —
+    - Eating Behavior — Page: —
+    - Biochemical Assessment — Page: —
+    - Vitamin and Mineral Deficiencies — Page: —
+    - Fluid and Electrolyte Balance — Page: —
+    - Energy Expenditure — Page: —
+    - Anthropometric Assessment — Page: —
+  - Medical Nutrition Therapy and Counseling — Page: —
+    - Anorexia Nervosa — Page: —
+    - Avoidant/Restrictive Food Intake Disorder — Page: —
+    - Bulimia Nervosa — Page: —
+    - Binge Eating Disorder — Page: —
+    - Orthorexia Nervosa — Page: —
+    - Monitoring Nutritional Rehabilitation — Page: —
+    - Nutrition Education — Page: —
+    - Prognosis — Page: —
+  - Summary — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**23 Nutrition in Exercise and Sports Performance** — Page: 472
+  - Key Terms — Page: —
+  - Bioenergetics of Physical Activity — Page: —
+    - Adenosine Triphosphate: Ultimate Energy Source — Page: —
+      - Anaerobic or Lactic Acid Pathway — Page: —
+    - Aerobic Pathway — Page: —
+    - Energy Continuum — Page: —
+  - Fuels for Contracting Muscles — Page: —
+    - Intensity — Page: —
+    - Duration — Page: —
+    - Effect of Training — Page: —
+  - An Integrative Approach to Working with Athletes — Page: —
+  - Nutritional Requirements of Exercise — Page: —
+    - Energy — Page: —
+      - Estimation of Energy Requirements — Page: —
+  - Weight Management — Page: —
+    - Weight Loss — Page: —
+    - Weight Gain — Page: —
+  - Weight Management and Aesthetics — Page: —
+    - Disordered Eating — Page: —
+    - Female Athlete Triad — Page: —
+    - Muscle Dysmorphia — Page: —
+  - Macronutrients — Page: —
+    - Nutrition Periodization — Page: —
+    - Strategies and Tools for Eating Guides in Athletes — Page: —
+  - Carbohydrate — Page: —
+    - Effects of Training Low, Competing High — Page: —
+    - Carbohydrate Recommendations — Page: —
+    - Food Timing — Page: —
+      - Pretraining Carbohydrates — Page: —
+    - Types of Carbohydrate — Page: —
+      - Pretraining Fasting — Page: —
+      - Training Fuel During Exercise — Page: —
+      - Postworkout and Recovery Fuel — Page: —
+  - Protein — Page: —
+    - Protein for Muscle Hypertrophy — Page: —
+  - Female Athlete Triad — Page: —
+    - Fats, Inflammation, and Sports Injury — Page: —
+  - Fluid — Page: —
+    - Fluid Balance — Page: —
+    - Daily Fluid Needs — Page: —
+    - Fluid Replacement — Page: —
+    - Fluid Absorption — Page: —
+    - Children — Page: —
+    - Older Athletes — Page: —
+    - Hydration at High Altitudes — Page: —
+    - Electrolytes — Page: —
+      - Sodium — Page: —
+      - Potassium — Page: —
+  - Vitamins and Minerals — Page: —
+    - B Vitamins — Page: —
+    - Antioxidants — Page: —
+    - Vitamin D — Page: —
+  - Minerals — Page: —
+    - Iron — Page: —
+    - Calcium — Page: —
+    - Magnesium — Page: —
+  - Ergogenic Aids — Page: —
+  - Popular Ergogenic Aids — Page: —
+    - Creatine — Page: —
+    - Beta-Alanine — Page: —
+    - Caffeine — Page: —
+    - Nitrates and Beet Juice — Page: —
+      - Steroids — Page: —
+      - Erythropoietin — Page: —
+  - Performance Enhancement Substances and Drugs: Doping In Sport — Page: —
+    - Prohormones and Steroids — Page: —
+      - Androstenedione — Page: —
+  - Useful Websites — Page: —
+    - Resources, Fact Sheets, Books, Programs, and Guides — Page: —
+    - Supplement Education/Certification Information — Page: —
+    - Company-Sponsored Websites for Research/Handouts — Page: —
+  - References — Page: —
+
+**24 Nutrition and Bone Health** — Page: 501
+  - Key Terms — Page: —
+  - Introduction — Page: —
+  - Bone Structure and Bone Physiology — Page: —
+    - Composition of Bone — Page: —
+    - Types of Bone Tissue — Page: —
+    - Bone Cells — Page: —
+    - Cartilage — Page: —
+    - Calcium Homeostasis — Page: —
+    - Bone Modeling — Page: —
+    - Bone Remodeling — Page: —
+  - Osteopenia and Osteoporosis — Page: —
+    - Prevalence — Page: —
+    - Types of Osteoporosis — Page: —
+    - Causes and Risk Factors — Page: —
+      - Alcohol — Page: —
+      - Body Weight — Page: —
+      - Cigarette Smoking — Page: —
+      - Ethnicity — Page: —
+      - Limited Weight-Bearing Exercise — Page: —
+      - Loss of Menses — Page: —
+      - Nutrients — Page: —
+      - Medications — Page: —
+      - Sarcopenia — Page: —
+    - Diagnosis and Monitoring — Page: —
+    - Definitions — Page: —
+    - Ultrasound Measurements of Bone — Page: —
+    - Fracture Risk Assessment — Page: —
+    - Bone Markers — Page: —
+  - Nutrition and Bone — Page: —
+    - Energy — Page: —
+    - Protein — Page: —
+    - Minerals — Page: —
+      - Calcium — Page: —
+      - Phosphate — Page: —
+      - Trace Minerals — Page: —
+    - Vitamins — Page: —
+      - Vitamin A — Page: —
+      - Vitamin D — Page: —
+      - Vitamin K — Page: —
+    - Other Dietary Components — Page: —
+      - Alcohol — Page: —
+      - Caffeine — Page: —
+      - Dietary Fiber — Page: —
+      - Soy and Isoflavones — Page: —
+      - High Acid or Alkaline Diets — Page: —
+      - Sodium — Page: —
+      - Vegetarian Diets — Page: —
+    - Prevention of Osteoporosis and Fractures — Page: —
+      - Exercise — Page: —
+    - Diet — Page: —
+  - Treatment of Osteoporosis — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Exercise — Page: —
+    - FDA-Approved Drugs for Prevention and Treatment of Osteoporosis — Page: —
+  - References — Page: —
+
+**25 Nutrition for Oral and Dental Health** — Page: 512
+  - Key Terms — Page: —
+  - Nutrition For Tooth Development — Page: —
+  - Dental Caries — Page: —
+    - Pathophysiology — Page: —
+      - Susceptible Tooth — Page: —
+      - The Oral Microbiome — Page: —
+      - Substrate — Page: —
+    - Caries Promotion by Individual Foods — Page: —
+    - Factors Affecting Cariogenicity of Food — Page: —
+      - Form and Consistency — Page: —
+      - Exposure — Page: —
+      - Nutrient Composition — Page: —
+      - Sequence and Frequency of Eating — Page: —
+    - The Decay Process — Page: —
+      - Roles of Saliva — Page: —
+      - Caries Patterns — Page: —
+    - Fluoride — Page: —
+      - Mechanism of Action — Page: —
+      - Food Sources — Page: —
+      - Supplementation — Page: —
+      - Excess Fluoride — Page: —
+  - Early Childhood Caries — Page: —
+    - Pathophysiology and Incidence — Page: —
+    - Nutrition Care — Page: —
+  - Caries Prevention — Page: —
+  - Tooth Loss and Dentures — Page: —
+    - Nutrition Care — Page: —
+  - Other Oral Disorders — Page: —
+  - Periodontal Disease — Page: —
+    - Pathophysiology — Page: —
+    - Nutritional Care — Page: —
+  - Oral Manifestations of Systemic Disease — Page: —
+    - Diabetes Mellitus — Page: —
+    - Fungal Infections — Page: —
+    - Head and Neck Cancers — Page: —
+    - HIV Infection and AIDS — Page: —
+    - Xerostomia — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**26 Medical Nutrition Therapy for Adverse Reactions to Food: Allergies and Intolerances** — Page: 522
+  - Key Terms — Page: —
+  - Definitions — Page: —
+  - Prevalence — Page: —
+  - Etiology — Page: —
+    - Genetics and Epigenetics — Page: —
+  - Pathophysiology of Food Allergy — Page: —
+  - Immune System Basics — Page: —
+    - Allergic Response — Page: —
+      - Breakdown of Oral Tolerance — Page: —
+      - Sensitization — Page: —
+      - Reaction — Page: —
+    - IgE-Mediated Food Allergies — Page: —
+    - Food-Induced Anaphylaxis — Page: —
+  - Food-Dependent, Exercise-Induced Anaphylaxis — Page: —
+    - Galactose-α-1,3-Galactose Anaphylaxis (Alpha-Gal) — Page: —
+    - Fruit and Vegetable Allergies: PFAS and LTPS — Page: —
+      - Latex-Fruit or Latex-Food Syndrome — Page: —
+    - Systemic Nickel Allergy Syndrome — Page: —
+    - Non-IgE-Mediated Reactions — Page: —
+    - Eosinophilic Gastrointestinal Diseases — Page: —
+      - Eosinophilic Esophagitis — Page: —
+    - Eosinophilic Gastroenteritis — Page: —
+    - Food Protein-Induced Enterocolitis Syndrome — Page: —
+    - Food Protein-Induced Proctitis or Proctocolitis — Page: —
+  - Food Intolerances — Page: —
+    - Gastrointestinal Manifestations — Page: —
+      - Lactose Intolerance — Page: —
+    - FODMAPs Intolerance — Page: —
+    - Gluten Intolerance — Page: —
+    - Pharmacologic — Page: —
+    - Histamine — Page: —
+    - Tyramine — Page: —
+    - Other Amines and Food Additives — Page: —
+    - Microbial Contamination and Toxins — Page: —
+    - Psychogenic and Behavioral Factors — Page: —
+  - Medical Nutrition Therapy — Page: —
+    - Assessment — Page: —
+  - Diagnosis — Page: —
+    - Immunologic Testing — Page: —
+      - Skin Prick Test — Page: —
+      - Serum Antibody Tests — Page: —
+      - Other Tests — Page: —
+  - Intervention — Page: —
+    - Elimination Diets — Page: —
+  - Monitoring and Evaluation — Page: —
+  - Prevention of Food Allergies — Page: —
+    - Microbial Exposure Hypotheses — Page: —
+    - Route of Birth Delivery — Page: —
+    - Antibiotic Use — Page: —
+    - Prebiotics and Probiotics — Page: —
+    - Allergen Avoidance Hypothesis — Page: —
+    - Breastfeeding — Page: —
+    - Infant Formulas — Page: —
+    - Dual Allergen Hypothesis — Page: —
+    - Timing of Introduction of Solids and Infant Feeding — Page: —
+    - Nutritional Immunomodulation — Page: —
+    - Vitamin D — Page: —
+    - Fatty Acids — Page: —
+    - Folate — Page: —
+    - Other Nutrients — Page: —
+    - Future Directions — Page: —
+    - Immunotherapy — Page: —
+    - Genetics and Omics — Page: —
+    - Future Innovations — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**27 Medical Nutrition Therapy for Upper Gastrointestinal Tract Disorders** — Page: 553
+  - Key Terms — Page: —
+  - The Esophagus — Page: —
+    - Gastroesophageal Reflux Disease and Esophagitis — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical and Surgical Management — Page: —
+      - Lifestyle Modifications and Medical Nutrition Therapy — Page: —
+    - Surgery of the Esophagus — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Preoperative phase. — Page: —
+        - Postoperative phase. — Page: —
+    - Head and Neck Cancer — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - The Stomach — Page: —
+    - Dyspepsia and Functional Dyspepsia — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Gastritis and Peptic Ulcers — Page: —
+      - Pathophysiology — Page: —
+      - Helicobacter pylori Gastritis — Page: —
+      - Non-Helicobacter pylori Gastritis — Page: —
+      - Medical Treatment — Page: —
+    - Peptic Ulcers — Page: —
+      - Etiology — Page: —
+    - Gastric Versus Duodenal Ulcers — Page: —
+      - Pathophysiology — Page: —
+      - Medical and Surgical Management of Ulcers — Page: —
+        - Peptic ulcers. — Page: —
+        - Stress ulcers. — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Carcinoma of the Stomach — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical and Surgical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Gastric Surgeries — Page: —
+    - Types of Surgeries — Page: —
+      - Postoperative Medical Nutrition Therapy — Page: —
+    - Dumping Syndrome — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Gastroparesis — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**28 Medical Nutrition Therapy for Lower Gastrointestinal Tract Disorders** — Page: 571
+  - Key Terms — Page: —
+  - Common Intestinal Problems — Page: —
+    - Intestinal Gas and Flatulence — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Constipation — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management for Adults — Page: —
+      - Medical Management for Infants and Children — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Diarrhea — Page: —
+      - Pathophysiology — Page: —
+      - Antibiotic-Associated Diarrhea — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Treating Diarrhea in Infants and Children — Page: —
+    - Gastrointestinal Strictures and Obstruction — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Diseases of the Small Intestine — Page: —
+    - Celiac Disease (Gluten-Sensitive Enteropathy) — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Assessment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Tropical Sprue — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Intestinal Brush-Border Enzyme Deficiencies — Page: —
+    - Lactose Intolerance — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Fructose Malabsorption — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+        - Crohn disease. — Page: —
+        - Ulcerative colitis. — Page: —
+      - Medical Management — Page: —
+      - Surgical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Microbiota. — Page: —
+  - Inflammatory Bowel Disease — Page: —
+    - Microscopic Colitis — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Irritable Bowel Syndrome — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - The FODMAP Elimination Diet — Page: —
+    - Diverticular Disease — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical and Surgical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Intestinal Polyps and Colorectal Cancer — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Nutritional Consequences Of Intestinal Surgery — Page: —
+    - Small Bowel Resections and Short-Bowel Syndrome — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+        - Duodenal resection. — Page: —
+        - Jejunal resections. — Page: —
+        - Ileal resections. — Page: —
+    - Colon Resections — Page: —
+      - Medical and Surgical Management of Resections — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Small Intestine Bacterial Overgrowth — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Fistula — Page: —
+      - Etiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Intestinal Ostomies — Page: —
+    - Colostomy — Page: —
+    - Ileostomy — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Restorative Proctocolectomy with Ileal Pouch Anal Anastomosis — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**29 Medical Nutrition Therapy for Hepatobiliary and Pancreatic Disorders** — Page: 608
+  - Key Terms — Page: —
+  - Physiology And Functions Of The Liver — Page: —
+    - Structure — Page: —
+    - Functions — Page: —
+    - Assessment of Liver Function — Page: —
+  - Diseases Of The Liver — Page: —
+    - Viral Hepatitis — Page: —
+    - Nonalcoholic Fatty Liver Disease — Page: —
+    - Alcoholic Liver Disease — Page: —
+    - Cholestatic Liver Diseases — Page: —
+      - Primary Biliary Cirrhosis — Page: —
+      - Primary Sclerosing Cholangitis — Page: —
+    - Inherited Disorders — Page: —
+      - Hemochromatosis — Page: —
+      - Wilson Disease — Page: —
+      - α1-Antitrypsin Deficiency — Page: —
+    - Other Liver Diseases — Page: —
+    - Classifying Liver Disease According to Duration — Page: —
+  - Complications of End-Stage Liver Disease: Cause And Nutrition Treatment — Page: —
+    - Portal Hypertension — Page: —
+      - Pathophysiology and Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Ascites — Page: —
+      - Pathophysiology and Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Hyponatremia — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Hepatic Encephalopathy — Page: —
+      - Pathophysiology and Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Glucose Alterations — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Fat Malabsorption — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Renal Insufficiency and Hepatorenal Syndrome — Page: —
+      - Pathophysiology, Medical, and Nutrition Therapies — Page: —
+    - Osteopenia — Page: —
+      - Pathophysiology — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Nutrition Issues Related to End-Stage Liver Disease — Page: —
+    - Nutrition Assessment — Page: —
+    - Malnutrition — Page: —
+    - Route of Nutrition — Page: —
+      - Treatment — Page: —
+  - Nutrient Requirements For Cirrhosis — Page: —
+    - Energy — Page: —
+    - Carbohydrate — Page: —
+    - Lipid — Page: —
+    - Protein — Page: —
+    - Vitamins and Minerals — Page: —
+  - Herbal And Dietary Supplements And Liver Disease — Page: —
+  - Liver Resection And Transplantation — Page: —
+  - Physiology And Functions Of The Gallbladder — Page: —
+  - Diseases Of The Gallbladder — Page: —
+    - Cholestasis — Page: —
+      - Pathophysiology and Medical Management — Page: —
+    - Cholelithiasis — Page: —
+      - Pathophysiology — Page: —
+      - Medical and Surgical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Cholecystitis — Page: —
+      - Pathophysiology — Page: —
+      - Surgical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Acute cholecystitis. — Page: —
+        - Chronic cholecystitis. — Page: —
+    - Cholangitis — Page: —
+      - Pathophysiology and Medical Management — Page: —
+  - Complementary And Integrative Medicine For Gallstones — Page: —
+  - Physiology and Functions Of The Exocrine Pancreas — Page: —
+  - Diseases Of The Exocrine Pancreas — Page: —
+    - Pancreatitis — Page: —
+      - Pathophysiology and Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Acute pancreatitis. — Page: —
+        - Chronic pancreatitis. — Page: —
+  - Complementary And Integrative Medicine For Pancreatic Disorders — Page: —
+  - Pancreatic Surgery — Page: —
+    - Pancreatic and Islet Cell Transplantation — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**30 Medical Nutrition Therapy for Diabetes Mellitus and Hypoglycemia of Nondiabetic Origin** — Page: 636
+  - Key Terms — Page: —
+  - Incidence and Prevalence — Page: —
+  - Categories of Glucose Intolerance — Page: —
+    - Prediabetes — Page: —
+    - Type 1 Diabetes — Page: —
+      - Pathophysiology — Page: —
+    - Type 2 Diabetes — Page: —
+      - Pathophysiology — Page: —
+    - Gestational Diabetes Mellitus — Page: —
+    - Other Types of Diabetes — Page: —
+  - Screening and Diagnostic Criteria — Page: —
+    - Screening for Diabetes — Page: —
+    - Diagnostic Criteria — Page: —
+  - Management of Prediabetes — Page: —
+    - Medical Management — Page: —
+    - Physical Activity — Page: —
+    - Medical Nutrition Therapy for Prediabetes — Page: —
+  - Management of Diabetes — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy for Diabetes — Page: —
+      - Goals and Desired Outcomes — Page: —
+    - Energy Balance and Weight — Page: —
+      - Children/Adolescents — Page: —
+    - Adults — Page: —
+      - Bariatric Surgery — Page: —
+      - Macronutrient Percentages and Eating Patterns — Page: —
+      - Carbohydrate Intake — Page: —
+      - Glycemic Index and Glycemic Load — Page: —
+      - Fiber and Whole Grains — Page: —
+      - Nonnutritive and Hypocaloric Sweeteners — Page: —
+      - Protein Intake — Page: —
+      - Fat Intake — Page: —
+      - Alcohol — Page: —
+      - Micronutrients and Herbal Supplements — Page: —
+      - Physical Activity/Exercise — Page: —
+      - Potential Problems with Exercise — Page: —
+      - Exercise Guidelines — Page: —
+        - Carbohydrate recommendations for insulin or insulin secretagogue users. — Page: —
+    - Insulin Guidelines — Page: —
+      - Precautions for Persons with Diabetes — Page: —
+      - Exercise Recommendations — Page: —
+    - Medications — Page: —
+      - Glucose-Lowering Medications for Type 2 Diabetes — Page: —
+      - Biguanides — Page: —
+      - Sulfonylureas — Page: —
+      - Thiazolidinediones — Page: —
+      - Glucagon-like Peptide-1 Receptor Agonists — Page: —
+      - Dipeptidyl Peptidase 4 Inhibitors — Page: —
+      - Alpha-Glucosidase Inhibitors — Page: —
+      - Meglitinides (Glinides) — Page: —
+      - Sodium-Glucose Transporter 2 Inhibitors — Page: —
+      - Amylin Agonists (Pramlintide) — Page: —
+      - Insulin — Page: —
+      - Insulin Regimens — Page: —
+      - Insulin Regimens: Continuous Sustained Insulin Infusion or Insulin Pump Therapy — Page: —
+    - Self-Management Education — Page: —
+    - Monitoring — Page: —
+      - Self-Monitoring of Blood Glucose — Page: —
+      - Continuous Glucose Monitoring — Page: —
+      - A1C Monitoring — Page: —
+      - Ketone, Lipid, and Blood Pressure Monitoring — Page: —
+  - Implementing the Nutrition Care Process — Page: —
+    - Nutrition Assessment — Page: —
+      - Nutrition Diagnosis — Page: —
+    - Nutrition Interventions — Page: —
+      - Nutrition Therapy Interventions for All People with Diabetes — Page: —
+      - Nutrition Therapy Interventions for Specific Populations — Page: —
+        - Persons with type 2 diabetes using medical nutrition therapy alone or with glucose-lowering medications. — Page: —
+          - Youth with type 1 diabetes. — Page: —
+        - Youth with type 2 diabetes. — Page: —
+        - Women with preexisting diabetes and pregnancy. — Page: —
+        - Women with gestational diabetes mellitus. — Page: —
+        - Older adults. — Page: —
+      - The Nutrition Prescription — Page: —
+      - Nutrition Education and Counseling — Page: —
+      - Nutrition Monitoring and Evaluation — Page: —
+      - Follow-Up Encounters — Page: —
+  - Acute Complications — Page: —
+    - Hypoglycemia — Page: —
+    - Hyperglycemia and Diabetic Ketoacidosis — Page: —
+  - Long-Term Complications — Page: —
+    - Macrovascular Diseases — Page: —
+      - Dyslipidemia — Page: —
+      - Hypertension — Page: —
+    - Microvascular Diseases — Page: —
+      - Diabetic Kidney Disease — Page: —
+      - Retinopathy — Page: —
+      - Neuropathy — Page: —
+      - COVID-19 — Page: —
+      - Pathophysiology — Page: —
+  - Hypoglycemia of Nondiabetic Origin — Page: —
+    - Types of Hypoglycemia — Page: —
+    - Diagnostic Criteria — Page: —
+    - Management of Hypoglycemia — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**31 Medical Nutrition Therapy for Thyroid, Adrenal, and Other Endocrine Disorders** — Page: 671
+  - Key Terms — Page: —
+  - Thyroid Physiology — Page: —
+  - Assessment in Thyroid Disorders — Page: —
+    - Laboratory Values in Thyroid Disease — Page: —
+  - Hypothyroidism — Page: —
+    - Pathophysiology — Page: —
+      - Triggers — Page: —
+        - Adrenal dysfunction and oxidative stress. — Page: —
+        - Aging. — Page: —
+        - Menopause. — Page: —
+        - Pregnancy. — Page: —
+        - Fasting or restrictive diets. — Page: —
+        - Goitrogens. — Page: —
+        - Iodine. — Page: —
+        - Iron. — Page: —
+        - Selenium. — Page: —
+        - Magnesium. — Page: —
+        - Vitamin D. — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Management of Thyroid Disorders During Pregnancy — Page: —
+    - Hypothyroidism and Pregnancy — Page: —
+      - Laboratory Assessment — Page: —
+      - Preconception Investigations — Page: —
+      - Iodine Intake — Page: —
+      - Additional Therapies — Page: —
+  - Polycystic Ovary Syndrome — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Complementary and Integrative Approaches — Page: —
+  - Hyperthyroidism — Page: —
+    - Pathophysiology — Page: —
+      - Triggers — Page: —
+        - Genetics. — Page: —
+        - Stress. — Page: —
+          - Provide adequate precursors for the formation of T4. — Page: —
+          - Reduce antithyroid antibodies. — Page: —
+          - Improve the conversion of T4 to T3. — Page: —
+          - Enhance T3 influence on mitochondrial function. — Page: —
+          - Monitor use of botanical products. — Page: —
+          - Avoid disruption of thyroid hormone metabolism from flavonoids. — Page: —
+          - Use caution with supplements. — Page: —
+          - Maintain vitamin sufficiency. — Page: —
+    - Medical Management — Page: —
+  - Managing Imbalances of the Hypothalamus-Pituitary-Thyroid Axis — Page: —
+  - Adrenal Disorders — Page: —
+    - Cushing Syndrome — Page: —
+    - Addison Disease — Page: —
+    - Adrenal Insufficiency/Adrenal Fatigue — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**32 Medical Nutrition Therapy for Anemia** — Page: 685
+  - Key Terms — Page: —
+  - Iron-Related Blood Disorders — Page: —
+    - Iron Deficiency Anemia — Page: —
+      - Pathophysiology — Page: —
+      - Assessment — Page: —
+      - Medical Management — Page: —
+        - Oral supplementation. — Page: —
+        - Parenteral iron administration. — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Form of iron. — Page: —
+        - Inhibitors. — Page: —
+        - Bioavailability of dietary iron. — Page: —
+  - Iron Overload — Page: —
+    - Hemochromatosis — Page: —
+      - Pathophysiology — Page: —
+      - Assessment — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Megaloblastic Anemias — Page: —
+    - Folate-Deficiency Anemia — Page: —
+      - Etiology — Page: —
+        - MTHFR allele. — Page: —
+        - Methylfolate trap. — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Vitamin B12 Deficiency and Pernicious Anemias — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Stages of Deficiency — Page: —
+      - Clinical Findings — Page: —
+      - Assessment — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Other Nutritional Anemias — Page: —
+    - Anemia of Protein-Energy Malnutrition — Page: —
+    - Copper Deficiency Anemia — Page: —
+    - Sideroblastic (B6-Responsive) Anemia — Page: —
+    - Vitamin E-Responsive Hemolytic Anemia — Page: —
+  - Nonnutritional Anemias — Page: —
+    - Anemia of Pregnancy — Page: —
+    - Anemia of Chronic Disease — Page: —
+    - Sickle Cell Disease — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Hypochromic Microcytic Transient Anemia (Sports Anemia) — Page: —
+    - Thalassemias — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**33 Medical Nutrition Therapy for Cardiovascular Disease** — Page: 701
+  - Key Terms — Page: —
+  - Atherosclerosis and Coronary Heart Disease — Page: —
+    - Anatomy and Physiology — Page: —
+    - Pathophysiology — Page: —
+    - Lipoproteins — Page: —
+    - Total Cholesterol — Page: —
+    - Triglycerides — Page: —
+  - Genetic Hyperlipidemias — Page: —
+    - Familial Hypercholesterolemia — Page: —
+    - Polygenic Familial Hypercholesterolemia — Page: —
+    - Familial Combined Hyperlipidemia — Page: —
+    - Familial Dysbetalipoproteinemia — Page: —
+    - Medical Diagnosis — Page: —
+    - Prevention and Management of Risk Factors — Page: —
+      - Inflammatory Markers — Page: —
+        - Fibrinogen. — Page: —
+        - C-reactive protein. — Page: —
+        - Homocysteine. — Page: —
+        - Trimethylamine-N-oxide. — Page: —
+    - Lifestyle Guidelines — Page: —
+    - Diet — Page: —
+      - The Mediterranean Diet — Page: —
+      - The Dietary Approaches to Stop Hypertension Diet — Page: —
+      - Vegan Diet — Page: —
+      - Physical Inactivity — Page: —
+      - Stress — Page: —
+      - Diabetes — Page: —
+      - Metabolic Syndrome — Page: —
+      - Obesity — Page: —
+    - Nonmodifiable Risk Factors — Page: —
+      - Age and Sex — Page: —
+      - Family History and Genetics — Page: —
+      - Menopausal Status — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Lifestyle Recommendations — Page: —
+        - Saturated fatty acids. — Page: —
+        - Trans fatty acids. — Page: —
+        - Monounsaturated fatty acids. — Page: —
+        - Polyunsaturated fatty acids. — Page: —
+        - Omega-3 fatty acids. — Page: —
+        - Dietary cholesterol. — Page: —
+        - Fiber. — Page: —
+        - Antioxidants. — Page: —
+        - Stanols and sterols. — Page: —
+        - Weight loss. — Page: —
+    - Medical Management — Page: —
+      - Pharmacologic Management — Page: —
+      - Medical Intervention — Page: —
+  - Hypertension — Page: —
+    - Prevalence and Incidence — Page: —
+    - Pathophysiology — Page: —
+    - Primary Prevention — Page: —
+      - Fats — Page: —
+      - Protein — Page: —
+      - Dietary Patterns Emphasizing Fruits and Vegetables — Page: —
+      - Weight Reduction — Page: —
+      - Sodium — Page: —
+      - Calcium and Vitamin D — Page: —
+      - Magnesium — Page: —
+      - Potassium — Page: —
+      - Physical Activity — Page: —
+      - Alcohol Consumption — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Energy Intake — Page: —
+      - DASH Diet — Page: —
+      - Salt Restriction — Page: —
+      - Potassium-Calcium-Magnesium — Page: —
+      - Lipids — Page: —
+      - Alcohol — Page: —
+      - Exercise — Page: —
+    - Treatment of Hypertension in Children and Adolescents — Page: —
+    - Treatment of Blood Pressure in Older Adults — Page: —
+  - Heart Failure — Page: —
+    - Pathophysiology — Page: —
+    - Risk Factors — Page: —
+    - Prevention — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Salt Restriction — Page: —
+      - Alcohol — Page: —
+      - Caffeine — Page: —
+      - Calcium — Page: —
+      - L-Arginine — Page: —
+      - Coenzyme Q10 — Page: —
+      - D-Ribose — Page: —
+      - Energy — Page: —
+      - Fats — Page: —
+      - Meal Strategies — Page: —
+      - Folate, Vitamin B6, and Vitamin B12 — Page: —
+      - Magnesium — Page: —
+      - Thiamin — Page: —
+      - Vitamin D — Page: —
+  - COVID-19 — Page: —
+    - Increased Risk — Page: —
+  - Cardiac Transplantation — Page: —
+    - Pretransplant Medical Nutrition Therapy — Page: —
+    - Immediate Posttransplant Nutrition Support — Page: —
+    - Long-Term Posttransplant Nutrition Support — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**34 Medical Nutrition Therapy for Pulmonary Disease** — Page: 737
+  - Key Terms — Page: —
+  - The Pulmonary System — Page: —
+    - Effect of Malnutrition on the Pulmonary System — Page: —
+    - Effect of Pulmonary Disease on Nutritional Status — Page: —
+    - Medical Management — Page: —
+  - Chronic Pulmonary Disease — Page: —
+    - Cystic Fibrosis — Page: —
+    - Pathophysiology — Page: —
+      - Pulmonary and Sinus Disease — Page: —
+      - Pancreatic Disease in Cystic Fibrosis — Page: —
+        - Pancreatic insufficiency. — Page: —
+        - Pancreatitis. — Page: —
+        - Cystic Fibrosis-related diabetes. — Page: —
+      - Bone Disease — Page: —
+      - Other Conditions — Page: —
+    - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Energy. — Page: —
+        - Vitamins and minerals. — Page: —
+        - Salt. — Page: —
+        - Zinc. — Page: —
+  - Asthma — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Chronic Obstructive Pulmonary Disease — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Macronutrients — Page: —
+      - Energy — Page: —
+      - Fat — Page: —
+      - Protein — Page: —
+      - Vitamins and Minerals — Page: —
+      - Patients in the Advanced Stage of COPD — Page: —
+  - Pulmonary Hypertension — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Diffuse Parenchymal Lung Disease — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Pulmonary Diagnostic Tests — Page: —
+    - Medical Nutrition Management — Page: —
+  - Tuberculosis — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Energy — Page: —
+      - Protein — Page: —
+      - Vitamins and Minerals — Page: —
+  - Lung Cancer — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Obesity Hypoventilation Syndrome — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Pleural Effusion — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Chylothorax — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Acute Respiratory Distress Syndrome — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Pneumonia — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Lung Transplantation — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Bronchopulmonary Dysplasia — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Complementary and Integrative Approaches for Pulmonary Disease — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**35 Medical Therapy for Renal Disorders** — Page: 759
+  - Key Terms — Page: —
+  - Physiology and Function of the Kidneys — Page: —
+  - Renal Diseases — Page: —
+    - Kidney Stones (Nephrolithiasis) — Page: —
+      - Pathophysiology — Page: —
+        - Calcium stones. — Page: —
+        - Oxalate stones. — Page: —
+        - Uric acid stones. — Page: —
+        - Cystine stones. — Page: —
+        - Melamine and indinavir stones. — Page: —
+        - Struvite stones. — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Fluid and urine volume. — Page: —
+        - Animal protein. — Page: —
+        - Oxalate. — Page: —
+        - Potassium. — Page: —
+        - Magnesium. — Page: —
+        - Phosphate. — Page: —
+        - Sodium. — Page: —
+        - Citrate. — Page: —
+        - Fructose. — Page: —
+        - Vitamins. — Page: —
+        - Omega-3 fatty acids. — Page: —
+  - Education, Adherence, and Compliance — Page: —
+  - Acute Kidney Injury (Acute Renal Failure) — Page: —
+    - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Protein. — Page: —
+        - Energy. — Page: —
+        - Fluid and sodium. — Page: —
+        - Potassium. — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Protein. — Page: —
+        - Energy. — Page: —
+        - Sodium. — Page: —
+        - Potassium. — Page: —
+        - Phosphorus. — Page: —
+        - Lipids. — Page: —
+        - Vitamins and probiotics. — Page: —
+  - Chronic Kidney Disease — Page: —
+  - End-Stage Renal Disease — Page: —
+    - Pathophysiology — Page: —
+    - Medical Treatment — Page: —
+      - Dialysis — Page: —
+      - Evaluation of Dialysis Efficacy — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Protein — Page: —
+      - Energy — Page: —
+      - Fluid and Sodium Balance — Page: —
+      - Potassium — Page: —
+      - Phosphorus — Page: —
+      - Calcium and Parathyroid Hormone — Page: —
+      - Lipid — Page: —
+      - Iron and Erythropoietin — Page: —
+      - Vitamins — Page: —
+    - Nutrition Support in End-Stage Renal Disease — Page: —
+      - Enteral Tube Feeding — Page: —
+      - Oral Protein Supplementation During Dialysis — Page: —
+      - Parenteral Nutrition — Page: —
+      - Intradialytic Parenteral Nutrition — Page: —
+    - End-Stage Renal Disease in Patients with Diabetes — Page: —
+    - Chronic Kidney Disease and End-Stage Renal Disease in Children — Page: —
+    - Medical Nutrition Therapy for Transplantation — Page: —
+    - Counseling and Education of Patients with End-Stage Renal Disease — Page: —
+    - Coordination of Care in End-Stage Renal Disease — Page: —
+    - Emergency Diets for Dialysis Patients — Page: —
+    - Medical Management (Conservative Treatment) or Palliative Care — Page: —
+  - References — Page: —
+
+**36 Medical Nutrition Therapy for Cancer Prevention, Treatment, and Survivorship** — Page: 788
+  - Key Terms — Page: —
+  - Pathophysiology — Page: —
+    - Phases of Carcinogenesis — Page: —
+  - Nutrition and Carcinogenesis — Page: —
+    - Alcohol — Page: —
+    - Energy Intake and Body Weight — Page: —
+    - Fat — Page: —
+    - Sugar and Nonnutritive Sweeteners — Page: —
+    - Protein — Page: —
+    - Smoked, Grilled, and Preserved Foods and Processed Meats — Page: —
+    - Organic and Genetically Modified Foods — Page: —
+    - Chemical Exposures — Page: —
+    - Bisphenol A (BPA) — Page: —
+  - Chemoprevention — Page: —
+    - Antioxidants and Bioactive Compounds — Page: —
+    - Vitamin D — Page: —
+    - Coffee and Tea — Page: —
+    - Fruits and Vegetables — Page: —
+    - Soy and Phytoestrogens — Page: —
+    - Vegetarian and Vegan Plant-Based Diets — Page: —
+    - Physical Activity — Page: —
+  - Medical Diagnosis and Staging of Cancer — Page: —
+    - Classification and Common Types of Cancer — Page: —
+  - Medical Treatment — Page: —
+    - Goals of Treatment — Page: —
+    - Cultural Considerations — Page: —
+  - Medical Nutrition Therapy — Page: —
+    - Nutrition Screening and Assessment — Page: —
+      - Validated Screening Tools — Page: —
+    - General Assessment — Page: —
+    - Energy — Page: —
+    - Protein — Page: —
+    - Fluid — Page: —
+    - Micronutrients — Page: —
+    - Nutrition Diagnosis — Page: —
+    - Nutrition Intervention — Page: —
+      - Oral Nutrition Management Strategies — Page: —
+      - Managing Anorexia and Alterations in Taste and Smell — Page: —
+      - Alterations in Energy Metabolism Resulting from Cancer — Page: —
+      - Managing Cancer Cachexia — Page: —
+      - Pharmacotherapy — Page: —
+      - Managing Other Cancer-Related Metabolic Abnormalities — Page: —
+  - Integrative, Complementary, and Functional Oncology — Page: —
+    - Dietary Supplements — Page: —
+  - Nutritional Impact of Cancer Treatments — Page: —
+    - Chemotherapy — Page: —
+    - Anemia of Chronic Disease — Page: —
+      - Diarrhea — Page: —
+      - Nausea and Vomiting — Page: —
+      - Food-Drug Interactions — Page: —
+      - Oral Changes — Page: —
+      - Mucositis — Page: —
+    - Biotherapy — Page: —
+    - Hormone Therapy — Page: —
+    - Radiation Therapy — Page: —
+    - Radiation to the Head and Neck — Page: —
+      - Radiation to the Thorax — Page: —
+      - Radiation to the Abdomen or Pelvis — Page: —
+      - Total-Body Irradiation — Page: —
+    - Surgery — Page: —
+      - Head and Neck Cancer — Page: —
+      - Esophageal Cancer — Page: —
+      - Gastric Cancer — Page: —
+      - Pancreatic Cancer — Page: —
+      - Cancers of the Intestinal Tract — Page: —
+    - Hematopoietic Cell Transplantation — Page: —
+      - Graft-Versus-Host Disease — Page: —
+      - Nutrition and Lifestyle Precautions with Neutropenia — Page: —
+  - Nutrition Monitoring and Evaluation — Page: —
+  - Pediatric Cancer — Page: —
+    - Advanced Cancer and Palliative Care — Page: —
+  - Nutrition Recommendations for Cancer Survivors — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**37 Medical Nutrition Therapy for Infectious Diseases** — Page: 820
+  - Key Terms — Page: —
+  - Introduction — Page: —
+  - Definitions — Page: —
+    - Nutrition — Page: —
+    - Nutritional Status — Page: —
+    - Malnutrition — Page: —
+  - The Immune System and Response to Infection — Page: —
+    - Innate and Adaptive Immune Responses — Page: —
+      - The Innate Immune System — Page: —
+      - The Adaptive Immune System — Page: —
+    - Pathogens — Page: —
+    - Process of Infection and Disease — Page: —
+  - Synergy of Malnutrition and Infection — Page: —
+    - Contemporary Context — Page: —
+  - Effects of Nutrition on the Immune System and Infection — Page: —
+    - Effects of Nutritional Deficiency — Page: —
+    - Mediation by the Gut Microbiota — Page: —
+    - Effects of Macronutrient Imbalances on Immunity — Page: —
+    - Effects of Obesity on the Immune System — Page: —
+    - Associations Between Obesity, Clinical Outcomes, and Infectious Disease — Page: —
+    - Obesity and Nutrition-Related Risk Factors for COVID-19 Disease — Page: —
+  - Micronutrient Deficiencies, Immunity, and Infection — Page: —
+    - Vitamin A — Page: —
+    - Zinc — Page: —
+    - Iron — Page: —
+    - Vitamin D — Page: —
+    - Vitamin C — Page: —
+    - Selenium — Page: —
+    - Vitamin E — Page: —
+    - B-Complex Vitamins and Folate — Page: —
+  - Impact of Infectious Disease on Nutrition and the Immune System — Page: —
+  - The Major Infectious Diseases and Their Impacts — Page: —
+    - Measles — Page: —
+    - Diarrhea — Page: —
+    - Acute Lower Respiratory Infections — Page: —
+    - Malaria — Page: —
+    - COVID-19 Disease — Page: —
+    - Dietary Supplement Use During COVID-19 — Page: —
+  - Summary — Page: —
+  - Clinical Case Study — Page: —
+    - Nutrition Assessment — Page: —
+      - Symptoms — Page: —
+      - Oral Intake — Page: —
+      - Nutrition History — Page: —
+      - Anthropometrics — Page: —
+      - Usual Body Weight — Page: —
+      - Nutrition Focused Physical Exam — Page: —
+      - Functional Capacity — Page: —
+      - Medications — Page: —
+      - Pertinent Labs/Vitals — Page: —
+      - Diet — Page: —
+      - Nutrition Diagnostic Statements — Page: —
+      - Interventions — Page: —
+      - Monitoring and Evaluation — Page: —
+  - References — Page: —
+
+**38 Medical Nutrition Therapy for HIV and AIDS** — Page: 853
+  - Key Terms — Page: —
+  - The Changing Face of HIV in the United States — Page: —
+  - Epidemiology and Trends — Page: —
+    - Global Status of HIV and AIDS — Page: —
+    - The United States — Page: —
+  - Pathophysiology and Classification — Page: —
+  - Medical Management — Page: —
+    - Classes of Antiretroviral Therapy Drugs — Page: —
+    - Predictors of Adherence — Page: —
+    - Illicit Drug Use — Page: —
+    - Food-Drug Interactions — Page: —
+    - Medical Management — Page: —
+  - Medical Nutrition Therapy — Page: —
+    - Anthropometry and Body Composition Measurements — Page: —
+    - Wasting — Page: —
+    - HIV-Associated Lipodystrophy Syndrome — Page: —
+    - Cardiometabolic Risk — Page: —
+    - Obesity — Page: —
+    - Social and Economic Factors — Page: —
+    - Nutrient Recommendations — Page: —
+      - Energy and Fluid — Page: —
+      - Protein — Page: —
+      - Fat — Page: —
+      - Micronutrients — Page: —
+    - Gastrointestinal Health — Page: —
+  - HIV in Women — Page: —
+    - Preconception and Prenatal Considerations — Page: —
+    - Postpartum and Other Considerations — Page: —
+  - HIV in Children — Page: —
+  - Integrative and Functional Nutrition — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**39 Medical Nutrition Therapy in Critical Care** — Page: 873
+  - Key Terms — Page: —
+  - Metabolic Response to Stress — Page: —
+  - Hormonal and Cell-Mediated Response — Page: —
+  - Starvation Versus Stress — Page: —
+  - Systemic Inflammatory Response Syndrome, Sepsis, and Organ Dysfunction or Failure — Page: —
+    - Pathophysiology — Page: —
+  - Malnutrition: The Etiology-Based Definition — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Nutrition Support Therapy — Page: —
+      - Nutritional Requirements — Page: —
+        - Energy. — Page: —
+        - Protein. — Page: —
+        - Vitamins, minerals, and trace elements. — Page: —
+        - Feeding strategies. — Page: —
+        - Timing and route of feeding. — Page: —
+  - Trauma and the Open Abdomen — Page: —
+  - Major Burns — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+      - Fluid and Electrolyte Repletion — Page: —
+      - Wound Management — Page: —
+      - Ancillary Measures — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Energy — Page: —
+      - Protein — Page: —
+      - Micronutrients and Antioxidants — Page: —
+      - Methods of Nutrition Support Therapy — Page: —
+  - Surgery — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Preoperative Nutrition Care — Page: —
+      - Postoperative Nutrition Care — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**40 Medical Nutrition Therapy for Rheumatic and Musculoskeletal Disease** — Page: 893
+  - Key Terms — Page: —
+  - Etiology — Page: —
+  - Pathophysiology and Inflammation — Page: —
+  - Medical Diagnosis and Treatment — Page: —
+    - Biochemical Assessment — Page: —
+  - Pharmacotherapy — Page: —
+    - Analgesics — Page: —
+    - Nonsteroidal Antiinflammatory Drugs — Page: —
+    - Disease-Modifying Antirheumatic Drugs — Page: —
+    - Biologic Response Modifiers or Biologics — Page: —
+    - Corticosteroids — Page: —
+    - Vitamin D — Page: —
+    - Vitamin A — Page: —
+  - Antiinflammatory Diet — Page: —
+  - Complementary and Integrative Health Approaches — Page: —
+    - Elimination Diets and Other Therapeutic Diets — Page: —
+  - Microbiota and Arthritis — Page: —
+  - COVID-19 and Rheumatic Disease — Page: —
+  - Osteoarthritis — Page: —
+    - Pathophysiology — Page: —
+    - Medical and Surgical Management — Page: —
+      - Exercise — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Weight and Adiposity Management — Page: —
+    - Vitamins and Minerals — Page: —
+      - Complementary Integrative Therapies — Page: —
+      - Glucosamine and Chondroitin Sulfate — Page: —
+  - Rheumatoid Arthritis — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+      - Pharmacologic Therapy — Page: —
+      - Surgery — Page: —
+      - Exercise — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Energy — Page: —
+      - Protein — Page: —
+      - Fat — Page: —
+      - Minerals, Vitamins, and Antioxidants — Page: —
+      - Complementary and Integrative Therapies — Page: —
+  - Sjögren Syndrome — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Temporomandibular Disorders — Page: —
+    - Pathophysiology — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Gout — Page: —
+    - Pathophysiology — Page: —
+      - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Scleroderma (Systemic Sclerosis or SSc) — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Systemic Lupus Erythematosus — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Complementary Integrative Therapies — Page: —
+  - Spondyloarthritides — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**41 Medical Nutrition Therapy for Neurologic Disorders** — Page: 917
+  - Key Terms — Page: —
+  - The Nervous System — Page: —
+    - Locations and Signs of Mass Lesions — Page: —
+    - Nutrition and Lifestyle Factors for a Healthy Nervous System — Page: —
+  - Dysphagia — Page: —
+    - Phases of Swallowing — Page: —
+    - Oral Phase — Page: —
+    - Pharyngeal Phase — Page: —
+    - Esophageal Phase — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Liquids — Page: —
+    - Textures — Page: —
+    - Enteral Tube Nutrition — Page: —
+  - Neurologic Diseases of Nutritional Origin — Page: —
+  - Neurologic Disorders from Trauma — Page: —
+    - Cerebrovascular Accident (Stroke) — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Head Trauma or Neurotrauma — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Spine Trauma and Spinal Cord Injury — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Pathophysiology — Page: —
+    - Medical Management — Page: —
+  - Neurologic Diseases — Page: —
+    - Adrenomyeloleukodystrophy — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Dementia — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Treatment — Page: —
+        - Potential risk reduction. — Page: —
+        - Public health approaches to promoting health and independence for an aging population. — Page: —
+        - Clinical approaches. — Page: —
+    - Amyotrophic Lateral Sclerosis — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Epilepsy — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Guillain-Barré Syndrome and Chronic Inflammatory Demyelinating Polyneuropathy — Page: —
+      - Etiology — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Myasthenia Gravis — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Multiple Sclerosis — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Parkinson Disease — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**42 Medical Nutrition Therapy for Psychiatric and Cognitive Disorders** — Page: 955
+  - Key Terms — Page: —
+  - The Enteric Nervous System — Page: —
+  - Blood Glucose Regulation — Page: —
+  - The Role of Nutrients in Mental Function — Page: —
+    - Omega-3 Fatty Acids — Page: —
+    - During Pregnancy and Lactation — Page: —
+    - During Childhood — Page: —
+    - During Adulthood — Page: —
+    - Omega-3 Supplements — Page: —
+    - Vitamins — Page: —
+      - Thiamin (Vitamin B1) — Page: —
+      - Riboflavin (Vitamin B2) — Page: —
+      - Niacin (Vitamin B3) — Page: —
+      - Vitamin B12 — Page: —
+      - Folate — Page: —
+      - Vitamin D — Page: —
+    - Minerals — Page: —
+      - Iron — Page: —
+      - Selenium — Page: —
+      - Zinc — Page: —
+      - Amino Acids — Page: —
+      - Phytochemicals — Page: —
+      - Nutritional Supplements — Page: —
+  - Addiction and Substance Abuse — Page: —
+    - Screening for Alcoholism — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Etiology — Page: —
+  - Anxiety — Page: —
+    - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutritional Therapy — Page: —
+  - Bipolar Disorder — Page: —
+    - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutritional Therapy — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+  - Dementia and Alzheimer Disease — Page: —
+    - Medical Nutritional Therapy — Page: —
+      - Medical Nutrition Therapy for Advanced Dementia — Page: —
+      - Pathophysiology — Page: —
+  - Depression — Page: —
+    - Medical Management — Page: —
+      - Medical Nutritional Therapy — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+  - Fatigue, Chronic Fatigue Syndrome, and Fibromyalgia Syndrome — Page: —
+    - Disordered Sleep — Page: —
+      - Immune Dysfunction and Infections — Page: —
+    - General Pain Relief — Page: —
+    - Medical Nutritional Therapy — Page: —
+      - Pathophysiology — Page: —
+      - Medical Management — Page: —
+      - Medical Nutritional Therapy — Page: —
+  - Schizophrenia — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**43 Medical Nutrition Therapy for Low-Birth Weight Infants** — Page: 984
+  - Key Terms — Page: —
+  - Infant Mortality and Statistics — Page: —
+  - Physiologic Development — Page: —
+    - Gestational Age and Size — Page: —
+    - Characteristics of Immaturity — Page: —
+  - Nutrition Requirements: Parenteral Feeding — Page: —
+    - Fluid — Page: —
+    - Energy — Page: —
+    - Glucose — Page: —
+    - Amino Acids — Page: —
+    - Lipids — Page: —
+    - Electrolytes — Page: —
+    - Minerals — Page: —
+    - Trace Elements — Page: —
+    - Vitamins — Page: —
+  - Transition from Parenteral to Enteral Feeding — Page: —
+  - Nutrition Requirements: Enteral Feeding — Page: —
+    - Energy — Page: —
+    - Protein — Page: —
+    - Lipids — Page: —
+    - Carbohydrates — Page: —
+    - Minerals and Vitamins — Page: —
+      - Calcium and Phosphorus — Page: —
+      - Vitamin D — Page: —
+      - Vitamin E — Page: —
+      - Iron — Page: —
+      - Folic Acid — Page: —
+      - Sodium — Page: —
+  - Feeding Methods — Page: —
+    - Oral Care with Colostrum — Page: —
+    - Gastric Gavage — Page: —
+    - Transpyloric Feeding — Page: —
+    - Nipple Feeding — Page: —
+    - Breastfeeding — Page: —
+    - Tolerance of Feedings — Page: —
+  - Selection of Enteral Feeding — Page: —
+    - Human Milk — Page: —
+    - Donor Human Milk — Page: —
+    - Premature Infant Formulas — Page: —
+    - Transitional Infant Formulas — Page: —
+    - Formula Adjustments — Page: —
+      - Concentration — Page: —
+      - Caloric Supplements — Page: —
+  - Nutrition Assessment and Growth — Page: —
+    - Dietary Intake — Page: —
+    - Laboratory Indices — Page: —
+    - Growth Rates and Growth Charts — Page: —
+  - Discharge Care — Page: —
+  - Neurodevelopmental Outcome — Page: —
+    - Complementary and Integrative Approaches — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**44 Medical Nutrition Therapy for Genetic Metabolic Disorders** — Page: 1007
+  - Key Terms — Page: —
+  - Newborn Screening — Page: —
+  - Disorders of Amino Acid Metabolism — Page: —
+  - Phenylketonuria — Page: —
+    - Etiology — Page: —
+      - Medical Treatment — Page: —
+        - Blood phenylalanine control. — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Formula. — Page: —
+        - Low-phenylalanine foods. — Page: —
+        - Education about therapy management. — Page: —
+        - Psychosocial development. — Page: —
+      - Maternal Phenylketonuria — Page: —
+      - Adults Living With Phenylketonuria — Page: —
+    - Maple Syrup Urine Disease — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Disorders of Organic Acid Metabolism — Page: —
+  - Disorders of Urea Cycle Metabolism — Page: —
+    - Pathophysiology — Page: —
+    - Medical Treatment — Page: —
+    - Medical Nutrition Therapy — Page: —
+      - Protein-Restricted Diets — Page: —
+  - Disorders of Carbohydrate Metabolism — Page: —
+    - Hereditary Fructose Intolerance — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Galactosemia — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Glycogen Storage Diseases — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Disorders of Fatty Acid Oxidation — Page: —
+    - Pathophysiology — Page: —
+    - Medical Nutrition Therapy — Page: —
+  - Role of the Nutritionist in Genetic Metabolic Disorders — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+**45 Medical Nutrition Therapy for Intellectual and Developmental Disabilities** — Page: 1026
+  - Key Terms — Page: —
+  - Medical Nutrition Therapy — Page: —
+    - Nutrition Assessment — Page: —
+      - Anthropometric Measures — Page: —
+      - Biochemical Measures — Page: —
+      - Dietary Intake and Feeding Problems — Page: —
+    - Nutrition Diagnosis — Page: —
+    - Interventions — Page: —
+    - Monitoring and Evaluation — Page: —
+  - Chromosomal Abnormalities — Page: —
+    - Down Syndrome — Page: —
+      - Pathophysiology — Page: —
+      - Medical Treatment — Page: —
+      - Medical Nutrition Therapy — Page: —
+        - Anthropometric measures. — Page: —
+        - Biochemical measures. — Page: —
+        - Dietary intake. — Page: —
+        - Feeding skills. — Page: —
+      - Intervention Strategies — Page: —
+        - Overweight. — Page: —
+        - Eating skills. — Page: —
+        - Constipation. — Page: —
+      - Prader-Willi Syndrome — Page: —
+      - Pathophysiology — Page: —
+        - Metabolic abnormalities. — Page: —
+        - Appetite and obesity. — Page: —
+      - Nutrition Assessment — Page: —
+        - Anthropometric measures. — Page: —
+        - Biochemical measures. — Page: —
+        - Dietary intake. — Page: —
+        - Feeding skills. — Page: —
+      - Intervention Strategies — Page: —
+        - Infancy. — Page: —
+        - Toddler and preschool age. — Page: —
+        - School age. — Page: —
+        - Adulthood. — Page: —
+  - Neurologic Disorders — Page: —
+    - Spina Bifida — Page: —
+      - Pathophysiology — Page: —
+      - Nutrition Assessment — Page: —
+        - Anthropometric measures. — Page: —
+        - Biochemical measures. — Page: —
+        - Dietary intake. — Page: —
+        - Clinical evaluation. — Page: —
+      - Intervention Strategies — Page: —
+    - Cerebral Palsy — Page: —
+      - Pathophysiology — Page: —
+      - Nutrition Assessment — Page: —
+        - Anthropometric measures. — Page: —
+        - Biochemical measures. — Page: —
+        - Dietary intake. — Page: —
+      - Intervention Strategies — Page: —
+    - Autism — Page: —
+      - Pathophysiology — Page: —
+      - Nutrition Assessment — Page: —
+        - Anthropometric measures. — Page: —
+        - Biochemical measures. — Page: —
+        - Dietary intake. — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Attention-Deficit/Hyperactivity Disorder — Page: —
+      - Nutrition Assessment — Page: —
+        - Anthropometric measures. — Page: —
+        - Biochemical measures. — Page: —
+        - Dietary intake. — Page: —
+      - Medical Nutrition Therapy — Page: —
+    - Cleft Lip and Palate — Page: —
+      - Nutrition Assessment — Page: —
+      - Medical Nutrition Therapy — Page: —
+  - Fetal Alcohol Syndrome — Page: —
+    - Nutrition Assessment — Page: —
+    - Medical Nutrition Therapy — Page: —
+    - Complementary and Integrative Medicine in Intellectual and Developmental Disabilities/Autism Spectrum Disorders — Page: —
+      - Nutritional Supplements — Page: —
+      - Special Diets — Page: —
+      - Choosing Complementary and Integrative Medicine Treatments — Page: —
+  - Community Resources — Page: —
+  - Useful Websites — Page: —
+  - References — Page: —
+
+### Back Matter
+
+
+**APPENDIX 1. Milliequivalents and Milligrams of Electrolytes** — Page: 1051
+
+**APPENDIX 2. Equivalents, Conversions** — Page: 1052
+  - Liquid Measure—Volume Equivalents — Page: —
+  - Dry Measure — Page: —
+  - Scoop Sizes — Page: —
+
+**Appendix 3. Growth Charts** — Page: 1053
+  - Prenatal Weight Category Table for Pregnancy Based on BMI (inches and pounds) — Page: —
+  - Prenatal Weight Category Table for Pregnancy Based on BMI (centimeters and kilograms) — Page: —
+
+**APPENDIX 4. Tanner Stages of Adolescent Development for Girls and Boys** — Page: 1064
+  - Tanner Stages of Adolescent Development for Girls — Page: —
+    - Female Breast Development Scale — Page: —
+  - Tanner Stages of Adolescent Development for Boys — Page: —
+    - Male External Genitalia Scale — Page: —
+
+**Appendix 5. Direct Methods for Measuring Height and Weight and Indirect Methods for Measuring Height** — Page: 1065
+  - Direct Methods for Measuring Height and Weight — Page: —
+    - Height — Page: —
+    - Weight — Page: —
+  - Indirect Methods for Measuring Height — Page: —
+    - Measuring Arm Span — Page: —
+      - Steps — Page: —
+    - Adult Recumbent — Page: —
+      - Steps — Page: —
+    - Knee Height — Page: —
+      - Steps — Page: —
+  - References — Page: —
+
+**Appendix 6. Determination of Frame Size** — Page: 1067
+
+**Appendix 7. Adjustment of Desirable Body Weight for Amputees** — Page: 1068
+
+**Appendix 8. Body Mass Index Table** — Page: 1069
+
+**Appendix 9. Percentage of Body Fat Based on Four Skinfold Measurementsa** — Page: 1070
+
+**Appendix 10. Physical Activity and Calories Expended Per Hour** — Page: 1072
+
+**Appendix 11. Nutrition-Focused Physical Assessment** — Page: 1075
+  - Pediatric Malnutrition — Page: —
+  - References — Page: —
+  - References — Page: —
+
+**Appendix 12. Laboratory Values for Nutritional Assessment and Monitoring** — Page: 1084
+  - Principles of nutritional laboratory testing — Page: —
+    - Purpose — Page: —
+    - Specimen Types — Page: —
+    - Interpretation of Laboratory Data — Page: —
+    - Reference Ranges — Page: —
+    - Units — Page: —
+    - Nature of Nutritional Testing and Types of Tests — Page: —
+  - References — Page: —
+
+**Appendix 13. Nutritional Implications of Selected Drugs** — Page: 1105
+  - References — Page: —
+
+**Appendix 14. Nutritional Facts on Fluid and Hydration** — Page: 1116
+
+**Appendix 15. Enteral (Tube Feeding) Formulas for Adults Marketed in the United States** — Page: 1118
+
+**Appendix 16. Sample Stepwise Method to Calculate a Parenteral Nutrition Formula** — Page: 1119
+  - Parenteral Nutrition Formula — Page: —
+
+**Appendix 17. Dietary Approaches to Stop Hypertension Diet** — Page: 1120
+
+**Appendix 18. Exchange Lists and Carbohydrate Counting for Meal Planning** — Page: 1122
+  - How the Exchange List Works with Meal Planning — Page: —
+  - Carbohydrates — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Fruit — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Milk — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Sweets, Desserts, and Other Carbohydrates — Page: —
+    - Common Measurements — Page: —
+      - Dry — Page: —
+      - Liquid — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Nonstarchy Vegetables — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Meat And Meat Substitutes — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Fats — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Free Foods — Page: —
+    - Selection Tips — Page: —
+    - Drinks/Mixes — Page: —
+    - Seasonings — Page: —
+  - Combination Foods — Page: —
+  - Fast Food — Page: —
+  - Alcohol — Page: —
+    - Nutrition Tips — Page: —
+    - Selection Tips — Page: —
+  - Estimated Exchange Recommendations Based on Calorie Level — Page: —
+  - References — Page: —
+
+**Appendix 19. The Ketogenic Diet** — Page: 1135
+  - Suggested Organizations for Additional Information — Page: —
+  - References — Page: —
+
+**Appendix 20. The International Dysphagia Diet Standardisation Initiative** — Page: 1141
+  - Introduction and Background — Page: —
+    - How does the existing classification system under the National Dysphagia Diet (NDD) fit in this framework? — Page: —
+    - Emergence of a New International Dysphagia Diet Standardisation Initiative — Page: —
+  - Development — Page: —
+  - Framework — Page: —
+    - Implementation and Utilization: Where and How Is the IDDSI Being Utilized? — Page: —
+    - Challenges: How Do We Understand Patient Choice Within This Framework? How Do We Implement to Fidelity? How Do We Address E ... — Page: —
+  - Websites Recommended for Additional Research — Page: —
+  - References — Page: —
+
+**Appendix 21. Renal Diet for Dialysis** — Page: 1147
+  - Protein — Page: —
+  - Albumin — Page: —
+  - Protein Servings for You — Page: —
+  - One Serving of Protein — Page: —
+  - Common Serving Sizes — Page: —
+  - Estimating Serving Sizes — Page: —
+  - Tips for Eating More Protein — Page: —
+  - Nutritional Supplements — Page: —
+  - Malnutrition — Page: —
+  - Exercise — Page: —
+  - Potassium for People on Hemodialysis — Page: —
+  - People on Hemodialysis — Page: —
+  - Soaking Vegetables and Beans — Page: —
+  - Other High-Potassium Foods — Page: —
+  - Shaking the Salt Habit — Page: —
+  - Most People on Dialysis May Have — Page: —
+  - Rinsing Canned Foods to Lower Sodium (Canned Vegetables, Chunk or Flaked Fish or Shellfish, Poultry, or Meats) — Page: —
+  - Phosphorus — Page: —
+    - Low-Phosphorus Diet — Page: —
+    - High-Phosphorus Foods — Page: —
+    - Other High-Phosphorus Foods — Page: —
+    - Phosphorus and Potassium — Page: —
+    - Phosphate Binders — Page: —
+    - Lower Phosphorus Ideas — Page: —
+    - High-Phosphorus Levels — Page: —
+
+**Appendix 22. The Antiinflammatory Diet** — Page: 1152
+  - Dietary Approaches to Reduce Inflammation — Page: —
+  - Consume an Abundance of Fruits, Vegetables, Herbs, and Spices — Page: —
+  - Encourage a Low Glycemic Diet Pattern — Page: —
+  - Include Nuts and Seeds or Nut and Seed Butter Every Day — Page: —
+  - Adjust the Quality and Quantity of Dietary Fat and Oils — Page: —
+  - Support a Healthy Microbiome — Page: —
+  - Eliminate Foods that Cause Symptoms of Allergy and Intolerance — Page: —
+  - Avoid Chemicals — Page: —
+  - Drink Alcohol in Moderation — Page: —
+  - Calorie Restriction and Intermittent Fasting — Page: —
+  - Reduce Stress and Improve Sleep — Page: —
+  - Example of an Anti inflammatory 1-Day Diet Based on the Dash, Mind, and Mediterranean Meal Patterns — Page: —
+  - References — Page: —
+
+**Appendix 23. The Mediterranean Diet** — Page: 1156
+  - Significance — Page: —
+    - Common Health Conditions Managed With the Mediterranean Diet — Page: —
+    - Foods and Lifestyle Factors Emphasized — Page: —
+  - Examples of a 1-Day Meal Plan Based on the Mediterranean Diet — Page: —
+  - Information for Further Reading — Page: —
+  - References — Page: —
+
+**Appendix 24. Nutritional Facts on Alcoholic Beverages** — Page: 1158
+  - Alcohol and Calorie Content in Selected Alcoholic Beverages — Page: —
+
+**Appendix 25. Nutritional Facts on Caffeine-Containing Products** — Page: 1160
+
+**Appendix 26. Nutritional Facts on Essential (Omega) Fatty Acids** — Page: 1161
+  - Ω-3 Fatty Acids — Page: —
+  - Ω-6 Fatty Acids — Page: —
+  - Dietary Sources — Page: —
+  - Omega-3 Fatty Acids — Page: —
+
+**Appendix 27. Nutritional Facts on a High-Fiber Diet** — Page: 1164
+  - Guidelines for High-Fiber Diet — Page: —
+  - Each of These Foods in this Amount Contains 2 G of Dietary Fiber — Page: —
+
+**Appendix 28. Low FODMAP Diet** — Page: 1166
+
+**Appendix 29. Glycemic Index and Glycemic Load of Selected Foods** — Page: 1167
+  - References — Page: —
+
+**Appendix 30. Nutritional Facts on a High-Protein Diet** — Page: 1170
+  - Best Food Sources of Protein — Page: —
+  - Protein Supplements — Page: —
+
+**Appendix 31. Nutritional Facts on Vegetarian Eating** — Page: 1171
+  - Nutrients to Consider When Planning a Vegetarian Menu — Page: —
+    - Protein — Page: —
+  - Special Notes — Page: —
+  - References — Page: —
+
+**Appendix 32. Nutritional Facts on Folic Acid, Vitamin B6, and Vitamin B12** — Page: 1174
+  - Folate — Page: —
+    - Recommended Intakes — Page: —
+  - VITAMIN B6 — Page: —
+    - Recommended Intakes — Page: —
+  - Vitamin B12 — Page: —
+  - References — Page: —
+
+**Appendix 33. Nutritional Facts on Choline** — Page: 1178
+  - Groups with Increased Choline Needs — Page: —
+  - Excessive Choline Intake — Page: —
+    - Drug Nutrient Interaction: Methotrexate — Page: —
+  - References — Page: —
+
+**Appendix 34. Nutritional Facts on Biotin** — Page: 1180
+  - References — Page: —
+
+**Appendix 35. Nutritional Facts on Vitamin A and Carotenoids** — Page: 1181
+  - Food Sources of Vitamin A — Page: —
+  - References — Page: —
+
+**Appendix 36. Nutritional Facts on Vitamin C** — Page: 1184
+  - Dietary Supplements — Page: —
+  - References — Page: —
+
+**Appendix 37. Nutritional Facts on Vitamin E** — Page: 1186
+  - References — Page: —
+
+**Appendix 38. Nutritional Facts on Vitamin K** — Page: 1188
+  - References — Page: —
+
+**Appendix 39. Nutritional Facts on Vitamin D** — Page: 1190
+  - Vitamin D Synthesized From Sunlight Exposure — Page: —
+  - Vitamin D in Foods — Page: —
+  - Vitamin D in Supplements — Page: —
+  - References — Page: —
+
+**Appendix 40. Nutritional Facts on Calcium** — Page: 1192
+  - Calcium in Foods — Page: —
+  - Calcium Supplements — Page: —
+  - Calcium in Medications — Page: —
+  - References — Page: —
+
+**Appendix 41. Nutritional Facts on Chromium** — Page: 1195
+  - References — Page: —
+
+**Appendix 42. Nutritional Facts on Iodine** — Page: 1196
+  - Deficiency — Page: —
+  - Goitrogens — Page: —
+  - References — Page: —
+
+**Appendix 43. Nutritional Facts on Iron** — Page: 1198
+  - Tips for Increasing Iron Intake — Page: —
+  - What about too much iron? — Page: —
+  - References — Page: —
+
+**Appendix 44. Nutritional Facts on Magnesium** — Page: 1201
+  - Dietary Sources — Page: —
+  - References — Page: —
+
+**Appendix 45. Nutritional Facts on Potassium** — Page: 1203
+  - References — Page: —
+
+**Appendix 46. Nutritional Facts on Selenium** — Page: 1205
+  - References — Page: —
+
+**Appendix 47. Sodium in Food** — Page: 1206
+  - Special Considerations — Page: —
+  - Guidelines for Sodium Restriction — Page: —
+  - References — Page: —
+
+**Appendix 48. Nutritional Facts on Zinc** — Page: 1208
+  - References — Page: —
+
+**Appendix 49. Dietary Reference Intakes (DRIs): Recommended Dietary Allowances and Adequate Intakes, Vitamins [title truncated to "Appendix" in the source PDF bookmark; verified from the actual page heading]** — Page: 1210
+
+**Appendix 50. Dietary Reference Intakes (DRIs): Tolerable Upper Intake Levels, Elements [title truncated to "Appendix" in the source PDF bookmark; verified from the actual page heading]** — Page: 1214
+
+## Extraction QA
+
+- **TOC pages inspected:** Full PDF bookmark/outline tree (2,772 raw nodes) walked programmatically; cross-checked against the printed "Contents" page (PDF p. 13) and against direct text extraction of numerous chapter- and appendix-opening pages to verify titles, edition, and year
+- **Total Parts:** 0 (no Part-level grouping — chapters run directly 1–45, followed by 50 appendices)
+- **Total Chapters:** 45
+- **Total Appendices:** 50 (48 cleanly bookmarked as "Appendix N. Title," plus 2 with a truncated bookmark title — see discrepancy note 4 above — restored here as Appendix 49 and Appendix 50 with their verified subject line)
+- **Total TOC entries:** 2,673 (3 front matter + 45 chapters + 2,394 chapter sections/subsections + 50 appendices + 181 appendix sections/subsections)
+- **Page numbers captured:** Partial — every chapter and appendix has a real, verified page number (taken directly from the PDF's own bookmark destinations). No page numbers are available below that level (sections, subsections, and deeper) because those bookmark destinations are broken/empty in this specific PDF export; those entries are marked "Page: —" rather than invented, per instructions
+- **Potential OCR issues:** None — this is a born-digital, text-layer PDF (not a scan); the only quality issue found is the broken destinations and two truncated titles described above, both of which are source-file defects rather than OCR problems
+- **Potential missing entries:** None identified — the bookmark tree was walked programmatically in full (not manually transcribed), so no chapter, appendix, or subsection was skipped; chapter numbering runs consecutively 1–45 with no gaps, and appendix numbering runs consecutively 1–50 with no gaps
+- **Edition verified:** Yes (16th Edition, confirmed on both the copyright page and in the Preface); publication-year discrepancy between filename (2022) and copyright page (2023) is flagged above

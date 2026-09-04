@@ -24,3 +24,17 @@ deno.lock
 .serena/project.local.yml
 .vercel
 .env*
+
+# ---------------------------------------------------------------------------
+# Nutrition Curriculum project (nutrition-curriculum/)
+# ---------------------------------------------------------------------------
+# Original source textbooks (PDF/EPUB) -- copyrighted commercial books, not
+# this project's own output. Kept on disk for reference, never versioned.
+nutrition-curriculum/01_SOURCE_BOOKS/
+
+# Common temporary/system files
+*.tmp
+*.temp
+*.log
+.DS_Store
+Thumbs.db
