@@ -68,6 +68,11 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
         href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
         badge: "Endotext",
       },
+      {
+        label: "Hector & Phillips (2018): protein during energy restriction",
+        href: "https://pubmed.ncbi.nlm.nih.gov/29182451/",
+        badge: "Hector 2018",
+      },
     ],
   },
   {
@@ -355,8 +360,9 @@ export function PersonalPlanView({ userId }: Props) {
                 </span>{" "}
                 hedef kaloriye göre DRI aralıklarından türetilir — yağ
                 hedefin %20-35'i, karbonhidrat %45-65'i, protein kilo başına
-                1.2-1.6g (aktif/çok aktif ya da kilo alma hedefinde üst uç),
-                lif her 1000 kcal için ~14g.
+                1.2g (temel), 1.6g (aktif/çok aktif ya da kilo alma
+                hedefinde) veya 2.0g (kilo verme hedefinde, kas kütlesini
+                korumak için), lif her 1000 kcal için ~14g.
               </li>
             </ul>
             <p>
