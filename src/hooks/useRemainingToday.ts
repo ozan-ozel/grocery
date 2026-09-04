@@ -1,8 +1,8 @@
-import { useMealPersonalization } from "./useMealPersonalization";
+import { useMealPersonalization, DEFAULT_PROFILE } from "./useMealPersonalization";
 import { todayDateStr, useMealPlan } from "./useMealPlan";
 import { useFoodCatalog } from "./useFoodCatalog";
 import type { MacroTotals } from "@/lib/mealNutrition";
-import type { PersonalTargets } from "@/lib/mealPersonalization";
+import { calculateTargets, type PersonalTargets } from "@/lib/mealPersonalization";
 import type { NutritionMap } from "@/lib/nutrition";
 import type { MealItem, MealSlot } from "@/lib/localMealPlan";
 
@@ -11,12 +11,6 @@ import type { MealItem, MealSlot } from "@/lib/localMealPlan";
 export type LoggedEntry = { id: string; slot: MealSlot };
 
 export type RemainingToday =
-  | {
-      status: "no-profile";
-      catalogMap: NutritionMap;
-      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
-      undoConsumption: (entries: LoggedEntry[]) => void;
-    }
   // Without the catalog every combo's totals lookup fails and matchCombos
   // returns [] — indistinguishable from an honest "nothing fits your budget"
   // unless the loading/error state is carried through to the view.
@@ -35,6 +29,11 @@ export type RemainingToday =
       target: MacroTotals;
       consumed: MacroTotals;
       remaining: MacroTotals;
+      // True when there's no real saved profile — target is computed off
+      // DEFAULT_PROFILE (or a real-but-invalid profile fell back the same
+      // way). TodayView shows a "Tahmini" tag when this is true instead of
+      // blocking the screen the way the old "no-profile" status did.
+      isEstimated: boolean;
       excludedFoodIds: string[];
       catalogMap: NutritionMap;
       // Every ingredient logged today, slot attached — TodayView groups
@@ -106,11 +105,11 @@ export function useRemainingToday(
     for (const entry of entries) removeItem(entry.slot, entry.id);
   }
 
-  // `targets` alone can't answer this: calculateTargets(DEFAULT_PROFILE)
-  // returns valid numbers for a body nobody entered.
-  if (!hasSavedProfile || !targets) {
-    return { status: "no-profile", catalogMap, logConsumption, undoConsumption };
-  }
+  // A real profile that somehow fails validation (targets === null) is
+  // treated the same as no profile at all — both fall back to
+  // DEFAULT_PROFILE's guaranteed-valid numbers, tagged as estimated.
+  const isEstimated = !hasSavedProfile || !targets;
+  const effectiveTargets = targets ?? calculateTargets(DEFAULT_PROFILE)!;
 
   if (catalogStatus === "error") {
     return { status: "catalog-error", logConsumption, undoConsumption };
@@ -125,7 +124,7 @@ export function useRemainingToday(
     return { status: "loading-catalog", logConsumption, undoConsumption };
   }
 
-  const target = targetToMacros(targets);
+  const target = targetToMacros(effectiveTargets);
   const consumed = dailyNutrition();
   const remaining = subtractMacros(target, consumed);
 
@@ -134,6 +133,7 @@ export function useRemainingToday(
     target,
     consumed,
     remaining,
+    isEstimated,
     excludedFoodIds: profile.excludedFoodIds,
     catalogMap,
     todaysItems: allItems(),

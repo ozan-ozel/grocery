@@ -10,7 +10,7 @@ import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
-import { useUiPrefs, type Tab } from "@/hooks/useUiPrefs";
+import { useUiPrefs, type Tab, type Section } from "@/hooks/useUiPrefs";
 import { useTenants } from "@/hooks/useTenants";
 import { useListSync } from "@/hooks/useListSync";
 import { useRollover } from "@/hooks/useRollover";
@@ -19,6 +19,9 @@ import { useCategoryOverlay } from "@/hooks/useCategoryOverlay";
 import { useItemCategories } from "@/hooks/useItemCategories";
 import { useSelection } from "@/hooks/useSelection";
 import { useAuth } from "@/hooks/useAuth";
+import { useMealPersonalization } from "@/hooks/useMealPersonalization";
+import { useOnboarding } from "@/hooks/useOnboarding";
+import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
 
 export function App() {
   const { session, checked, signInWithGoogle, signOut } = useAuth();
@@ -182,12 +185,25 @@ function AppShell({
   const { itemCategories, rememberCategory } =
     useItemCategories(activeTenantId);
 
+  const personalization = useMealPersonalization(currentUserId);
+  const onboarding = useOnboarding(currentUserId, personalization.hasSavedProfile);
+
   const catalog = useMemo(
     () => buildCatalog(state?.lists ?? []),
     [state?.lists],
   );
 
   const selection = useSelection(state?.activeId ?? undefined);
+
+  // While onboarding is showing, any section pill tap is treated as if the
+  // user had tapped "Atla" — it's a clearer read of intent than leaving the
+  // pill silently inert, and the wizard would otherwise sit above app chrome
+  // that looks interactive but does nothing (see Finding 3 of the
+  // 2026-09-03 final review).
+  function selectSection(next: Section) {
+    if (onboarding.status === "unseen") onboarding.skip();
+    setSection(next);
+  }
 
   if (!tenants || !activeTenantId || !state) {
     return <AppBootSkeleton />;
@@ -245,7 +261,7 @@ function AppShell({
         theme={theme}
         onSelectTheme={setTheme}
         section={section}
-        onSelectSection={setSection}
+        onSelectSection={selectSection}
         active={active}
         onRenameActive={renameActive}
         onStartNewList={startNewList}
@@ -256,7 +272,20 @@ function AppShell({
         className="pt-5"
         onTouchStart={swipeTabs.onTouchStart as never}
         onTouchEnd={swipeTabs.onTouchEnd as never}>
-        {section === "besin" ? (
+        {onboarding.status === "unseen" && personalization.remoteChecked ? (
+          <OnboardingQuickSetup
+            initialProfile={personalization.profile}
+            onFinish={(answers) => {
+              personalization.update("ageYears", answers.ageYears);
+              personalization.update("heightCm", answers.heightCm);
+              personalization.update("weightKg", answers.weightKg);
+              personalization.setEquationSex(answers.equationSex);
+              personalization.setActivity(answers.activity);
+              personalization.setGoal(answers.goal);
+            }}
+            onSkip={onboarding.skip}
+          />
+        ) : section === "besin" ? (
           <NutritionView items={active.items} />
         ) : section === "yemek" ? (
           <MealPlanView householdId={activeTenantId} />

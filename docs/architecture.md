@@ -26,6 +26,7 @@ mostly presentational. Persistence is split across several independent layers wi
 | Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1`                                                                | device            | no                                                   |
 | Item name → category memory                    | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant        | yes, via `netlify/functions/item-category-memory.ts` |
 | UI prefs (theme, swipe mode)                   | `grocery.theme.v1`, `grocery.swipeMode.v1`                                             | device            | no                                                   |
+| Onboarding quick-setup seen?                   | `grocery.onboarding.v1:<userId>`                                                        | device             | no                                                    |
 
 Category customization stays device-local even though it's keyed by tenant. Item category memory
 now syncs across devices for the same tenant (NUT-13): the local cache paints instantly, then a
