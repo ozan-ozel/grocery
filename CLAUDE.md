@@ -22,6 +22,17 @@ this project is. This file is a router and behavior layer, not the architecture 
   (e.g. the nutrition view). Historical rationale; check each spec's own status note before
   trusting implementation details as current.
 
+## Session continuity
+
+- `docs/SESSION_CHECKPOINT.md` is the single active project checkpoint. It records the current
+  state and what the next agent needs to continue.
+- Historical session logs belong outside the repository in `~/vault/grocery/logs/` and are written
+  only for meaningful session history, not every conversation.
+- Project-specific durable architecture notes belong in `~/vault/grocery/architecture/`.
+- Cross-project durable knowledge belongs in `~/vault/permanent/`.
+- The Vault is outside the repository and must not be committed to Git. The repository remains the
+  source of truth for source code and project files.
+
 ## Git shorthand
 
 - **Start every piece of coding work on a new local branch, before writing any code** — not just
@@ -66,9 +77,11 @@ All backend logic lives under `netlify/functions/*` — a former `functions/api/
 path was retired (see git history / `docs/roadmap.md`); Netlify is what's actually deployed.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
+
 ```bash
 node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.ts
 ```
+
 Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (see `.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`.
 
@@ -84,6 +97,7 @@ git+https://github.com/oraios/serena serena ...` fetches Serena into the uv cach
 install manually.
 
 Files in this repo:
+
 - `.mcp.json` — MCP server registration, uses `"."` for the project path so it works from any
   checkout location.
 - `.serena/project.yml` — checked-in project config (language server: typescript, etc.).

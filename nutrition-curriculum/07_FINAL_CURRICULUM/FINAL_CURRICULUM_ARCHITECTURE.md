@@ -86,7 +86,7 @@ Per Gate 4 decisions #3/#4. Internal order below was checked against every `TOPI
 
 Per Gate 4 decisions #2, #5–#12. Organized into branches, in teaching-sequence order.
 
-### 4a. Requirements Cluster (8 topics)
+### 4a. Requirements Cluster (11 topics: 7 taught + 4 reference-only)
 
 `CHO-04`, `LIP-05`, `PRO-04`, `PRO-05` (extends `PRO-04`, `STRONGLY_RECOMMENDED`), `VIT-03`, `MIN-03`
 (both need `DRV-01`, Act 1, `REQUIRED`), `BODY-05` (applied weight-management/treatment
@@ -102,7 +102,7 @@ designation, ratified — Gate 4 decision #11).
 cluster is the `REQUIRED` prerequisite gateway into the Clinical branch (4c) and feeds `PUBHEALTH-02`
 (4f) and `SPECIAL-03` (4c's Layer 4 cluster).
 
-### 4c. Clinical Branch (27 CLIN topics + 5 cross-cutting Layer-4 topics)
+### 4c. Clinical Branch (31 topics: 27 CLIN + 3 SPECIAL Layer-4 additions + `GI-05`; `LIFE-07` cross-referenced, counted under Life Stages, §4e)
 
 Per Gate 4 decisions #7/#8/#14 — **curriculum-scope decisions only; `DEC-099`/`DEC-100`'s application-
 scope boundary is untouched and not implied by anything below.**
@@ -122,18 +122,23 @@ scope boundary is untouched and not implied by anything below.**
    curriculum places `SPECIAL-04` as CORE (via Layer 4), consistent with, not caused by, that override.
 3. **Layer 5 — general-practice tier, CORE** (14 topics — the corrected 24-topic Layer 5 minus its
    10-topic Layer-6 subset, per the Gate 1 decision record's validated 24/14 figures): `CLIN-03, 04, 05,
-   06, 07, 08, 09, 10, 11, 12, 13, 14, 20, 24`. Cross-reference: `GI-05` (Act 2's `GI-01/02` feed both
-   `CLIN-04`/`05` directly, `REQUIRED`); `MET-09`/`LIP-04` (Act 2) feed `CLIN-10` (`REQUIRED`); `MET-10`
-   (Act 2) feeds `CLIN-07` (`REQUIRED`); `MIN-02`/`VIT-02` (Act 1) feed `CLIN-09` (`REQUIRED`).
+   06, 07, 08, 09, 10, 11, 12, 13, 14, 20, 24`. **`GI-05`** (Gastrointestinal Disorders, Clinical — a
+   cross-reference-only topic per its own definition in `MASTER_TOPIC_UNIVERSE.md`, pointing to
+   `CLIN-04`/`05`) is explicitly placed and taught here, alongside `CLIN-04`/`05`, not separately — this
+   is the one Level-1 `GI`-domain topic not already placed in Act 2 or §4i. Prerequisite notes: Act 2's
+   `GI-01/02` feed `CLIN-04`/`05` directly (`REQUIRED`); `MET-09`/`LIP-04` (Act 2) feed `CLIN-10`
+   (`REQUIRED`); `MET-10` (Act 2) feeds `CLIN-07` (`REQUIRED`); `MIN-02`/`VIT-02` (Act 1) feed `CLIN-09`
+   (`REQUIRED`).
 4. **Layer 6 — SPECIALIZED tier, ELECTIVE/ADVANCED module** (10 topics, taught after the CORE sequence,
    for students continuing toward a clinical-dietetics track): `CLIN-15, 16, 17, 18, 19, 21, 22, 23, 25,
    27`. `LIFE-07` (a cross-reference to `CLIN-27` per its own definition in `MASTER_TOPIC_UNIVERSE.md`)
-   is taught here, not separately.
+   is taught here, not separately — for topic-count purposes it is tallied under the Life Stages branch
+   (§4e), which owns all 8 `LIFE`-domain topics, not re-counted here.
 
 **Explicit, per Gate 4 decision #14:** none of the above resolves which conditions the *application*
 supports. `DEC-099`/`DEC-100` remain exactly as scope-pending as at Gates 1–3.
 
-### 4d. Sport Branch (21 topics)
+### 4d. Sport Branch (19 topics: 10 `SPORT`-domain + `CHO-05`/`LIP-06`/`PRO-06`/`FLU-04`/`FLU-05`/`GI-04`/`VIT-04`/`MIN-04`/`BODY-07`; `LIFE-08` cross-referenced, counted under Life Stages, §4e)
 
 Per Gate 4 decision #2 — **topic-by-topic role assignment**, reusing `SPORT_NUTRITION_ARCHITECTURE.md`'s
 own working table verbatim (not re-derived):
@@ -156,17 +161,21 @@ Plus the practical/applied macronutrient-and-exercise topics (deferred from Act 
 micronutrients: `VIT-04`, `MIN-04` (both need Act 1's `VIT-01/02`/`MIN-01/02`, `REQUIRED`); athlete
 body-composition/weight-management application: `BODY-07` (needs `BODY-01`/`BODY-03`, Act 2,
 `STRONGLY_RECOMMENDED` — the athlete-specific counterpart to `BODY-05`, §4a).
-`LIFE-08` (cross-reference to `SPORT-09`) taught here, not separately.
+`LIFE-08` (cross-reference to `SPORT-09`) taught here, not separately — tallied under Life Stages (§4e)
+for topic-count purposes, not re-counted here.
 
 **`SPORT-11` is deliberately not in this branch** — see §4h.
 
-### 4e. Life Stages Branch (7 taught topics + 1 integrated)
+### 4e. Life Stages Branch (8 topics — all of the `LIFE` domain: 6 taught/integrated directly, 2 taught via cross-reference elsewhere)
 
 `LIFE-01, 02, 03, 04, 06` in natural life-course order (`HELPFUL`-only internal edges — pedagogical
 convenience, not a hard dependency). `LIFE-05` (Adulthood) is **not** a standalone unit per Gate 4
 decision #12 — its content is integrated as a brief bridging note between `LIFE-04` and `LIFE-06`,
 cross-referencing general `NUT`/`BODY` content already taught. Topic ID and provenance retained; no
-deletion.
+deletion. `LIFE-07` (= `CLIN-27`) is taught within the Clinical Layer-6 module, §4c; `LIFE-08` (=
+`SPORT-09`) is taught within the Sport branch, §4d — both per their own cross-reference-only definitions
+in `MASTER_TOPIC_UNIVERSE.md`, both counted here (this branch) for the domain's total of 8, not taught
+as separate lessons in their respective branches.
 
 ### 4f. Public Health Branch (6 topics)
 
@@ -260,6 +269,20 @@ reinforcement map, but had been omitted from the actual §4a/§4d topic lists in
 added (§4a, §4d) before this validation section was finalized — recorded here for transparency rather
 than silently corrected without a trace.
 
+**A second, independent self-audit pass** (performed after Gate 4's approval, before closing Phase 6)
+re-derived every branch's topic count directly from its own listed topics, rather than trusting the
+section headers as originally written, and found three branch **headers** (not topic placements) were
+miscounted or ambiguous: §4a stated "8 topics" for a set that is actually 11 (7 taught + 4 reference,
+the 4 `DRV` reference topics having been left out of the header's own arithmetic); §4c stated "27 CLIN
+topics + 5 cross-cutting Layer-4 topics" — double-counting `CLIN-02`/`CLIN-26` (already inside "27")
+against the "5," and omitting `GI-05` and `LIFE-07` entirely from the count despite both being named in
+the section's own prose; §4d stated "21 topics" for a set that is actually 19, and likewise omitted
+`LIFE-08` from its count despite naming it. **No topic was moved between Acts or branches — every fix
+was to a header's own arithmetic or to make an already-intended cross-reference placement explicit in
+the count, not a change to which branch teaches which topic.** All headers now correctly total 99 for
+Act 3 (4a=11, 4b=6, 4c=31, 4d=19, 4e=8, 4f=6, 4g=9, 4h=8, 4i=1; 11+6+31+19+8+6+9+8+1=99), independently
+re-verified by direct addition, not assumed.
+
 ### 6.2 Prerequisite Graph (`TOPIC_PREREQUISITES.md`, 86 edges)
 
 Every `REQUIRED` edge (35 total) was checked against this architecture's Act/sequence placement — see
@@ -336,11 +359,40 @@ deletions — both retain their IDs and provenance in `MASTER_TOPIC_UNIVERSE.md`
   must not be confused with this curriculum's pedagogical sequencing, per `PROJECT_AI_PROTOCOL.md`
   §15/§28's premature-implementation rule, unaffected by anything in this document.
 
+**Post-Gate-4-approval closure self-audit** (performed per explicit instruction, after the human's
+approval, before formally closing Phase 6): checked specifically for missing/duplicated topic
+placements, prerequisite violations, learning-level contradictions, core/elective contradictions,
+sport/research/clinical branch inconsistencies, conflicts with Phase 3–5 findings, stable-ID integrity,
+and governance/provenance violations.
+
+- **Missing/duplicated placements:** a genuine issue was found and fixed (§6.1's second note) — three
+  branch-header counts (§4a, §4c, §4d) undercounted or double-counted their own listed topics; no topic
+  was actually missing from or duplicated across the architecture itself, only mislabeled in three
+  headers. Re-verified by direct re-summation (99, matching Act 3's stated total) and by re-running the
+  same programmatic cross-reference script used at initial validation.
+- **Prerequisite violations:** none found on re-check — §6.2's edge-by-edge validation is unaffected by
+  the header-count fixes (no topic moved between Acts).
+- **Learning-level contradictions:** none found.
+- **Core/elective contradictions:** none found — the header fixes did not reclassify any topic; `GI-05`,
+  `LIFE-07`, and `LIFE-08` were always intended as taught-via-cross-reference (stated in the original
+  prose), only their branch-count tallies were incomplete.
+- **Sport/research/clinical branch inconsistencies:** this is exactly what the header-count audit caught
+  (§6.1) — now corrected and re-verified.
+- **Conflicts with Phase 3–5 findings:** none found; unaffected by the header fixes.
+- **Stable-ID integrity:** confirmed intact — no ID was renamed, merged, split, or deleted by these
+  fixes, which touched only header arithmetic and clarifying prose.
+- **Governance/provenance violations:** none found — `DEC-099`/`DEC-100` remain untouched; no Phase 1–5
+  source document was modified by this audit pass; the three previously-flagged bookkeeping/citation
+  discrepancies remain flagged, not fixed.
+
 ---
 
 ## 8. Status
 
-Phase 6's final curriculum architecture is built and validated against all seven required cross-checks
-(§6). `DEC-099`/`DEC-100` remain scope-pending; three bookkeeping/citation discrepancies remain flagged;
-eight Phase 5 recommendations remain recommendations; no Phase 1–5 source document was modified; no
-topic ID was changed. See `AI_SESSION_STATE.md` for the Gate 4 completion package and next action.
+**CLOSED.** Gate 4 was approved by the human (`DECISIONS/2026-09-06-gate-4-approval-phase-6-closure.md`).
+Phase 6's final curriculum architecture is built, validated against all seven required cross-checks
+(§6), and has passed a second, post-approval closure self-audit (above) that caught and corrected three
+branch-header miscounts (no topic reclassified). `DEC-099`/`DEC-100` remain scope-pending; three
+bookkeeping/citation discrepancies remain flagged; eight Phase 5 recommendations remain recommendations;
+no Phase 1–5 source document was modified; no topic ID was changed. Phase 7 (Decision Engine
+Specification) is authorized. See `AI_SESSION_STATE.md` for the exact Phase 7 starting point.
