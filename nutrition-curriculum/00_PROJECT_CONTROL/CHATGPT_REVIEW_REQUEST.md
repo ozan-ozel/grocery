@@ -84,4 +84,5 @@ parameters).
 ---
 
 *This file is a placeholder while no gate is open. It will be replaced in full when a genuine review
-gate next opens. Execution state lives in `AI_SESSION_STATE.md`; phase status in `PROJECT_STATUS.md`.*
+gate next opens. Execution state lives in the session checkpoint (`docs/SESSION_CHECKPOINT.md`); phase
+status in `PROJECT_STATUS.md`.*
