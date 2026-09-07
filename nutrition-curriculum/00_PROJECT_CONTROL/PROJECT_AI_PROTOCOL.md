@@ -1613,9 +1613,17 @@ That is the governing philosophy of Grocery.
 *(Added as a purely additive extension of this protocol. Nothing above this section was rewritten or
 renumbered to add it. §43 CURRENT STATE and §44 IMMEDIATE TASK, above, are a snapshot frozen at the
 moment this protocol was first adopted — they are not live-updated and must not be read as current.
-From this point forward, live execution state lives in `AI_SESSION_STATE.md`, and live phase/project
-status lives in `PROJECT_STATUS.md`. This section governs how the two are kept honest across sessions
-that share no conversation history.)*
+From this point forward, live execution state lives in the project's session checkpoint,
+`docs/SESSION_CHECKPOINT.md`, and live phase/project status lives in `PROJECT_STATUS.md`. This section
+governs how the two are kept honest across sessions that share no conversation history.)*
+
+*(Amended 2026-09-07: this mechanism originally used a dedicated `AI_SESSION_STATE.md` control file in
+this directory. That file was retired and deleted; session continuity is now maintained through the
+project's existing session-log/checkpoint mechanism — the single active checkpoint
+`docs/SESSION_CHECKPOINT.md`, with historical logs in `~/vault/grocery/logs/`, as defined by `CLAUDE.md`
+and the `checkpoint-user` / `session-log` skills. Every rule in §48 below is otherwise unchanged and now
+applies to that checkpoint. The project must have exactly one session-continuity artifact — do not
+reintroduce a separate state file under any name.)*
 
 ## 48.1 Purpose
 
@@ -1630,12 +1638,14 @@ execution stands and what to do next.
 PROJECT_AI_PROTOCOL.md      = persistent operating rules (this file). Changes rarely.
 PROJECT_STATUS.md           = project-level phase/status information. Changes at phase boundaries
                                and major milestones.
-AI_SESSION_STATE.md         = agent-level execution checkpoint. Changes frequently, during active work.
+docs/SESSION_CHECKPOINT.md  = the session checkpoint: agent-level execution state. Changes frequently,
+                               during active work. Repository-root path, shared with the whole project;
+                               historical logs live outside the repo in ~/vault/grocery/logs/.
 CHATGPT_REVIEW_REQUEST.md   = the current external decision request, present only while a Review Gate
                                is open. Absent when no gate is currently awaiting a decision.
 ```
 
-`AI_SESSION_STATE.md` must never be used as a substitute for `PROJECT_STATUS.md`, and never overrides
+The session checkpoint must never be used as a substitute for `PROJECT_STATUS.md`, and never overrides
 project governance, human decisions, source-book evidence, stable IDs, or finalized phase outputs. If
 the session state ever conflicts with one of those authoritative sources, **the authoritative source
 wins** — see §48.6.
@@ -1646,9 +1656,9 @@ At the beginning of every session, before doing any project work:
 
 1. Read `PROJECT_AI_PROTOCOL.md` (this file).
 2. Read `PROJECT_STATUS.md`.
-3. Read `00_PROJECT_CONTROL/AI_SESSION_STATE.md`.
-4. Inspect the repository's actual current state (the relevant phase directory, the files
-   `AI_SESSION_STATE.md` names as in-progress or recently touched).
+3. Read `docs/SESSION_CHECKPOINT.md`.
+4. Inspect the repository's actual current state (the relevant phase directory, the files the
+   checkpoint names as in-progress or recently touched).
 5. Compare the recorded session state against what the repository actually shows.
 6. Recover the correct execution position from that comparison, not from assumption.
 7. Continue from the recorded checkpoint's `Next Action` — do not restart completed work, and do not
@@ -1656,7 +1666,7 @@ At the beginning of every session, before doing any project work:
 
 ## 48.4 Update Triggers During Autonomous Execution
 
-`AI_SESSION_STATE.md` must be updated — not merely at the end of a phase —:
+The session checkpoint must be updated — not merely at the end of a phase —:
 
 - after every major milestone,
 - after completing a substantial unit of work,
@@ -1682,34 +1692,35 @@ existing gate rules, which this mechanism does not alter or relax.
 
 ## 48.6 Recovery Rules
 
-**If a session starts and `AI_SESSION_STATE.md` says `STATUS: IN_PROGRESS`:** do not restart the phase.
+**If a session starts and the checkpoint says `STATUS: IN_PROGRESS`:** do not restart the phase.
 Verify the recorded checkpoint against the repository, determine whether it is still valid, and resume
 from the recorded `Next Action`. If the checkpoint conflicts with the actual repository state: do not
 guess — inspect the relevant files and Git state, determine which is authoritative per §3's source-of-
 truth hierarchy, repair the checkpoint if the correct state is unambiguous, otherwise escalate (report
 the conflict rather than silently picking one side).
 
-**If the previous session ended without a final status update (crash/interruption):** treat
-`AI_SESSION_STATE.md` as the last known checkpoint, not as ground truth. Inspect the actual repository
+**If the previous session ended without a final status update (crash/interruption):** treat the
+checkpoint as the last known state, not as ground truth. Inspect the actual repository
 state, identify partially completed work, and validate before continuing — never assume an unfinished
 operation completed successfully. If the discrepancy cannot be resolved unambiguously, set
 `STATUS: RECOVERY_REQUIRED` and resolve it before continuing any further work.
 
-**If `AI_SESSION_STATE.md` says `STATUS: WAITING_FOR_REVIEW`:** do not continue past that Review Gate
+**If the checkpoint says `STATUS: WAITING_FOR_REVIEW`:** do not continue past that Review Gate
 under any circumstance. Read `00_PROJECT_CONTROL/CHATGPT_REVIEW_REQUEST.md` and wait. Once a decision is
 supplied: (1) record the decision in the appropriate project decision document (`00_PROJECT_CONTROL/
-DECISIONS/`); (2) update `AI_SESSION_STATE.md` to reflect it; (3) validate the affected documents;
+DECISIONS/`); (2) update the checkpoint to reflect it; (3) validate the affected documents;
 (4) set `STATUS: IN_PROGRESS`; (5) resume from the exact recorded resume point.
 
 ## 48.7 Phase Completion
 
-When a phase is genuinely complete: update `AI_SESSION_STATE.md`, update `PROJECT_STATUS.md`, record
+When a phase is genuinely complete: update the checkpoint, update `PROJECT_STATUS.md`, record
 the next authorized phase, preserve every unresolved human decision exactly as unresolved, then proceed
 autonomously only if the protocol/gate rules in effect at that time allow it.
 
 ## 48.8 State Machine
 
-Exactly these six execution states, used consistently, with no ad hoc additions:
+Exactly these six execution states, used consistently, with no ad hoc additions. The current state is
+recorded in the checkpoint's `Current State` section:
 
 ```text
 READY               — checkpoint recorded, no work currently active
@@ -1722,7 +1733,7 @@ COMPLETED            — the project (or a terminal unit of work) is finished
 
 ## 48.9 Deterministic Resume Requirement
 
-The `Next Action` field in `AI_SESSION_STATE.md` must be concrete enough that a fresh session can act
+The checkpoint's next-step entries must be concrete enough that a fresh session can act
 on it without asking what was happening. Avoid vague entries ("continue analysis," "keep working,"
 "finish Phase 4"). Prefer exact document, exact section/range, exact unfinished operation, relevant
 source documents, and known constraints — e.g. *"Continue mapping DEC-038 through DEC-052 in
@@ -1731,7 +1742,7 @@ DEC-001–037 unless validation reveals a contradiction."*
 
 ## 48.10 Non-Source-of-Truth Constraint
 
-`AI_SESSION_STATE.md` records execution state only. It must never override human decisions, project
+The session checkpoint records execution state only. It must never override human decisions, project
 governance, source-book evidence, stable IDs, finalized phase outputs, or `PROJECT_STATUS.md`. Where
 the two files might seem to disagree, `PROJECT_STATUS.md` is authoritative for phase/project status,
-and `AI_SESSION_STATE.md` is authoritative only for exactly where execution paused and what to do next.
+and the checkpoint is authoritative only for exactly where execution paused and what to do next.

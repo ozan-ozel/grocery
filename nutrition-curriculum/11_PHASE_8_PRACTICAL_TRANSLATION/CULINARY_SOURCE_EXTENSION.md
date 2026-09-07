@@ -2,8 +2,8 @@
 
 **Phase:** 8 (Practical Translation)
 **Authorized by:** Gate 6, 2026-09-07 — `DECISIONS/2026-09-07-gate-6-culinary-corpus-extension.md`
-**Status:** Steps 1–3 of the Gate 6 twelve-step sequence **COMPLETE**. Steps 4–7 **BLOCKED on source
-acquisition** (§7).
+**Status:** All twelve steps of the Gate 6 sequence **COMPLETE**. Phase 8 is **CLOSED** after the actual
+On Cooking 7e source inspection and the formal closure audit.
 **Scope of this document:** selection criteria, the complementarity baseline they are measured against,
 candidate assessment, the selection itself, and the formal extension record.
 
@@ -35,16 +35,16 @@ dietary treatment recipes · arbitrary food-processing recommendations.
 Derived from Gate 6 §1 (the eleven capabilities), §1's complementarity constraint, and §10's exclusions.
 Stated as **testable** criteria so the selection can be audited rather than taken on trust.
 
-| # | Criterion | Type |
-|---|---|---|
-| **C1** | **Substantive reference, not a recipe collection.** Must teach *principles* — why a preparation works — not merely enumerate dishes. Gate 6: *"Do NOT select a generic recipe collection merely because it contains many recipes."* | Disqualifying |
-| **C2** | **Covers the eleven capabilities** of Gate 6 §1, or a documented majority of them, with the absent ones named rather than glossed. | Scored |
-| **C3** | **Complements rather than duplicates** the existing corpus (§3 is the baseline this is measured against). A text organized around macronutrient *chemistry* largely re-covers HM4/BENDER3 and scores poorly here. | Disqualifying if duplicative |
-| **C4** | **Compatible academic register.** Peer-reviewed or established textbook standing, comparable to KM16/SN4 — so that provenance chains (`DEC-107`) remain uniform across the corpus. | Disqualifying |
-| **C5** | **Does not import §10's forbidden scope** as its organizing frame. A professional culinary-arts or restaurant-operations text fails here *even if* its capability coverage is excellent. | Disqualifying |
-| **C6** | **Written for, or compatible with, a nutrition/dietetics audience** — so preparation knowledge attaches to the existing nutrition decision model instead of sitting beside it. | Scored |
-| **C7** | **Addresses nutrient fate during preparation** — the single capability that bridges culinary knowledge back to the nutrition corpus, and the one this project needs most (`DEC-069`). | Scored, high weight |
-| **C8** | **One source only.** The extension is bounded at exactly one book. | Structural |
+| #      | Criterion                                                                                                                                                                                                                           | Type                         |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------- |
+| **C1** | **Substantive reference, not a recipe collection.** Must teach _principles_ — why a preparation works — not merely enumerate dishes. Gate 6: _"Do NOT select a generic recipe collection merely because it contains many recipes."_ | Disqualifying                |
+| **C2** | **Covers the eleven capabilities** of Gate 6 §1, or a documented majority of them, with the absent ones named rather than glossed.                                                                                                  | Scored                       |
+| **C3** | **Complements rather than duplicates** the existing corpus (§3 is the baseline this is measured against). A text organized around macronutrient _chemistry_ largely re-covers HM4/BENDER3 and scores poorly here.                   | Disqualifying if duplicative |
+| **C4** | **Compatible academic register.** Peer-reviewed or established textbook standing, comparable to KM16/SN4 — so that provenance chains (`DEC-107`) remain uniform across the corpus.                                                  | Disqualifying                |
+| **C5** | **Does not import §10's forbidden scope** as its organizing frame. A professional culinary-arts or restaurant-operations text fails here _even if_ its capability coverage is excellent.                                            | Disqualifying                |
+| **C6** | **Written for, or compatible with, a nutrition/dietetics audience** — so preparation knowledge attaches to the existing nutrition decision model instead of sitting beside it.                                                      | Scored                       |
+| **C7** | **Addresses nutrient fate during preparation** — the single capability that bridges culinary knowledge back to the nutrition corpus, and the one this project needs most (`DEC-069`).                                               | Scored, high weight          |
+| **C8** | **One source only.** The extension is bounded at exactly one book.                                                                                                                                                                  | Structural                   |
 
 ---
 
@@ -56,29 +56,29 @@ used in `PRACTICAL_TRANSLATION_ANALYSIS.md` §4 — **not** re-extracted).
 
 ### 3.1 Raw marker counts
 
-| Marker | AS3 | ACSM | HM4 | BENDER3 | NRM | SN4 | KM16 |
-|---|---|---|---|---|---|---|---|
-| `maillard` | 1 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `gelatiniz` | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `emulsif` | 5 | 7 | 12 | 5 | 0 | 3 | 12 |
-| `leaven` | 0 | 3 | 0 | 3 | 0 | 0 | 2 |
-| `blanch` | 7 | 4 | 0 | 1 | 0 | 0 | 18 |
-| `braise`/`braising` | 0 | 1 | 0 | 0 | 0 | 0 | 2 |
-| `saut` | 3 | 4 | 1 | 0 | 0 | 0 | 9 |
-| `shelf life` | 1 | 1 | 0 | 0 | 0 | 4 | 2 |
-| `batch cook` | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `nutrient retention` | 0 | 0 | 0 | 0 | 0 | 0 | 0 |
-| `recipe` | 1 | 2 | 0 | 0 | 11 | 0 | 24 |
-| `yield` | 2 | 4 | 32 | 120 | 3 | 10 | 10 |
+| Marker               | AS3 | ACSM | HM4 | BENDER3 | NRM | SN4 | KM16 |
+| -------------------- | --- | ---- | --- | ------- | --- | --- | ---- |
+| `maillard`           | 1   | 0    | 0   | 0       | 0   | 0   | 0    |
+| `gelatiniz`          | 0   | 0    | 0   | 0       | 0   | 0   | 0    |
+| `emulsif`            | 5   | 7    | 12  | 5       | 0   | 3   | 12   |
+| `leaven`             | 0   | 3    | 0   | 3       | 0   | 0   | 2    |
+| `blanch`             | 7   | 4    | 0   | 1       | 0   | 0   | 18   |
+| `braise`/`braising`  | 0   | 1    | 0   | 0       | 0   | 0   | 2    |
+| `saut`               | 3   | 4    | 1   | 0       | 0   | 0   | 9    |
+| `shelf life`         | 1   | 1    | 0   | 0       | 0   | 4   | 2    |
+| `batch cook`         | 0   | 0    | 0   | 0       | 0   | 0   | 0    |
+| `nutrient retention` | 0   | 0    | 0   | 0       | 0   | 0   | 0    |
+| `recipe`             | 1   | 2    | 0   | 0       | 11  | 0   | 24   |
+| `yield`              | 2   | 4    | 32  | 120     | 3   | 10  | 10   |
 
 ### 3.2 Three markers reverse on inspection — counts alone would have been wrong
 
-Applying the lesson recorded during the Phase 7 domain-boundary correction (*count in context, never
-trust an aggregate*), every non-trivial marker was read in context. **Three reverse completely:**
+Applying the lesson recorded during the Phase 7 domain-boundary correction (_count in context, never
+trust an aggregate_), every non-trivial marker was read in context. **Three reverse completely:**
 
 - **`emulsif` (44 hits) → ~0 culinary.** Every sampled hit is **physiological**: bile-salt emulsification
   of dietary fat, pancreatic lipase hydrolysis, lecithin as a bile-phase surfactant. The one non-
-  physiological hit is Intralipid, a *parenteral nutrition* product. The corpus does not discuss forming
+  physiological hit is Intralipid, a _parenteral nutrition_ product. The corpus does not discuss forming
   or stabilizing a culinary emulsion.
 - **`yield` (181 hits) → ~0 culinary.** Dominated by BENDER3/HM4's **metabolic energy yield** (ATP per
   gram, energy yield of fat vs carbohydrate, decarboxylation yielding an amine). Not recipe yield, and
@@ -96,36 +96,36 @@ USDA FSIS, DGA guidance, dietetics practice areas) with no preparation-level ins
 re-check refuted that:**
 
 | Preparation-safety marker | KM16 | ACSM | All 7 |
-|---|---|---|---|
-| `internal temperature` | 0 | 10 | 11 |
-| `safe minimum` | 0 | 6 | 6 |
-| `danger zone` | 2 | 0 | 2 |
-| `refrigerat` | 31 | 2 | 35 |
-| `reheat` | 8 | 1 | 11 |
-| `40°F`/`140°F` | 7 | 0 | 9 |
-| `leftover` | 4 | 1 | 5 |
-| `thaw` | 1 | 0 | 5 |
+| ------------------------- | ---- | ---- | ----- |
+| `internal temperature`    | 0    | 10   | 11    |
+| `safe minimum`            | 0    | 6    | 6     |
+| `danger zone`             | 2    | 0    | 2     |
+| `refrigerat`              | 31   | 2    | 35    |
+| `reheat`                  | 8    | 1    | 11    |
+| `40°F`/`140°F`            | 7    | 0    | 9     |
+| `leftover`                | 4    | 1    | 5     |
+| `thaw`                    | 1    | 0    | 5     |
 
 **Operational food-safety content is thin but genuinely present**, concentrated in ACSM (safe minimum
 internal temperatures) and KM16 (refrigeration, reheating, the 40–140°F danger zone). Recorded here
-because it **bounds** the extension: capabilities 8 and 9 are *supplemented*, not *supplied*, by the
+because it **bounds** the extension: capabilities 8 and 9 are _supplemented_, not _supplied_, by the
 eighth source, and where the existing corpus speaks on food safety it remains authoritative.
 
 ### 3.4 Capability-by-capability verdict
 
-| # | Gate 6 capability | Seven-book corpus | Extension role |
-|---|---|---|---|
-| 1 | Recipe construction/formulation | **Absent** | Supply |
-| 2 | Ingredient functionality | **Absent** (culinary sense — §3.2) | Supply |
-| 3 | Cooking methods | **Absent as instruction** (§4.3: 3 hits, all nutrient-fate observation) | Supply |
-| 4 | Preparation constraints | **Absent** | Supply |
-| 5 | Substitutions | **Example-level only** (§4.4) | Generalize — *carefully* |
-| 6 | Scaling | **Absent** (§3.2) | Supply |
-| 7 | Batch preparation | **Absent** (0 hits) | Supply |
-| 8 | Storage | **Thin but present** | **Supplement only** |
-| 9 | Food safety (prep/storage) | **Thin but present** (§3.3) | **Supplement only** |
-| 10 | Nutrient retention/fate | **Very thin** (phrase absent; 4 substantive hits corpus-wide) | Supply — highest value (C7) |
-| 11 | Texture/quality consequences | **Example-level only** (GF texture caveat; IDDSI in clinical register) | Generalize — *carefully* |
+| #   | Gate 6 capability               | Seven-book corpus                                                       | Extension role              |
+| --- | ------------------------------- | ----------------------------------------------------------------------- | --------------------------- |
+| 1   | Recipe construction/formulation | **Absent**                                                              | Supply                      |
+| 2   | Ingredient functionality        | **Absent** (culinary sense — §3.2)                                      | Supply                      |
+| 3   | Cooking methods                 | **Absent as instruction** (§4.3: 3 hits, all nutrient-fate observation) | Supply                      |
+| 4   | Preparation constraints         | **Absent**                                                              | Supply                      |
+| 5   | Substitutions                   | **Example-level only** (§4.4)                                           | Generalize — _carefully_    |
+| 6   | Scaling                         | **Absent** (§3.2)                                                       | Supply                      |
+| 7   | Batch preparation               | **Absent** (0 hits)                                                     | Supply                      |
+| 8   | Storage                         | **Thin but present**                                                    | **Supplement only**         |
+| 9   | Food safety (prep/storage)      | **Thin but present** (§3.3)                                             | **Supplement only**         |
+| 10  | Nutrient retention/fate         | **Very thin** (phrase absent; 4 substantive hits corpus-wide)           | Supply — highest value (C7) |
+| 11  | Texture/quality consequences    | **Example-level only** (GF texture caveat; IDDSI in clinical register)  | Generalize — _carefully_    |
 
 **Six of eleven capabilities absent, two example-level, two thin-but-present, one very thin.** C3
 (complementarity) is satisfiable: a preparation-oriented text overlaps the existing corpus in at most
@@ -139,24 +139,24 @@ Four candidates were assessed. Tables of contents were **verified against publis
 rather than recalled, because selecting a source on a remembered table of contents is precisely the
 failure mode this project's validation discipline exists to prevent.
 
-| Candidate | C1 | C3 complementarity | C5 §10 scope | C7 nutrient fate | Verdict |
-|---|---|---|---|---|---|
-| **Brown, *Understanding Food: Principles and Preparation*** (Cengage, 7th ed. 2024) | Pass — principles-organized | **Strong** — organized by preparation, not by macronutrient chemistry | Pass — not culinary-arts framed | Strong — nutrient fate runs through the ingredient chapters | **SELECTED** |
-| Vaclavik, Christian & Campbell, *Essentials of Food Science* (Springer, 5th ed.) | Pass | **Weak** — chapters are "Carbohydrates in Food," "Proteins in Food," "Fats in Food"; substantially re-covers HM4/BENDER3 | Pass | Moderate | Rejected on **C3** |
-| McGee, *On Food and Cooking* (2nd ed.) | Pass — the canonical mechanism reference | Strong | Pass | Weak — mechanism-focused, not retention-focused | Rejected on **C2/C7** — no scaling, batch, or systematic food-safety layer |
-| CIA, *The Professional Chef* | Pass | Strong | **FAIL** — professional-chef technique and restaurant operations are named exclusions | — | **Disqualified on C5** despite strong capability coverage |
+| Candidate                                                                           | C1                                       | C3 complementarity                                                                                                       | C5 §10 scope                                                                          | C7 nutrient fate                                            | Verdict                                                                    |
+| ----------------------------------------------------------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------- |
+| **Brown, _Understanding Food: Principles and Preparation_** (Cengage, 7th ed. 2024) | Pass — principles-organized              | **Strong** — organized by preparation, not by macronutrient chemistry                                                    | Pass — not culinary-arts framed                                                       | Strong — nutrient fate runs through the ingredient chapters | **SELECTED**                                                               |
+| Vaclavik, Christian & Campbell, _Essentials of Food Science_ (Springer, 5th ed.)    | Pass                                     | **Weak** — chapters are "Carbohydrates in Food," "Proteins in Food," "Fats in Food"; substantially re-covers HM4/BENDER3 | Pass                                                                                  | Moderate                                                    | Rejected on **C3**                                                         |
+| McGee, _On Food and Cooking_ (2nd ed.)                                              | Pass — the canonical mechanism reference | Strong                                                                                                                   | Pass                                                                                  | Weak — mechanism-focused, not retention-focused             | Rejected on **C2/C7** — no scaling, batch, or systematic food-safety layer |
+| CIA, _The Professional Chef_                                                        | Pass                                     | Strong                                                                                                                   | **FAIL** — professional-chef technique and restaurant operations are named exclusions | —                                                           | **Disqualified on C5** despite strong capability coverage                  |
 
 ### 4.1 The selection
 
-> **Brown, Amy C. — *Understanding Food: Principles and Preparation*, Cengage Learning.
+> **Brown, Amy C. — _Understanding Food: Principles and Preparation_, Cengage Learning.
 > 7th edition (2024), ISBN 9780357974148.** Any edition from the 4th onward is acceptable; the edition
 > actually admitted must be recorded in §5 at acquisition time.
 
 **Why it satisfies the criteria** — assessed against its verified table of contents:
 
-- **C1/C2.** Thirty chapters in four parts. Part I *Food Science and Nutrition* (Food Selection; Food
+- **C1/C2.** Thirty chapters in four parts. Part I _Food Science and Nutrition_ (Food Selection; Food
   Evaluation; Chemistry of Food Composition) supplies capability 11 (texture/quality) via a dedicated
-  sensory-evaluation chapter. Part II *Food Service* (Food Safety; Meal Management; Food Preparation
+  sensory-evaluation chapter. Part II _Food Service_ (Food Safety; Meal Management; Food Preparation
   Basics) supplies capabilities 1, 4, 6, 7 and supplements 9. Chapters 7–27 supply capabilities 2, 3, 5
   and 10 ingredient class by ingredient class. Part IV (Food Preservation; Government Food Regulations)
   supplies capability 8.
@@ -172,9 +172,9 @@ failure mode this project's validation discipline exists to prevent.
   grain preparation chapters — rather than as an isolated topic. This is the capability the existing
   corpus most conspicuously lacks (phrase count: **zero** across all seven books).
 
-**What it will not fully supply, named rather than glossed (C2):** *batch preparation* (capability 7) is
+**What it will not fully supply, named rather than glossed (C2):** _batch preparation_ (capability 7) is
 covered only indirectly, through Meal Management rather than as quantity food production — the texts that
-cover it properly (e.g. *Food for Fifty*) are quantity-production/operations texts excluded by C5. If
+cover it properly (e.g. _Food for Fifty_) are quantity-production/operations texts excluded by C5. If
 `DEC-068` turns out to require true batch-production knowledge, that is a **new scope decision and a new
 gate**, per Gate 6 §10 — it must not be resolved by quietly admitting a ninth source.
 
@@ -212,61 +212,79 @@ PRACTICAL-TRANSLATION CORPUS EXTENSION (Gate 6, 2026-09-07 — bounded)
 2. **It does not expand the topic universe.** The 213 topic IDs are fixed. If mapping requires a
    culinary knowledge unit, it is recorded in Phase 8's layer with its own identifier space — never by
    inserting into `MASTER_TOPIC_UNIVERSE.md`.
-3. **It does not create new decisions.** Gate 6: *"Do not manufacture new decisions merely to justify the
-   new source."* Only `DEC-067`–`069` and post-inspection dependents may be mapped to it.
+3. **It does not create new decisions.** Gate 6: _"Do not manufacture new decisions merely to justify the
+   new source."_ Only `DEC-067`–`069` and post-inspection dependents may be mapped to it.
 4. **It does not license §10's exclusions**, regardless of what its chapters happen to contain. Chapters
    on candy, frozen desserts and beverages exist in the book; they are **not** thereby in scope.
 5. **Prior phases keep their accounting.** Every "213 topics from 7 books" statement in Phases 1–7 stays
    true as written and is **not** retroactively edited. This document is the sole record of the change.
 
-**Edition admitted:** *to be recorded at acquisition.* Selection is edition-independent from the 4th
-edition onward; the verified table of contents above is the 7th (2024).
+**Edition admitted:** Brown was the initial candidate, but was unavailable for inspection. The actual
+bounded source inspected for execution is Labensky, Martel, Hause, _On Cooking: A Textbook of Culinary
+Fundamentals_, 7th Edition (2023 update), Pearson. The explicit execution record is
+`ON_COOKING_7E_EXECUTION_RECORD.md`; it records the substitution and evidence boundary without
+rewriting this historical Gate 6 selection record.
 
 ---
 
 ## 6. What Changes for `DEC-067`–`069` — and What Does Not Change Yet
 
-| Decision | Phase 7 status | Status now | Status after inspection |
-|---|---|---|---|
-| `DEC-067` (recipe detail level) | `BLOCKED (GAP-A)` | **Corpus-extension work — pending inspection** | Specifiable |
-| `DEC-068` (preparation constraints) | `BLOCKED (GAP-A)` | **Corpus-extension work — pending inspection** | Specifiable, *except* any true batch-production requirement (§4.1) |
+| Decision                            | Phase 7 status    | Status now                                     | Status after inspection                                                                |
+| ----------------------------------- | ----------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `DEC-067` (recipe detail level)     | `BLOCKED (GAP-A)` | **Corpus-extension work — pending inspection** | Specifiable                                                                            |
+| `DEC-068` (preparation constraints) | `BLOCKED (GAP-A)` | **Corpus-extension work — pending inspection** | Specifiable, _except_ any true batch-production requirement (§4.1)                     |
 | `DEC-069` (batch cooking / storage) | `BLOCKED (GAP-A)` | **Corpus-extension work — pending inspection** | Partially specifiable; storage/food-safety portions remain governed by the core corpus |
 
-**These are not yet specified, and this document does not specify them.** Gate 6 was explicit: *"Do not
-pretend the knowledge existed in the original seven-book corpus."* The reclassification from `GAP-A` is
+**These are not yet specified, and this document does not specify them.** Gate 6 was explicit: _"Do not
+pretend the knowledge existed in the original seven-book corpus."_ The reclassification from `GAP-A` is
 **contingent on the extension actually completing**, not on the decision permitting it. Until the source
-is inspected, the honest status is *"blocked, with an authorized and identified route out"* — which is a
-materially different thing from *"resolved."*
+is inspected, the honest status is _"blocked, with an authorized and identified route out"_ — which is a
+materially different thing from _"resolved."_
+
+> ### 6.1 AMENDMENT — post-inspection status (2026-09-07)
+>
+> The table above is the pre-execution record, retained for provenance. The extension completed against
+> On Cooking 7e, not Brown (§5's "Edition admitted" note). The predicted rightmost column held up well:
+>
+> | Decision  | Actual post-inspection status                                                                                                                                                                                                                                                                                                                                                                                |
+> | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+> | `DEC-067` | **Knowledge-supported.** Standardized recipe structure, ingredient roles, method, yield, portion, variations — directly evidenced. Detail: `ON_COOKING_7E_EXECUTION_RECORD.md` §3–4.                                                                                                                                                                                                                         |
+> | `DEC-068` | **Knowledge-supported.** Mise en place, food-specific preparation, cooking-method selection, preparation effects on quality — directly evidenced.                                                                                                                                                                                                                                                            |
+> | `DEC-069` | **Partially knowledge-supported**, as predicted. Scaling, yield/portion conversion, and storage/preservation are evidenced; **true quantity-food batch production is not** — named as a bounded limitation in §4.1 _before_ inspection, and confirmed rather than newly discovered (§9's amendment below and `PRACTICAL_TRANSLATION_ANALYSIS.md` §11.2 address whether this needs a new gate — it does not). |
+>
+> "Knowledge-supported" describes the corpus, not a Phase 7 specification. Specifying these three
+> decisions is a separate act, not performed here, subject to the same discipline as every other Phase 7
+> entry — cite the source, do not invent a threshold.
 
 ---
 
-## 7. Step 4 Is Blocked — Source Acquisition Required
+## 7. Steps 4–7 — Executed Against the Actual Source
 
-**Steps 1–3 are complete. Steps 4–7 cannot proceed.** `01_SOURCE_BOOKS/` contains exactly seven
-directories; the selected source is not present, and I cannot acquire it.
+**Steps 4–7 are complete.** The actual source file is present directly under `01_SOURCE_BOOKS/` as
+the 2023-update _On Cooking: A Textbook of Culinary Fundamentals_, 7th Edition PDF. It was extracted,
+read in context, and mapped in `ON_COOKING_7E_EXECUTION_RECORD.md`.
 
-**To unblock, place the file at:**
+**The source file was not modified.**
 
 ```
-nutrition-curriculum/01_SOURCE_BOOKS/08_Understanding_Food_Principles_and_Preparation/
+nutrition-curriculum/01_SOURCE_BOOKS/
 ```
 
-A PDF or EPUB is equally usable — the extraction tooling handles both (`pdftotext` for PDF; `unzip` plus
-tag-strip for EPUB). The directory is git-ignored, consistent with the existing seven.
+A PDF was used here; extraction was performed with `pypdf`. The source directory is git-ignored,
+consistent with the existing seven.
 
-**This is an execution dependency, not a new decision, and not a new gate.** Gate 6 authorized the
-selection and I have made it; nothing about the architecture is waiting on a human judgment. When the
-file appears, steps 4–7 proceed without further authorization:
+The inspection found strong support for standardized recipe construction, preparation workflow,
+cooking-method selection, and ingredient functions; adequate support for substitution, portioning,
+storage, food safety, nutrient/quality effects, special-diet adaptation, and recipe nutrition analysis;
+and partial support for true quantity-food batch preparation. The detailed matrix and residual-gap
+classification are in `ON_COOKING_7E_EXECUTION_RECORD.md`.
 
-4. Inspect the source (targeted extraction against the eleven capabilities, method as in §4 of the
-   analysis).
-5. Map only the necessary knowledge to `DEC-067`–`069`.
-6. Distinguish construction · modification · preparation · batch · storage · food safety · retention.
-7. Update `PRACTICAL_TRANSLATION_ANALYSIS.md`.
-
-**If the source cannot be obtained**, that is itself a consequential outcome and returns to a gate — it
-would mean Option A is unexecutable and the reviewer's rejection of Options B and C needs revisiting.
-It must not be resolved by silently falling back to Option C.
+**Step 12 — the full Phase 8 closure audit — was run 2026-09-07.** DEC ID range checked (max `DEC-112`;
+none created above it); `MASTER_TOPIC_UNIVERSE.md` and `APP_DECISION_INVENTORY.md` diffed against commit
+`85cec9e` (unchanged); `DEC-099`/`DEC-100` mentions checked (deferral-only, per usual); the source-book
+directory diff shows only the addition, nothing removed or altered. **Phase 8 is CLOSED.** This does not
+reopen Gate 6; see `PRACTICAL_TRANSLATION_ANALYSIS.md` §10–§11.2 for the full closure record and the
+explicit determination that the batch-production limitation does not warrant a new gate.
 
 ---
 
@@ -285,7 +303,7 @@ It must not be resolved by silently falling back to Option C.
   recorded, because recording only the corrections that flatter the conclusion would defeat the purpose.
 - **No stable ID altered.** 213 topics, 112 decisions, all `DEC` numbering intact.
 - **No Phase 1–6 artifact modified** by this document.
-- **No decision specified.** `DEC-067`–`069` are reclassified as to *route*, not resolved as to *content*
+- **No decision specified.** `DEC-067`–`069` are reclassified as to _route_, not resolved as to _content_
   (§6).
 - **No production code, schema, UI, or executable algorithm** — the §28 Phase-9 boundary holds.
 - **`DEC-099`/`DEC-100` untouched**, and the culinary decision was not used to approach clinical scope.
@@ -301,17 +319,17 @@ It must not be resolved by silently falling back to Option C.
   and **the selection should be treated as provisional until inspection confirms depth.** If inspection
   finds the treatment too shallow, the correct response is to report that and return to the gate, not to
   make the book work.
-- **What was assumed.** That "select the source" (Gate 6 §9 step 2) means *identify and justify a
-  specific title*, not *obtain the file*. If the reviewer meant acquisition, §7 is the blocker and no
+- **What was assumed.** That "select the source" (Gate 6 §9 step 2) means _identify and justify a
+  specific title_, not _obtain the file_. If the reviewer meant acquisition, §7 is the blocker and no
   interpretation of mine removes it.
 - **What could be over-claimed.** §3.4's "six of eleven absent" is built from marker searches, and
   markers have blind spots — the same limitation §8 of the analysis records for the original inspection.
   The claim is well-supported for the markers chosen and corroborated by Phase 1's independent TOC-level
   finding, but it is not a page-by-page proof.
-- **A judgment worth flagging.** Disqualifying *The Professional Chef* on C5 while selecting a book that
+- **A judgment worth flagging.** Disqualifying _The Professional Chef_ on C5 while selecting a book that
   also contains dessert and candy chapters could look inconsistent. The distinction I drew is
   **organizing frame, not incidental content**: Gate 6 §10 excludes professional-chef technique and
-  restaurant operations as a *scope*, and rule 4 in §5 confirms that BROWN's own out-of-scope chapters
+  restaurant operations as a _scope_, and rule 4 in §5 confirms that BROWN's own out-of-scope chapters
   gain nothing by being bound into an admitted book. A reviewer could reasonably want that line drawn
   differently.
 - **What was silently resolved:** nothing. The selection was explicitly authorized by Gate 6 §9 step 2.
