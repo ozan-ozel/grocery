@@ -46,6 +46,20 @@ export const ACTIVITY_OPTIONS: {
 
 const MIN_CALORIES = 1200;
 
+// g of carbohydrate per kg body weight per day, by activity level.
+// Sport Nutrition (Jeukendrup & Gleeson, Ch.6) has no sedentary-specific
+// tier — its lowest tier is for "low-intensity or skill-based activities" —
+// so sedentary shares that same floor rather than a separate (unsourced)
+// value; Ch.4 backs this up, defining sedentary as 1.4-1.6x RMR, a range
+// that already covers this app's own sedentary (1.4) and light (1.55) PAL.
+const CARB_G_PER_KG: Record<ActivityLevel, { min: number; max: number }> = {
+  sedentary: { min: 3, max: 5 },
+  light: { min: 3, max: 5 },
+  moderate: { min: 5, max: 7 },
+  high: { min: 6, max: 10 },
+  very_high: { min: 10, max: 12 },
+};
+
 function round(value: number): number {
   return Math.round(value);
 }
@@ -116,8 +130,9 @@ export function calculateTargets(
         : 1.2);
   const fatMin = (safeTarget * 0.2) / 9;
   const fatMax = (safeTarget * 0.35) / 9;
-  const carbsMin = (safeTarget * 0.45) / 4;
-  const carbsMax = (safeTarget * 0.65) / 4;
+  const carbRange = CARB_G_PER_KG[profile.activity];
+  const carbsMin = profile.weightKg * carbRange.min;
+  const carbsMax = profile.weightKg * carbRange.max;
   const bmi = profile.weightKg / Math.pow(profile.heightCm / 100, 2);
   const warnings: string[] = [];
   if (target < MIN_CALORIES)

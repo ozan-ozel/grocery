@@ -73,6 +73,11 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
         href: "https://pubmed.ncbi.nlm.nih.gov/29182451/",
         badge: "Hector 2018",
       },
+      {
+        label: "ACSM/AND/DC joint position stand: carbohydrate by training load",
+        href: "https://pubmed.ncbi.nlm.nih.gov/26891166/",
+        badge: "ACSM 2016",
+      },
     ],
   },
   {
@@ -358,11 +363,12 @@ export function PersonalPlanView({ userId }: Props) {
                 <span className="font-medium text-foreground">
                   Protein / Yağ / Karbonhidrat / Lif aralıkları:
                 </span>{" "}
-                hedef kaloriye göre DRI aralıklarından türetilir — yağ
-                hedefin %20-35'i, karbonhidrat %45-65'i, protein kilo başına
+                yağ hedef kalorinin %20-35'i (DRI); karbonhidrat, aktivite
+                seviyesine göre kilo başına 3-12g (spor beslenmesi
+                literatürü, kalori hedefinden bağımsız); protein kilo başına
                 1.2g (temel), 1.6g (aktif/çok aktif ya da kilo alma
                 hedefinde) veya 2.0g (kilo verme hedefinde, kas kütlesini
-                korumak için), lif her 1000 kcal için ~14g.
+                korumak için); lif her 1000 kcal için ~14g (DRI).
               </li>
             </ul>
             <p>
