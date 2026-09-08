@@ -9,20 +9,36 @@ authoritative technical content. This file references those artifacts rather tha
 
 ## Current Objective
 
-**Branch: `feature/phase-9-canonical-food-identity` (merged, milestone closed).** The Canonical
-Food Identity implementation (the six decisions in
-`nutrition-curriculum/08_APP_TRANSLATION/CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17) is
-**committed, merged into `master`, and pushed.** `supabase/16-nutrition-food-id.sql` was applied to
-the live database (user-run); the live identity audit and a full `netlify:dev` + `auth-test-login`
-+ Playwright browser QA pass both completed successfully — see "Verification" below.
+**DEC-067 (preparation-detail level) is now RATIFIED and its documentation closeout is complete.**
+DEC-067 = **Level 1 — ingredient-list-level, with an optional concise textual preparation note.**
+See `nutrition-curriculum/00_PROJECT_CONTROL/DECISIONS/2026-09-08-dec-067-preparation-detail-
+ratification.md` (the decision record), `08_APP_TRANSLATION/DEC-067_PREPARATION_DETAIL_
+INVESTIGATION.md` (the investigation that preceded it), and `08_APP_TRANSLATION/DEC-067_LEVEL_1_
+IMPLEMENTATION_INVESTIGATION.md` (the post-ratification implementation-readiness analysis — no
+implementation performed).
 
-- Feature commit: `d437f37` — "feat: establish canonical food identity"
-- Merge commit into `master`: `6555c7d`
-- Both `feature/phase-9-canonical-food-identity` and `master` pushed to `origin`; local `master`
-  and `origin/master` confirmed at the same commit (`6555c7d`) after push.
+```text
+DEC-067 decision:        CLOSED (ratified Level 1)
+DEC-067 implementation:  NOT YET STARTED
+DEC-069:                 OPEN (unresolved, untouched)
+Canonical Food Identity: CLOSED (unchanged by this closeout)
+Next task:               DEC-067 Level 1 implementation (see the implementation-readiness
+                          artifact's §15/§16 for the recommended minimal scope), pending its own
+                          explicit authorization
+```
+
+- Documentation branch: `docs/dec-067-preparation-closeout`.
+- Documentation commit: `4bfddbf` — "docs: close DEC-067 preparation detail decision" (three files,
+  1080 insertions, 0 deletions — no application source, schema, API, or UI touched).
+- Merge/push status: recorded once the merge into `master` and the push complete (see Git history).
+
+**Prior objective, retained below as historical record, not current:** the Canonical Food Identity
+milestone (`feature/phase-9-canonical-food-identity`, merged `6555c7d`, checkpoint-closed `8a5ac09`)
+remains CLOSED and was not reopened or modified by the DEC-067 work above. Everything in "Current
+State" through "Important Context" below describes that earlier, already-closed milestone.
 
 Execution status (protocol §48.8 state machine): **`READY`** — no autonomous execution active, no
-review gate open. Gate 7 (end of Phase 9) has **not** opened. No further Phase 9 work has been
+review gate open. Gate 7 (end of Phase 9) has **not** opened. DEC-067's own implementation has not
 started as part of this closeout.
 
 ## Current State
@@ -120,8 +136,11 @@ Modified: `netlify/functions/nutrition.ts`, `src/App.tsx`, `src/components/MealF
   kept here as historical record. Future work still requires its own explicit authorization before
   committing, pushing, or merging.
 - Do not resolve autonomously: allergen vocabulary, unmapped-food default, precedence mechanics, C2's
-  schema, user-vs-household exclusion scope, `DEC-067`, `DEC-069`, `DEC-099`/`DEC-100`,
-  `DEC-021`/`110`, `DEC-090`. None of these were touched or resolved by this session.
+  schema, user-vs-household exclusion scope, `DEC-069`, `DEC-099`/`DEC-100`, `DEC-021`/`110`,
+  `DEC-090`. None of these were touched or resolved by this session. **`DEC-067` is no longer in
+  this list** — it was ratified (Level 1) in the separate DEC-067 closeout described in "Current
+  Objective" above; its *implementation* still requires its own explicit authorization before any
+  code, schema, or UI change.
 - Do not modify stable IDs (213 topics, 112 decisions), rewrite historical decisions, or reopen
   Phase 8.
 - Recipe engine, pantry, portion/scaling, substitution, shopping optimization, and clinical
@@ -147,8 +166,10 @@ Modified: `netlify/functions/nutrition.ts`, `src/App.tsx`, `src/components/MealF
 2. **Canonical Food identity anchor question (investigation §17 decision 1) itself is now
    implemented**, not just decided — `name_tr` stays canonical, `food_id` is the new stable anchor.
    Nothing further needed here unless a future session decides to revisit it.
-3. Allergen vocabulary/mapping/unmapped-default, C2's schema, `DEC-067`/`069`/`099`/`100`,
-   user-vs-household scope — all unchanged, all still open, none touched this session.
+3. Allergen vocabulary/mapping/unmapped-default, C2's schema, `DEC-069`/`099`/`100`, user-vs-
+   household scope — all unchanged, all still open, none touched this session. **`DEC-067` has
+   since been ratified** (Level 1 — see "Current Objective" above) in a later, separate closeout;
+   it is no longer open, though its implementation has not started.
 4. **Live-data alias collision: `"pirinç"`** is aliased by both `"beyaz pirinç"` and `"baldo
    pirinç"` in the live `nutrition` table (absent from the seed catalog, so not caught by the
    earlier seed-only audit). `resolveFood('pirinç')` still resolves correctly today because a row
@@ -172,10 +193,12 @@ Modified: `netlify/functions/nutrition.ts`, `src/App.tsx`, `src/components/MealF
    bug found and fixed, and a final pre-commit audit confirmed the diff is clean and scoped.
 2. ~~Commit, when explicitly authorized~~ — **done**: committed (`d437f37`), merged into `master`
    (`6555c7d`), both branches pushed to `origin`. Canonical Food Identity milestone is closed.
-3. **No next Phase 9 task has been started.** Remaining known follow-ups (not started, not
-   scheduled): the `"pirinç"` alias collision (Problems item 4) and expanding curated
-   `allergen_classes` coverage beyond 19/89 foods (Problems item 5). Either requires its own
-   explicit go-ahead before work begins.
+3. **Superseded by the DEC-067 closeout described in "Current Objective" above.** DEC-067
+   (preparation-detail level) has since been investigated and ratified as Level 1
+   (ingredient-list-level + optional textual note); its implementation has **not** started and is
+   the next authorized task, pending its own explicit go-ahead. Other remaining follow-ups (not
+   started, not scheduled): the `"pirinç"` alias collision (Problems item 4) and expanding curated
+   `allergen_classes` coverage beyond 19/89 foods (Problems item 5).
 
 ## Important Context
 
