@@ -1827,7 +1827,11 @@ acting on "A1/B3/C2" could land on the wrong table. **The ratified decisions are
 | **C2** | Decision C option 2 — *validity window on an exclusion* (§18.3, §19.3) | §16.3 is "Decision Package **C** — Recipe Depth and Batch-Production Scope", an unrelated package with no C1/C2/C3 options. |
 
 Per the precedent at §0.1, §12.1 and §17, §16 is **not rewritten**; this note supersedes it for anyone
-reading forward. Canonical Food identity's A1/A2/A3 (§16.1) remain **open**.
+reading forward. **Correction (this pass):** canonical Food identity's anchor question (§16.1) is no
+longer open — it was resolved and implemented (`nutrition.food_id uuid` added, `name_tr` stays
+canonical) in the separate, later Canonical Food Identity milestone (`d437f37` → `6555c7d` → `8a5ac09`;
+see `CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17 decision 1 and `docs/SESSION_CHECKPOINT.md`). §16.1
+itself is left unedited per the precedent above; only this forward-reading note is corrected.
 
 ### 20.1 Layer Assignment and the Non-Collapsible Distinctions
 
@@ -1869,7 +1873,10 @@ this section.**
 
 **Preserved as unresolved by B3, per the ratification's own §7/§8 — none is answered below:** the allergen
 **vocabulary**; allergen **mapping completeness**; the **unmapped-food safety default**; **precedence
-mechanics**; **canonical Food identity**.
+mechanics**. **Canonical Food identity is no longer in this list** — it was resolved and implemented in
+the separate, later Canonical Food Identity milestone (`d437f37` → `6555c7d` → `8a5ac09`), after this
+ratification was recorded; see `CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17 and
+`docs/SESSION_CHECKPOINT.md`.
 
 ### 20.3 Implementation Readiness Map — 26 Capabilities
 
@@ -1879,7 +1886,7 @@ named thing gates it. `DEFERRED` = not required for the near-term path and nothi
 
 | # | Capability | Current state (verified) | Target state | Blocking dependency | DEC IDs | Code / data | Independent start? | **Classification** |
 |---|---|---|---|---|---|---|---|---|
-| 1 | **Canonical Food identity** | `nutrition.name_tr` is the de facto identity (display string, no FK). Three key spaces: the alias-aware server lookup, the alias-**blind** client catalog map, and `item_category_memory` | One resolution point every consumer uses; exact wherever safety or nutrition depends on it | The **anchor choice** (§16.1 A1/A2/A3) is open — but a single resolver *onto today's anchor* is common to A1 **and** A2 and pre-empts neither | 060, 061, 063, 065, 071, 072 | `nutrition.ts`, `itemCategories.normalize`, `store.findCanonicalName`, `useFoodCatalog.ts` | **Yes** — the resolver seam only; **not** the anchor replacement | **READY WITH ADAPTER** (anchor replacement remains BLOCKED BY HUMAN DECISION) |
+| 1 | **Canonical Food identity** | **Correction (this pass): resolved and implemented since this row was written** — `nutrition.food_id uuid` added as a stable anchor, `name_tr` stays canonical, exact-match precedence chain (`food_id → canonical name → unique alias → AMBIGUOUS/UNKNOWN`), no fuzzy step. See `CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17, `docs/SESSION_CHECKPOINT.md`. Row otherwise left as originally written for provenance: `nutrition.name_tr` is the de facto identity (display string, no FK). Three key spaces: the alias-aware server lookup, the alias-**blind** client catalog map, and `item_category_memory` | One resolution point every consumer uses; exact wherever safety or nutrition depends on it | *(as originally written, now resolved — see correction above)* The **anchor choice** (§16.1 A1/A2/A3) is open — but a single resolver *onto today's anchor* is common to A1 **and** A2 and pre-empts neither | 060, 061, 063, 065, 071, 072 | `nutrition.ts`, `itemCategories.normalize`, `store.findCanonicalName`, `useFoodCatalog.ts`, `src/lib/foodIdentity.ts`, `supabase/16-nutrition-food-id.sql` | **Yes** — the resolver seam only; **not** the anchor replacement | **IMPLEMENTED** (was `READY WITH ADAPTER`; anchor question resolved, not a full "replace name_tr" per §16.1 A2) |
 | 2 | **Food aliases / normalization** | `normalize()` = `trim().toLocaleLowerCase("tr-TR")`, shared by `nutrition.ts` and `itemCategories.ts`. Aliases resolve **only** in `POST /api/nutrition` (`name_tr=in.(…)` ∪ `aliases=ov.(…)`); the browse path's client mapper `pickNutrition` **drops `aliases`**, so `useFoodCatalog`'s catalog map cannot resolve one | One alias-aware resolution used by every consumer; fuzzy matching stays quarantined | None | 060, 061, 063 | `src/lib/nutrition.ts`, `netlify/functions/nutrition.ts:144–162`, `useFoodCatalog.ts` | Yes | **READY WITH ADAPTER** |
 | 3 | **Food composition lookup** | Live: `nutrition` table (`kcal_per_100`, `protein_g`, `fat_g`, `carbs_g`, `fiber_g`, `aliases[]`); 64 seed rows, macro+fiber only | Same shape, broader coverage; micronutrients are a separate capability | None for macro scope | 060, 062, 066 | `data/nutrition.json`, `netlify/functions/nutrition.ts` | Yes | **READY** |
 | 4 | **Allergen representation** | **Absent.** No allergen attribute on any row; a food row is atomic, so a composite food's constituents are invisible to any filter | A class vocabulary, a per-Food mapping, and an explicit unmapped default | **Vocabulary and unmapped default must be chosen before the data can be collected** — collection is downstream of the decision | 061 (B3) | none | No | **BLOCKED BY HUMAN DECISION** |
@@ -2211,7 +2218,9 @@ IMPLEMENTATION MUST NOT START YET:
   - Pantry, structured quantity parsing, pricing, availability             (deferred / external data)
   - Household-vs-user scope behavior                                       (human decision)
   - Anything condition-specific or prescriptive                            (DEC-099/DEC-100, BLOCKED)
-  - Replacing name_tr as the identity anchor                               (§16.1 A2, undecided)
+  - Replacing name_tr as the identity anchor                               (moot - resolved: name_tr
+                                                                             stays canonical, food_id
+                                                                             added; §16.1 A2 not chosen)
 
 FIRST IMPLEMENTATION MILESTONE:
   Food resolution + exclusion-reason foundation.
@@ -2238,9 +2247,12 @@ OUT OF SCOPE:
 complete.** Gate 7 (end of Phase 9) remains unopened. **Implementation has not started**; this section
 defines the boundary at which it may.
 
-**Still open, unchanged:** canonical Food identity's anchor (§16.1 A1/A2/A3); allergen vocabulary, mapping
-completeness, the unmapped-food default and precedence mechanics (B3's own carve-outs); user-vs-household
-scope (§18.4); `DEC-067`; `DEC-069`; `DEC-099`/`DEC-100`; `DEC-090` and `DEC-021`/`110` numeric values.
+**Still open, unchanged:** allergen vocabulary, mapping completeness, the unmapped-food default and
+precedence mechanics (B3's own carve-outs); user-vs-household scope (§18.4); `DEC-067`; `DEC-069`;
+`DEC-099`/`DEC-100`; `DEC-090` and `DEC-021`/`110` numeric values. **`Canonical Food identity's anchor`
+is no longer in this list** — resolved and implemented in the separate, later Canonical Food Identity
+milestone (`d437f37` → `6555c7d` → `8a5ac09`; see `CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17,
+`docs/SESSION_CHECKPOINT.md`).
 
 ### 20.14 Self-Audit — This Pass Specifically
 
@@ -2253,9 +2265,13 @@ scope (§18.4); `DEC-067`; `DEC-069`; `DEC-099`/`DEC-100`; `DEC-090` and `DEC-02
 - **No `DEC` ID was created, amended, or renumbered**, and no stable ID changed. Every `DEC-###` above is
   quoted from `APP_DECISION_INVENTORY.md`, `DECISION_LOGIC_SPECIFICATION.md` §3.11 or
   `APP_DECISION_DEPENDENCY_GRAPH.md`, re-read this pass.
-- **No open human decision was resolved.** `DEC-067`, `DEC-069`, `DEC-099`/`DEC-100`, canonical identity's
-  anchor, the allergen vocabulary, the unmapped-food default, precedence mechanics, and user-vs-household
-  scope are all carried forward as open; §20.7 maps the household collision without deciding it.
+- **No open human decision was resolved by this pass.** `DEC-067`, `DEC-069`, `DEC-099`/`DEC-100`,
+  canonical identity's anchor, the allergen vocabulary, the unmapped-food default, precedence mechanics,
+  and user-vs-household scope were all carried forward as open by this pass; §20.7 maps the household
+  collision without deciding it. **Correction (later pass):** canonical identity's anchor was
+  subsequently resolved and implemented in the separate Canonical Food Identity milestone (`d437f37` →
+  `6555c7d` → `8a5ac09`); it is no longer open. It remains correctly described as open *as of this
+  pass*, per the precedent this document already sets of not rewriting an earlier pass's own self-audit.
 - **The ratification was not rewritten as pre-existing.** §20.2 states in its own column that `DEC-053`/
   `DEC-061` are **silent** on granularity and that `DEC-011`/`DEC-054` do **not** reach `DEC-061` — the two
   claims the ratification specifically warned against inverting.
