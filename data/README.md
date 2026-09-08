@@ -40,6 +40,8 @@ Hand-authored meal-combo suggestions used by the "Bugün" recommendation engine
   `nutrition.json` but was later renamed/removed in Supabase would quietly drop that combo.
 - `prep_minutes` — rough hands-on time.
 - `tags` — free-form, not filtered on yet; informational only for now.
+- `prep_note` — optional, concise textual preparation note (DEC-067 Level 1). Plain descriptive
+  text only — not structured steps, not a recipe. Omit the key entirely for combos with no note.
 
 Unlike `nutrition.json`, this file is not uploaded to Supabase — it's bundled directly into
 the client build and edited by hand.

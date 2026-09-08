@@ -8,7 +8,8 @@
       { "food_id": "brokoli", "grams": 100 }
     ],
     "prep_minutes": 20,
-    "tags": ["hizli", "yuksek-protein"]
+    "tags": ["hizli", "yuksek-protein"],
+    "prep_note": "Tavuğu haşlayıp parçalayın, pirinci pişirin, brokoliyi buharda hafifçe yumuşatın."
   },
   {
     "id": "somon-brokoli-zeytinyagi",
@@ -41,7 +42,8 @@
       { "food_id": "domates", "grams": 80 }
     ],
     "prep_minutes": 10,
-    "tags": ["hizli", "kahvalti"]
+    "tags": ["hizli", "kahvalti"],
+    "prep_note": "Yumurtaları haşlayın veya sote edin, ekmeği kızartıp domatesle birlikte servis edin."
   },
   {
     "id": "mercimek-corbasi",
@@ -151,7 +153,8 @@
       { "food_id": "yeşil biber", "grams": 50 }
     ],
     "prep_minutes": 10,
-    "tags": ["hizli", "kahvalti"]
+    "tags": ["hizli", "kahvalti"],
+    "prep_note": "Yumurtaları çırpıp kaşar peyniri ve biberle birlikte tavada omlet olarak pişirin."
   },
   {
     "id": "tavuk-karnabahar",
