@@ -358,6 +358,10 @@ rows are superseded by Phase 8/9 findings, not by a correction to that file itse
 
 ## 11. Status (first milestone — unchanged, kept as written)
 
+> **SUPERSEDED — kept verbatim as the first-milestone record.** Current Phase 9 status is
+> **§20.13**; the current implementation ordering is **§20.4**. The recommended next step below
+> was overtaken by §12–§20. Not rewritten, per this document's own convention (§20.4 item 1).
+
 **Phase 9 first milestone: capability architecture established.** Not started: any implementation.
 Recommended next step: resolve the two §8 human decisions (preparation-detail level; batch-production v1
 necessity), since several §4.3 product-design items are easiest to scope once §8.1 is answered. No further
@@ -527,6 +531,11 @@ viable representation** — stated at the information-architecture level, delibe
 ---
 
 ## 13. Status — Updated After the Dependency-Analysis Pass
+
+> **SUPERSEDED — kept verbatim as the second-milestone record.** Current Phase 9 status is
+> **§20.13**. The recommended implementation order below is explicitly superseded by **§20.4**,
+> which records why `DEC-067`/`DEC-069` are no longer step 1. Not rewritten, per this
+> document's own convention.
 
 **Phase 9, second milestone: dependency analysis complete for all 13 areas the user named.** Still not
 started: any implementation, any schema, any provider selection. Still open, unchanged from §8: `DEC-067`
@@ -893,6 +902,11 @@ which this evidence says belongs very early, not as an afterthought to restricti
 ---
 
 ## 15. Status — Updated After the Domain-Boundary Pass
+
+> **SUPERSEDED — kept verbatim as the third-milestone record.** Current Phase 9 status is
+> **§20.13**. The exclusion-semantics question this pass surfaced as open was subsequently
+> decided — see §18–§19 and the decision record. Not rewritten, per this document's own
+> convention.
 
 **Phase 9, third milestone: domain-boundary and implementation-readiness analysis complete.** Still not
 started: any implementation, schema, migration, or provider selection. Still open, unchanged: `DEC-067`,
@@ -1675,6 +1689,12 @@ boundary until they are resolved.
 ---
 
 ## 19. HUMAN SAFETY DECISION RATIFICATION
+
+> **Authoritative source for the ratified semantics:**
+> `00_PROJECT_CONTROL/DECISIONS/2026-09-07-phase-9-safety-decisions-ratification.md`.
+> That decision record owns A1/B3/C2. This section is the in-document restatement, kept because
+> §20.0's label-collision table and §20.2/§20.6 anchor on §19.1–§19.5 by reference. **If the two
+> ever diverge, the decision record governs** — amend it first, then reconcile this section to it.
 
 **The three §18 decisions have been decided by the human/ChatGPT reviewer (2026-09-07): A1 · B3 · C2.**
 Formal record: `00_PROJECT_CONTROL/DECISIONS/2026-09-07-phase-9-safety-decisions-ratification.md`.
