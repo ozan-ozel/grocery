@@ -10,6 +10,16 @@ export type Item = {
   addedAt: number;
   // Either a built-in CategoryId or a user-created custom id ("u:...").
   category?: AnyCategoryId;
+  // Opaque, stable canonical Food identity (Phase 9 Canonical Food Identity
+  // implementation — see src/lib/foodIdentity.ts), set by listActions.addItem
+  // whenever the item's final name resolves exactly. This is a client-only
+  // type addition, not a schema change: the whole State tree (including
+  // every Item) persists as one opaque `sync_state.state jsonb` blob (see
+  // netlify/functions/state.ts), so an extra optional field round-trips
+  // through existing persistence for free, the same way `category` already
+  // does. `Item.id` remains the shopping-row identity; foodId is the
+  // Food this row represents, and the two are never conflated.
+  foodId?: string;
 };
 
 export type List = {

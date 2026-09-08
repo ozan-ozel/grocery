@@ -3,6 +3,12 @@ import type { AllergenClassMapping } from "./allergenClasses";
 
 export type Nutrition = {
   name_tr: string;
+  // Opaque, stable canonical Food identity (Phase 9 Canonical Food Identity
+  // implementation — see src/lib/foodIdentity.ts). Optional because it is
+  // read-through only: absent until supabase/16-nutrition-food-id.sql has
+  // been applied and the response re-fetched. Never client-set — see
+  // prepareRow below, which deliberately never includes it in a write.
+  food_id?: string;
   kcal_per_100: number;
   protein_g: number;
   fat_g: number;
@@ -265,6 +271,10 @@ export function lookupNutrition(
 function pickNutrition(row: ApiRow): Nutrition {
   return {
     name_tr: row.name_tr,
+    // Read-through only — see the Nutrition type above. Never sent back on
+    // a write (prepareRow has no food_id field), so the client can never
+    // spoof or overwrite the server-assigned value.
+    food_id: row.food_id,
     kcal_per_100: row.kcal_per_100,
     protein_g: row.protein_g,
     fat_g: row.fat_g,

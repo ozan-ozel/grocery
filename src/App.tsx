@@ -22,6 +22,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
+import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
 
 export function App() {
   const { session, checked, signInWithGoogle, signOut, deleteAccount } = useAuth();
@@ -201,6 +203,19 @@ function AppShell({
     [state?.lists],
   );
 
+  // Canonical Food Identity implementation: one useFoodCatalog() instance
+  // here so createListActions' addItem can resolve a shopping add against
+  // the nutrition catalog. Safe to add at this top level (unlike
+  // useMealPersonalization, which caused a real staleness bug when tried
+  // here previously) — useFoodCatalog is a TanStack Query hook already
+  // called from several other components against the same shared cache
+  // key, so this instance and theirs stay coherent automatically.
+  const { foods: nutritionFoods } = useFoodCatalog();
+  const foodIdentityIndex = useMemo(
+    () => buildFoodIdentityIndex(nutritionFoods),
+    [nutritionFoods],
+  );
+
   const selection = useSelection(state?.activeId ?? undefined);
 
   // While onboarding is showing, any section pill tap is treated as if the
@@ -248,6 +263,7 @@ function AppShell({
     showUndo,
     selectedIds: selection.selectedIds,
     exitSelectMode: selection.exitSelectMode,
+    foodIdentityIndex,
   });
 
   return (

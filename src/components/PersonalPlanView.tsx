@@ -1,5 +1,5 @@
 import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   ACTIVITY_OPTIONS,
@@ -17,6 +17,8 @@ import {
   ALLERGEN_CLASS_LABEL_TR,
   type AllergenClassId,
 } from "@/lib/allergenClasses";
+import type { Nutrition } from "@/lib/nutrition";
+import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useDetailsTransition } from "@/hooks/useDetailsTransition";
@@ -139,11 +141,27 @@ export function PersonalPlanView({ userId }: Props) {
   const sourcesDetails = useDetailsTransition<HTMLElement>();
 
   const { foods } = useFoodCatalog();
+  // Display-only resolver for an exclusion chip's foodId: an entry created
+  // before Canonical Food Identity holds a bare name_tr string (never a key
+  // in byId, so this falls through to the id itself, unchanged — the same
+  // string it always displayed); one created after it holds an opaque
+  // food_id UUID that must be resolved through the catalog to show anything
+  // readable. Exact food_id -> canonical name only (same precedence as
+  // src/lib/foodIdentity.ts, no fuzzy step) — never used for matching or
+  // safety, only for what the chip renders.
+  const foodIdentityIndex = useMemo(() => buildFoodIdentityIndex(foods), [foods]);
+  function displayNameForFoodId(foodId: string): string {
+    return foodIdentityIndex.byId.get(foodId)?.name_tr ?? foodId;
+  }
   const [excludeQuery, setExcludeQuery] = useState("");
   // A food picked from search but not yet given a reason — nothing is
   // written to foodExclusions until one of the four reasons is chosen
-  // (Phase 9 §20 Milestone 1: an exclusion must carry why it exists).
-  const [pendingFoodId, setPendingFoodId] = useState<string | null>(null);
+  // (Phase 9 §20 Milestone 1: an exclusion must carry why it exists). Holds
+  // the whole resolved Nutrition object, not just a display string, so the
+  // eventual addExclusion call can prefer the stable food_id over the
+  // mutable name_tr (Canonical Food Identity decision 6) while the
+  // confirmation UI still shows the readable name, not an opaque id.
+  const [pendingFood, setPendingFood] = useState<Nutrition | null>(null);
 
   const excludedIds = new Set(profile.foodExclusions.map(e => e.foodId));
   const excludeMatches = excludeQuery.trim()
@@ -167,7 +185,7 @@ export function PersonalPlanView({ userId }: Props) {
       ...profile.foodExclusions,
       { foodId, reason, createdAt: new Date().toISOString() },
     ]);
-    setPendingFoodId(null);
+    setPendingFood(null);
     setExcludeQuery("");
   }
 
@@ -380,7 +398,7 @@ export function PersonalPlanView({ userId }: Props) {
           ve emin olmadığın besinler önerilerden tamamen çıkarılır, hassasiyet
           daha az önerilir, sevmediğin besinler önerilmez.
         </p>
-        {!pendingFoodId && (
+        {!pendingFood && (
           <Input
             className="mt-2"
             placeholder="Besin ara..."
@@ -390,25 +408,25 @@ export function PersonalPlanView({ userId }: Props) {
             }
           />
         )}
-        {!pendingFoodId && excludeMatches.length > 0 && (
+        {!pendingFood && excludeMatches.length > 0 && (
           <ul className="mt-1 divide-y divide-border rounded-md border border-border">
             {excludeMatches.map(f => (
               <li key={f.name_tr}>
                 <button
                   type="button"
                   className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
-                  onClick={() => setPendingFoodId(f.name_tr)}>
+                  onClick={() => setPendingFood(f)}>
                   {f.name_tr}
                 </button>
               </li>
             ))}
           </ul>
         )}
-        {pendingFoodId && (
+        {pendingFood && (
           <div className="mt-2 rounded-md border border-border p-2">
             <p className="text-xs text-muted-foreground">
               <span className="font-medium text-foreground">
-                {pendingFoodId}
+                {pendingFood.name_tr}
               </span>{" "}
               — nedeni ne?
             </p>
@@ -417,13 +435,20 @@ export function PersonalPlanView({ userId }: Props) {
                 <ReasonButton
                   key={opt.value}
                   label={opt.label}
-                  onClick={() => addExclusion(pendingFoodId, opt.value)}
+                  onClick={() =>
+                    // Prefer the stable food_id over the mutable name_tr so
+                    // this new entry survives a future rename (Canonical
+                    // Food Identity decision 6); pendingFood is only ever
+                    // set from a resolved catalog row, so name_tr is always
+                    // a safe fallback for anything pre-migration.
+                    addExclusion(pendingFood.food_id ?? pendingFood.name_tr, opt.value)
+                  }
                 />
               ))}
             </div>
             <button
               type="button"
-              onClick={() => setPendingFoodId(null)}
+              onClick={() => setPendingFood(null)}
               className="mt-2 text-xs text-muted-foreground underline underline-offset-2">
               Vazgeç
             </button>
@@ -437,7 +462,7 @@ export function PersonalPlanView({ userId }: Props) {
             </p>
             {unclassifiedExclusions.map(e => (
               <div key={e.foodId} className="space-y-1">
-                <p className="text-xs">{e.foodId}</p>
+                <p className="text-xs">{displayNameForFoodId(e.foodId)}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {REASON_OPTIONS.map(opt => (
                     <ReasonButton
@@ -450,7 +475,7 @@ export function PersonalPlanView({ userId }: Props) {
                   <button
                     type="button"
                     onClick={() => removeExclusion(e.foodId)}
-                    aria-label={`${e.foodId} hariç tutmayı kaldır`}
+                    aria-label={`${displayNameForFoodId(e.foodId)} hariç tutmayı kaldır`}
                     className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-accent">
                     Kaldır
                   </button>
@@ -466,14 +491,14 @@ export function PersonalPlanView({ userId }: Props) {
               <span
                 key={e.foodId}
                 className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs">
-                {e.foodId}
+                {displayNameForFoodId(e.foodId)}
                 <span className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
                   {REASON_LABEL_SHORT[e.reason]}
                 </span>
                 <button
                   type="button"
                   onClick={() => removeExclusion(e.foodId)}
-                  aria-label={`${e.foodId} hariç tutmayı kaldır`}
+                  aria-label={`${displayNameForFoodId(e.foodId)} hariç tutmayı kaldır`}
                   className="text-muted-foreground">
                   ×
                 </button>

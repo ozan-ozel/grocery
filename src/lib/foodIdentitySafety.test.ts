@@ -24,7 +24,16 @@ import { hasHardExclusion } from "./foodExclusions";
 
 const dir = path.dirname(fileURLToPath(import.meta.url));
 const FORBIDDEN = ["isCloseMatch", "findCanonicalName"];
-const SAFETY_FILES = ["foodExclusions.ts", "comboMatch.ts", "allergenClasses.ts"];
+const SAFETY_FILES = [
+  "foodExclusions.ts",
+  "comboMatch.ts",
+  "allergenClasses.ts",
+  // Canonical Food Identity resolver — the one place identity resolution
+  // happens must never let fuzzy matching in (investigation §5/§8: fuzzy
+  // matching must never establish Food identity, alias ownership, or
+  // safety/exclusion equivalence).
+  "foodIdentity.ts",
+];
 
 describe("fuzzy matching must not reach the exclusion-safety path", () => {
   for (const file of SAFETY_FILES) {
