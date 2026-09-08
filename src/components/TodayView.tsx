@@ -20,6 +20,7 @@ type RawCombo = {
   items: { food_id: string; grams: number }[];
   prep_minutes: number;
   tags: string[];
+  prep_note?: string;
 };
 
 const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
@@ -28,6 +29,7 @@ const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
   items: raw.items.map((item) => ({ foodId: item.food_id, grams: item.grams })),
   prepMinutes: raw.prep_minutes,
   tags: raw.tags,
+  prepNote: raw.prep_note,
 }));
 
 const COMBO_BY_ID = new Map(COMBOS.map((c) => [c.id, c]));
@@ -41,6 +43,7 @@ type EatenGroup = {
   comboId: string;
   nameTr: string;
   prepMinutes: number;
+  prepNote?: string;
   totals: MacroTotals;
   entries: LoggedEntry[];
 };
@@ -111,6 +114,7 @@ export function TodayView({
         comboId,
         nameTr: raw.nameTr,
         prepMinutes: raw.prepMinutes,
+        prepNote: raw.prepNote,
         totals: calculateItemsNutrition(bucket.items, remaining.catalogMap),
         entries: bucket.entries,
       });
@@ -288,6 +292,11 @@ export function TodayView({
                     {Math.round(group.totals.kcal)} kcal ·{" "}
                     {Math.round(group.totals.proteinG)}g protein
                   </p>
+                  {group.prepNote && (
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {group.prepNote}
+                    </p>
+                  )}
                   <div className="mt-2">
                     <button
                       type="button"
@@ -351,6 +360,9 @@ function SuggestionCard({
         {Math.round(combo.totals.kcal)} kcal ·{" "}
         {Math.round(combo.totals.proteinG)}g protein
       </p>
+      {combo.prepNote && (
+        <p className="mt-1 text-xs text-muted-foreground">{combo.prepNote}</p>
+      )}
       {!!overBudgetBy && overBudgetBy > 0 && (
         <p className="mt-1 text-xs text-signal">
           Kalan makronun {Math.round(overBudgetBy)} kcal üzerinde

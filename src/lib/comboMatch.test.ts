@@ -239,3 +239,35 @@ describe("allergen-class exclusions cannot be bypassed by a food-level allow", (
     expect(idsOf(scored)).not.toContain("combo-almonds");
   });
 });
+
+// ---------------------------------------------------------------------------
+// DEC-067 Level 1 — optional textual preparation note. Purely descriptive
+// data carried through unchanged; must not affect scoring/matching/totals.
+
+describe("scoreAllCombos — optional prepNote (DEC-067 Level 1)", () => {
+  it("scores a combo with no prepNote exactly as before (field absent)", () => {
+    const scored = scoreAllCombos(COMBOS, [], [], CATALOG);
+    const chickenRice = scored.find((c) => c.id === "combo-chicken-rice");
+    expect(chickenRice?.prepNote).toBeUndefined();
+  });
+
+  it("carries a combo's prepNote through to the scored result unchanged", () => {
+    const withNote: Combo[] = [
+      { ...COMBOS[0], id: "combo-with-note", prepNote: "Tavuğu haşlayıp pirinçle servis edin." },
+    ];
+    const scored = scoreAllCombos(withNote, [], [], CATALOG);
+    expect(scored[0]?.prepNote).toBe("Tavuğu haşlayıp pirinçle servis edin.");
+  });
+
+  it("does not affect totals or exclusion filtering, present or absent", () => {
+    const withoutNote = scoreAllCombos(COMBOS, [], [], CATALOG);
+    const withNote: Combo[] = COMBOS.map((c) =>
+      c.id === "combo-chicken-rice" ? { ...c, prepNote: "Basit bir not." } : c
+    );
+    const scored = scoreAllCombos(withNote, [], [], CATALOG);
+    const before = withoutNote.find((c) => c.id === "combo-chicken-rice");
+    const after = scored.find((c) => c.id === "combo-chicken-rice");
+    expect(after?.totals).toEqual(before?.totals);
+    expect(after?.hasSoftConflict).toBe(before?.hasSoftConflict);
+  });
+});
