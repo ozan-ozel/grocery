@@ -37,11 +37,19 @@ export function createListActions(params: {
     }));
   }
 
-  function addItem(name: string, qty: string) {
+  function addItem(name: string, qty: string, opts?: { exact?: boolean }) {
     // A typo like "maydonoz" resolves to the household's already-established
     // "Maydanoz" instead of minting a new catalog entry; a genuinely new
     // name (no close match) passes through unchanged.
-    const canonicalName = findCanonicalName(name, catalog) ?? name;
+    //
+    // opts.exact skips this rewrite entirely — used when `name` already IS
+    // a canonical Food identity (e.g. a combo's foodId) rather than
+    // free-typed text. Fuzzy-rewriting an already-canonical id would run it
+    // through the shopping catalog's fuzzy key space, which is exactly the
+    // coupling Phase 9 §20.6 (C1) flags as unsafe for anything beyond human
+    // typing — it must not silently rewrite a recipe ingredient's identity
+    // to a near-spelling already on this household's list.
+    const canonicalName = opts?.exact ? name : findCanonicalName(name, catalog) ?? name;
 
     const existing = active.items.find((i) =>
       isCloseMatch(
