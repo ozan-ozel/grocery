@@ -6,17 +6,28 @@ import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { MEAL_SLOTS, type MealItem } from "@/lib/localMealPlan";
 import { scaleNutrition, type MacroTotals } from "@/lib/mealNutrition";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
+import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
 import { format } from "@/components/NutritionTableCell";
 import { MealFoodPicker } from "@/components/MealFoodPicker";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 
-type Props = { householdId: string | null };
+type Props = { userId: string | null; householdId: string | null };
 
-export function MealPlanView({ householdId }: Props) {
+export function MealPlanView({ userId, householdId }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
+  // Own instance, matching PersonalPlanView's and useRemainingToday's own
+  // pattern — NOT App.tsx's top-level `personalization`, which is mounted
+  // once at the app root and never remounts on a tab switch, so it would
+  // never observe an edit made through one of those other instances
+  // (confirmed by manual QA: threading App.tsx's stale copy down as a prop
+  // showed exclusions set moments earlier in Kişisel Plan as absent here).
+  const { profile: personalizationProfile } = useMealPersonalization(userId);
+  const foodExclusions = personalizationProfile.foodExclusions;
+  const allergenExclusions = personalizationProfile.allergenExclusions;
   const {
     dateLabel,
     isLoading,
@@ -78,6 +89,8 @@ export function MealPlanView({ householdId }: Props) {
               label={label}
               items={itemsForSlot(slot)}
               foods={foods}
+              exclusions={foodExclusions}
+              allergenExclusions={allergenExclusions}
               catalog={catalogMap}
               macros={slotNutrition(slot)}
               onAddItem={(foodId, quantityG) => addItem(slot, foodId, quantityG)}
@@ -125,6 +138,8 @@ function MealSection({
   label,
   items,
   foods,
+  exclusions,
+  allergenExclusions,
   catalog,
   macros,
   onAddItem,
@@ -134,6 +149,8 @@ function MealSection({
   label: string;
   items: MealItem[];
   foods: Nutrition[];
+  exclusions: FoodExclusion[];
+  allergenExclusions: AllergenClassExclusion[];
   catalog: NutritionMap;
   macros: MacroTotals;
   onAddItem: (foodId: string, quantityG: number) => void;
@@ -165,7 +182,12 @@ function MealSection({
           ))}
         </ul>
       )}
-      <MealFoodPicker foods={foods} onAdd={onAddItem} />
+      <MealFoodPicker
+        foods={foods}
+        exclusions={exclusions}
+        allergenExclusions={allergenExclusions}
+        onAdd={onAddItem}
+      />
       <div className="mt-3 flex items-center justify-between border-t border-border pt-2">
         <span className="text-xs text-muted-foreground">
           {items.length} besin

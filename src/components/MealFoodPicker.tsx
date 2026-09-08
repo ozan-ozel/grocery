@@ -3,24 +3,54 @@ import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Nutrition } from "@/lib/nutrition";
+import {
+  hasHardExclusion,
+  hasSoftConstraint,
+  hasHardAllergenClassExclusion,
+  hasSoftAllergenClassConstraint,
+  type FoodExclusion,
+  type AllergenClassExclusion,
+} from "@/lib/foodExclusions";
 
 type Props = {
   foods: Nutrition[];
   onAdd: (foodId: string, quantityG: number) => void;
+  // Optional so existing/other callers aren't forced to thread it through
+  // before they have a source for it; treated as "no exclusions" when
+  // omitted, never as "skip the check".
+  exclusions?: FoodExclusion[];
+  allergenExclusions?: AllergenClassExclusion[];
 };
 
-export function MealFoodPicker({ foods, onAdd }: Props) {
+export function MealFoodPicker({
+  foods,
+  onAdd,
+  exclusions = [],
+  allergenExclusions = [],
+}: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Nutrition | null>(null);
   const [quantity, setQuantity] = useState("100");
 
   const queryLower = query.trim().toLocaleLowerCase("tr-TR");
+  // Hard-tier (allergy/unclear/unclassified/preference) foods are removed
+  // outright — this is a "what did you eat" logging surface, not a
+  // reference lookup (Phase 9 §20 Milestone 1). Soft-tier (intolerance)
+  // foods stay pickable, just flagged. Allergen-class exclusions apply the
+  // same split — a food UNKNOWN for an excluded hard-tier class is removed
+  // too (conservative escalation, this milestone's own decision), not just
+  // a confirmed PRESENT match.
+  const visibleFoods = foods.filter(
+    (food) =>
+      !hasHardExclusion(exclusions, food.name_tr) &&
+      !hasHardAllergenClassExclusion(allergenExclusions, food)
+  );
   const results = queryLower
-    ? foods.filter(food =>
+    ? visibleFoods.filter(food =>
         food.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower),
       )
-    : foods.slice(0, 30);
+    : visibleFoods.slice(0, 30);
 
   function reset() {
     setOpen(false);
@@ -107,7 +137,15 @@ export function MealFoodPicker({ foods, onAdd }: Props) {
                   type="button"
                   onClick={() => setSelected(food)}
                   className="flex w-full items-center justify-between px-2 py-2 text-left text-sm hover:bg-accent">
-                  <span>{food.name_tr}</span>
+                  <span>
+                    {food.name_tr}
+                    {(hasSoftConstraint(exclusions, food.name_tr) ||
+                      hasSoftAllergenClassConstraint(allergenExclusions, food)) && (
+                      <span className="ml-1.5 text-xs text-muted-foreground">
+                        {" "}(hassasiyetin var)
+                      </span>
+                    )}
+                  </span>
                   <span className="ledger text-xs text-muted-foreground">
                     {Math.round(food.kcal_per_100)} kcal/100g
                   </span>

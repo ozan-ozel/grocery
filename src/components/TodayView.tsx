@@ -48,7 +48,7 @@ type EatenGroup = {
 type Props = {
   userId: string | null;
   householdId: string | null;
-  onAddItem: (name: string, qty: string) => void;
+  onAddItem: (name: string, qty: string, opts?: { exact?: boolean }) => void;
   isOnList: (name: string) => boolean;
   onRemoveItemByName: (name: string) => void;
 };
@@ -72,7 +72,8 @@ export function TodayView({
     return matchCombos(
       COMBOS,
       remaining.remaining,
-      remaining.excludedFoodIds,
+      remaining.foodExclusions,
+      remaining.allergenExclusions,
       remaining.catalogMap
     );
   }, [remaining]);
@@ -81,7 +82,12 @@ export function TodayView({
   // combo that doesn't fit today never just vanishes; it's still browsable.
   const allCombos = useMemo<ScoredCombo[]>(() => {
     if (remaining.status !== "ready") return [];
-    return scoreAllCombos(COMBOS, remaining.excludedFoodIds, remaining.catalogMap);
+    return scoreAllCombos(
+      COMBOS,
+      remaining.foodExclusions,
+      remaining.allergenExclusions,
+      remaining.catalogMap
+    );
   }, [remaining]);
 
   // Reconstructed from today's real meal_entries (grouped by comboId) rather
@@ -142,7 +148,10 @@ export function TodayView({
 
   function addComboToList(combo: ScoredCombo) {
     for (const item of combo.items) {
-      onAddItem(item.foodId, `${item.grams}g`);
+      // exact: true — a combo's foodId is already a canonical Food identity,
+      // not free-typed text, so it must not be run through the shopping
+      // catalog's fuzzy rewrite (Phase 9 §20.6 C1).
+      onAddItem(item.foodId, `${item.grams}g`, { exact: true });
     }
   }
 

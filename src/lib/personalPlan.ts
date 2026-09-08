@@ -1,4 +1,9 @@
 import type { PersonalProfile } from "./mealPersonalization";
+import {
+  migrateLegacyExclusions,
+  type FoodExclusion,
+  type AllergenClassExclusion,
+} from "./foodExclusions";
 
 type PersonalPlanRow = {
   user_id: string;
@@ -11,6 +16,10 @@ type PersonalPlanRow = {
   goal: string;
   waist_cm: number | null;
   excluded_food_ids: string[] | null;
+  food_exclusions: FoodExclusion[] | null;
+  // Absent on a row saved before supabase/15-personal-plan-allergen-exclusions.sql
+  // ran — no legacy predecessor to migrate from, unlike food_exclusions.
+  allergen_class_exclusions: AllergenClassExclusion[] | null;
 };
 
 function fromRow(row: PersonalPlanRow): PersonalProfile {
@@ -23,7 +32,14 @@ function fromRow(row: PersonalPlanRow): PersonalProfile {
     activity: row.activity as PersonalProfile["activity"],
     goal: row.goal as PersonalProfile["goal"],
     waistCm: row.waist_cm ?? undefined,
-    excludedFoodIds: row.excluded_food_ids ?? [],
+    // food_exclusions is authoritative once present. A row saved before the
+    // 13-personal-plan-food-exclusions.sql migration ran (or backfilled but
+    // not yet re-fetched) falls back to migrating the legacy column —
+    // same no-silent-downgrade rule as everywhere else this migration
+    // touches (Phase 9 §20.11 invariant 10).
+    foodExclusions:
+      row.food_exclusions ?? migrateLegacyExclusions(row.excluded_food_ids ?? []),
+    allergenExclusions: row.allergen_class_exclusions ?? [],
   };
 }
 
@@ -66,7 +82,8 @@ export async function savePersonalPlan(profile: PersonalProfile): Promise<boolea
         activity: profile.activity,
         goal: profile.goal,
         waist_cm: profile.waistCm ?? null,
-        excluded_food_ids: profile.excludedFoodIds,
+        food_exclusions: profile.foodExclusions,
+        allergen_class_exclusions: profile.allergenExclusions,
       }),
     });
     if (!res.ok) {

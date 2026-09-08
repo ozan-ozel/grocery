@@ -7,10 +7,37 @@ import {
   bmiLabel,
   type PersonalGoal,
 } from "@/lib/mealPersonalization";
+import {
+  upsertAllergenClassExclusion,
+  type ExclusionReason,
+  type AllergenClassExclusion,
+} from "@/lib/foodExclusions";
+import {
+  ALLERGEN_CLASS_IDS,
+  ALLERGEN_CLASS_LABEL_TR,
+  type AllergenClassId,
+} from "@/lib/allergenClasses";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useDetailsTransition } from "@/hooks/useDetailsTransition";
 import { cn } from "@/lib/utils";
+
+// A user only ever picks one of these four — "unclassified" is a migration
+// artifact (Phase 9 §20 Milestone 1), never a choice offered here.
+const REASON_OPTIONS: { value: ExclusionReason; label: string }[] = [
+  { value: "preference", label: "Sevmiyorum" },
+  { value: "intolerance", label: "Hassasiyetim var" },
+  { value: "allergy", label: "Alerjim var" },
+  { value: "unclear", label: "Emin değilim" },
+];
+
+const REASON_LABEL_SHORT: Record<ExclusionReason, string> = {
+  preference: "tercih",
+  intolerance: "hassasiyet",
+  allergy: "alerji",
+  unclear: "emin değil",
+  unclassified: "neden yok",
+};
 
 type Source = { label: string; href: string; badge: string };
 
@@ -74,7 +101,8 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
         badge: "Hector 2018",
       },
       {
-        label: "ACSM/AND/DC joint position stand: carbohydrate by training load",
+        label:
+          "ACSM/AND/DC joint position stand: carbohydrate by training load",
         href: "https://pubmed.ncbi.nlm.nih.gov/26891166/",
         badge: "ACSM 2016",
       },
@@ -95,8 +123,16 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
 type Props = { userId: string | null };
 
 export function PersonalPlanView({ userId }: Props) {
-  const { profile, targets, update, setActivity, setEquationSex, setGoal } =
-    useMealPersonalization(userId);
+  const {
+    profile,
+    targets,
+    update,
+    setActivity,
+    setEquationSex,
+    setGoal,
+    saveError,
+    retrySave,
+  } = useMealPersonalization(userId);
   const [showSources, setShowSources] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
   const howDetails = useDetailsTransition<HTMLElement>();
@@ -104,30 +140,108 @@ export function PersonalPlanView({ userId }: Props) {
 
   const { foods } = useFoodCatalog();
   const [excludeQuery, setExcludeQuery] = useState("");
+  // A food picked from search but not yet given a reason — nothing is
+  // written to foodExclusions until one of the four reasons is chosen
+  // (Phase 9 §20 Milestone 1: an exclusion must carry why it exists).
+  const [pendingFoodId, setPendingFoodId] = useState<string | null>(null);
 
+  const excludedIds = new Set(profile.foodExclusions.map(e => e.foodId));
   const excludeMatches = excludeQuery.trim()
     ? foods
-        .filter(
-          (f) =>
-            f.name_tr
-              .toLocaleLowerCase("tr-TR")
-              .includes(excludeQuery.trim().toLocaleLowerCase("tr-TR")) &&
-            !profile.excludedFoodIds.includes(f.name_tr)
-        )
+        .filter(f => {
+          const q = excludeQuery.trim().toLocaleLowerCase("tr-TR");
+          const nameMatches = f.name_tr.toLocaleLowerCase("tr-TR").includes(q);
+          // Alias-aware: useFoodCatalog's map already keys by alias too, but
+          // `foods` here is the plain list — check aliases directly so a
+          // search by an alias spelling still finds the row (§20.6 C5).
+          const aliasMatches = (f.aliases ?? []).some(a =>
+            a.toLocaleLowerCase("tr-TR").includes(q),
+          );
+          return (nameMatches || aliasMatches) && !excludedIds.has(f.name_tr);
+        })
         .slice(0, 5)
     : [];
 
-  function addExclusion(nameTr: string) {
-    update("excludedFoodIds", [...profile.excludedFoodIds, nameTr]);
+  function addExclusion(foodId: string, reason: ExclusionReason) {
+    update("foodExclusions", [
+      ...profile.foodExclusions,
+      { foodId, reason, createdAt: new Date().toISOString() },
+    ]);
+    setPendingFoodId(null);
     setExcludeQuery("");
   }
 
-  function removeExclusion(nameTr: string) {
+  // For a legacy "unclassified" entry — gives it a real reason without
+  // touching its foodId or createdAt.
+  function reclassifyExclusion(foodId: string, reason: ExclusionReason) {
     update(
-      "excludedFoodIds",
-      profile.excludedFoodIds.filter((id) => id !== nameTr)
+      "foodExclusions",
+      profile.foodExclusions.map(e =>
+        e.foodId === foodId ? { ...e, reason } : e,
+      ),
     );
   }
+
+  function removeExclusion(foodId: string) {
+    update(
+      "foodExclusions",
+      profile.foodExclusions.filter(e => e.foodId !== foodId),
+    );
+  }
+
+  const unclassifiedExclusions = profile.foodExclusions.filter(
+    e => e.reason === "unclassified",
+  );
+  const classifiedExclusions = profile.foodExclusions.filter(
+    e => e.reason !== "unclassified",
+  );
+
+  // Allergen-class exclusions — a separate list from food-level exclusions
+  // above (B3's own binding rule: a specific food and an allergen class are
+  // not interchangeable). No "unclassified" migration state exists here —
+  // this is a brand new field, every entry always carries the reason it
+  // was created with.
+  const [pendingAllergenClass, setPendingAllergenClass] =
+    useState<AllergenClassId | null>(null);
+  const excludedAllergenClasses = new Set(
+    profile.allergenExclusions.map(e => e.allergenClass),
+  );
+  const availableAllergenClasses = ALLERGEN_CLASS_IDS.filter(
+    id => !excludedAllergenClasses.has(id),
+  );
+
+  function addAllergenExclusion(
+    allergenClass: AllergenClassId,
+    reason: ExclusionReason,
+  ) {
+    const entry: AllergenClassExclusion = {
+      allergenClass,
+      reason,
+      createdAt: new Date().toISOString(),
+    };
+    update("allergenExclusions", current =>
+      upsertAllergenClassExclusion(current, entry),
+    );
+    setPendingAllergenClass(null);
+  }
+
+  function removeAllergenExclusion(allergenClass: AllergenClassId) {
+    update("allergenExclusions", current =>
+      current.filter(e => e.allergenClass !== allergenClass),
+    );
+  }
+
+  // Shown once anything hard-tier-and-clinical-adjacent is present — not a
+  // safety claim, a caveat that this app does not replace one (Phase 9
+  // §20 Milestone 1: no allergy-safety claim in product copy).
+  const hasClinicalAdjacentExclusion =
+    unclassifiedExclusions.length > 0 ||
+    classifiedExclusions.some(
+      e => e.reason === "allergy" || e.reason === "unclear",
+    ) ||
+    profile.allergenExclusions.some(
+      e => e.reason === "allergy" || e.reason === "unclear",
+    );
 
   return (
     <div className="space-y-5">
@@ -143,6 +257,15 @@ export function PersonalPlanView({ userId }: Props) {
           bilgilerinle oluştur.
         </p>
       </div>
+
+      {saveError && (
+        <div className="rounded-lg border border-destructive/40 bg-destructive/5 p-3 text-xs text-destructive">
+          Değişiklikler cihazında kaydedildi ama sunucuya kaydedilemedi.{" "}
+          <button type="button" onClick={retrySave} className="underline">
+            Tekrar dene
+          </button>
+        </div>
+      )}
 
       <section className="rounded-lg border border-border p-3">
         <h2 className="flex items-center gap-2 text-sm font-semibold">
@@ -226,7 +349,9 @@ export function PersonalPlanView({ userId }: Props) {
                 ))}
               </select>
             </Field>
-            <Field label="Hedef" sourceBadge={showSources ? "NIDDK" : undefined}>
+            <Field
+              label="Hedef"
+              sourceBadge={showSources ? "NIDDK" : undefined}>
               <select
                 value={profile.goal}
                 onChange={event =>
@@ -251,42 +376,186 @@ export function PersonalPlanView({ userId }: Props) {
       <section className="rounded-lg border border-border p-3">
         <h2 className="text-sm font-semibold">Önerilmesin</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          Sevmediğin veya yiyemediğin besinleri işaretle — öneriler bunları hiç
-          göstermez.
+          Besini işaretle ve nedenini seç — öneriler buna göre değişir: alerji
+          ve emin olmadığın besinler önerilerden tamamen çıkarılır, hassasiyet
+          daha az önerilir, sevmediğin besinler önerilmez.
         </p>
-        <Input
-          className="mt-2"
-          placeholder="Besin ara..."
-          value={excludeQuery}
-          onInput={(event: Event) =>
-            setExcludeQuery((event.target as HTMLInputElement).value)
-          }
-        />
-        {excludeMatches.length > 0 && (
+        {!pendingFoodId && (
+          <Input
+            className="mt-2"
+            placeholder="Besin ara..."
+            value={excludeQuery}
+            onInput={(event: Event) =>
+              setExcludeQuery((event.target as HTMLInputElement).value)
+            }
+          />
+        )}
+        {!pendingFoodId && excludeMatches.length > 0 && (
           <ul className="mt-1 divide-y divide-border rounded-md border border-border">
-            {excludeMatches.map((f) => (
+            {excludeMatches.map(f => (
               <li key={f.name_tr}>
                 <button
                   type="button"
                   className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
-                  onClick={() => addExclusion(f.name_tr)}>
+                  onClick={() => setPendingFoodId(f.name_tr)}>
                   {f.name_tr}
                 </button>
               </li>
             ))}
           </ul>
         )}
-        {profile.excludedFoodIds.length > 0 && (
+        {pendingFoodId && (
+          <div className="mt-2 rounded-md border border-border p-2">
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {pendingFoodId}
+              </span>{" "}
+              — nedeni ne?
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              {REASON_OPTIONS.map(opt => (
+                <ReasonButton
+                  key={opt.value}
+                  label={opt.label}
+                  onClick={() => addExclusion(pendingFoodId, opt.value)}
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setPendingFoodId(null)}
+              className="mt-2 text-xs text-muted-foreground underline underline-offset-2">
+              Vazgeç
+            </button>
+          </div>
+        )}
+
+        {unclassifiedExclusions.length > 0 && (
+          <div className="mt-3 space-y-2 rounded-md border border-signal/40 bg-signal/5 p-2">
+            <p className="text-xs font-medium text-foreground">
+              Bu besinlerin nedeni hiç seçilmemiş — lütfen seç:
+            </p>
+            {unclassifiedExclusions.map(e => (
+              <div key={e.foodId} className="space-y-1">
+                <p className="text-xs">{e.foodId}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {REASON_OPTIONS.map(opt => (
+                    <ReasonButton
+                      key={opt.value}
+                      small
+                      label={opt.label}
+                      onClick={() => reclassifyExclusion(e.foodId, opt.value)}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => removeExclusion(e.foodId)}
+                    aria-label={`${e.foodId} hariç tutmayı kaldır`}
+                    className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-accent">
+                    Kaldır
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {classifiedExclusions.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1.5">
-            {profile.excludedFoodIds.map((id) => (
+            {classifiedExclusions.map(e => (
               <span
-                key={id}
+                key={e.foodId}
                 className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs">
-                {id}
+                {e.foodId}
+                <span className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+                  {REASON_LABEL_SHORT[e.reason]}
+                </span>
                 <button
                   type="button"
-                  onClick={() => removeExclusion(id)}
-                  aria-label={`${id} hariç tutmayı kaldır`}
+                  onClick={() => removeExclusion(e.foodId)}
+                  aria-label={`${e.foodId} hariç tutmayı kaldır`}
+                  className="text-muted-foreground">
+                  ×
+                </button>
+              </span>
+            ))}
+          </div>
+        )}
+
+        {hasClinicalAdjacentExclusion && (
+          <p className="mt-2 text-xs text-signal">
+            Bu uygulama tıbbi bir alerji kontrolü yapmaz. Ciddi bir alerjin ya
+            da hassasiyetin varsa etiketleri her zaman kontrol et ve gerekiyorsa
+            bir sağlık uzmanına danış.
+          </p>
+        )}
+      </section>
+
+      <section className="rounded-lg border border-border p-3">
+        <h2 className="text-sm font-semibold">Alerjen grubu hariç tut</h2>
+        <p className="mt-1 text-xs text-muted-foreground">
+          Belirli bir besin yerine bütün bir alerjen grubunu (ör. "sert kabuklu
+          yemişler") hariç tutabilirsin — Türkiye/AB'nin 14 alerjen grubuna
+          göre. Bu, tek bir besini hariç tutmaktan farklıdır: grup eşleşmesi
+          bilinmeyen (henüz değerlendirilmemiş) bir besin de, alerji/emin
+          değilim nedeniyle hariç tutulmuş bir grup için önerilerden çıkarılır —
+          güvenlik için, veri eksikliği asla "güvenli" sayılmaz.
+        </p>
+        {!pendingAllergenClass && availableAllergenClasses.length > 0 && (
+          <ul className="mt-2 divide-y divide-border rounded-md border border-border">
+            {availableAllergenClasses.map(id => (
+              <li key={id}>
+                <button
+                  type="button"
+                  className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                  onClick={() => setPendingAllergenClass(id)}>
+                  {ALLERGEN_CLASS_LABEL_TR[id]}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {pendingAllergenClass && (
+          <div className="mt-2 rounded-md border border-border p-2">
+            <p className="text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">
+                {ALLERGEN_CLASS_LABEL_TR[pendingAllergenClass]}
+              </span>{" "}
+              — nedeni ne?
+            </p>
+            <div className="mt-2 grid grid-cols-2 gap-1.5">
+              {REASON_OPTIONS.map(opt => (
+                <ReasonButton
+                  key={opt.value}
+                  label={opt.label}
+                  onClick={() =>
+                    addAllergenExclusion(pendingAllergenClass, opt.value)
+                  }
+                />
+              ))}
+            </div>
+            <button
+              type="button"
+              onClick={() => setPendingAllergenClass(null)}
+              className="mt-2 text-xs text-muted-foreground underline underline-offset-2">
+              Vazgeç
+            </button>
+          </div>
+        )}
+        {profile.allergenExclusions.length > 0 && (
+          <div className="mt-2 flex flex-wrap gap-1.5">
+            {profile.allergenExclusions.map(e => (
+              <span
+                key={e.allergenClass}
+                className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs">
+                {ALLERGEN_CLASS_LABEL_TR[e.allergenClass]}
+                <span className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+                  {REASON_LABEL_SHORT[e.reason]}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => removeAllergenExclusion(e.allergenClass)}
+                  aria-label={`${ALLERGEN_CLASS_LABEL_TR[e.allergenClass]} hariç tutmayı kaldır`}
                   className="text-muted-foreground">
                   ×
                 </button>
@@ -304,8 +573,7 @@ export function PersonalPlanView({ userId }: Props) {
         />
       )}
 
-      <div
-        className="glow-signal rounded-lg">
+      <div className="glow-signal rounded-lg">
         <details
           open={howOpen}
           onToggle={event => {
@@ -317,7 +585,7 @@ export function PersonalPlanView({ userId }: Props) {
             "rounded-lg",
             howOpen && howDetails.settled
               ? "gradient-edge-flow p-px"
-              : "border-signal-solid"
+              : "border-signal-solid",
           )}>
           <summary
             ref={howDetails.ref}
@@ -339,9 +607,9 @@ export function PersonalPlanView({ userId }: Props) {
                 <span className="font-medium text-foreground">
                   Bazal metabolizma (BMR):
                 </span>{" "}
-                Mifflin-St Jeor formülü — 9.99×Kilo + 6.25×Boy − 4.92×Yaş,
-                artı denklem seçimine göre erkek katsayısı (+5) ya da kadın
-                katsayısı (−161).
+                Mifflin-St Jeor formülü — 9.99×Kilo + 6.25×Boy − 4.92×Yaş, artı
+                denklem seçimine göre erkek katsayısı (+5) ya da kadın katsayısı
+                (−161).
               </li>
               <li>
                 <span className="font-medium text-foreground">
@@ -355,33 +623,32 @@ export function PersonalPlanView({ userId }: Props) {
                 <span className="font-medium text-foreground">
                   Günlük enerji hedefi:
                 </span>{" "}
-                Kademeli kilo kaybında koruma −400 kcal, kilo
-                alma/performansta +250 kcal; kilomu korumak seçiliyse
-                değişmez. Hedef hiçbir zaman 1200 kcal'in altına inmez.
+                Kademeli kilo kaybında koruma −400 kcal, kilo alma/performansta
+                +250 kcal; kilomu korumak seçiliyse değişmez. Hedef hiçbir zaman
+                1200 kcal'in altına inmez.
               </li>
               <li>
                 <span className="font-medium text-foreground">
                   Protein / Yağ / Karbonhidrat / Lif aralıkları:
                 </span>{" "}
                 yağ hedef kalorinin %20-35'i (DRI); karbonhidrat, aktivite
-                seviyesine göre kilo başına 3-12g (spor beslenmesi
-                literatürü, kalori hedefinden bağımsız); protein kilo başına
-                1.2g (temel), 1.6g (aktif/çok aktif ya da kilo alma
-                hedefinde) veya 2.0g (kilo verme hedefinde, kas kütlesini
-                korumak için); lif her 1000 kcal için ~14g (DRI).
+                seviyesine göre kilo başına 3-12g (spor beslenmesi literatürü,
+                kalori hedefinden bağımsız); protein kilo başına 1.2g (temel),
+                1.6g (aktif/çok aktif ya da kilo alma hedefinde) veya 2.0g (kilo
+                verme hedefinde, kas kütlesini korumak için); lif her 1000 kcal
+                için ~14g (DRI).
               </li>
             </ul>
             <p>
-              Bu sonuçlar klinik ölçüm veya tıbbi tavsiye değildir. İlaç,
-              kronik hastalık, gebelik, emzirme veya yeme bozukluğu
-              durumlarında diyetisyen ya da hekimle görüş.
+              Bu sonuçlar klinik ölçüm veya tıbbi tavsiye değildir. İlaç, kronik
+              hastalık, gebelik, emzirme veya yeme bozukluğu durumlarında
+              diyetisyen ya da hekimle görüş.
             </p>
           </div>
         </details>
       </div>
 
-      <div
-        className="glow-signal rounded-lg">
+      <div className="glow-signal rounded-lg">
         <details
           open={showSources}
           onToggle={event => {
@@ -391,7 +658,7 @@ export function PersonalPlanView({ userId }: Props) {
           }}
           className={cn(
             "group rounded-lg",
-            showSources ? "border-gradient-edge" : "border-signal-solid"
+            showSources ? "border-gradient-edge" : "border-signal-solid",
           )}>
           <summary
             ref={sourcesDetails.ref}
@@ -421,6 +688,28 @@ export function PersonalPlanView({ userId }: Props) {
         </details>
       </div>
     </div>
+  );
+}
+
+function ReasonButton({
+  label,
+  onClick,
+  small,
+}: {
+  label: string;
+  onClick: () => void;
+  small?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        "rounded-md border border-border text-left transition-colors hover:bg-accent",
+        small ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm",
+      )}>
+      {label}
+    </button>
   );
 }
 

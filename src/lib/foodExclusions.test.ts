@@ -2,16 +2,27 @@ import { describe, expect, it } from "vitest";
 import {
   hasHardExclusion,
   hasSoftConstraint,
-  allergenMappingStatus,
-  hasAllergenClassExclusion,
+  hasHardAllergenClassExclusion,
+  hasSoftAllergenClassConstraint,
   migrateLegacyExclusions,
+  upsertAllergenClassExclusion,
   tierOf,
   type ExclusionReason,
+  type AllergenClassExclusion,
 } from "./foodExclusions";
+import {
+  allergenClassStatusForFood,
+  type AllergenClassMapping,
+} from "./allergenClasses";
 
 describe("tierOf", () => {
   it("classifies allergy, unclear, unclassified, and preference as hard", () => {
-    const hard: ExclusionReason[] = ["allergy", "unclear", "unclassified", "preference"];
+    const hard: ExclusionReason[] = [
+      "allergy",
+      "unclear",
+      "unclassified",
+      "preference",
+    ];
     for (const reason of hard) {
       expect(tierOf(reason)).toBe("hard");
     }
@@ -22,7 +33,7 @@ describe("tierOf", () => {
   });
 });
 
-describe("hasHardExclusion / hasSoftConstraint", () => {
+describe("hasHardExclusion / hasSoftConstraint (food-level)", () => {
   const now = new Date().toISOString();
   const entries = [
     { foodId: "yer fıstığı", reason: "allergy" as const, createdAt: now },
@@ -44,14 +55,14 @@ describe("hasHardExclusion / hasSoftConstraint", () => {
     expect(hasHardExclusion(entries, "brokoli")).toBe(true);
   });
 
-  it("fails closed for a food id with no matching entry", () => {
+  it("does not exclude an unrelated food with no matching entry", () => {
     expect(hasHardExclusion(entries, "muz")).toBe(false);
     expect(hasSoftConstraint(entries, "muz")).toBe(false);
   });
 });
 
 describe("migrateLegacyExclusions", () => {
-  it("never produces reason \"preference\" — an allergy must not be silently downgraded", () => {
+  it('never produces reason "preference" — an allergy must not be silently downgraded', () => {
     const migrated = migrateLegacyExclusions(["yer fıstığı", "süt", "brokoli"]);
     for (const entry of migrated) {
       expect(entry.reason).toBe("unclassified");
@@ -70,71 +81,255 @@ describe("migrateLegacyExclusions", () => {
   });
 });
 
-describe("preference vs. safety-tier exclusions (Phase 9 §20 Milestone 1)", () => {
+describe("preference vs. safety-tier exclusions — existing semantics preserved", () => {
   it("keeps reason distinguishable even though preference and allergy share today's hard tier", () => {
-    // Today's shipped behavior gives preference and allergy the same tier
-    // (both hard) — foodExclusions.ts documents this as a deliberate,
-    // unchanged-from-today choice, not an oversight. What must never
-    // regress is that the *reason* stays on the entry regardless, so a
-    // later milestone can differentiate them without a data migration.
     const entries = [
-      { foodId: "brokoli", reason: "preference" as const, createdAt: new Date().toISOString() },
-      { foodId: "yer fıstığı", reason: "allergy" as const, createdAt: new Date().toISOString() },
+      {
+        foodId: "brokoli",
+        reason: "preference" as const,
+        createdAt: new Date().toISOString(),
+      },
+      {
+        foodId: "yer fıstığı",
+        reason: "allergy" as const,
+        createdAt: new Date().toISOString(),
+      },
     ];
-    expect(entries.find((e) => e.foodId === "brokoli")?.reason).toBe("preference");
-    expect(entries.find((e) => e.foodId === "yer fıstığı")?.reason).toBe("allergy");
+    expect(entries.find(e => e.foodId === "brokoli")?.reason).toBe(
+      "preference",
+    );
+    expect(entries.find(e => e.foodId === "yer fıstığı")?.reason).toBe(
+      "allergy",
+    );
     expect(tierOf("preference")).toBe(tierOf("allergy"));
   });
-});
 
-describe("allergenMappingStatus — B3 foundation", () => {
-  it("reports \"unmapped\" for a food with no allergenClasses field", () => {
-    expect(allergenMappingStatus({})).toBe("unmapped");
-  });
-
-  it("reports \"mapped\" for a food with a confirmed-empty allergenClasses list", () => {
-    // [] is a real, confirmed answer ("checked, carries none") — must not
-    // collapse into the same state as "never checked."
-    expect(allergenMappingStatus({ allergenClasses: [] })).toBe("mapped");
-  });
-
-  it("reports \"mapped\" for a food with populated allergenClasses", () => {
-    expect(allergenMappingStatus({ allergenClasses: ["tree_nut"] })).toBe("mapped");
+  it("intolerance stays soft, allergy stays hard — A1 unchanged", () => {
+    expect(tierOf("intolerance")).toBe("soft");
+    expect(tierOf("allergy")).toBe("hard");
+    expect(tierOf("unclear")).toBe("hard");
   });
 });
 
-describe("hasAllergenClassExclusion — B3 foundation", () => {
+// ---------------------------------------------------------------------------
+// Allergen-class (B3) — canonical vocabulary, tri-state status, conservative
+// UNKNOWN escalation.
+
+function mapping(entries: AllergenClassMapping[]) {
+  return { allergen_classes: entries };
+}
+
+describe("allergenClassStatusForFood — tri-state", () => {
+  it('reports "unknown" for a food with no allergen_classes field at all', () => {
+    expect(allergenClassStatusForFood({}, "tree_nuts")).toBe("unknown");
+  });
+
+  it('reports "unknown" for a class not present in an otherwise-populated array', () => {
+    const food = mapping([
+      { class: "milk", status: "present", source: "curated" },
+    ]);
+    expect(allergenClassStatusForFood(food, "tree_nuts")).toBe("unknown");
+  });
+
+  it('reports "present" for an explicitly present class', () => {
+    const food = mapping([
+      { class: "tree_nuts", status: "present", source: "regulatory" },
+    ]);
+    expect(allergenClassStatusForFood(food, "tree_nuts")).toBe("present");
+  });
+
+  it('reports "confirmed_absent" only when explicitly recorded, never inferred', () => {
+    const food = mapping([
+      {
+        class: "gluten_cereals",
+        status: "confirmed_absent",
+        source: "regulatory",
+      },
+    ]);
+    expect(allergenClassStatusForFood(food, "gluten_cereals")).toBe(
+      "confirmed_absent",
+    );
+  });
+});
+
+describe("hasHardAllergenClassExclusion — conservative UNKNOWN escalation", () => {
   const now = new Date().toISOString();
 
-  it("does not fail open when the food IS mapped and the class is excluded", () => {
-    const exclusions = [{ allergenClass: "tree_nut", reason: "allergy" as const, createdAt: now }];
-    expect(hasAllergenClassExclusion(exclusions, { allergenClasses: ["tree_nut"] })).toBe(true);
+  it("blocks a food whose class status is PRESENT (does not fail open)", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "tree_nuts", reason: "allergy", createdAt: now },
+    ];
+    const almond = mapping([
+      { class: "tree_nuts", status: "present", source: "regulatory" },
+    ]);
+    expect(hasHardAllergenClassExclusion(exclusions, almond)).toBe(true);
   });
 
-  it("matches on any one of several mapped classes", () => {
-    const exclusions = [{ allergenClass: "shellfish", reason: "allergy" as const, createdAt: now }];
+  it("blocks a food with UNKNOWN status for the excluded class — cannot silently bypass", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "tree_nuts", reason: "allergy", createdAt: now },
+    ];
+    // No mapping data at all for this food — must not be treated as safe.
+    expect(hasHardAllergenClassExclusion(exclusions, {})).toBe(true);
+  });
+
+  it("lets through only a food explicitly confirmed_absent for the excluded class", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "gluten_cereals", reason: "allergy", createdAt: now },
+    ];
+    const rice = mapping([
+      {
+        class: "gluten_cereals",
+        status: "confirmed_absent",
+        source: "regulatory",
+      },
+    ]);
+    expect(hasHardAllergenClassExclusion(exclusions, rice)).toBe(false);
+  });
+
+  it("blocks on unclear/unclassified reasons the same as allergy (hard tier)", () => {
+    const unclear: AllergenClassExclusion[] = [
+      { allergenClass: "milk", reason: "unclear", createdAt: now },
+    ];
+    expect(hasHardAllergenClassExclusion(unclear, {})).toBe(true);
+  });
+
+  it("does not block on a soft-tier (intolerance) allergen-class entry", () => {
+    const soft: AllergenClassExclusion[] = [
+      { allergenClass: "milk", reason: "intolerance", createdAt: now },
+    ];
+    const yogurt = mapping([
+      { class: "milk", status: "present", source: "curated" },
+    ]);
+    expect(hasHardAllergenClassExclusion(soft, yogurt)).toBe(false);
+  });
+
+  it("does not exclude a food explicitly confirmed_absent for the excluded class, even if other classes are unrelated", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "peanuts", reason: "allergy", createdAt: now },
+    ];
+    // Rice must carry an EXPLICIT confirmed_absent for "peanuts" itself to
+    // pass — a confirmed_absent entry for a DIFFERENT class (gluten_cereals)
+    // says nothing about peanuts, which is UNKNOWN and therefore correctly
+    // blocks (see the UNKNOWN-escalation test above). This is the same
+    // per-class granularity in action, just proving the opposite corner.
+    const rice = mapping([
+      {
+        class: "gluten_cereals",
+        status: "confirmed_absent",
+        source: "regulatory",
+      },
+      { class: "peanuts", status: "confirmed_absent", source: "curated" },
+    ]);
+    expect(hasHardAllergenClassExclusion(exclusions, rice)).toBe(false);
+  });
+});
+
+describe("hasSoftAllergenClassConstraint — intolerance stays soft, A1 unchanged", () => {
+  const now = new Date().toISOString();
+
+  it("flags only a confirmed PRESENT match", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "milk", reason: "intolerance", createdAt: now },
+    ];
+    const yogurt = mapping([
+      { class: "milk", status: "present", source: "curated" },
+    ]);
+    expect(hasSoftAllergenClassConstraint(exclusions, yogurt)).toBe(true);
+  });
+
+  it("does not flag UNKNOWN — soft tier doesn't need hard tier's escalation", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "milk", reason: "intolerance", createdAt: now },
+    ];
+    expect(hasSoftAllergenClassConstraint(exclusions, {})).toBe(false);
+  });
+
+  it("does not flag confirmed_absent", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      {
+        allergenClass: "gluten_cereals",
+        reason: "intolerance",
+        createdAt: now,
+      },
+    ];
+    const rice = mapping([
+      {
+        class: "gluten_cereals",
+        status: "confirmed_absent",
+        source: "regulatory",
+      },
+    ]);
+    expect(hasSoftAllergenClassConstraint(exclusions, rice)).toBe(false);
+  });
+
+  it("ignores hard-tier entries — a soft check never reports a hard-tier match", () => {
+    const exclusions: AllergenClassExclusion[] = [
+      { allergenClass: "tree_nuts", reason: "allergy", createdAt: now },
+    ];
+    const almond = mapping([
+      { class: "tree_nuts", status: "present", source: "regulatory" },
+    ]);
+    expect(hasSoftAllergenClassConstraint(exclusions, almond)).toBe(false);
+  });
+});
+
+describe("food-level vs. allergen-class exclusions are not interchangeable", () => {
+  it("a food-level exclusion on one food does not exclude a different food via its class", () => {
+    const now = new Date().toISOString();
+    const foodLevel = [
+      { foodId: "badem", reason: "allergy" as const, createdAt: now },
+    ];
+    // "ceviz" (walnut) is a different food, also a tree nut, but was never
+    // itself excluded at the food level.
+    expect(hasHardExclusion(foodLevel, "ceviz")).toBe(false);
+  });
+
+  it("an allergen-class exclusion does not require a matching food-level entry to block", () => {
+    const now = new Date().toISOString();
+    const classLevel: AllergenClassExclusion[] = [
+      { allergenClass: "tree_nuts", reason: "allergy", createdAt: now },
+    ];
+    const walnut = mapping([
+      { class: "tree_nuts", status: "present", source: "regulatory" },
+    ]);
+    // No food-level exclusion exists for "ceviz" at all — the class-level
+    // one is sufficient and independent (B3's binding rule).
+    expect(hasHardAllergenClassExclusion(classLevel, walnut)).toBe(true);
+  });
+});
+
+describe("allergen-class exclusion updates", () => {
+  it("replaces a removed-and-re-added class without collapsing other classes", () => {
+    const first: AllergenClassExclusion = {
+      allergenClass: "tree_nuts",
+      reason: "allergy",
+      createdAt: "2026-09-08T00:00:00.000Z",
+    };
+    const milk: AllergenClassExclusion = {
+      allergenClass: "milk",
+      reason: "intolerance",
+      createdAt: "2026-09-08T00:01:00.000Z",
+    };
+    const readded: AllergenClassExclusion = {
+      allergenClass: "tree_nuts",
+      reason: "unclear",
+      createdAt: "2026-09-08T00:02:00.000Z",
+    };
+
+    const afterAdd = upsertAllergenClassExclusion([], first);
+    const withMilk = upsertAllergenClassExclusion(afterAdd, milk);
+    const afterRemove = withMilk.filter(
+      entry => entry.allergenClass !== "tree_nuts",
+    );
+    const afterReadd = upsertAllergenClassExclusion(afterRemove, readded);
+
+    expect(afterReadd).toEqual([milk, readded]);
     expect(
-      hasAllergenClassExclusion(exclusions, { allergenClasses: ["tree_nut", "shellfish"] })
-    ).toBe(true);
-  });
-
-  it("does not match a mapped food whose classes don't intersect the exclusion", () => {
-    const exclusions = [{ allergenClass: "shellfish", reason: "allergy" as const, createdAt: now }];
-    expect(hasAllergenClassExclusion(exclusions, { allergenClasses: ["tree_nut"] })).toBe(false);
-  });
-
-  it("only matches on hard-tier reasons, same split as tierOf", () => {
-    const exclusions = [{ allergenClass: "tree_nut", reason: "intolerance" as const, createdAt: now }];
-    expect(hasAllergenClassExclusion(exclusions, { allergenClasses: ["tree_nut"] })).toBe(false);
-  });
-
-  it("explicitly handles unmapped allergen data — never matches, and this is not a safety claim", () => {
-    const exclusions = [{ allergenClass: "tree_nut", reason: "allergy" as const, createdAt: now }];
-    // No allergenClasses field at all — unmapped, not "confirmed clear".
-    const unmappedFood = {};
-    expect(hasAllergenClassExclusion(exclusions, unmappedFood)).toBe(false);
-    // The caller's obligation: check mapping status separately rather than
-    // reading the false above as "this food is safe".
-    expect(allergenMappingStatus(unmappedFood)).toBe("unmapped");
+      afterReadd.filter(entry => entry.allergenClass === "tree_nuts"),
+    ).toHaveLength(1);
+    expect(
+      afterReadd.filter(entry => entry.allergenClass === "milk"),
+    ).toHaveLength(1);
   });
 });

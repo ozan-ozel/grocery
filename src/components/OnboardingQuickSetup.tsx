@@ -39,10 +39,10 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
 
   // Reuses validateProfile's bounds (age 18-100, height 120-230cm, weight
   // 35-300kg) instead of re-declaring them, so step 0 can't silently drift
-  // from what the server-side save will actually accept. `name` and
-  // `excludedFoodIds` are filled with non-triggering placeholders since
-  // step 0 doesn't collect them — only the age/height/weight messages are
-  // relevant here.
+  // from what the server-side save will actually accept. `name`,
+  // `foodExclusions` and `allergenExclusions` are filled with
+  // non-triggering placeholders since step 0 doesn't collect them — only
+  // the age/height/weight messages are relevant here.
   const step0Errors = validateProfile({
     name: "-",
     equationSex: answers.equationSex,
@@ -51,7 +51,8 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
     weightKg: answers.weightKg,
     activity: answers.activity,
     goal: answers.goal,
-    excludedFoodIds: [],
+    foodExclusions: [],
+    allergenExclusions: [],
   });
   const step0Invalid = step === 0 && step0Errors.length > 0;
 

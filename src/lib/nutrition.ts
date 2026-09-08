@@ -1,4 +1,5 @@
 import { normalize } from "./categorization/itemCategories";
+import type { AllergenClassMapping } from "./allergenClasses";
 
 export type Nutrition = {
   name_tr: string;
@@ -7,13 +8,22 @@ export type Nutrition = {
   fat_g: number;
   carbs_g: number;
   fiber_g: number;
-  // B3 (allergen-class exclusion) foundation — Phase 9 §20.2. undefined means
-  // "not yet mapped" (unmapped), distinct from [] ("confirmed no known allergen
-  // classes"). Nothing currently populates this — no allergen vocabulary or
-  // per-food mapping exists in this project (checked: nutrition table columns,
-  // data/nutrition.json row schema, supabase/*.sql — none carry allergen data).
-  // See src/lib/foodExclusions.ts for the matching side of this seam.
-  allergenClasses?: string[];
+  // Optional: only populated on paths that fetch it (browseNutrition now
+  // does — see pickNutrition). Lets a catalog built from a browse response
+  // resolve alias spellings too, not just exact name_tr (Phase 9 §20.6 C5:
+  // previously only the POST-by-name path resolved aliases).
+  aliases?: string[];
+  // Türkiye/EU 14 allergen-class relationships for this food (see
+  // src/lib/allergenClasses.ts). Snake_case to match every other field on
+  // this type, which is a verbatim passthrough of the `nutrition` table's
+  // real column names — no camelCase translation happens anywhere in this
+  // file. undefined = this food has never been evaluated for ANY class
+  // (whole-food unknown); a present array only carries the classes that
+  // HAVE been evaluated — a class missing from the array is UNKNOWN for
+  // that class specifically, never inferred as confirmed_absent. See
+  // allergenClassStatusForFood() and src/lib/foodExclusions.ts for the
+  // matching side.
+  allergen_classes?: AllergenClassMapping[];
 };
 
 export type NutritionMap = Map<string, Nutrition>;
@@ -260,9 +270,13 @@ function pickNutrition(row: ApiRow): Nutrition {
     fat_g: row.fat_g,
     carbs_g: row.carbs_g,
     fiber_g: row.fiber_g,
-    // Forward-compatible pass-through for the B3 seam (see the
-    // Nutrition type above) — not currently sent by any API route,
-    // so this is a no-op today, not a claim that mapping data exists.
-    allergenClasses: row.allergenClasses,
+    // Previously dropped here, which made browseNutrition (and anything
+    // built from it, e.g. useFoodCatalog's map) alias-blind while
+    // fetchNutrition's POST-by-name path already resolved aliases.
+    aliases: row.aliases,
+    // Now sent by netlify/functions/nutrition.ts's SELECT_COLS (see the
+    // Nutrition type above) — carries real curated/regulatory allergen-class
+    // data once supabase/14-nutrition-allergen-classes.sql has been applied.
+    allergen_classes: row.allergen_classes,
   };
 }
