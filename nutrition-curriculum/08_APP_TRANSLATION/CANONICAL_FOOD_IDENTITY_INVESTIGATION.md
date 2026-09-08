@@ -2,11 +2,19 @@
 
 ## Status and Scope
 
+> **Correction, added after this investigation was superseded by events:** the implementation this
+> document's own status lines describe as "still unauthorized" was subsequently authorized, completed,
+> and merged to `master` (`d437f37` → `6555c7d` → `8a5ac09`). See `docs/SESSION_CHECKPOINT.md` for the
+> current, authoritative state. The status lines immediately below are preserved unedited as the
+> historical record of this investigation's own scope at the time it was written.
+
 - Phase: Phase 9 — Application / Product Architecture
 - Task: read-only identity investigation and architecture definition
 - Branch: `feature/phase-9-canonical-food-identity`
-- Implementation status: no production behavior changed by this investigation
-- Decision status: six implementation-boundary decisions approved; implementation still unauthorized
+- Implementation status (at the time this investigation was written): no production behavior changed by
+  this investigation
+- Decision status (at the time this investigation was written): six implementation-boundary decisions
+  approved; implementation still unauthorized
 
 This artifact records the current code evidence and a minimum safe direction for a future
 implementation. It does not amend Phase 1–8 artifacts, existing DEC records, the master Phase 9
