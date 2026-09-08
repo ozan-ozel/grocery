@@ -9,20 +9,36 @@ authoritative technical content. This file references those artifacts rather tha
 
 ## Current Objective
 
-**DEC-067 (preparation-detail level) is RATIFIED, and its Level 1 implementation is now CLOSED.**
-DEC-067 = **Level 1 — ingredient-list-level, with an optional concise textual preparation note.**
-See `nutrition-curriculum/00_PROJECT_CONTROL/DECISIONS/2026-09-08-dec-067-preparation-detail-
-ratification.md` (the decision record), `08_APP_TRANSLATION/DEC-067_PREPARATION_DETAIL_
-INVESTIGATION.md` (the investigation that preceded it), and `08_APP_TRANSLATION/DEC-067_LEVEL_1_
-IMPLEMENTATION_INVESTIGATION.md` (the implementation-readiness analysis this implementation followed).
+**Phase 9 documentation maintenance is complete: a documentation architecture investigation was
+completed, and stale Canonical Food Identity references were corrected.**
+
+- **Documentation architecture investigation:** `08_APP_TRANSLATION/PHASE_9_DOCUMENTATION_
+  ARCHITECTURE_INVESTIGATION.md` evaluated whether `APP_DECISION_INVENTORY.md`, `APP_DECISION_
+  MODEL.md`, `APP_DECISION_KNOWLEDGE_MAPPING.md`, `APP_DECISION_GAPS.md`, and `PHASE_9_APPLICATION_
+  CAPABILITY_ARCHITECTURE.md` should be split into a document family. **Conclusion: no split is
+  justified for any of the five documents** — investigation only, nothing was split, renamed, or
+  restructured.
+- **Canonical Food Identity stale-reference maintenance:** seven passages across `PHASE_9_
+  APPLICATION_CAPABILITY_ARCHITECTURE.md` (§20.0, §20.2, §20.3, §20.12, §20.13, §20.14) and
+  `CANONICAL_FOOD_IDENTITY_INVESTIGATION.md`'s status header still described the Canonical Food
+  Identity anchor decision as open/undecided, though it was ratified and implemented in the earlier,
+  separate Canonical Food Identity milestone. Each was corrected with a minimal, additive note (original
+  text preserved for provenance); no historical decision-package section was rewritten.
+- Both were committed on `docs/phase-9-food-identity-refs-and-architecture-investigation`
+  (`5ce521a` stale-reference corrections, `c627f47` the investigation artifact), merged `--no-ff` into
+  `master` at `6472560`, and pushed. `local master == origin/master` confirmed by commit hash.
+
+DEC-067 (preparation-detail level) remains ratified (Level 1) and its implementation remains CLOSED,
+per the prior milestone below — unchanged by this documentation work.
 
 ```text
 DEC-067 decision:        CLOSED (ratified Level 1)
 DEC-067 implementation:  CLOSED
+DEC-068:                 OPEN (untouched)
 DEC-069:                 OPEN (unresolved, untouched)
-Canonical Food Identity: CLOSED (unchanged by this work)
-Next task:               continue Phase 9 downstream work (DEC-068/DEC-069 remain open; see
-                          Problems/Unresolved and Next Steps below for other unstarted follow-ups)
+Canonical Food Identity: CLOSED (unchanged; stale docs referencing it as open now corrected)
+Phase 9 doc architecture: investigated — no split justified (see artifact above)
+Next task:               DEC-068 Investigation
 ```
 
 - Implementation: an optional `Combo.prepNote?: string` (`data/combos.json`'s `prep_note`), rendered
