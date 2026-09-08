@@ -43,7 +43,10 @@ export function MealFoodPicker({
   // a confirmed PRESENT match.
   const visibleFoods = foods.filter(
     (food) =>
-      !hasHardExclusion(exclusions, food.name_tr) &&
+      // Passing the full food object (not just .name_tr) lets a food-level
+      // exclusion match by its canonical food_id too, once one exists
+      // (Canonical Food Identity decision 6).
+      !hasHardExclusion(exclusions, food) &&
       !hasHardAllergenClassExclusion(allergenExclusions, food)
   );
   const results = queryLower
@@ -139,7 +142,7 @@ export function MealFoodPicker({
                   className="flex w-full items-center justify-between px-2 py-2 text-left text-sm hover:bg-accent">
                   <span>
                     {food.name_tr}
-                    {(hasSoftConstraint(exclusions, food.name_tr) ||
+                    {(hasSoftConstraint(exclusions, food) ||
                       hasSoftAllergenClassConstraint(allergenExclusions, food)) && (
                       <span className="ml-1.5 text-xs text-muted-foreground">
                         {" "}(hassasiyetin var)

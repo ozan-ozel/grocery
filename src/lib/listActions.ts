@@ -14,6 +14,7 @@ import {
   type State,
 } from "@/lib/store";
 import { isCloseMatch } from "@/lib/fuzzyMatch";
+import { resolveFood, type FoodIdentityIndex } from "@/lib/foodIdentity";
 import type { Undo } from "@/hooks/useUndo";
 
 export function createListActions(params: {
@@ -26,9 +27,24 @@ export function createListActions(params: {
   showUndo: (u: Undo, ttlMs: number) => void;
   selectedIds: Set<string>;
   exitSelectMode: () => void;
+  // Optional — treated as "nothing resolves" when omitted, never as "skip
+  // the check" (same convention as MealFoodPicker's exclusions prop).
+  // Canonical Food Identity implementation: lets addItem attach a stable
+  // food_id to a new shopping row whenever its final name resolves exactly.
+  foodIdentityIndex?: FoodIdentityIndex;
 }) {
-  const { state, active, catalog, updateState, itemCategories, rememberCategory, showUndo, selectedIds, exitSelectMode } =
-    params;
+  const {
+    state,
+    active,
+    catalog,
+    updateState,
+    itemCategories,
+    rememberCategory,
+    showUndo,
+    selectedIds,
+    exitSelectMode,
+    foodIdentityIndex,
+  } = params;
 
   function updateActive(fn: (items: Item[]) => Item[]) {
     updateState((s) => ({
@@ -51,11 +67,31 @@ export function createListActions(params: {
     // to a near-spelling already on this household's list.
     const canonicalName = opts?.exact ? name : findCanonicalName(name, catalog) ?? name;
 
+    // Exact-only resolution (no fuzzy step — see src/lib/foodIdentity.ts) of
+    // the final chosen name against the nutrition catalog. Canonical Food
+    // Identity implementation: this is what makes a shopping add "prefer
+    // Food ID equality where identity matters" without touching free-text
+    // UX for anything that doesn't resolve.
+    const resolution = foodIdentityIndex
+      ? resolveFood(canonicalName, foodIdentityIndex)
+      : { status: "unknown" as const };
+    const resolvedFoodId =
+      resolution.status === "resolved" ? resolution.food.food_id : undefined;
+
     const existing = active.items.find((i) =>
-      isCloseMatch(
-        i.name.toLocaleLowerCase("tr-TR"),
-        canonicalName.toLocaleLowerCase("tr-TR")
-      )
+      // Prefer exact foodId equality when BOTH sides have a resolved
+      // identity — this is the fix for the residual bug the investigation
+      // flagged: `{ exact: true }` (a combo add) skipped the canonical-name
+      // rewrite but this existing-row check still fuzzy-matched against
+      // shopping history, so an exact Food ID add could still be silently
+      // absorbed into an unrelated near-spelling row. Anything that doesn't
+      // resolve on either side keeps today's fuzzy behavior unchanged.
+      resolvedFoodId && i.foodId
+        ? i.foodId === resolvedFoodId
+        : isCloseMatch(
+            i.name.toLocaleLowerCase("tr-TR"),
+            canonicalName.toLocaleLowerCase("tr-TR")
+          )
     );
     // Re-adding something already on the list just un-checks it rather
     // than creating a confusing duplicate row.
@@ -75,6 +111,7 @@ export function createListActions(params: {
         checked: false,
         addedAt: Date.now(),
         category: remembered,
+        foodId: resolvedFoodId,
       },
     ]);
   }

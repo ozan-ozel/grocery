@@ -37,18 +37,41 @@ export function tierOf(reason: ExclusionReason): ExclusionTier {
   return reason === "intolerance" ? "soft" : "hard";
 }
 
+// A FoodExclusion.foodId entry is a legacy display-name string for every
+// row created before the Canonical Food Identity work, and the resolved
+// opaque food_id for anything created after it (PersonalPlanView now stores
+// f.food_id ?? f.name_tr) — the field was never renamed to avoid disturbing
+// the already-tested, already-persisted exclusion system. Accepting either
+// a bare name string (old call sites, and every existing test) or a
+// resolved food identity object lets a match succeed against WHICHEVER
+// representation a given entry happens to hold, without needing to know in
+// advance which one it is. This is what makes exclusion matching survive a
+// future rename for entries created going forward (Canonical Food Identity
+// decision 6 / investigation §12) while never breaking an old entry that
+// only ever had a name to match against.
+type FoodIdentityLike = string | { name_tr: string; food_id?: string };
+
+function matchesFoodIdentity(entryFoodId: string, candidate: FoodIdentityLike): boolean {
+  if (typeof candidate === "string") return entryFoodId === candidate;
+  return entryFoodId === candidate.name_tr || entryFoodId === candidate.food_id;
+}
+
 export function hasHardExclusion(
   entries: FoodExclusion[],
-  foodId: string,
+  candidate: FoodIdentityLike,
 ): boolean {
-  return entries.some(e => e.foodId === foodId && tierOf(e.reason) === "hard");
+  return entries.some(
+    e => matchesFoodIdentity(e.foodId, candidate) && tierOf(e.reason) === "hard",
+  );
 }
 
 export function hasSoftConstraint(
   entries: FoodExclusion[],
-  foodId: string,
+  candidate: FoodIdentityLike,
 ): boolean {
-  return entries.some(e => e.foodId === foodId && tierOf(e.reason) === "soft");
+  return entries.some(
+    e => matchesFoodIdentity(e.foodId, candidate) && tierOf(e.reason) === "soft",
+  );
 }
 
 // A pre-existing entry from the old `excluded_food_ids text[]` mechanism

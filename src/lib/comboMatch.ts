@@ -52,7 +52,10 @@ function comboHasHardConflict(
 ): boolean {
   return items.some(
     (nutrition) =>
-      hasHardExclusion(exclusions, nutrition.name_tr) ||
+      // Passing the resolved Nutrition object (not just .name_tr) lets a
+      // food-level exclusion match by its canonical food_id too, once one
+      // exists — Canonical Food Identity decision 6.
+      hasHardExclusion(exclusions, nutrition) ||
       hasHardAllergenClassExclusion(allergenExclusions, nutrition)
   );
 }
@@ -64,7 +67,7 @@ function comboHasSoftConflict(
 ): boolean {
   return items.some(
     (nutrition) =>
-      hasSoftConstraint(exclusions, nutrition.name_tr) ||
+      hasSoftConstraint(exclusions, nutrition) ||
       hasSoftAllergenClassConstraint(allergenExclusions, nutrition)
   );
 }
