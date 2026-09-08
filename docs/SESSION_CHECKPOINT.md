@@ -9,16 +9,21 @@ authoritative technical content. This file references those artifacts rather tha
 
 ## Current Objective
 
-**Branch: `feature/phase-9-canonical-food-identity`.** The Canonical Food Identity implementation
-(the six decisions in `nutrition-curriculum/08_APP_TRANSLATION/CANONICAL_FOOD_IDENTITY_INVESTIGATION.md`
-§17) is **code-complete, live-verified, and ready to commit.** `supabase/16-nutrition-food-id.sql`
-has been applied to the live database (user-run); the live identity audit and a full
-`netlify:dev` + `auth-test-login` + Playwright browser QA pass have both completed successfully —
-see "Verification" below. A final pre-commit audit found the diff clean and scoped. Nothing is
-blocking a commit except explicit authorization to perform one.
+**Branch: `feature/phase-9-canonical-food-identity` (merged, milestone closed).** The Canonical
+Food Identity implementation (the six decisions in
+`nutrition-curriculum/08_APP_TRANSLATION/CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17) is
+**committed, merged into `master`, and pushed.** `supabase/16-nutrition-food-id.sql` was applied to
+the live database (user-run); the live identity audit and a full `netlify:dev` + `auth-test-login`
++ Playwright browser QA pass both completed successfully — see "Verification" below.
+
+- Feature commit: `d437f37` — "feat: establish canonical food identity"
+- Merge commit into `master`: `6555c7d`
+- Both `feature/phase-9-canonical-food-identity` and `master` pushed to `origin`; local `master`
+  and `origin/master` confirmed at the same commit (`6555c7d`) after push.
 
 Execution status (protocol §48.8 state machine): **`READY`** — no autonomous execution active, no
-review gate open. Gate 7 (end of Phase 9) has **not** opened.
+review gate open. Gate 7 (end of Phase 9) has **not** opened. No further Phase 9 work has been
+started as part of this closeout.
 
 ## Current State
 
@@ -90,9 +95,9 @@ Modified: `netlify/functions/nutrition.ts`, `src/App.tsx`, `src/components/MealF
 `src/components/PersonalPlanView.tsx` (also carries the exclusion-chip display fix — see
 "Verification" above), `src/lib/comboMatch.ts`, `src/lib/foodExclusions.ts`,
 `src/lib/foodIdentitySafety.test.ts`, `src/lib/listActions.ts`, `src/lib/nutrition.ts`,
-`src/lib/store.ts`, `docs/SESSION_CHECKPOINT.md` (this file, kept current through live verification).
+`src/lib/store.ts`, `docs/SESSION_CHECKPOINT.md` (this file, kept current through closeout).
 
-**No commit, push, or merge performed** — explicitly withheld per instruction, working tree only.
+**Committed (`d437f37`), merged into `master` (`6555c7d`), both branches pushed to `origin`.**
 
 ## Important Decisions
 
@@ -110,7 +115,10 @@ Modified: `netlify/functions/nutrition.ts`, `src/App.tsx`, `src/components/MealF
 
 - `supabase/16-nutrition-food-id.sql` **has been applied** to the live database (user-run, confirmed
   via live audit) — this constraint is now satisfied, kept here as historical record.
-- Do not commit, push, merge, or create another branch without explicit authorization.
+- The commit/merge/push sequence for this milestone **was explicitly authorized** and has been
+  performed (see "Current Objective"/"Files Changed" above) — this constraint is now satisfied,
+  kept here as historical record. Future work still requires its own explicit authorization before
+  committing, pushing, or merging.
 - Do not resolve autonomously: allergen vocabulary, unmapped-food default, precedence mechanics, C2's
   schema, user-vs-household exclusion scope, `DEC-067`, `DEC-069`, `DEC-099`/`DEC-100`,
   `DEC-021`/`110`, `DEC-090`. None of these were touched or resolved by this session.
@@ -162,10 +170,12 @@ Modified: `netlify/functions/nutrition.ts`, `src/App.tsx`, `src/components/MealF
 1. ~~Wait for the user to apply the migration, then live-verify~~ — **done**: migration applied,
    live identity audit and a full Playwright QA pass both completed successfully, one UI display
    bug found and fixed, and a final pre-commit audit confirmed the diff is clean and scoped.
-2. **Commit, when explicitly authorized** — nothing else is blocking. Commit message should cover
-   the full Canonical Food Identity milestone (resolver, `food_id`-aware exclusions/shopping,
-   migration, the exclusion-chip display fix) per this checkpoint's "Current State" section.
-3. Do not commit/push/merge without explicit authorization, per instruction §20 of the task.
+2. ~~Commit, when explicitly authorized~~ — **done**: committed (`d437f37`), merged into `master`
+   (`6555c7d`), both branches pushed to `origin`. Canonical Food Identity milestone is closed.
+3. **No next Phase 9 task has been started.** Remaining known follow-ups (not started, not
+   scheduled): the `"pirinç"` alias collision (Problems item 4) and expanding curated
+   `allergen_classes` coverage beyond 19/89 foods (Problems item 5). Either requires its own
+   explicit go-ahead before work begins.
 
 ## Important Context
 
