@@ -130,6 +130,148 @@ Counts computed directly from §5's matrix (verified programmatically: 73+20+5+7
 
 ---
 
+# 5. Complete Decision Gap Matrix
+
+Every one of the 112 `DEC` IDs, exactly once. `NONE` in the Primary Gap column means no material gap
+was found — the decision is adequately supported by existing knowledge at HIGH or MODERATE mapping
+confidence, per `APP_DECISION_KNOWLEDGE_MAPPING.md` §6.
+
+## Domain A–D
+
+| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
+|---|---|---|---|---|---|---|---|---|
+| 001 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 002 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 003 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | Recomposition physiology thin beyond BODY-07 | CURRENT EVIDENCE | IMPORTANT | NO |
+| 004 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | "Implausible timeframe" threshold is evidence-dependent | CURRENT EVIDENCE | IMPORTANT | minor (touches DEC-012) |
+| 005 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 006 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 007 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 008 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 009 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 010 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 011 | COVERED | NONE | LOW | LOW | Minimal science content, governance timer | NO ACTION REQUIRED | NO | NO |
+| 012 | CONDITIONAL | GAP-F | HIGH | HIGH | Exact out-of-scope condition list undetermined | SCOPE DECISION | IMPORTANT | YES (⇄ DEC-099) |
+| 013 | PARTIALLY COVERED | GAP-E | MODERATE | HIGH | Red-flag criteria benefit from current clinical consensus | CURRENT EVIDENCE | IMPORTANT | NO |
+| 014 | CONDITIONAL | GAP-F | HIGH | MODERATE | Withhold-boundary is mostly a liability/application decision | SCOPE DECISION | NO | YES |
+| 015 | CONDITIONAL | GAP-F | LOW | LOW | Coordination workflow depends on scope resolution | SCOPE DECISION | NO | YES |
+| 016 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | Same as DEC-013, longitudinal | CURRENT EVIDENCE | IMPORTANT | NO |
+| 017 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 018 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 019 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 020 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 021 | COVERED | GAP-I (secondary) | HIGH (bottleneck) | HIGH | No content gap; highest knowledge-convergence decision — see §16 | NO ACTION REQUIRED | NO | NO |
+| 022 | PARTIALLY COVERED | GAP-E | HIGH | HIGH | Contemporary weight-management prescription standards | CURRENT EVIDENCE | IMPORTANT | NO |
+| 023 | COVERED | NONE | LOW | LOW | — | NO ACTION REQUIRED | NO | NO |
+| 024 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+
+## Domain E–J
+
+| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
+|---|---|---|---|---|---|---|---|---|
+| 025 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 026 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 027 | PARTIALLY COVERED | GAP-E | **CRITICAL** | MODERATE | Acceptable target rate of change — corpus gives concept only | CURRENT EVIDENCE | **PRIMARY** | NO |
+| 028 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 029 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 030 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | Device-based body-comp tracking / recomposition norms evolving | CURRENT EVIDENCE | IMPORTANT | NO |
+| 031 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 032 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 033 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 034 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 035 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 036 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 037 | PARTIALLY COVERED | GAP-C | LOW | LOW | No dedicated fiber-requirement topic — a CHO-04 subsection only | CONTENT REVIEW | NO | NO |
+| 038 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 039 | PARTIALLY COVERED | GAP-C | MODERATE | LOW | Macro-adjustment-trigger logic itself is application-level, uncovered by any topic | APPLICATION TRANSLATION | NO | NO |
+| 040 | PARTIALLY COVERED | GAP-G | LOW | MODERATE | Conflict-resolution priority rules not explicit in source material | CONTENT REVIEW | NO | NO |
+| 041 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 042 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 043 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 044 | PARTIALLY COVERED | GAP-E | MODERATE | HIGH | Supplement safety/efficacy currency | CURRENT EVIDENCE | IMPORTANT | NO |
+| 045 | CONDITIONAL | GAP-F | MODERATE | HIGH | How simultaneous clinical + life-stage flags combine is undetermined | SCOPE DECISION | NO | YES |
+| 046 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 047 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 048 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 049 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 050 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 051 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 052 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 053 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 054 | UNCERTAIN | GAP-B | LOW | MODERATE | GI-adaptation depth; intersects GI-03's own open content-inspection deferral | CONTENT REVIEW | NO | NO |
+| 055 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 056 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 057 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 058 | UNCERTAIN | GAP-C | MODERATE | LOW | Dedicated appetite/satiety-regulation depth — only a BODY-01 subsection | CONTENT REVIEW | NO | NO |
+| 059 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+
+## Domain K–O
+
+| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
+|---|---|---|---|---|---|---|---|---|
+| 060 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 061 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 062 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 063 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 064 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 065 | NOT COVERED | GAP-D | MODERATE | n/a | Pantry/grocery-app integration — no curriculum counterpart possible | APPLICATION TRANSLATION | NO | NO |
+| 066 | UNCERTAIN | GAP-D | HIGH | LOW | Meal-construction knowledge beyond general eating-pattern guidance | APPLICATION TRANSLATION | NO | NO |
+| 067 | NOT COVERED | **GAP-A** | MODERATE | n/a | Recipe/preparation-detail science — confirmed absent from all 7 books; a categorically different (culinary) knowledge domain | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
+| 068 | NOT COVERED | **GAP-A** | LOW | n/a | Same as DEC-067 | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
+| 069 | NOT COVERED | **GAP-A** | LOW | n/a | Same as DEC-067 | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
+| 070 | PARTIALLY COVERED | GAP-D | MODERATE | LOW | Deviation-handling logic mostly application-level | APPLICATION TRANSLATION | NO | NO |
+| 071 | NOT COVERED | GAP-D | MODERATE | n/a | Shopping-list consolidation logistics — no topic anywhere | APPLICATION TRANSLATION | NO | NO |
+| 072 | NOT COVERED | GAP-D | MODERATE | n/a | Pantry reconciliation — same gap, this app's own integration point | APPLICATION TRANSLATION | NO | NO |
+| 073 | PARTIALLY COVERED | GAP-D | LOW | LOW | Budget-constrained shopping beyond PUBHEALTH-04's general framing | APPLICATION TRANSLATION | NO | NO |
+| 074 | PARTIALLY COVERED | GAP-D | LOW | LOW | Availability-constrained substitution logistics | APPLICATION TRANSLATION | NO | NO |
+| 075 | NOT COVERED | GAP-D | LOW | n/a | Pure logistics optimization, no topic | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
+| 076 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 077 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 078 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 079 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 080 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 081 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 082 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 083 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 084 | COVERED | GAP-I (secondary) | HIGH (bottleneck) | HIGH | No content gap; central adjustment pivot — see §16 | NO ACTION REQUIRED | NO | NO |
+| 085 | PARTIALLY COVERED | GAP-C | MODERATE | LOW | Same adjustment-trigger-logic gap as DEC-039 | APPLICATION TRANSLATION | NO | NO |
+| 086 | PARTIALLY COVERED | GAP-D | LOW | MODERATE | Reuses DEC-060/066 — inherits DEC-066's translation gap when triggered | APPLICATION TRANSLATION | NO | NO |
+| 087 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 088 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 089 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 090 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 091 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+
+## Domain P–T
+
+| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
+|---|---|---|---|---|---|---|---|---|
+| 092 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 093 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 094 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 095 | PARTIALLY COVERED | GAP-E | HIGH | HIGH | RED-S/overtraining screening practice evolving; single-book-sourced besides | CURRENT EVIDENCE | IMPORTANT | NO |
+| 096 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 097 | PARTIALLY COVERED | GAP-E | MODERATE | HIGH | Supplement safety/efficacy currency; touches open AS3/ACSM/SN4 redundancy question | CURRENT EVIDENCE | IMPORTANT | minor |
+| 098 | UNCERTAIN | GAP-G + GAP-E | MODERATE | LOW | Cycle-phase-specific depth unconfirmed by source TOC; SPORT-11 itself flagged for currency check | CONTENT REVIEW + CURRENT EVIDENCE | PRIMARY (SPORT-11 aspect) | NO |
+| 099 | CONDITIONAL | GAP-F | **CRITICAL** | HIGH | Exact supported-conditions list undetermined — gates the entire clinical pathway | SCOPE DECISION | IMPORTANT | YES (⇄ DEC-012) |
+| 100 | CONDITIONAL | GAP-F | **CRITICAL** | HIGH | Same scope dependency as DEC-099, propagated to 5+ downstream decisions | SCOPE DECISION | IMPORTANT | YES |
+| 101 | PARTIALLY COVERED | GAP-F (secondary) | MODERATE | MODERATE | Depends on DEC-100's resolution | SCOPE DECISION | NO | YES |
+| 102 | CONDITIONAL | GAP-F | MODERATE | MODERATE | Same as DEC-101 | SCOPE DECISION | NO | YES |
+| 103 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 104 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 105 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 106 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
+| 107 | PARTIALLY COVERED | GAP-E | LOW | HIGH | Named external guides periodically revised | CURRENT EVIDENCE | SUPPORTING | NO |
+| 108 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 109 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+| 110 | COVERED | GAP-I (secondary) | HIGH (bottleneck) | HIGH | No content gap; hardest single decision in the inventory — requires the strongest research-methods reasoning in the model | NO ACTION REQUIRED | NO | NO |
+| 111 | UNCERTAIN | GAP-G | LOW | LOW | RESEARCH-15 framed around policy translation, not internal app governance — approximate mapping | CONTENT REVIEW | NO | NO |
+| 112 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
+
+**112 of 112 DEC IDs appear exactly once above.**
+
+---
+
 # 6. Critical Decision Gaps
 
 The five decisions carrying `CRITICAL` or bottleneck-`HIGH` severity in §5, examined individually.
@@ -881,144 +1023,3 @@ so the counts above sum to more than 112 when read loosely but each decision app
 §5's matrix. (Exact final counts are given at the end of §5, computed from the matrix itself rather
 than asserted in advance.)
 
----
-
-# 5. Complete Decision Gap Matrix
-
-Every one of the 112 `DEC` IDs, exactly once. `NONE` in the Primary Gap column means no material gap
-was found — the decision is adequately supported by existing knowledge at HIGH or MODERATE mapping
-confidence, per `APP_DECISION_KNOWLEDGE_MAPPING.md` §6.
-
-## Domain A–D
-
-| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
-|---|---|---|---|---|---|---|---|---|
-| 001 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 002 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 003 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | Recomposition physiology thin beyond BODY-07 | CURRENT EVIDENCE | IMPORTANT | NO |
-| 004 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | "Implausible timeframe" threshold is evidence-dependent | CURRENT EVIDENCE | IMPORTANT | minor (touches DEC-012) |
-| 005 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 006 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 007 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 008 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 009 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 010 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 011 | COVERED | NONE | LOW | LOW | Minimal science content, governance timer | NO ACTION REQUIRED | NO | NO |
-| 012 | CONDITIONAL | GAP-F | HIGH | HIGH | Exact out-of-scope condition list undetermined | SCOPE DECISION | IMPORTANT | YES (⇄ DEC-099) |
-| 013 | PARTIALLY COVERED | GAP-E | MODERATE | HIGH | Red-flag criteria benefit from current clinical consensus | CURRENT EVIDENCE | IMPORTANT | NO |
-| 014 | CONDITIONAL | GAP-F | HIGH | MODERATE | Withhold-boundary is mostly a liability/application decision | SCOPE DECISION | NO | YES |
-| 015 | CONDITIONAL | GAP-F | LOW | LOW | Coordination workflow depends on scope resolution | SCOPE DECISION | NO | YES |
-| 016 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | Same as DEC-013, longitudinal | CURRENT EVIDENCE | IMPORTANT | NO |
-| 017 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 018 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 019 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 020 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 021 | COVERED | GAP-I (secondary) | HIGH (bottleneck) | HIGH | No content gap; highest knowledge-convergence decision — see §16 | NO ACTION REQUIRED | NO | NO |
-| 022 | PARTIALLY COVERED | GAP-E | HIGH | HIGH | Contemporary weight-management prescription standards | CURRENT EVIDENCE | IMPORTANT | NO |
-| 023 | COVERED | NONE | LOW | LOW | — | NO ACTION REQUIRED | NO | NO |
-| 024 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-
-## Domain E–J
-
-| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
-|---|---|---|---|---|---|---|---|---|
-| 025 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 026 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 027 | PARTIALLY COVERED | GAP-E | **CRITICAL** | MODERATE | Acceptable target rate of change — corpus gives concept only | CURRENT EVIDENCE | **PRIMARY** | NO |
-| 028 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 029 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 030 | PARTIALLY COVERED | GAP-E | MODERATE | MODERATE | Device-based body-comp tracking / recomposition norms evolving | CURRENT EVIDENCE | IMPORTANT | NO |
-| 031 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 032 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 033 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 034 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 035 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 036 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 037 | PARTIALLY COVERED | GAP-C | LOW | LOW | No dedicated fiber-requirement topic — a CHO-04 subsection only | CONTENT REVIEW | NO | NO |
-| 038 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 039 | PARTIALLY COVERED | GAP-C | MODERATE | LOW | Macro-adjustment-trigger logic itself is application-level, uncovered by any topic | APPLICATION TRANSLATION | NO | NO |
-| 040 | PARTIALLY COVERED | GAP-G | LOW | MODERATE | Conflict-resolution priority rules not explicit in source material | CONTENT REVIEW | NO | NO |
-| 041 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 042 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 043 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 044 | PARTIALLY COVERED | GAP-E | MODERATE | HIGH | Supplement safety/efficacy currency | CURRENT EVIDENCE | IMPORTANT | NO |
-| 045 | CONDITIONAL | GAP-F | MODERATE | HIGH | How simultaneous clinical + life-stage flags combine is undetermined | SCOPE DECISION | NO | YES |
-| 046 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 047 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 048 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 049 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 050 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 051 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 052 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 053 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 054 | UNCERTAIN | GAP-B | LOW | MODERATE | GI-adaptation depth; intersects GI-03's own open content-inspection deferral | CONTENT REVIEW | NO | NO |
-| 055 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 056 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 057 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 058 | UNCERTAIN | GAP-C | MODERATE | LOW | Dedicated appetite/satiety-regulation depth — only a BODY-01 subsection | CONTENT REVIEW | NO | NO |
-| 059 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-
-## Domain K–O
-
-| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
-|---|---|---|---|---|---|---|---|---|
-| 060 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 061 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 062 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 063 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 064 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 065 | NOT COVERED | GAP-D | MODERATE | n/a | Pantry/grocery-app integration — no curriculum counterpart possible | APPLICATION TRANSLATION | NO | NO |
-| 066 | UNCERTAIN | GAP-D | HIGH | LOW | Meal-construction knowledge beyond general eating-pattern guidance | APPLICATION TRANSLATION | NO | NO |
-| 067 | NOT COVERED | **GAP-A** | MODERATE | n/a | Recipe/preparation-detail science — confirmed absent from all 7 books; a categorically different (culinary) knowledge domain | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
-| 068 | NOT COVERED | **GAP-A** | LOW | n/a | Same as DEC-067 | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
-| 069 | NOT COVERED | **GAP-A** | LOW | n/a | Same as DEC-067 | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
-| 070 | PARTIALLY COVERED | GAP-D | MODERATE | LOW | Deviation-handling logic mostly application-level | APPLICATION TRANSLATION | NO | NO |
-| 071 | NOT COVERED | GAP-D | MODERATE | n/a | Shopping-list consolidation logistics — no topic anywhere | APPLICATION TRANSLATION | NO | NO |
-| 072 | NOT COVERED | GAP-D | MODERATE | n/a | Pantry reconciliation — same gap, this app's own integration point | APPLICATION TRANSLATION | NO | NO |
-| 073 | PARTIALLY COVERED | GAP-D | LOW | LOW | Budget-constrained shopping beyond PUBHEALTH-04's general framing | APPLICATION TRANSLATION | NO | NO |
-| 074 | PARTIALLY COVERED | GAP-D | LOW | LOW | Availability-constrained substitution logistics | APPLICATION TRANSLATION | NO | NO |
-| 075 | NOT COVERED | GAP-D | LOW | n/a | Pure logistics optimization, no topic | APPLICATION TRANSLATION / FUTURE FEATURE | NO | NO |
-| 076 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 077 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 078 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 079 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 080 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 081 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 082 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 083 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 084 | COVERED | GAP-I (secondary) | HIGH (bottleneck) | HIGH | No content gap; central adjustment pivot — see §16 | NO ACTION REQUIRED | NO | NO |
-| 085 | PARTIALLY COVERED | GAP-C | MODERATE | LOW | Same adjustment-trigger-logic gap as DEC-039 | APPLICATION TRANSLATION | NO | NO |
-| 086 | PARTIALLY COVERED | GAP-D | LOW | MODERATE | Reuses DEC-060/066 — inherits DEC-066's translation gap when triggered | APPLICATION TRANSLATION | NO | NO |
-| 087 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 088 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 089 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 090 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 091 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-
-## Domain P–T
-
-| DEC | Coverage | Primary Gap | Severity | Confidence | Missing / Uncertain Knowledge | Resolution Type | Current Evidence | Scope Dependency |
-|---|---|---|---|---|---|---|---|---|
-| 092 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 093 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 094 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 095 | PARTIALLY COVERED | GAP-E | HIGH | HIGH | RED-S/overtraining screening practice evolving; single-book-sourced besides | CURRENT EVIDENCE | IMPORTANT | NO |
-| 096 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 097 | PARTIALLY COVERED | GAP-E | MODERATE | HIGH | Supplement safety/efficacy currency; touches open AS3/ACSM/SN4 redundancy question | CURRENT EVIDENCE | IMPORTANT | minor |
-| 098 | UNCERTAIN | GAP-G + GAP-E | MODERATE | LOW | Cycle-phase-specific depth unconfirmed by source TOC; SPORT-11 itself flagged for currency check | CONTENT REVIEW + CURRENT EVIDENCE | PRIMARY (SPORT-11 aspect) | NO |
-| 099 | CONDITIONAL | GAP-F | **CRITICAL** | HIGH | Exact supported-conditions list undetermined — gates the entire clinical pathway | SCOPE DECISION | IMPORTANT | YES (⇄ DEC-012) |
-| 100 | CONDITIONAL | GAP-F | **CRITICAL** | HIGH | Same scope dependency as DEC-099, propagated to 5+ downstream decisions | SCOPE DECISION | IMPORTANT | YES |
-| 101 | PARTIALLY COVERED | GAP-F (secondary) | MODERATE | MODERATE | Depends on DEC-100's resolution | SCOPE DECISION | NO | YES |
-| 102 | CONDITIONAL | GAP-F | MODERATE | MODERATE | Same as DEC-101 | SCOPE DECISION | NO | YES |
-| 103 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 104 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 105 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 106 | COVERED | NONE | LOW | MODERATE | — | NO ACTION REQUIRED | NO | NO |
-| 107 | PARTIALLY COVERED | GAP-E | LOW | HIGH | Named external guides periodically revised | CURRENT EVIDENCE | SUPPORTING | NO |
-| 108 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 109 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-| 110 | COVERED | GAP-I (secondary) | HIGH (bottleneck) | HIGH | No content gap; hardest single decision in the inventory — requires the strongest research-methods reasoning in the model | NO ACTION REQUIRED | NO | NO |
-| 111 | UNCERTAIN | GAP-G | LOW | LOW | RESEARCH-15 framed around policy translation, not internal app governance — approximate mapping | CONTENT REVIEW | NO | NO |
-| 112 | COVERED | NONE | LOW | HIGH | — | NO ACTION REQUIRED | NO | NO |
-
-**112 of 112 DEC IDs appear exactly once above.**

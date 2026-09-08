@@ -291,6 +291,60 @@ This project was reorganized from a flat working folder (`C:\Users\4D\Desktop\CL
 
 ---
 
+## Structural Maintenance Log — 2026-09-08
+
+A documentation-structure audit of `nutrition-curriculum/` (54 files, 24,132 lines). **Verdict: the
+corpus is not oversized and was not split.** Only two structural defects were corrected; no document
+was split, renamed, merged, or renumbered, and no content was removed.
+
+### 1. `APP_DECISION_GAPS.md` — section order corrected
+
+`# 5. Complete Decision Gap Matrix` was physically located at the end of the file, after `# 24.
+Validation`, so the document read 1, 2, 3, 4, 6, 7 … 24, 5. §5 was moved back to its correct position
+between §4 and §6. **Pure block move:** word count identical before and after (11,957), all 112 `DEC`
+rows intact, section numbers now strictly sequential 1→24.
+
+### 2. `PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md` — supersession banners added
+
+The document carries four status sections from successive passes (§11, §13, §15, §20.13), the first
+three of which are superseded but were reachable without any indication of that. A reader landing on
+§11 or §13 could act on overtaken guidance — §20.4 in particular reverses §13's implementation
+ordering.
+
+A one-line **SUPERSEDED** banner pointing to the current status (§20.13) and current ordering (§20.4)
+was added at the head of §11, §13 and §15. **Their content was not rewritten**, per this document's own
+stated convention (§20.4 item 1: *"This supersedes §14.10's ordering for anyone reading forward; §14.10
+is not rewritten"*).
+
+A **precedence banner** was added to §19 naming
+`DECISIONS/2026-09-07-phase-9-safety-decisions-ratification.md` as the authoritative source for the
+ratified A1/B3/C2 semantics, resolving the `PROJECT_AI_PROTOCOL.md` §31 competing-source-of-truth
+condition without deleting the restatement.
+
+### 3. Considered and deliberately NOT done
+
+- **Splitting any large document.** Rejected: §31 prefers extending an authoritative document over
+  duplicating it, §39 already prescribes targeted navigation over small files, and the corpus is
+  densely self-citing (`MASTER_TOPIC_UNIVERSE` is referenced by 25 files, `PROJECT_AI_PROTOCOL` by 20,
+  `APP_DECISION_GAPS` by 17). Each large file is one conceptual object.
+- **Deleting the duplicated PHASE_9 §19.1–§19.5.** Rejected after field-by-field comparison against the
+  decision record: six internal references depend on those anchors (§20.0's label-collision table,
+  §20.2, §20.6), and §19.4's downstream-consequence analysis is **not** carried by the record. Marking
+  precedence achieves the §31 goal at no structural risk.
+- **Consolidating the four status sections into one.** Rejected: §11/§13/§15 are cited seven times
+  internally and form an append-only audit trail that later passes correct *by reference*.
+- **`DECISION_LOGIC_SPECIFICATION.md` §3** (651 of 945 lines). Left as-is — Gate-5-closed and
+  structurally consistent with the other domain registers. Recorded so a future audit need not
+  re-derive it.
+- **The 2,813-line Krause TOC file.** Left untouched; it is a mechanical table-of-contents extraction,
+  i.e. data rather than prose.
+
+**Invariants verified after the changes:** 112 unique `DEC` IDs unchanged (`PROJECT_AI_PROTOCOL.md`
+§30); both inbound references to the Phase 9 document still resolve; all five `§19.x` anchors intact;
+CRLF line endings preserved throughout.
+
+---
+
 ## Phase 9 — Implementation Milestone 1 — 2026-09-08
 
 **"Food Identity + Exclusion Foundation" (bounded by `PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md`

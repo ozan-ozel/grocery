@@ -38,3 +38,4 @@ nutrition-curriculum/01_SOURCE_BOOKS/
 *.log
 .DS_Store
 Thumbs.db
+.playwright-mcp/
