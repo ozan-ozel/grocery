@@ -1,4 +1,4 @@
-import type { State } from "../store";
+import { emptyState, type State } from "../store";
 
 type Envelope = { version: number; state: State | null };
 
@@ -64,9 +64,10 @@ export function createSync({
         backoff = BACKOFF_START_MS;
         return;
       }
+      const hydrated = normalizeHydratedState(state);
       const local = getState();
       if (local.version !== version) {
-        setState({ ...state, version });
+        setState({ ...hydrated, version });
         lastSentSerialized = serialize(state);
       }
       backoff = BACKOFF_START_MS;
@@ -97,7 +98,8 @@ export function createSync({
         if (res.status === 409) {
           const { version, state: server } = (await res.json()) as Envelope;
           if (server != null) {
-            setState({ ...server, version });
+            const hydrated = normalizeHydratedState(server);
+            setState({ ...hydrated, version });
             lastSentSerialized = serialize(server);
           }
           backoff = BACKOFF_START_MS;
@@ -166,4 +168,21 @@ export function createSync({
 function serialize(s: State): string {
   const { version: _v, ...rest } = s;
   return JSON.stringify(rest);
+}
+
+// Older or partially-created tenant records can contain a non-null state with
+// no lists. Keep the list invariant at the hydration boundary: every state
+// handed to the app has an active list, and a repaired state is pushed back on
+// the next change notification.
+function normalizeHydratedState(state: State): State {
+  if (state.lists.length === 0) {
+    const seeded = emptyState();
+    return { ...seeded, groupByCategory: state.groupByCategory };
+  }
+
+  const active =
+    state.lists.find(list => list.id === state.activeId) ?? state.lists[0];
+  return state.activeId === active.id
+    ? state
+    : { ...state, activeId: active.id };
 }

@@ -1,3 +1,5 @@
+import type { FoodExclusion, AllergenClassExclusion } from "./foodExclusions";
+
 export type EquationSex = "female" | "male";
 export type ActivityLevel =
   | "sedentary"
@@ -16,7 +18,15 @@ export type PersonalProfile = {
   activity: ActivityLevel;
   goal: PersonalGoal;
   waistCm?: number;
-  excludedFoodIds: string[];
+  // Reason-tagged exclusion list (Phase 9 §20 Milestone 1), replacing the
+  // old undifferentiated `excludedFoodIds: string[]`. See
+  // src/lib/foodExclusions.ts for the reason taxonomy and tier semantics.
+  foodExclusions: FoodExclusion[];
+  // Allergen-class exclusions (B3, Türkiye/EU 14 vocabulary) — a separate
+  // array rather than folded into foodExclusions, since a food-level entry
+  // and a class-level entry are not interchangeable (B3's own binding
+  // rule). See src/lib/allergenClasses.ts.
+  allergenExclusions: AllergenClassExclusion[];
 };
 
 export type PersonalTargets = {

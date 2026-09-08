@@ -288,3 +288,37 @@ This project was reorganized from a flat working folder (`C:\Users\4D\Desktop\CL
 ### File Archived (Judgment Call, Reported)
 
 - `desktop_books_inventory.md` → moved to `99_ARCHIVE/`. This was the very first deliverable of the whole project (a raw listing of book files found on the Desktop, before the 7-book corpus was finalized and before TOC extraction began). Its content — filename/format/size/path for candidate books — is now fully superseded by the more authoritative and complete `02_TOC_AND_SOURCE_ANALYSIS/README.md` inventory. Archived as "clearly superseded" per the reorganization instructions' archive criteria, not simply because it's old.
+
+---
+
+## Phase 9 — Implementation Milestone 1 — 2026-09-08
+
+**"Food Identity + Exclusion Foundation" (bounded by `PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md`
+§20.12/§20.5) is complete, foundation-scoped.** This is the first production code written in Phase 9 —
+it supersedes this file's earlier "Explicitly not started: any production code, schema, API, UI..."
+line above, which correctly described the architecture-only state as of 2026-09-07 and is left
+unedited as a historical record.
+
+**What shipped:** `DEC-053`'s A1 split (allergy/unclear → hard exclusion, intolerance → soft
+constraint) is now enforced in `src/lib/foodExclusions.ts`, `comboMatch.ts`, and `MealFoodPicker`.
+`DEC-061`'s B3 hybrid exclusion unit is implemented on its food-level half (a reason-tagged
+`food_exclusions` JSONB column, `supabase/13-personal-plan-food-exclusions.sql`, replacing the old
+undifferentiated `excluded_food_ids`). A deterministic canonical-Food-identity mechanism
+(`nutrition.name_tr` + exact-match `aliases[]`) was verified safe to reuse rather than replaced, and a
+regression test now guards that fuzzy matching (`isCloseMatch`/`findCanonicalName`) can never reach
+the exclusion-safety path.
+
+**What deliberately did not ship:** B3's allergen-class half is a type-level foundation only
+(`Nutrition.allergenClasses?`, `AllergenClassExclusion`, `hasAllergenClassExclusion()`) — not wired
+into any enforcement path, because no allergen vocabulary, no per-food allergen mapping, and no
+unmapped-food default policy exist anywhere in this project. C2 (temporary/validity-window
+exclusions) was not implemented — the ratification record proposes no schema for it, and none was
+invented here. Both stops match `PROJECT_AI_PROTOCOL.md` §28 (no premature implementation) and were
+reported rather than resolved silently.
+
+No `DEC` was amended and no `DEC` ID was created. `DEC-053`, `DEC-061`, `DEC-011`, `DEC-054` are
+unmodified. Recipe/shopping-architecture, `DEC-067`, `DEC-069`, `DEC-099`/`DEC-100`, and clinical
+functionality remain untouched.
+
+**Verification:** 35/35 tests passing (`vitest run`), `tsc -b` clean, `npm run build` clean. Full
+detail: `docs/SESSION_CHECKPOINT.md`, "Implementation Milestone 1" section.

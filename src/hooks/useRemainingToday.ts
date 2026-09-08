@@ -5,6 +5,7 @@ import type { MacroTotals } from "@/lib/mealNutrition";
 import { calculateTargets, type PersonalTargets } from "@/lib/mealPersonalization";
 import type { NutritionMap } from "@/lib/nutrition";
 import type { MealItem, MealSlot } from "@/lib/localMealPlan";
+import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
 
 // One ingredient logged via logConsumption — enough to undo it later
 // (removeItem needs both the entry id and the slot it was filed under).
@@ -34,7 +35,8 @@ export type RemainingToday =
       // way). TodayView shows a "Tahmini" tag when this is true instead of
       // blocking the screen the way the old "no-profile" status did.
       isEstimated: boolean;
-      excludedFoodIds: string[];
+      foodExclusions: FoodExclusion[];
+      allergenExclusions: AllergenClassExclusion[];
       catalogMap: NutritionMap;
       // Every ingredient logged today, slot attached — TodayView groups
       // whichever of these carry a comboId to reconstruct "Bugün
@@ -134,7 +136,8 @@ export function useRemainingToday(
     consumed,
     remaining,
     isEstimated,
-    excludedFoodIds: profile.excludedFoodIds,
+    foodExclusions: profile.foodExclusions,
+    allergenExclusions: profile.allergenExclusions,
     catalogMap,
     todaysItems: allItems(),
     logConsumption,

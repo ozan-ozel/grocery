@@ -297,7 +297,7 @@ function AppShell({
         ) : section === "besin" ? (
           <NutritionView items={active.items} />
         ) : section === "yemek" ? (
-          <MealPlanView householdId={activeTenantId} />
+          <MealPlanView userId={currentUserId} householdId={activeTenantId} />
         ) : section === "kisisel" ? (
           <PersonalPlanView userId={currentUserId} />
         ) : (

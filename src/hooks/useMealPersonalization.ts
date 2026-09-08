@@ -6,6 +6,7 @@ import {
   type EquationSex,
   type ActivityLevel,
 } from "@/lib/mealPersonalization";
+import { migrateLegacyExclusions } from "@/lib/foodExclusions";
 import { fetchPersonalPlan, savePersonalPlan } from "@/lib/personalPlan";
 
 const STORAGE_PREFIX = "grocery.personalPlan.v1";
@@ -18,7 +19,12 @@ export const DEFAULT_PROFILE: PersonalProfile = {
   weightKg: 70,
   activity: "moderate",
   goal: "maintain",
-  excludedFoodIds: [],
+  foodExclusions: [],
+  // Brand new field — no legacy predecessor, so no cache migration is
+  // needed the way foodExclusions has one below: an old cached profile
+  // simply lacks the key, and the `...DEFAULT_PROFILE, ...rest` spread in
+  // migrateCachedProfile already fills it in as [] in that case.
+  allergenExclusions: [],
 };
 
 // Not synced yet (session not ready) falls back to a bare device-local key,
@@ -27,11 +33,32 @@ function storageKey(userId: string | null): string {
   return userId ? `${STORAGE_PREFIX}:${userId}` : STORAGE_PREFIX;
 }
 
+// A cache written before Phase 9 §20 Milestone 1 carries the old bare
+// `excludedFoodIds: string[]` instead of `foodExclusions`. Migrated the same
+// way the DB migration does — every id becomes reason "unclassified"
+// (hard-tier, same behavior as before), never silently downgraded to
+// "preference" (§20.11 invariant 10), applied here so a returning user's
+// local cache doesn't momentarily look like it has zero exclusions.
+type LegacyCachedProfile = Partial<PersonalProfile> & {
+  excludedFoodIds?: string[];
+};
+
+function migrateCachedProfile(cached: LegacyCachedProfile): PersonalProfile {
+  const { excludedFoodIds, foodExclusions, ...rest } = cached;
+  return {
+    ...DEFAULT_PROFILE,
+    ...rest,
+    foodExclusions:
+      foodExclusions ??
+      (excludedFoodIds ? migrateLegacyExclusions(excludedFoodIds) : []),
+  };
+}
+
 function loadProfile(userId: string | null): PersonalProfile {
   try {
     const raw = localStorage.getItem(storageKey(userId));
     return raw
-      ? { ...DEFAULT_PROFILE, ...(JSON.parse(raw) as Partial<PersonalProfile>) }
+      ? migrateCachedProfile(JSON.parse(raw) as LegacyCachedProfile)
       : DEFAULT_PROFILE;
   } catch {
     return DEFAULT_PROFILE;
@@ -68,7 +95,9 @@ const SAVE_DEBOUNCE_MS = 600;
 // the server copy (server wins, same pattern as useItemCategories); without
 // a signed-in user yet this stays device-local only.
 export function useMealPersonalization(userId: string | null) {
-  const [profile, setProfile] = useState<PersonalProfile>(() => loadProfile(userId));
+  const [profile, setProfile] = useState<PersonalProfile>(() =>
+    loadProfile(userId),
+  );
   const [hasSavedProfile, setHasSavedProfile] = useState<boolean>(() =>
     hasSavedProfileLocally(userId),
   );
@@ -81,6 +110,12 @@ export function useMealPersonalization(userId: string | null) {
   // hasSavedProfile, since a returning user on a fresh device or hitting a
   // network blip would otherwise look identical to a genuine first run.
   const [remoteChecked, setRemoteChecked] = useState<boolean>(() => !userId);
+  // A failed persist must not be silently console-only (Phase 9 §20.11
+  // invariant 9) — a safety-relevant exclusion could otherwise end up
+  // device-local only with no visible sign of it. Cleared on the next
+  // successful save or on any further edit (an edit implies the user is
+  // about to retry anyway via the debounce below).
+  const [saveError, setSaveError] = useState(false);
   const saveTimer = useRef<number | undefined>(undefined);
 
   useEffect(() => {
@@ -90,7 +125,7 @@ export function useMealPersonalization(userId: string | null) {
     if (!userId) return;
 
     let cancelled = false;
-    fetchPersonalPlan().then((server) => {
+    fetchPersonalPlan().then(server => {
       if (cancelled) return;
       setRemoteChecked(true);
       if (!server) return;
@@ -113,29 +148,64 @@ export function useMealPersonalization(userId: string | null) {
     if (profile === DEFAULT_PROFILE) return;
     saveProfileCache(userId, profile);
     setHasSavedProfile(true);
+    setSaveError(false);
     if (!userId) return;
     window.clearTimeout(saveTimer.current);
     saveTimer.current = window.setTimeout(() => {
-      savePersonalPlan(profile).then((ok) => {
-        if (ok) setHasSavedProfile(true);
-        else console.warn("[personalPlan] profile saved locally but failed to persist");
+      savePersonalPlan(profile).then(ok => {
+        if (ok) {
+          setHasSavedProfile(true);
+          setSaveError(false);
+        } else {
+          console.warn(
+            "[personalPlan] profile saved locally but failed to persist",
+          );
+          setSaveError(true);
+        }
       });
     }, SAVE_DEBOUNCE_MS);
     return () => window.clearTimeout(saveTimer.current);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile, userId]);
 
+  // Re-runs the same debounced save the effect above would fire on the next
+  // edit — exposed so a "tekrar dene" button can retry immediately instead
+  // of waiting for the user to touch an unrelated field first.
+  function retrySave() {
+    if (!userId || profile === DEFAULT_PROFILE) return;
+    savePersonalPlan(profile).then(ok => {
+      if (ok) {
+        setHasSavedProfile(true);
+        setSaveError(false);
+      } else {
+        setSaveError(true);
+      }
+    });
+  }
+
   function update<K extends keyof PersonalProfile>(
     key: K,
-    value: PersonalProfile[K],
+    value:
+      | PersonalProfile[K]
+      | ((current: PersonalProfile[K]) => PersonalProfile[K]),
   ) {
-    setProfile(current => ({ ...current, [key]: value }));
+    setProfile(current => ({
+      ...current,
+      [key]:
+        typeof value === "function"
+          ? (value as (current: PersonalProfile[K]) => PersonalProfile[K])(
+              current[key],
+            )
+          : value,
+    }));
   }
 
   return {
     profile,
     hasSavedProfile,
     remoteChecked,
+    saveError,
+    retrySave,
     targets: calculateTargets(profile),
     update,
     setEquationSex: (value: EquationSex) => update("equationSex", value),
