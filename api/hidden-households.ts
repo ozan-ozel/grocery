@@ -2,9 +2,11 @@
 // POST   /api/hidden-households  { household_id }     -> { ok: true } (hide)
 // DELETE /api/hidden-households?household_id=<id>     -> { ok: true } (unhide)
 //
-// Per-user preference. Requires auth (Stream A's requireUser).
+// Per-user preference. Every request authenticates to PostgREST as the
+// caller's own Supabase session — RLS's hidden_households_all policy
+// backs the existing user_id-scoped behavior.
 
-import { requireUser, authErrorResponse, type AuthUser } from "../lib/auth.js";
+import { requireUser, userRestHeaders, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
 type HiddenRow = { household_id: string };
 
@@ -36,16 +38,11 @@ export default {
 
 async function handleGet(user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const target = `${restBase(supabaseUrl)}/hidden_households?user_id=eq.${encodeURIComponent(user.userId)}&select=household_id`;
@@ -62,8 +59,7 @@ async function handleGet(user: AuthUser): Promise<Response> {
 
 async function handleHide(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -78,9 +74,7 @@ async function handleHide(request: Request, user: AuthUser): Promise<Response> {
   }
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     // Upsert semantics: if the row already exists, do nothing rather than 409.
     prefer: "resolution=merge-duplicates,return=minimal",
@@ -109,8 +103,7 @@ async function handleHide(request: Request, user: AuthUser): Promise<Response> {
 
 async function handleUnhide(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -120,12 +113,7 @@ async function handleUnhide(request: Request, user: AuthUser): Promise<Response>
     return json({ error: "expected ?household_id=<id>" }, 400);
   }
 
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-    prefer: "return=minimal",
-  };
+  const headers = { ...userRestHeaders(user), prefer: "return=minimal" };
 
   try {
     const response = await fetch(
