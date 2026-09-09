@@ -14,6 +14,7 @@ import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions
 import { format } from "@/components/NutritionTableCell";
 import { MealFoodPicker } from "@/components/MealFoodPicker";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
+import { BatchPlanner } from "@/components/BatchPlanner";
 
 type Props = { userId: string | null; householdId: string | null };
 
@@ -29,6 +30,7 @@ export function MealPlanView({ userId, householdId }: Props) {
   const foodExclusions = personalizationProfile.foodExclusions;
   const allergenExclusions = personalizationProfile.allergenExclusions;
   const {
+    date,
     dateLabel,
     isLoading,
     goToPrevDay,
@@ -130,6 +132,14 @@ export function MealPlanView({ userId, householdId }: Props) {
           onClose={() => setDailyDetailOpen(false)}
         />
       )}
+      <BatchPlanner
+        householdId={householdId}
+        foods={foods}
+        catalog={catalogMap}
+        exclusions={foodExclusions}
+        allergenExclusions={allergenExclusions}
+        defaultDate={date}
+      />
     </div>
   );
 }
@@ -237,7 +247,14 @@ function MealItemRow({
   return (
     <li className="flex items-center gap-2 border-b border-border py-2">
       <div className="min-w-0 flex-1">
-        <div className="text-[0.975rem]">{name}</div>
+        <div className="text-[0.975rem]">
+          {name}
+          {item.batchId && (
+            <span className="ml-1.5 rounded-full border border-border px-1.5 py-0.5 text-[0.6rem] uppercase tracking-wide text-muted-foreground">
+              Parti
+            </span>
+          )}
+        </div>
         {itemMacros && (
           <div className="ledger mt-0.5 text-xs tabular-nums text-muted-foreground">
             {Math.round(itemMacros.kcal)} kcal · P {format(itemMacros.proteinG)}{" "}

@@ -6,33 +6,7 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 import { calculateItemsNutrition, type MealItem } from "@/lib/localMealPlan";
-import combosData from "../../data/combos.json";
-import type { Combo } from "@/lib/combos";
-
-// data/combos.json is hand-authored with snake_case keys (name_tr/food_id/prep_minutes —
-// see data/README.md, matching nutrition.json's convention), but the `Combo` type
-// (src/lib/combos.ts) and comboMatch.ts consume camelCase. A bare `as Combo[]` cast doesn't
-// even typecheck ("neither type sufficiently overlaps with the other"), so normalize here at
-// the one place this file gets loaded into the app rather than reshaping the shared type.
-type RawCombo = {
-  id: string;
-  name_tr: string;
-  items: { food_id: string; grams: number }[];
-  prep_minutes: number;
-  tags: string[];
-  prep_note?: string;
-};
-
-const COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
-  id: raw.id,
-  nameTr: raw.name_tr,
-  items: raw.items.map((item) => ({ foodId: item.food_id, grams: item.grams })),
-  prepMinutes: raw.prep_minutes,
-  tags: raw.tags,
-  prepNote: raw.prep_note,
-}));
-
-const COMBO_BY_ID = new Map(COMBOS.map((c) => [c.id, c]));
+import { ALL_COMBOS as COMBOS, COMBO_BY_ID } from "@/lib/combos";
 
 // A combo eaten today, reconstructed from real meal_entries (grouped by the
 // comboId "Yedim" tags each ingredient with) rather than kept in component

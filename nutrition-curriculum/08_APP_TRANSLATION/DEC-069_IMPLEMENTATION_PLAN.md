@@ -9,6 +9,17 @@ CLOSED/DEFERRED FOR V1. **DEC-069 CLOSED / V1 SCOPE RATIFIED (Option 3 — house
 multi-day batch cooking, leftovers, and storage-aware meal planning); implementation NOT STARTED
 before this document and NOT STARTED after it.** DEC-070, DEC-071 unchanged.
 
+> **IMPLEMENTATION STATUS UPDATE (additive, added after this document — original plan preserved
+> below for provenance).** This plan was subsequently executed on `feature/dec-069-batch-
+> implementation` (commits `842aed3`, `24e58e5`). **DEC-069 implementation is COMPLETE and
+> live-validated at the data/API/database layer** against the actual configured Supabase project
+> (schema, batch creation, batch-linked allocation, leftover derivation, the required historical-
+> integrity test, Food Identity separation, household isolation, and full regression suite all
+> confirmed live). **Interactive rendered-browser QA remains PENDING** — not performed, because no
+> browser-automation tool was available in that session; this is a validation follow-up, not an
+> unresolved architecture or product question. See `docs/SESSION_CHECKPOINT.md` for the current,
+> authoritative status and the exact commit/verification detail.
+
 **Inputs read (not modified):** `DEC-069_INVESTIGATION.md`,
 `DEC-069_IMPLEMENTATION_ARCHITECTURE_INVESTIGATION.md` (including its "Revised Architecture
 (Post-Audit)" section — authoritative for the `PreparationBatch` shape),
