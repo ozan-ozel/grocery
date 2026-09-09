@@ -137,16 +137,24 @@ export default {
       "content-type": "application/json",
       prefer: "resolution=merge-duplicates,return=minimal",
     };
-    await fetch(`${base}/app_users`, {
+    const userRes = await fetch(`${base}/app_users`, {
       method: "POST",
       headers: serviceHeaders,
       body: JSON.stringify({ id: appUserId, email }),
     });
-    await fetch(`${base}/auth_user_map`, {
+    if (!userRes.ok) {
+      const text = await userRes.text();
+      return errorResponse(`failed to upsert app_users: ${text}`);
+    }
+    const mapRes = await fetch(`${base}/auth_user_map`, {
       method: "POST",
       headers: serviceHeaders,
       body: JSON.stringify({ supabase_uid: supabaseUid, app_user_id: appUserId }),
     });
+    if (!mapRes.ok) {
+      const text = await mapRes.text();
+      return errorResponse(`failed to upsert auth_user_map: ${text}`);
+    }
 
     return new Response(null, { status: 302, headers: responseHeaders });
   },
