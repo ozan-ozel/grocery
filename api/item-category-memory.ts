@@ -1,12 +1,17 @@
 // GET /api/item-category-memory?household_id=<id>            -> Row[]   (read)
 // PUT /api/item-category-memory  { household_id, name_lower, category } -> Row (upsert)
 //
-// The read proxies to PostgREST so the anon key stays server-side. The write
-// uses the service_role key (also server-side) so RLS on
-// public.item_category_memory can stay locked to reads only. Both are gated
-// by owner/invited household access.
+// Every request authenticates to PostgREST as the caller's own Supabase
+// session — RLS's item_category_memory_all policy backs the existing
+// owner/invited household access, on top of requireHouseholdAccess.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
+import {
+  requireUser,
+  requireHouseholdAccess,
+  userRestHeaders,
+  authErrorResponse,
+  type AuthUser,
+} from "../lib/auth.js";
 
 type Row = {
   name_lower: string;
@@ -41,8 +46,7 @@ export default {
 
 async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -58,11 +62,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
     return authErrorResponse(err);
   }
 
-  const headers = {
-    apikey: anonKey,
-    authorization: `Bearer ${anonKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const res = await fetch(
@@ -82,8 +82,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
 
 async function handleWrite(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -113,8 +112,7 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
       {
         method: "POST",
         headers: {
-          apikey: serviceKey,
-          authorization: `Bearer ${serviceKey}`,
+          ...userRestHeaders(user),
           "content-type": "application/json",
           prefer: "resolution=merge-duplicates,return=representation",
         },
