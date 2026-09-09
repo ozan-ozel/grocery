@@ -1,0 +1,29 @@
+-- supabase/18-preparation-batches-rls-drift.sql
+--
+-- Fixes the same live-database configuration drift documented in
+-- 11-fix-anon-read-rls-drift.sql, now observed on the brand-new
+-- preparation_batches table (17-preparation-batches.sql): immediately after
+-- that migration was applied via the Supabase SQL editor, the table had row
+-- level security ENABLED with zero policies, even though
+-- 17-preparation-batches.sql never ran `enable row level security` on it.
+-- RLS-enabled-with-no-policy silently denies all rows to any role but
+-- service_role — confirmed live: a row created and readable via
+-- SUPABASE_SERVICE_ROLE_KEY returned an empty array via SUPABASE_ANON_KEY
+-- with a 200 status (not a permission error), the same signature the 2026-
+-- 09-02 incident on meal_entries/personal_plan had. The likely source is
+-- unchanged from that incident too: Supabase's own "Security Advisor"
+-- nudge (or an equivalent platform default), applied outside of any file in
+-- this repo, to every newly created table.
+--
+-- This app enforces all authorization at the Netlify function layer
+-- (requireUser / requireHouseholdAccess in _auth.ts), not via Postgres RLS +
+-- auth.uid() — this app doesn't use Supabase Auth at all, so auth.uid() is
+-- always null and no RLS policy referencing it could ever match anyway.
+-- netlify/functions/preparation-batches.ts reads via SUPABASE_ANON_KEY and
+-- writes via service_role (mirrors meal-entries.ts exactly), so bringing
+-- this table back in line with every other household-scoped table (RLS
+-- off) is the fix, not writing policies.
+--
+-- Idempotent: safe to re-run.
+
+alter table public.preparation_batches disable row level security;
