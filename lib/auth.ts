@@ -1,18 +1,24 @@
-// Shared session validation for Netlify Functions. Every function that
+// Shared session validation for Vercel Functions. Every function that
 // touches Supabase data calls requireUser() first; on failure it throws
 // AuthError, which callers catch and translate to a Response via
-// authErrorResponse(). Validates our own session JWT (signed on Google
-// OAuth callback, see auth-google-callback.ts) read from the httpOnly
-// "session" cookie.
+// authErrorResponse(). Validates a real Supabase Auth session (see
+// api/auth-link.ts for how a Supabase identity gets linked to this app's
+// existing app_users/household model).
 //
-// Leading underscore keeps Netlify from treating this as a routable
-// function.
+// Session refresh is deliberately not implemented here — the cookie
+// adapter below never rewrites cookies. Sessions expire per Supabase's
+// configured access-token lifetime (default 1 hour). This is an explicit,
+// approved scope boundary (see
+// docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md),
+// the same class of tradeoff as this app's original JWT session having no
+// refresh flow.
 
-import jwt from "jsonwebtoken";
+import { createServerClient } from "@supabase/ssr";
 
 export type AuthUser = {
-  userId: string;
+  userId: string; // app_users.id (Google `sub`) — resolved via auth_user_map
   email: string;
+  accessToken: string; // this caller's own Supabase access token
 };
 
 export class AuthError extends Error {
@@ -21,10 +27,6 @@ export class AuthError extends Error {
     this.name = "AuthError";
   }
 }
-
-type SessionPayload = { sub: string; email: string };
-
-export const SESSION_COOKIE = "session";
 
 // Hand-rolled: zero cookie-parsing exists anywhere in this repo yet and the
 // format needed is trivial. Not adding the `cookie` npm dependency for this.
@@ -39,30 +41,99 @@ export function parseCookies(header: string | null): Record<string, string> {
   return out;
 }
 
-export async function requireUser(request: Request): Promise<AuthUser> {
-  const secret = process.env.JWT_SECRET;
-  if (!secret) throw new AuthError(500, "auth not configured");
-
-  const token = parseCookies(request.headers.get("cookie"))[SESSION_COOKIE];
-  if (!token) throw new AuthError(401, "missing session cookie");
-
-  try {
-    const payload = jwt.verify(token, secret) as SessionPayload;
-    if (!payload.sub || !payload.email) throw new AuthError(401, "invalid session");
-    return { userId: payload.sub, email: payload.email.toLowerCase() };
-  } catch (err) {
-    if (err instanceof AuthError) throw err;
-    throw new AuthError(401, "invalid or expired session");
-  }
-}
-
 function restBase(url: string): string {
   return `${url.replace(/\/$/, "")}/rest/v1`;
+}
+
+// Read-only cookie adapter: getAll() feeds @supabase/ssr the incoming
+// request's cookies; setAll() is a no-op (see the file header comment —
+// session refresh is out of scope for this pass).
+function readOnlyCookies(request: Request) {
+  return {
+    getAll() {
+      const jar = parseCookies(request.headers.get("cookie"));
+      return Object.entries(jar).map(([name, value]) => ({ name, value }));
+    },
+    setAll() {
+      // Intentional no-op.
+    },
+  };
+}
+
+export async function requireUser(request: Request): Promise<AuthUser> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !anonKey || !serviceKey) throw new AuthError(500, "auth not configured");
+
+  const supabase = createServerClient(supabaseUrl, anonKey, {
+    cookies: readOnlyCookies(request),
+  });
+
+  const { data: sessionData } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+  if (!accessToken) throw new AuthError(401, "missing session");
+
+  // getUser() re-verifies against Supabase's own server. getSession() alone
+  // just decodes the cookie locally and must never be trusted by itself for
+  // an authorization decision.
+  const { data: userData, error } = await supabase.auth.getUser();
+  if (error || !userData.user || !userData.user.email) {
+    throw new AuthError(401, "invalid or expired session");
+  }
+
+  const mapHeaders = {
+    apikey: serviceKey,
+    authorization: `Bearer ${serviceKey}`,
+    accept: "application/json",
+  };
+  let mapRows: { app_user_id: string }[];
+  try {
+    const mapRes = await fetch(
+      `${restBase(supabaseUrl)}/auth_user_map?supabase_uid=eq.${encodeURIComponent(
+        userData.user.id
+      )}&select=app_user_id`,
+      { headers: mapHeaders }
+    );
+    if (!mapRes.ok) throw new AuthError(502, "identity lookup failed");
+    mapRows = (await mapRes.json()) as { app_user_id: string }[];
+  } catch (err) {
+    if (err instanceof AuthError) throw err;
+    throw new AuthError(502, "identity lookup failed");
+  }
+  if (mapRows.length === 0) {
+    throw new AuthError(409, "account not linked — call /api/auth-link first");
+  }
+
+  return {
+    userId: mapRows[0].app_user_id,
+    email: userData.user.email.toLowerCase(),
+    accessToken,
+  };
+}
+
+// Builds PostgREST headers authenticated as the caller's own Supabase
+// session, so auth.uid() is non-null and RLS actually evaluates for real —
+// the entire point of this migration. `apikey` still needs to be the anon
+// key (Supabase's gateway requires a valid project key there regardless);
+// `authorization` carries the user's own token, which is what sets the
+// Postgres role RLS checks against.
+export function userRestHeaders(user: AuthUser): Record<string, string> {
+  const anonKey = process.env.SUPABASE_ANON_KEY;
+  if (!anonKey) throw new AuthError(500, "supabase not configured");
+  return {
+    apikey: anonKey,
+    authorization: `Bearer ${user.accessToken}`,
+    accept: "application/json",
+  };
 }
 
 type HouseholdOwnerRow = { owner_id: string | null };
 type ShareRow = { email: string };
 
+// Unchanged from the pre-migration version — still the first layer, still
+// backed by service_role. RLS (Task 3) is an independent second layer
+// underneath this, not a replacement for it.
 export async function requireHouseholdAccess(
   householdId: string,
   user: AuthUser,
