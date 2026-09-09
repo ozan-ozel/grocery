@@ -3,13 +3,23 @@
 // PATCH  /api/meal-entries?id=<id>                                  -> MealEntryRow    (update)
 // DELETE /api/meal-entries?id=<id>                                  -> { ok: true }    (delete)
 //
-// Persists the Meal Plan tab's daily food+quantity entries (see
-// src/lib/localMealPlan.ts and src/hooks/useMealPlan.ts). Nutrition is never
-// stored here — always derived client-side from food_id + quantity_g against
-// the nutrition catalog. Uses PostgREST anon key for reads and service_role
-// key for writes, both gated by owner/invited household access.
+// Persists the Meal Plan tab's daily food+quantity entries. Nutrition is
+// never stored here. Every request authenticates to PostgREST as the
+// caller's own Supabase session — RLS's meal_entries_all policy backs the
+// existing owner/invited household access, on top of requireHouseholdAccess.
+// The one lookup that must stay on service_role is mealEntryHouseholdId:
+// resolving which household an entry belongs to, for a PATCH/DELETE that
+// only has the entry's own id, needs to work even for an entry a stranger
+// is trying to touch — the access decision comes after that lookup, not
+// from it.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
+import {
+  requireUser,
+  requireHouseholdAccess,
+  userRestHeaders,
+  authErrorResponse,
+  type AuthUser,
+} from "../lib/auth.js";
 
 export type MealEntryRow = {
   id: string;
@@ -51,11 +61,10 @@ export default {
   },
 };
 
-async function mealEntryHouseholdId(
-  supabaseUrl: string,
-  serviceKey: string,
-  entryId: string
-): Promise<string | null> {
+async function mealEntryHouseholdId(entryId: string): Promise<string | null> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) throw new Error("supabase not configured");
   const headers = {
     apikey: serviceKey,
     authorization: `Bearer ${serviceKey}`,
@@ -72,8 +81,7 @@ async function mealEntryHouseholdId(
 
 async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -92,11 +100,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
     return authErrorResponse(err);
   }
 
-  const headers = {
-    apikey: anonKey,
-    authorization: `Bearer ${anonKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const target =
@@ -118,8 +122,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
 
 async function handleCreate(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -165,9 +168,7 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
   }
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "return=representation",
   };
@@ -205,8 +206,7 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
 
 async function handleUpdate(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -218,7 +218,7 @@ async function handleUpdate(request: Request, user: AuthUser): Promise<Response>
 
   let householdId: string | null;
   try {
-    householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+    householdId = await mealEntryHouseholdId(id);
   } catch (e) {
     return json({ error: `failed to look up meal entry: ${e}` }, 502);
   }
@@ -250,9 +250,7 @@ async function handleUpdate(request: Request, user: AuthUser): Promise<Response>
   }
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "return=representation",
   };
@@ -279,8 +277,7 @@ async function handleUpdate(request: Request, user: AuthUser): Promise<Response>
 
 async function handleDelete(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -292,7 +289,7 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
 
   let householdId: string | null;
   try {
-    householdId = await mealEntryHouseholdId(supabaseUrl, serviceKey, id);
+    householdId = await mealEntryHouseholdId(id);
   } catch (e) {
     return json({ error: `failed to look up meal entry: ${e}` }, 502);
   }
@@ -303,11 +300,7 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
     return authErrorResponse(err);
   }
 
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const response = await fetch(
