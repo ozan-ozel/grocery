@@ -103,11 +103,49 @@ review gate open. Gate 7 (end of Phase 9) has **not** opened.
   - A minimal additive status note was added to the top of `DEC-069_IMPLEMENTATION_PLAN.md`
     pointing here; the plan's own body (options, invariants, sequence, verdict) is left as historical
     reasoning, unmodified.
+- **2026-09-09 — Supabase RLS warnings reviewed; NUT-29 (Netlify→Vercel) closed; Netlify decommission
+  split into backlog.** Unrelated to DEC-069. Supabase Advisor flagged `meal_entries`/`personal_plan`
+  (and, per the DEC-069 entry above, `preparation_batches`) as "RLS not enabled." Reviewed and
+  confirmed this is the same deliberate tradeoff as `11-fix-anon-read-rls-drift.sql`: this app has no
+  Supabase Auth, so `auth.uid()` is always null, and authorization is enforced entirely at the
+  Netlify-function layer (`requireUser`/`requireHouseholdAccess` in `_auth.ts`). A proposed
+  "swap `SUPABASE_ANON_KEY` for `SUPABASE_SERVICE_ROLE_KEY` everywhere + enable RLS on all tables"
+  fix was rejected as illogical: `service_role` always bypasses RLS, so that would make RLS
+  decorative for all of this app's own traffic while consolidating every backend operation onto the
+  single highest-privilege key — worse for blast radius, not better. Real bulletproofing would
+  require migrating to actual Supabase Auth (so `auth.uid()` is non-null and real per-row policies can
+  run as a second, independent layer behind the existing Netlify-function checks) — scoped as a
+  separate, larger architectural sub-project (**Sub-project B**, below), not started.
+  - **NUT-29 (Netlify→Vercel migration) marked Done.** Steps 0–5.2 (code migrated to `api/*.ts`,
+    already on `master`; Vercel project verified end-to-end; parallel observation since 2026-08-27
+    with no issues) are complete. Decision made **not** to decommission Netlify today — it stays the
+    live deploy target indefinitely, in parallel with Vercel, with no scheduled cutover date.
+  - **[NUT-52](https://linear.app/nutrition-grocery-planner/issue/NUT-52/netlifyi-sok-eski-deploy-hedefini-kaldir)
+    created (Backlog)** carrying the old Adım 5.3/5.4 (delete `netlify/functions/`, `netlify.toml`,
+    the two migration scripts; remove `@netlify/blobs`/`netlify-cli` from `package.json`; update
+    `README.md`/`CLAUDE.md` to describe Vercel; shut down the Netlify site) — deferred until an actual
+    cutover date is set.
+  - **Vercel prod is stale**: last deployed 2026-08-28 (`e13d625`); `master` has moved on
+    significantly since (DEC-069, NUT-32/33/34, an ESM-resolution fix). A `npx vercel --prod` redeploy
+    was attempted this session and **blocked by the Claude Code auto-mode classifier** (production-
+    effecting command, no autonomous approval) — noted on NUT-29 and as NUT-52's prerequisite; needs a
+    human-run (or explicitly approved) `npx vercel --prod` plus an end-to-end re-verification before
+    NUT-52 starts.
+  - **Sub-project B (not started, no branch/issue yet):** real Supabase Auth migration — replace the
+    custom Google-OAuth-then-self-signed-JWT flow (`auth-google-callback.ts`, `_auth.ts`) with
+    Supabase's own session/identity system, forward the user's own access token (not `anon`/
+    `service_role`) as the PostgREST bearer for their own data, and rewrite RLS policies on
+    `households`/`lists`/`items`/`meal_entries`/`personal_plan`/`preparation_batches`/
+    `household_shares` around `auth.uid()`. The hard part flagged during review: `app_users.id` is
+    today the Google `sub` (text), and `owner_id`/`user_id` columns already point at it on live data —
+    migrating to Supabase Auth's own uuid needs either a mapping table or a careful backfill, not a
+    config flip. User explicitly wants both this and the Netlify code-retirement (NUT-52) eventually
+    done; sequencing (this doc's own recommendation) is cutover-adjacent work first, this second,
+    given both touch the same `api/`/`netlify/functions/` trees.
 
 ## Files Changed
 
-Committed on `feature/dec-069-batch-implementation` (pushed; not yet merged into `master` as of this
-checkpoint's own commit — see Next Steps):
+Committed on `feature/dec-069-batch-implementation`, since merged into `master` (`67de28c`):
 
 - `supabase/17-preparation-batches.sql`, `supabase/18-preparation-batches-rls-drift.sql` — new.
 - `src/lib/preparationBatch.ts`, `src/lib/preparationBatch.test.ts` — new.
@@ -186,15 +224,19 @@ architecture/audit/plan document set (see Current State above).
 
 ## Next Steps
 
-1. **Merge `feature/dec-069-batch-implementation` into `master`** (this checkpoint's own closeout
-   commit is the last thing landing on that branch before the merge — see git history for the exact
-   sequence).
+1. ~~Merge `feature/dec-069-batch-implementation` into `master`~~ — done (`67de28c`).
 2. **Interactive browser QA for DEC-069**, whenever a working browser-automation environment is
    available (see Problems/Unresolved Issues, item 1) — a validation follow-up, not a new task with
    its own scope.
 3. The `"pirinç"` alias collision, expanded `allergen_classes` coverage, DEC-069's restaurant-scale
    sub-question, and the two orthogonal "Requires Human Decision" items above remain unstarted,
    unscheduled follow-ups — no next Phase 9 milestone is currently queued beyond these.
+4. **Redeploy Vercel prod** (`npx vercel --prod`, manual — no git integration) to catch it up to
+   current `master`, then re-verify end-to-end (login/logout, CRUD, sync, throttled connection) —
+   prerequisite for [NUT-52](https://linear.app/nutrition-grocery-planner/issue/NUT-52/netlifyi-sok-eski-deploy-hedefini-kaldir).
+   Blocked this session by the auto-mode classifier; needs to be run by a human or explicitly approved.
+5. **Sub-project B (real Supabase Auth migration)** — not yet brainstormed/spec'd. Start a fresh
+   design conversation when picked up; do not start coding from this checkpoint's summary alone.
 
 ## Important Context
 
