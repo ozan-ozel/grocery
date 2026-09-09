@@ -1,13 +1,21 @@
-// Netlify Function: shared grocery state.
+// Shared grocery state.
 // Backed by the `sync_state` Supabase table (one row per tenant):
 // household_id -> { version, state }. Concurrent PUTs are last-write-wins by
 // design; the version check is an optimistic-concurrency guard, not a
 // transaction. Fine for a household of 2-4.
 //
-// Previously backed by Netlify Blobs — see scripts/migrate-blobs-to-supabase.ts
-// for the one-off data migration and supabase/06-sync-state.sql for the schema.
+// Every request authenticates to PostgREST as the caller's own Supabase
+// session — RLS's sync_state_all / lists_select / items_select policies
+// back the existing owner/invited household access, on top of
+// requireHouseholdAccess.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse } from "../lib/auth.js";
+import {
+  requireUser,
+  requireHouseholdAccess,
+  userRestHeaders,
+  authErrorResponse,
+  type AuthUser,
+} from "../lib/auth.js";
 
 type Envelope = { version: number; state: unknown };
 
@@ -56,7 +64,7 @@ function restBase(url: string): string {
 
 export default {
   async fetch(request: Request): Promise<Response> {
-  let user;
+  let user: AuthUser;
   try {
     user = await requireUser(request);
   } catch (err) {
@@ -70,22 +78,17 @@ export default {
   }
   const method = request.method.toUpperCase();
 
-  if (method === "GET") return handleGet(tenantId);
-  if (method === "PUT") return handlePut(request, tenantId);
+  if (method === "GET") return handleGet(tenantId, user);
+  if (method === "PUT") return handlePut(request, tenantId, user);
   return json({ error: "method not allowed" }, 405);
   },
 };
 
 async function fetchRow(
   supabaseUrl: string,
-  serviceKey: string,
+  headers: Record<string, string>,
   tenantId: string
 ): Promise<{ version: number; state: unknown } | null> {
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-  };
   const response = await fetch(
     `${restBase(supabaseUrl)}/sync_state?household_id=eq.${encodeURIComponent(tenantId)}&select=version,state`,
     { headers }
@@ -95,16 +98,15 @@ async function fetchRow(
   return rows[0] ?? null;
 }
 
-async function handleGet(tenantId: string): Promise<Response> {
+async function handleGet(tenantId: string, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
   let row: { version: number; state: unknown } | null;
   try {
-    row = await fetchRow(supabaseUrl, serviceKey, tenantId);
+    row = await fetchRow(supabaseUrl, userRestHeaders(user), tenantId);
   } catch (err) {
     console.error(`[state] Supabase read failed tenant=${tenantId}:`, err);
     return json({ error: "storage read failed" }, 500);
@@ -116,7 +118,7 @@ async function handleGet(tenantId: string): Promise<Response> {
   // No row for this tenant yet: try hydrating from Supabase (households/lists/items).
   // One-time bridge — the first client PUT will populate sync_state and this
   // path won't run again for that tenant.
-  const hydrated = await hydrateFromSupabase(tenantId);
+  const hydrated = await hydrateFromSupabase(tenantId, user);
   if (hydrated) {
     console.info(`[state] hydrated tenant=${tenantId} from Supabase (${hydrated.lists.length} lists)`);
     return json({ version: 0, state: hydrated }, 200);
@@ -125,17 +127,12 @@ async function handleGet(tenantId: string): Promise<Response> {
   return json({ version: 0, state: null }, 200);
 }
 
-async function hydrateFromSupabase(householdId: string): Promise<HydratedState | null> {
+async function hydrateFromSupabase(householdId: string, user: AuthUser): Promise<HydratedState | null> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) return null;
+  if (!supabaseUrl) return null;
 
   const base = restBase(supabaseUrl);
-  const headers = {
-    apikey: anonKey,
-    authorization: `Bearer ${anonKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const listsRes = await fetch(
@@ -211,10 +208,9 @@ async function hydrateFromSupabase(householdId: string): Promise<HydratedState |
   }
 }
 
-async function handlePut(request: Request, tenantId: string): Promise<Response> {
+async function handlePut(request: Request, tenantId: string, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -230,9 +226,7 @@ async function handlePut(request: Request, tenantId: string): Promise<Response> 
 
   const base = restBase(supabaseUrl);
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "return=representation",
   };
@@ -262,7 +256,7 @@ async function handlePut(request: Request, tenantId: string): Promise<Response> 
     }
 
     // No row matched — either it doesn't exist yet, or the version is stale.
-    const current = await fetchRow(supabaseUrl, serviceKey, tenantId);
+    const current = await fetchRow(supabaseUrl, userRestHeaders(user), tenantId);
     if (current) {
       console.warn(
         `[state] 409 conflict tenant=${tenantId} clientVersion=${body.version} serverVersion=${current.version}`
@@ -283,7 +277,7 @@ async function handlePut(request: Request, tenantId: string): Promise<Response> 
     }
     const inserted = (await insertRes.json()) as Array<{ version: number }>;
     if (inserted.length === 0) {
-      const race = await fetchRow(supabaseUrl, serviceKey, tenantId);
+      const race = await fetchRow(supabaseUrl, userRestHeaders(user), tenantId);
       return json({ version: race?.version ?? 0, state: race?.state ?? null }, 409);
     }
     return json({ version: inserted[0].version }, 200);
