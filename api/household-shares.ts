@@ -2,10 +2,18 @@
 // POST   /api/household-shares  { household_id, email }            -> { ok: true } (invite; owner only)
 // DELETE /api/household-shares?household_id=<id>&email=<email>     -> { ok: true } (revoke; owner only)
 //
-// Owner-only management of who else can access a household. See
-// docs/superpowers/specs/2026-08-25-household-ownership-sharing-design.md.
+// Owner-only management of who else can access a household. Every request
+// authenticates to PostgREST as the caller's own Supabase session — RLS's
+// household_shares_owner_all policy backs the same owner-only restriction
+// requireHouseholdAccess({ ownerOnly: true }) already enforces.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
+import {
+  requireUser,
+  requireHouseholdAccess,
+  userRestHeaders,
+  authErrorResponse,
+  type AuthUser,
+} from "../lib/auth.js";
 
 type ShareRow = { email: string };
 
@@ -37,8 +45,7 @@ export default {
 
 async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -54,11 +61,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
     return authErrorResponse(err);
   }
 
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const target = `${restBase(supabaseUrl)}/household_shares?household_id=eq.${encodeURIComponent(
@@ -75,8 +78,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
 
 async function handleInvite(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -100,9 +102,7 @@ async function handleInvite(request: Request, user: AuthUser): Promise<Response>
   }
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "resolution=merge-duplicates,return=minimal",
   };
@@ -125,8 +125,7 @@ async function handleInvite(request: Request, user: AuthUser): Promise<Response>
 
 async function handleRevoke(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -143,12 +142,7 @@ async function handleRevoke(request: Request, user: AuthUser): Promise<Response>
     return authErrorResponse(err);
   }
 
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-    prefer: "return=minimal",
-  };
+  const headers = { ...userRestHeaders(user), prefer: "return=minimal" };
 
   try {
     const response = await fetch(
