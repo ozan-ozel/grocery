@@ -1,13 +1,13 @@
 // GET /api/personal-plan  -> PersonalPlanRow | null  (read the caller's own profile)
 // PUT /api/personal-plan  { ...profile }             -> PersonalPlanRow  (upsert)
 //
-// One profile per logged-in user — see src/hooks/useMealPersonalization.ts
-// and supabase/08-personal-plan.sql/09-personal-plan-user-scoped.sql. Scoped
-// entirely by the session's userId (never a client-supplied id), so no
-// separate access check is needed beyond requireUser. Uses PostgREST anon
-// key for reads and service_role key for writes.
+// One profile per logged-in user, scoped entirely by the session's userId
+// (never a client-supplied id) — no separate access check needed beyond
+// requireUser. Every request authenticates to PostgREST as the caller's own
+// Supabase session — RLS's personal_plan_all policy (user_id =
+// current_app_user_id()) backs this.
 
-import { requireUser, authErrorResponse, type AuthUser } from "../lib/auth.js";
+import { requireUser, userRestHeaders, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
 export type PersonalPlanRow = {
   user_id: string;
@@ -54,16 +54,11 @@ export default {
 
 async function handleGet(user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
-  const headers = {
-    apikey: anonKey,
-    authorization: `Bearer ${anonKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   try {
     const target = `${restBase(supabaseUrl)}/personal_plan?select=${SELECT_COLS}&user_id=eq.${encodeURIComponent(
@@ -80,8 +75,7 @@ async function handleGet(user: AuthUser): Promise<Response> {
 
 async function handleWrite(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -123,9 +117,7 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
   const waistCm = body.waist_cm === undefined || body.waist_cm === null ? null : num(body.waist_cm);
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "resolution=merge-duplicates,return=representation",
   };
