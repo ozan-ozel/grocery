@@ -8,6 +8,11 @@ export type MealEntry = {
   quantityG: number;
   position: number;
   comboId: string | null;
+  // DEC-069: set when this entry is an allocation drawn from a
+  // PreparationBatch rather than a fresh addition. Nullable/FK-less,
+  // mirroring comboId's own precedent exactly — every existing row is
+  // unaffected (batchId: null).
+  batchId: string | null;
 };
 
 type MealEntryRow = {
@@ -19,6 +24,7 @@ type MealEntryRow = {
   quantity_g: number;
   position: number;
   combo_id: string | null;
+  batch_id: string | null;
 };
 
 function fromRow(row: MealEntryRow): MealEntry {
@@ -30,6 +36,7 @@ function fromRow(row: MealEntryRow): MealEntry {
     quantityG: row.quantity_g,
     position: row.position,
     comboId: row.combo_id,
+    batchId: row.batch_id,
   };
 }
 
@@ -62,6 +69,32 @@ export async function fetchMealEntries(
   }
 }
 
+// DEC-069: every allocation ever drawn from one batch, regardless of date —
+// backs remainingComposition() (src/lib/preparationBatch.ts), which needs
+// the full history, not just one day's window.
+export async function fetchMealEntriesForBatch(
+  householdId: string,
+  batchId: string
+): Promise<MealEntry[]> {
+  try {
+    const res = await fetch(
+      apiUrl(
+        `/api/meal-entries?householdId=${encodeURIComponent(householdId)}&batchId=${encodeURIComponent(batchId)}`
+      ),
+      { method: "GET", headers: { "content-type": "application/json" } }
+    );
+    if (!res.ok) {
+      console.warn("[mealPlan] batch fetch failed:", res.status);
+      return [];
+    }
+    const rows = (await res.json()) as MealEntryRow[];
+    return rows.map(fromRow);
+  } catch (err) {
+    console.warn("[mealPlan] batch fetch threw:", err);
+    return [];
+  }
+}
+
 export type NewMealEntry = {
   id: string;
   householdId: string;
@@ -71,6 +104,8 @@ export type NewMealEntry = {
   quantityG: number;
   position: number;
   comboId?: string;
+  // DEC-069: set when this entry allocates from an existing PreparationBatch.
+  batchId?: string;
 };
 
 export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | null> {
@@ -87,6 +122,7 @@ export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | 
         quantity_g: entry.quantityG,
         position: entry.position,
         combo_id: entry.comboId ?? null,
+        batch_id: entry.batchId ?? null,
       }),
     });
     if (!res.ok) {

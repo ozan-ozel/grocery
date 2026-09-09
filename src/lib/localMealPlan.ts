@@ -14,6 +14,8 @@ export type MealItem = {
   foodId: string; // Nutrition.name_tr
   quantityG: number;
   comboId?: string;
+  // DEC-069: set when this item allocates from a PreparationBatch.
+  batchId?: string;
 };
 
 // Exactly one section per slot, rendered in this order — no "add another

@@ -59,6 +59,7 @@ function toDayPlan(entries: MealEntry[]): DayPlan {
       foodId: entry.foodId,
       quantityG: entry.quantityG,
       comboId: entry.comboId ?? undefined,
+      batchId: entry.batchId ?? undefined,
     });
   }
   return plan;
@@ -139,15 +140,21 @@ export function useMealPlan(
     return MEAL_SLOTS.flatMap(({ slot }) => dayPlan[slot].map((item) => ({ ...item, slot })));
   }
 
-  function addItem(slot: MealSlot, foodId: string, quantityG: number, comboId?: string): string {
+  function addItem(
+    slot: MealSlot,
+    foodId: string,
+    quantityG: number,
+    comboId?: string,
+    batchId?: string
+  ): string {
     const id = uid();
     const position = dayPlan[slot].length;
     setEntries((prev) => [
       ...prev,
-      { id, date, slot, foodId, quantityG, position, comboId: comboId ?? null },
+      { id, date, slot, foodId, quantityG, position, comboId: comboId ?? null, batchId: batchId ?? null },
     ]);
     if (householdId) {
-      createMealEntry({ id, householdId, date, slot, foodId, quantityG, position, comboId }).then(
+      createMealEntry({ id, householdId, date, slot, foodId, quantityG, position, comboId, batchId }).then(
         (saved) => {
           if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", id);
         }
@@ -187,6 +194,7 @@ export function useMealPlan(
   }
 
   return {
+    date,
     dateLabel: defaultTitle(strToDate(date).getTime()),
     // True only on a cold load (no cached data yet for this household+date).
     // Background revalidation after that never flips this back on, so
