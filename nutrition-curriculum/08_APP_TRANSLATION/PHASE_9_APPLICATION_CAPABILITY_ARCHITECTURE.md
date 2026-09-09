@@ -2116,6 +2116,18 @@ disclosures out of client state. **Which rule goes in that seam is the unresolve
 **Neither is decided here.** `DEC-067` (preparation-detail depth) and `DEC-069` (restaurant-scale
 batch-production scope) remain exactly as open as §8, §13, §14.9, §16.3 and §19.5 left them.
 
+**Status update, additive — original sentence above preserved for provenance:** both decisions have
+since been ratified in separate, later milestones, neither reopening this pass's analysis. `DEC-067` was
+ratified Level 1 and implemented (`00_PROJECT_CONTROL/DECISIONS/2026-09-08-dec-067-preparation-detail-
+ratification.md`; `docs/SESSION_CHECKPOINT.md`). `DEC-069` was ratified **Option 3 — household-scale
+multi-day batch cooking, leftovers, and storage-aware planning** (`00_PROJECT_CONTROL/DECISIONS/
+2026-09-09-dec-069-v1-scope-ratification.md`); **the restaurant/professional-scale sub-question this
+section already identified as DEC-069's actual open part is explicitly NOT ratified** and remains exactly
+as open as this section and `DEC-069_INVESTIGATION.md` §16 (Option 4) leave it — the table and
+"stated plainly" note below remain accurate without modification. Implementation of DEC-069's ratified
+scope has **not** started; a separate implementation-architecture investigation is the next authorized
+step.
+
 | Stage / capability | `DEC-067` | `DEC-069` |
 |---|---|---|
 | Milestone 1 (F1–F3) | **Independent** | **Independent** |
@@ -2252,7 +2264,13 @@ precedence mechanics (B3's own carve-outs); user-vs-household scope (§18.4); `D
 `DEC-099`/`DEC-100`; `DEC-090` and `DEC-021`/`110` numeric values. **`Canonical Food identity's anchor`
 is no longer in this list** — resolved and implemented in the separate, later Canonical Food Identity
 milestone (`d437f37` → `6555c7d` → `8a5ac09`; see `CANONICAL_FOOD_IDENTITY_INVESTIGATION.md` §17,
-`docs/SESSION_CHECKPOINT.md`).
+`docs/SESSION_CHECKPOINT.md`). **`DEC-067` and `DEC-069` are also no longer fully in this list** —
+both have since been ratified in separate, later milestones: `DEC-067` at Level 1, implemented
+(`00_PROJECT_CONTROL/DECISIONS/2026-09-08-dec-067-preparation-detail-ratification.md`); `DEC-069`'s v1
+scope as Option 3 — household-scale multi-day batch cooking, leftovers, and storage-aware planning,
+**not yet implemented** (`00_PROJECT_CONTROL/DECISIONS/2026-09-09-dec-069-v1-scope-ratification.md`).
+`DEC-069`'s restaurant/professional-scale sub-question remains genuinely open and unratified (see §20.8's
+status update above).
 
 ### 20.14 Self-Audit — This Pass Specifically
 
@@ -2272,6 +2290,10 @@ milestone (`d437f37` → `6555c7d` → `8a5ac09`; see `CANONICAL_FOOD_IDENTITY_I
   subsequently resolved and implemented in the separate Canonical Food Identity milestone (`d437f37` →
   `6555c7d` → `8a5ac09`); it is no longer open. It remains correctly described as open *as of this
   pass*, per the precedent this document already sets of not rewriting an earlier pass's own self-audit.
+  **Correction (later pass):** `DEC-067` was subsequently ratified (Level 1) and implemented; `DEC-069`'s
+  v1 scope was subsequently ratified as Option 3 (household-scale multi-day batch cooking, leftovers,
+  storage — not yet implemented; restaurant/professional scale remains open) — see §20.13's status update
+  above. Both remain correctly described as open *as of this pass*, per the same precedent.
 - **The ratification was not rewritten as pre-existing.** §20.2 states in its own column that `DEC-053`/
   `DEC-061` are **silent** on granularity and that `DEC-011`/`DEC-054` do **not** reach `DEC-061` — the two
   claims the ratification specifically warned against inverting.
