@@ -1,14 +1,21 @@
 // GET    /api/households?id=<id>     -> Household       (read by id; access-gated)
-// GET    /api/households              -> Household[]     (list; filtered to owned + invited)
+// GET    /api/households              -> Household[]     (list; RLS-filtered to owned + invited)
 // POST   /api/households              -> Household       (create; creator becomes owner)
 // PATCH  /api/households               -> Household       (rename; any member)
 // DELETE /api/households?id=<id>     -> { ok: true }     (delete; owner only)
 //
-// Uses PostgREST anon... no — service_role key throughout (households has no
-// public read policy). Access is owner-or-invited, see
-// docs/superpowers/specs/2026-08-25-household-ownership-sharing-design.md.
+// Every request authenticates to PostgREST as the caller's own Supabase
+// session (userRestHeaders) — RLS (supabase/19-auth-user-map-and-rls.sql)
+// is the real filter for the list/read paths; requireHouseholdAccess stays
+// as the first-layer check for write paths, matching every other function.
 
-import { requireUser, requireHouseholdAccess, authErrorResponse, type AuthUser } from "../lib/auth.js";
+import {
+  requireUser,
+  requireHouseholdAccess,
+  userRestHeaders,
+  authErrorResponse,
+  type AuthUser,
+} from "../lib/auth.js";
 
 export type Household = {
   id: string;
@@ -45,19 +52,13 @@ export default {
 
 async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
   const url = new URL(request.url);
   const id = url.searchParams.get("id")?.trim();
-
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-  };
+  const headers = userRestHeaders(user);
 
   if (id) {
     try {
@@ -77,26 +78,11 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
     }
   }
 
-  // No id: list only households this user can access (owns, or was invited to
-  // by email) instead of gating a single lookup.
+  // No id: list every household this user can access. RLS's
+  // households_select policy already restricts this to owned + invited —
+  // no manual owner/shares filter needed on this side anymore.
   try {
-    const sharesTarget = `${restBase(supabaseUrl)}/household_shares?email=eq.${encodeURIComponent(
-      user.email
-    )}&select=household_id`;
-    const sharesRes = await fetch(sharesTarget, { headers });
-    if (!sharesRes.ok) return json({ error: `supabase ${sharesRes.status}` }, 502);
-    const shareRows = (await sharesRes.json()) as { household_id: string }[];
-    const invitedIds = shareRows.map((r) => r.household_id);
-    const safeInvitedIds = invitedIds.filter((i) => /^[a-zA-Z0-9_-]{1,64}$/.test(i));
-
-    const filter =
-      safeInvitedIds.length > 0
-        ? `or=${encodeURIComponent(
-            `(owner_id.eq.${user.userId},id.in.(${safeInvitedIds.map((i) => `"${i}"`).join(",")}))`
-          )}`
-        : `owner_id=eq.${encodeURIComponent(user.userId)}`;
-
-    const target = `${restBase(supabaseUrl)}/households?select=*&order=created_at.asc&${filter}`;
+    const target = `${restBase(supabaseUrl)}/households?select=*&order=created_at.asc`;
     const response = await fetch(target, { headers });
     if (!response.ok) return json({ error: `supabase ${response.status}` }, 502);
     const data = (await response.json()) as Household[];
@@ -108,8 +94,7 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
 
 async function handleCreate(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -128,9 +113,7 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
   }
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "return=representation",
   };
@@ -162,8 +145,7 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
 
 async function handleRename(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -189,9 +171,7 @@ async function handleRename(request: Request, user: AuthUser): Promise<Response>
   }
 
   const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
+    ...userRestHeaders(user),
     "content-type": "application/json",
     prefer: "return=representation",
   };
@@ -222,8 +202,7 @@ async function handleRename(request: Request, user: AuthUser): Promise<Response>
 
 async function handleDelete(request: Request, user: AuthUser): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!supabaseUrl || !serviceKey) {
+  if (!supabaseUrl) {
     return json({ error: "supabase not configured" }, 500);
   }
 
@@ -239,12 +218,7 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
     return authErrorResponse(err);
   }
 
-  const headers = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-    prefer: "return=representation",
-  };
+  const headers = { ...userRestHeaders(user), prefer: "return=representation" };
 
   try {
     const response = await fetch(
@@ -262,7 +236,7 @@ async function handleDelete(request: Request, user: AuthUser): Promise<Response>
     if (data.length === 0) return json({ error: "household not found" }, 404);
 
     // sync_state cascades automatically (FK ON DELETE CASCADE) — no manual
-    // cleanup needed here, unlike the old Blobs-backed store.
+    // cleanup needed here.
     return json({ ok: true }, 200);
   } catch (e) {
     return json({ error: `failed to delete household: ${e}` }, 500);
