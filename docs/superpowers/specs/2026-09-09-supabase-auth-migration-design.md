@@ -147,7 +147,7 @@ single most important thing to verify live before trusting any of these policies
 
 | Table | Policy | Notes |
 |---|---|---|
-| `households` | SELECT/UPDATE via `has_household_access(id)`; DELETE/ownership-transfer restricted to `owner_id = current_app_user_id()` | matches today's `ownerOnly` calls in `households.ts` |
+| `households` | SELECT via `owner_id = current_app_user_id() or has_household_share(id)` (**not** `has_household_access(id)` — see `supabase/20-households-select-returning-recursion-fix.sql`); UPDATE via `has_household_access(id)`; DELETE/ownership-transfer restricted to `owner_id = current_app_user_id()` | matches today's `ownerOnly` calls in `households.ts`. **households_select must never re-query `households` itself**: `api/households.ts` sends `Prefer: return=representation` on every write, so `INSERT ... RETURNING` requires the new row to pass this same SELECT policy, and a self-referential sub-query can't see the row its own command just inserted — this shipped broken once (42501 on every create) and was fixed live; don't reintroduce `has_household_access(id)` here. |
 | `lists`, `items` | SELECT only, via `has_household_access(household_id)` (direct on `lists`; via a join to `lists` for `items`) | **dead-write scaffolding** per `docs/architecture.md` — `netlify/functions/lists.ts`/`items.ts` exist but nothing calls them; the only live usage is `state.ts`'s one-time `hydrateFromSupabase()` fallback read |
 | `item_category_memory`, `meal_entries`, `preparation_batches`, `sync_state` | full SELECT/INSERT/UPDATE/DELETE via `has_household_access(household_id)` | actively read/written tables |
 | `personal_plan` | `user_id = current_app_user_id()` | per-person by design, no household check |
