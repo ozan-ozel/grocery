@@ -57,15 +57,22 @@ no decision changes category as a result of this work.
 | C | `PROVISIONAL` | Implement a deliberately temporary MVP choice, tagged `MVP-N PROVISIONAL` | 5 |
 | D | `DEFERRED` | Deliberately out of scope for v1 | 7 |
 | E | `BLOCKED` | Waiting on a named missing subsystem or a human safety decision | 72 |
-| F, G, H | `N/A` | Informational or already covered; nothing to build | 15 |
+| F, G, H | `COVERED` | The app already does something adequate here; no work needed now | 15 |
 
 `READY` and `PROVISIONAL` must remain distinct. Collapsing them would let an implementer harden a
 provisional choice into a permanent one — the exact failure the ledger's own
 `MVP-1 PROVISIONAL / REVISIT AFTER QA-1` tagging convention exists to prevent. A `DEC` only becomes
 `READY` through its own ratification process, never by an implementer's judgement.
 
-`F` and `H` are both empty today; they fold into `N/A` alongside `G`. If a future triage populates `F`
-(reference/scientific), it stays `N/A` — the distinction is not actionable for an implementer.
+`F` (reference/scientific) and `H` (other) are both empty today — no decision was ever filed under
+either — so all 15 `COVERED` rows are `G`. They fold together because none of the three is actionable
+for an implementer; if a future triage populates `F`, it stays `COVERED`.
+
+`COVERED` is deliberately not `DONE`. `SHIPPED` means the decision was implemented as specified;
+`COVERED` means the app has something adequate in that space and the curriculum's fuller version is a
+later refinement, not a gap. `DEC-022` is the clearest case — the app applies ±400/−250 kcal where the
+curriculum says ±500, which the ledger calls "a numeric-tuning question for a human, not an
+architecture gap. Left as-is." A `COVERED` row is a candidate for later sanding, not a closed item.
 
 **Note for readers:** `READY` is currently zero. Every executable decision today is `PROVISIONAL`. This
 is a true and load-bearing fact about the project's state, not a gap in the register.
