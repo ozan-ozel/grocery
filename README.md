@@ -1,14 +1,14 @@
 # Grocery
 
 A grocery list app for Turkish households. Preact + shadcn/ui + Tailwind v4 on the client,
-synced per household across devices via Supabase + Netlify Functions.
+synced per household across devices via Supabase + Vercel Functions.
 
 ```bash
 npm install
-npm run netlify:dev   # real local stack — Vite + every netlify/functions/*, proxied on :8888
+npm run vercel:dev   # real local stack — Vite + every api/*.ts, proxied on :3000
 ```
 
-`npm run dev` also works for client-only UI work, but `/api/*` calls 404 without `netlify:dev`.
+`npm run dev` also works for client-only UI work, but `/api/*` calls 404 without `vercel:dev`.
 See [CLAUDE.md](./CLAUDE.md) for the full command reference and
 [docs/architecture.md](./docs/architecture.md) for the architecture — persistence layers,
 tenants, sync, categorization, nutrition, theming.
@@ -36,7 +36,7 @@ src/
   components/ui/  shadcn primitives — button, input, checkbox, tabs
   components/     AddItem, ActiveList, HistoryView, SearchView, NutritionView, ...
   App.tsx         all state lives here
-netlify/functions/  backend — households, lists, items, nutrition, state
+api/             backend — households, lists, items, nutrition, state
 ```
 
 Lists are never deleted; starting a new list stamps the old one with `closedAt` and files it

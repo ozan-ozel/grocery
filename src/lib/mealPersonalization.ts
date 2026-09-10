@@ -38,6 +38,10 @@ export type PersonalTargets = {
   fatG: { min: number; max: number };
   carbsG: { min: number; max: number };
   fiberG: { min: number; max: number };
+  // MVP-1 PROVISIONAL (PSM Iteration 1, DEC-046): baseline fluid need only —
+  // no exercise/heat adjustment (DEC-047/048), no per-occasion timing.
+  // REVISIT AFTER QA-1. See PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md.
+  waterMl: number;
   warnings: string[];
   assumptions: string[];
 };
@@ -144,6 +148,10 @@ export function calculateTargets(
   const carbsMin = profile.weightKg * carbRange.min;
   const carbsMax = profile.weightKg * carbRange.max;
   const bmi = profile.weightKg / Math.pow(profile.heightCm / 100, 2);
+  // MVP-1 PROVISIONAL (DEC-046): midpoint of the drafted 30-35 mL/kg/day DRI
+  // baseline-fluid range — no exercise (DEC-047) or heat/altitude (DEC-048)
+  // adjustment. REVISIT AFTER QA-1.
+  const waterMl = round(profile.weightKg * 33);
   const warnings: string[] = [];
   if (target < MIN_CALORIES)
     warnings.push(
@@ -151,6 +159,15 @@ export function calculateTargets(
     );
   if (profile.waistCm !== undefined)
     warnings.push("Bel çevresi yalnızca sağlık bağlamı sağlar; tanı koymaz.");
+  // MVP-1 PROVISIONAL (DEC-009): coarse implausibility flag on top of
+  // validateProfile()'s existing per-field bounds, which can still combine
+  // into a physiologically nonsensical BMI (e.g. 35 kg at 230 cm). A warning,
+  // not a gate — validateProfile() remains the only hard stop. REVISIT AFTER
+  // QA-1.
+  if (bmi < 12 || bmi > 60)
+    warnings.push(
+      "Boy ve kilo birlikte olağan dışı bir oran veriyor; değerleri kontrol et.",
+    );
   return {
     bmi: round(bmi * 10) / 10,
     bmrKcal: round(bmr),
@@ -163,6 +180,7 @@ export function calculateTargets(
       Math.max(25, (safeTarget / 1000) * 14),
       Math.max(30, (safeTarget / 1000) * 14),
     ),
+    waterMl,
     warnings,
     assumptions: [
       "Mifflin-St Jeor ile tahmin edildi; gerçek enerji ihtiyacı kişiden kişiye değişir.",
@@ -177,6 +195,15 @@ export function bmiLabel(bmi: number): string {
   if (bmi < 25) return "Genel aralık";
   if (bmi < 30) return "Yüksek";
   return "Çok yüksek";
+}
+
+// MVP-1 PROVISIONAL (PSM Iteration 1, DEC-033): a flat 0.3-0.4 g/kg/occasion
+// band (the curriculum's own drafted figure) applied uniformly to every meal
+// slot — no per-occasion redistribution by size, timing, or training
+// proximity (DEC-035/057). Display-only; nothing reads this to gate or
+// resize an entry. REVISIT AFTER QA-1.
+export function occasionProteinTargetG(weightKg: number) {
+  return range(weightKg * 0.3, weightKg * 0.4);
 }
 
 export function activityLabel(activity: ActivityLevel): string {

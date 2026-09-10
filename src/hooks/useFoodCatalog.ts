@@ -51,7 +51,7 @@ export function useFoodCatalog() {
   useEffect(() => {
     if (query.isError) {
       console.warn(
-        "[mealPlan] food catalog fetch failed — if you're running locally, npm run netlify:dev serves /api/*, npm run dev does not:",
+        "[mealPlan] food catalog fetch failed — if you're running locally, npm run vercel:dev serves /api/*, npm run dev does not:",
         query.error
       );
     }

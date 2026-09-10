@@ -64,17 +64,18 @@ npm install
 npm run dev          # Vite dev server, client only — /api/* calls will 404 (no functions here)
 npm run build         # tsc -b (typecheck src/) && vite build -> dist/
 npm run preview       # serve the built dist/ (still no /api/*)
-npm run netlify:dev   # netlify dev — the real local stack: Vite + every netlify/functions/*
-                       #   (households, lists, items, nutrition, state), proxied on :8888. This is
-                       #   what production actually runs (see netlify.toml's /api/* redirect).
-                       #   Reads Supabase creds from .env.local automatically.
+npm run vercel:dev    # vercel dev — the real local stack: Vite + every api/*.ts, proxied on :3000.
+                       #   This is what production actually runs. Reads Supabase creds from
+                       #   .env.local automatically.
 ```
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
 
-All backend logic lives under `netlify/functions/*` — a former `functions/api/*` Cloudflare Pages
-path was retired (see git history / `docs/roadmap.md`); Netlify is what's actually deployed.
+All backend logic lives under `api/*` (Vercel functions), with shared helpers in `lib/` (e.g.
+`lib/auth.ts`). A former `functions/api/*` Cloudflare Pages path and, later, a parallel
+`netlify/functions/*` deploy were both retired (see git history / `docs/roadmap.md`); Vercel is
+what's actually deployed now.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 
