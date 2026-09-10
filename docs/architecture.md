@@ -53,6 +53,42 @@ boots. Deleting a household (`DELETE /api/households?id=`) cascades `lists`/`ite
 Switching tenants tears down and recreates the sync channel (see `App.tsx`'s sync `useEffect`) so a
 push from tenant A can never land on tenant B.
 
+## Supabase RLS
+
+The Vercel path (`api/*.ts`, see `docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md`
+for the full migration design) authenticates to PostgREST as **the caller's own Supabase session**
+(`lib/auth.ts`'s `userRestHeaders`), not `anon`/`service_role`, so Postgres row-level security policies
+on `households`/`lists`/`items`/`item_category_memory`/`meal_entries`/`preparation_batches`/
+`sync_state`/`personal_plan`/`hidden_households`/`household_shares` (`supabase/19-auth-user-map-and-
+rls.sql`) are a real, independent second authorization layer behind the existing Netlify/Vercel
+function-layer checks (`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Two
+`security definer` helper functions do the real work so policies don't have to re-implement the same
+logic: `current_app_user_id()` maps `auth.uid()` (a Supabase Auth uuid) to this app's pre-existing
+Google-`sub`-as-text identity via `auth_user_map`, and `has_household_access(hh_id)` checks
+owner-or-invited access to a household. The Netlify path (`netlify/functions/*.ts`) still runs on the
+older `service_role`-only model with RLS disabled — see `docs/superpowers/specs/2026-09-09-supabase-
+auth-migration-design.md` for why both currently coexist.
+
+**Hard rule: a table's own SELECT policy must never re-query that same table.** `households_select`
+originally delegated to `has_household_access(id)` for both the owner and shared-invite cases, which
+works fine for ordinary reads but broke every household creation: `api/households.ts` sends
+`Prefer: return=representation` on every write, so PostgREST always issues `INSERT ... RETURNING *`,
+and returning the new row requires it to also pass `households_select`. `has_household_access()`'s
+internal sub-query back into `households` can't see a row the same INSERT command is still creating,
+so the check silently failed and Postgres reported it with the exact same "new row violates row-level
+security policy" message as a genuine `WITH CHECK` failure — even though `households_insert`'s own
+check was correct the whole time. Root-caused live (byte-identical `owner_id`/`current_app_user_id()`
+values, the identical INSERT succeeding once `RETURNING` was dropped); fixed in
+`supabase/20-households-select-returning-recursion-fix.sql` by having `households_select` compare
+`owner_id` directly on the row (no sub-query) instead. The naive fix of inlining the household_shares
+lookup instead of going through a function recurses (`household_shares`'s own policy queries
+`households`, which re-triggers `households_select`, ...; confirmed live as `42P17: infinite recursion
+detected in policy`), so that half stays isolated in its own `security definer` function
+(`has_household_share()`) to bypass RLS instead of re-entering it. `households` is the only table in
+this schema where this applies — every other table's policy checks *upward* into `households` (an
+already-committed, different row), never itself, so this specific failure mode can't recur elsewhere
+unless a future policy is written to re-query its own table. See NUT-53 for the full incident writeup.
+
 ## Sync
 
 **Sync** (`src/lib/sync/sync.ts` + `netlify/functions/state.ts`) is a polling + optimistic-concurrency
