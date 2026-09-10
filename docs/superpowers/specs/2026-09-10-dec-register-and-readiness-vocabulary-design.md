@@ -128,16 +128,26 @@ ledger keeps its per-decision rationale, which the register summarises but does 
 
 ### 5. Validator
 
-`scripts/check-dec-register.ts`, runnable via `node --experimental-strip-types`, matching the existing
-`scripts/upload-nutrition.ts` invocation style. It asserts:
+`tests/decRegister.test.ts`, run by the existing `npm test` (`vitest run`). It asserts:
 
-1. The register contains exactly `DEC-001`–`DEC-112` — no gaps, no duplicates, no invented IDs.
+1. The register contains exactly `DEC-001`–`DEC-112` — no gaps, no duplicates.
 2. Every `Readiness` value is one of the six words.
-3. Every `DEC` ID appearing in the register also appears in `APP_DECISION_INVENTORY.md`.
-4. The per-word totals match the ledger §3 triage counts, under the §1 mapping.
+3. Every row's readiness word is consistent with its own `A`–`H` category, under the §1 mapping.
+4. The per-word row totals match the counts the register declares in its own vocabulary table.
+5. Every `DEC` ID in the register exists in `APP_DECISION_INVENTORY.md`.
+6. Every row's domain letter agrees with that decision's `**Domain:**` in the inventory.
 
-Exit non-zero with a specific message on any failure. This is the drift guard: the register is
-hand-maintained, and assertion 4 is what catches a readiness change made in one place but not the other.
+**Two deviations from the original draft of this section, both deliberate:**
+
+- **A vitest test, not a `scripts/` file.** The repo already runs `npm test` with a real suite; a test
+  is enforced automatically, where a script relies on someone remembering to run it. This follows the
+  existing pattern rather than adding a second invocation style.
+- **Assertion 4 checks the register against itself, not against the ledger.** Tying the totals to the
+  ledger permanently would make the ledger authoritative in practice, contradicting the decision that
+  the register owns readiness — and it would fail the first time the two legitimately diverge. The
+  ledger comparison was instead run **once, at bootstrap**, and matched on all six buckets
+  (13/0/5/7/72/15); that is what establishes the transcription was faithful. Ongoing, assertions 3 and
+  4 catch a row edited without its legend count, or a word edited away from its category.
 
 ## Maintenance rule
 
@@ -160,10 +170,11 @@ noticed rather than inherited.
 
 ## Verification
 
-- Validator passes.
-- `npm run build` (`tsc -b`) stays clean. The validator lives in `scripts/`, which the existing
-  `tsc -b` covers only if `scripts/` is in the build's include set; if it is not, the validator is run
-  directly and no build coverage is claimed for it.
+- Validator passes, and is confirmed capable of failing: injecting a wrong readiness word into one row
+  must fail assertions 3 and 4 with a message naming that row.
+- `npm test` stays green.
+- `npm run build` (`tsc -b`) stays clean. `tsconfig.json`'s `include` gains `tests` and
+  `vitest.config.ts` so the validator is typechecked with the rest of the codebase.
 - Register row count is exactly 112; per-word totals equal 13 / 0 / 5 / 7 / 72 / 15.
 - Every link in the three touched README files resolves to a file that exists.
 - No file under `03_`–`07_`, `09_`–`11_` is modified. No `DEC` ID added, removed, or renamed.

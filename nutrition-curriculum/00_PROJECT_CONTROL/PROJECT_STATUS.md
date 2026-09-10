@@ -251,7 +251,7 @@ CLINICAL_NUTRITION_ARCHITECTURE.md` while validating this Gate: it states Layer 
   be fixed in a small, separately-authorized future pass.
 
 Core source books:
-7
+7 core (+ 1 bounded culinary extension admitted at Gate 6 — On Cooking 7e; the 7-book baseline is preserved unedited)
 
 Current curriculum topic universe:
 213 stable IDs
@@ -376,3 +376,81 @@ functionality remain untouched.
 
 **Verification:** 35/35 tests passing (`vitest run`), `tsc -b` clean, `npm run build` clean. Full
 detail: `docs/SESSION_CHECKPOINT.md`, "Implementation Milestone 1" section.
+
+---
+
+## Phase 9 — PSM Iteration 1 + Browser QA #1 — 2026-09-10
+
+**Supersedes the "Current next task" line in the Phase 9 section above** (extend the capability-architecture
+artifact). Phase 9 implementation now proceeds under the **Progressive Sanding Model (PSM)**: build a broad,
+coherent, working MVP surface, then sand it down through cumulative real-system browser QA, rather than
+finalizing every decision before writing code. PSM is an execution method inside Phase 9 — it opens no gate,
+amends no `DEC`, and closes nothing. Gate 7 (end of Phase 9) remains unreached.
+
+**PSM Iteration 1 shipped** (`b09d90b`, merged to `master`). Artifact:
+`08_APP_TRANSLATION/PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md` — an implementation-triage view of all 112
+decisions plus the provisional choices actually shipped. Four **MVP-1 PROVISIONAL** decisions were
+implemented: `DEC-046` (baseline fluid needs), `DEC-009` (profile-data plausibility check), `DEC-033`
+(protein distribution across occasions), `DEC-071` (meal plan → shopping list consolidation). Each is tagged
+inline in the codebase as `MVP-1 PROVISIONAL / REVISIT AFTER QA-1`. **A provisional choice is not a
+ratification** — no canonical `DEC` record changes status except through its own ratification process. The
+ledger does not replace `APP_DECISION_INVENTORY.md` or any ratification record.
+
+**Browser QA #1 run 2026-09-10 — status PARTIAL.** Artifact:
+`08_APP_TRANSLATION/PSM_ITERATION_1_BROWSER_QA.md`. First real authenticated pass of this PSM cycle
+(onboarding, Personal Plan, Meal Plan, Shopping, Consumption) against `npm run vercel:dev` on the real
+Supabase instance. All four PSM-1 provisional decisions click-tested successfully — no changes needed.
+
+**Two migration regressions found, both open, neither caused by PSM-1:**
+
+- **`§6.1` — CRITICAL / SAFETY / P0.** `api/personal-plan.ts` (the Vercel port of the retired Netlify
+  function) dropped `food_exclusions`, `excluded_food_ids`, and `allergen_class_exclusions` from its read
+  `SELECT_COLS` and from its write body type, validation, and payload. Food-level and allergen-class
+  exclusions entered in Personal Plan are **silently never persisted** — reproduced live, with the excluded
+  food reappearing unfiltered in the meal-plan picker after a full reload. This regresses `DEC-061`'s B3
+  closed-decision safety guarantee and contradicts the app's own "Önerilmesin" copy. Fix is mechanical:
+  restore the three fields, matching the retired Netlify implementation (`git show
+  99f4f44^:netlify/functions/personal-plan.ts`).
+- **`§6.2` — DATA/ARCHITECTURE / P1.** `api/meal-entries.ts` dropped `combo_id`/`batch_id` the same way,
+  breaking combo attribution and `DEC-069` batch-cooking linkage for entries created since the migration.
+
+No fix was made during QA, per that task's own rules. No `DEC` was amended and no `DEC` ID was created.
+
+**Current next task:** fix the `§6.1` P0 exclusion-persistence regression, then `§6.2` — both ahead of any
+further PSM iteration. Resume PSM sanding (and the deferred `§4.3` product-design / `§4.2` data-requirement
+items of `PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md`) after that.
+
+---
+
+## DEC Register & Readiness Vocabulary — 2026-09-10
+
+**`nutrition-curriculum/DEC_REGISTER.md` is now authoritative for each decision's implementation
+readiness.** All 112 decisions appear as individual rows (ranges expanded) with a plain-word readiness
+value alongside the original `A`–`H` category, so the register and the ledger can always be reconciled.
+
+**Vocabulary**, mapped one-to-one from `PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md` §3: `SHIPPED` (A, 13),
+`READY` (B, 0), `PROVISIONAL` (C, 5), `DEFERRED` (D, 7), `BLOCKED` (E, 72), `COVERED` (F/G/H, 15).
+`READY` and `PROVISIONAL` are deliberately distinct — a provisional MVP choice must never be hardened
+into a permanent one by an implementer. `COVERED` is deliberately distinct from `SHIPPED` — it means
+the app has something adequate in that space, a candidate for later sanding, not a closed item.
+
+**No decision was re-triaged, amended, or reclassified.** The register transcribes the existing triage;
+the per-word totals were verified against the ledger's own declared counts at bootstrap and matched on
+all six buckets. `DEC-061` is the one row a single word cannot carry (`A (food-level) / E
+(allergen-class)`); it reads `SHIPPED` with the split stated in its Note.
+
+**Also:** a readiness-precedence banner added at the head of the ledger's §3 (content not rewritten, per
+`PROJECT_AI_PROTOCOL.md` §31); a new top-level `nutrition-curriculum/README.md` as the corpus entry
+point; the 7 broken relative links in `02_TOC_AND_SOURCE_ANALYSIS/README.md` repaired — the defect
+recorded in this file's reorganization log is now closed.
+
+**Maintenance rule:** any change to a decision's readiness updates `DEC_REGISTER.md` in the same commit.
+`tests/decRegister.test.ts` (run by `npm test`) guards ID coverage, the six-word vocabulary,
+word↔category consistency, the register's self-declared totals, and agreement with
+`APP_DECISION_INVENTORY.md` on IDs and domains.
+
+**Verification:** 114/114 tests passing (`npm test`), `tsc -b` and `npm run build` clean. The validator
+was confirmed able to fail by injecting a wrong readiness word into one row.
+
+**Unchanged:** the two open migration regressions from Browser QA #1 (§6.1 P0 exclusion persistence,
+§6.2 P1 `combo_id`/`batch_id`) remain the current next task. Nothing in this pass touched `api/`.
