@@ -141,8 +141,9 @@ Browser                     api/auth-callback
 
 ## Testing
 
-No test suite covers HTTP/cookie flows in this repo (`vitest` covers pure logic only). Verification
-is manual, end-to-end, same pattern as the original Supabase Auth migration's own plan:
+**No automated tests are written for this work** — per explicit user instruction. No new `vitest`
+files, no test scaffolding for the new endpoints. Verification is manual, end-to-end only, same
+pattern as the original Supabase Auth migration's own plan:
 
 - Fresh login (no existing `auth_user_map` row): full redirect chain completes, lands on
   `returnTo`, `/api/auth-session` returns the right `{ email, userId }`.
