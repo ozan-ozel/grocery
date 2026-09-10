@@ -87,9 +87,11 @@ export function writableCookies(request: Request, responseHeaders: Headers) {
 // Same-origin-relative path only — rejects absolute/protocol-relative URLs
 // (open-redirect guard for the OAuth returnTo param, since it round-trips
 // through a plain cookie with no signature). "/x" is fine; "//evil.com",
-// "https://evil.com", "/\\evil.com" are not.
+// "https://evil.com", "/\\evil.com" are not. Also rejects tab/CR/LF to
+// guard against WHATWG URL normalization bypasses.
 export function isSafeReturnTo(value: string | null): value is string {
   if (!value) return false;
+  if (/[\t\r\n]/.test(value)) return false;
   if (!value.startsWith("/")) return false;
   if (value.startsWith("//")) return false;
   if (value.startsWith("/\\")) return false;
