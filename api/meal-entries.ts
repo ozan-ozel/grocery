@@ -29,6 +29,8 @@ export type MealEntryRow = {
   food_id: string;
   quantity_g: number;
   position: number;
+  combo_id: string | null;
+  batch_id: string | null;
 };
 
 const JSON_HEADERS = {
@@ -36,7 +38,7 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
 };
 
-const SELECT_COLS = "id,household_id,date,slot,food_id,quantity_g,position";
+const SELECT_COLS = "id,household_id,date,slot,food_id,quantity_g,position,combo_id,batch_id";
 
 const VALID_SLOTS = ["kahvalti", "ogle", "aksam", "ara"];
 
@@ -89,9 +91,16 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const householdId = url.searchParams.get("householdId")?.trim();
   const from = url.searchParams.get("from")?.trim();
   const to = url.searchParams.get("to")?.trim();
+  // DEC-069: fetch every allocation ever drawn from one batch, regardless of
+  // date, instead of a day-range window — a batch can feed meals on any
+  // number of days, so leftover derivation can't be bounded by from/to.
+  const batchId = url.searchParams.get("batchId")?.trim();
 
-  if (!householdId || !from || !to) {
-    return json({ error: "expected ?householdId=<id>&from=<date>&to=<date>" }, 400);
+  if (!householdId || (!batchId && (!from || !to))) {
+    return json(
+      { error: "expected ?householdId=<id>&from=<date>&to=<date>, or ?householdId=<id>&batchId=<id>" },
+      400,
+    );
   }
 
   try {
@@ -103,11 +112,15 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const headers = userRestHeaders(user);
 
   try {
-    const target =
-      `${restBase(supabaseUrl)}/meal_entries?select=${SELECT_COLS}` +
-      `&household_id=eq.${encodeURIComponent(householdId)}` +
-      `&date=gte.${encodeURIComponent(from)}&date=lte.${encodeURIComponent(to)}` +
-      `&order=date.asc,slot.asc,position.asc`;
+    const target = batchId
+      ? `${restBase(supabaseUrl)}/meal_entries?select=${SELECT_COLS}` +
+        `&household_id=eq.${encodeURIComponent(householdId)}` +
+        `&batch_id=eq.${encodeURIComponent(batchId)}` +
+        `&order=date.asc,slot.asc,position.asc`
+      : `${restBase(supabaseUrl)}/meal_entries?select=${SELECT_COLS}` +
+        `&household_id=eq.${encodeURIComponent(householdId)}` +
+        `&date=gte.${encodeURIComponent(from!)}&date=lte.${encodeURIComponent(to!)}` +
+        `&order=date.asc,slot.asc,position.asc`;
 
     const response = await fetch(target, { headers });
     if (!response.ok) {
@@ -134,6 +147,8 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
     food_id?: unknown;
     quantity_g?: unknown;
     position?: unknown;
+    combo_id?: unknown;
+    batch_id?: unknown;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -166,6 +181,20 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
   if (typeof body.quantity_g !== "number" || !Number.isFinite(body.quantity_g) || body.quantity_g <= 0) {
     return json({ error: "expected quantity_g: positive number" }, 400);
   }
+  if (
+    body.combo_id !== undefined &&
+    body.combo_id !== null &&
+    (typeof body.combo_id !== "string" || body.combo_id.trim().length === 0)
+  ) {
+    return json({ error: "expected combo_id: string (non-empty) or null" }, 400);
+  }
+  if (
+    body.batch_id !== undefined &&
+    body.batch_id !== null &&
+    (typeof body.batch_id !== "string" || body.batch_id.trim().length === 0)
+  ) {
+    return json({ error: "expected batch_id: string (non-empty) or null" }, 400);
+  }
 
   const headers = {
     ...userRestHeaders(user),
@@ -181,6 +210,8 @@ async function handleCreate(request: Request, user: AuthUser): Promise<Response>
     food_id: body.food_id.trim(),
     quantity_g: body.quantity_g,
     position: typeof body.position === "number" ? body.position : 0,
+    combo_id: typeof body.combo_id === "string" ? body.combo_id.trim() : null,
+    batch_id: typeof body.batch_id === "string" ? body.batch_id.trim() : null,
   };
 
   try {

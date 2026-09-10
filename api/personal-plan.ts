@@ -9,6 +9,38 @@
 
 import { requireUser, userRestHeaders, authErrorResponse, type AuthUser } from "../lib/auth.js";
 
+export type FoodExclusionRow = {
+  foodId: string;
+  reason: "allergy" | "intolerance" | "unclear" | "preference" | "unclassified";
+  createdAt: string;
+};
+
+// Türkiye/EU 14 — see src/lib/allergenClasses.ts for the canonical
+// definition. Duplicated here rather than imported, matching this file's
+// existing precedent of keeping its own literal copies of shared validation
+// constants (VALID_REASONS below).
+export type AllergenClassId =
+  | "gluten_cereals"
+  | "crustaceans"
+  | "eggs"
+  | "fish"
+  | "peanuts"
+  | "soybeans"
+  | "milk"
+  | "tree_nuts"
+  | "celery"
+  | "mustard"
+  | "sesame"
+  | "sulphites"
+  | "lupin"
+  | "molluscs";
+
+export type AllergenClassExclusionRow = {
+  allergenClass: AllergenClassId;
+  reason: "allergy" | "intolerance" | "unclear" | "preference" | "unclassified";
+  createdAt: string;
+};
+
 export type PersonalPlanRow = {
   user_id: string;
   name: string;
@@ -19,6 +51,9 @@ export type PersonalPlanRow = {
   activity: string;
   goal: string;
   waist_cm: number | null;
+  excluded_food_ids: string[] | null;
+  food_exclusions: FoodExclusionRow[] | null;
+  allergen_class_exclusions: AllergenClassExclusionRow[] | null;
 };
 
 const JSON_HEADERS = {
@@ -27,11 +62,77 @@ const JSON_HEADERS = {
 };
 
 const SELECT_COLS =
-  "user_id,name,equation_sex,age_years,height_cm,weight_kg,activity,goal,waist_cm";
+  "user_id,name,equation_sex,age_years,height_cm,weight_kg,activity,goal,waist_cm,excluded_food_ids,food_exclusions,allergen_class_exclusions";
 
 const VALID_SEX = ["female", "male"];
 const VALID_ACTIVITY = ["sedentary", "light", "moderate", "high", "very_high"];
 const VALID_GOAL = ["maintain", "loss", "gain"];
+const VALID_REASONS = ["allergy", "intolerance", "unclear", "preference", "unclassified"];
+const VALID_ALLERGEN_CLASSES = [
+  "gluten_cereals",
+  "crustaceans",
+  "eggs",
+  "fish",
+  "peanuts",
+  "soybeans",
+  "milk",
+  "tree_nuts",
+  "celery",
+  "mustard",
+  "sesame",
+  "sulphites",
+  "lupin",
+  "molluscs",
+];
+
+// Rejects a malformed/unrecognized entry outright (400) rather than silently
+// dropping or coercing it — fail-closed, matching the resolver's own rule
+// (Phase 9 §20 Milestone 1). Returns null on any validation failure so the
+// caller can report which entry was bad.
+function parseFoodExclusions(value: unknown): FoodExclusionRow[] | null {
+  if (!Array.isArray(value)) return null;
+  const parsed: FoodExclusionRow[] = [];
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) return null;
+    const e = entry as Record<string, unknown>;
+    if (typeof e.foodId !== "string" || !e.foodId.trim()) return null;
+    if (typeof e.reason !== "string" || !VALID_REASONS.includes(e.reason)) return null;
+    if (typeof e.createdAt !== "string" || !e.createdAt) return null;
+    parsed.push({
+      foodId: e.foodId,
+      reason: e.reason as FoodExclusionRow["reason"],
+      createdAt: e.createdAt,
+    });
+  }
+  return parsed;
+}
+
+// Same fail-closed rule as parseFoodExclusions — an unrecognized
+// allergenClass is rejected outright (400), never silently dropped or
+// coerced, since a class string outside the fixed 14 could otherwise be
+// stored and then silently never match anything at enforcement time.
+function parseAllergenClassExclusions(value: unknown): AllergenClassExclusionRow[] | null {
+  if (!Array.isArray(value)) return null;
+  const parsed = new Map<AllergenClassId, AllergenClassExclusionRow>();
+  for (const entry of value) {
+    if (typeof entry !== "object" || entry === null) return null;
+    const e = entry as Record<string, unknown>;
+    if (typeof e.allergenClass !== "string" || !VALID_ALLERGEN_CLASSES.includes(e.allergenClass))
+      return null;
+    if (typeof e.reason !== "string" || !VALID_REASONS.includes(e.reason)) return null;
+    if (typeof e.createdAt !== "string" || !e.createdAt) return null;
+    const parsedEntry: AllergenClassExclusionRow = {
+      allergenClass: e.allergenClass as AllergenClassId,
+      reason: e.reason as AllergenClassExclusionRow["reason"],
+      createdAt: e.createdAt,
+    };
+    // Keep the most recent submitted choice for a class. Other classes are
+    // preserved, so normalization cannot create duplicate React keys or
+    // discard independent allergen exclusions.
+    parsed.set(parsedEntry.allergenClass, parsedEntry);
+  }
+  return [...parsed.values()];
+}
 
 function restBase(url: string): string {
   return `${url.replace(/\/$/, "")}/rest/v1`;
@@ -88,6 +189,9 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     activity?: unknown;
     goal?: unknown;
     waist_cm?: unknown;
+    excluded_food_ids?: unknown;
+    food_exclusions?: unknown;
+    allergen_class_exclusions?: unknown;
   };
   try {
     body = (await request.json()) as typeof body;
@@ -115,6 +219,29 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     return json({ error: "age_years, height_cm, weight_kg must be numbers" }, 400);
   }
   const waistCm = body.waist_cm === undefined || body.waist_cm === null ? null : num(body.waist_cm);
+  // food_exclusions is the sole source of truth going forward (Phase 9 §20
+  // Milestone 1); excluded_food_ids is derived from it purely as a
+  // read-only historical mirror, not written from client input anymore.
+  const foodExclusions = parseFoodExclusions(body.food_exclusions ?? []);
+  if (foodExclusions === null) {
+    return json(
+      { error: "invalid food_exclusions: expected [{foodId, reason, createdAt}]" },
+      400,
+    );
+  }
+  const excludedFoodIds = foodExclusions.map(e => e.foodId);
+  const allergenClassExclusions = parseAllergenClassExclusions(
+    body.allergen_class_exclusions ?? [],
+  );
+  if (allergenClassExclusions === null) {
+    return json(
+      {
+        error:
+          "invalid allergen_class_exclusions: expected [{allergenClass, reason, createdAt}]",
+      },
+      400,
+    );
+  }
 
   const headers = {
     ...userRestHeaders(user),
@@ -132,6 +259,9 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     activity: body.activity,
     goal: body.goal,
     waist_cm: waistCm,
+    excluded_food_ids: excludedFoodIds,
+    food_exclusions: foodExclusions,
+    allergen_class_exclusions: allergenClassExclusions,
     updated_at: new Date().toISOString(),
   };
 
