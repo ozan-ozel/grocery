@@ -10,11 +10,15 @@
 // than one Food) rather than picking a winner, which the existing map never
 // needed to do.
 //
-// Hard rule, enforced by src/lib/foodIdentitySafety.test.ts (a literal
-// source-text scan, so this comment deliberately never spells out either
-// forbidden identifier — see fuzzyMatch.ts for what they are): this module
-// must never reach for the shopping-catalog's edit-distance matcher to
-// establish identity. Only exact, Turkish-normalized string equality does.
+// Hard rule — this module must never reach for the shopping-catalog's
+// edit-distance matcher to establish identity. Only exact,
+// Turkish-normalized string equality does. See fuzzyMatch.ts for the
+// matcher this rule excludes.
+//
+// This rule is NOT enforced automatically. It was previously guarded by a
+// source-text scan in foodIdentitySafety.test.ts, removed along with the
+// rest of the test suite. Breaking it silently reconnects fuzzy matching to
+// the allergy/exclusion safety path, so check it by hand when editing here.
 
 import { normalize } from "./categorization/itemCategories";
 import type { Nutrition } from "./nutrition";
