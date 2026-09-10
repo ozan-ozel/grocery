@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import type { AuthChangeEvent } from "@supabase/supabase-js";
-import { getSupabaseAuthClient, supabaseAuthEnabled } from "../lib/supabaseAuthClient";
 
 type Session = { email: string | null; userId: string | null };
 
@@ -10,23 +8,13 @@ export function useAuth() {
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
-    if (!supabaseAuthEnabled) {
-      fetchAppSession();
-      return;
-    }
-    fetchAppSessionAfterSupabaseCheck();
-    const supabase = getSupabaseAuthClient();
-    const { data: sub } = supabase.auth.onAuthStateChange((event: AuthChangeEvent) => {
-      if (event === "SIGNED_IN") void fetchAppSessionAfterSupabaseCheck();
-      if (event === "SIGNED_OUT") setSession(undefined);
-    });
-    return () => sub.subscription.unsubscribe();
+    fetchAppSession();
   }, []);
 
-  // Reads the canonical { email, userId } pair from our own backend — same
-  // endpoint, same shape, under either auth mode. userId here is always
-  // app_users.id (the Google sub), never a raw Supabase uuid — TenantSwitcher
-  // etc. compare it directly against households.owner_id.
+  // Reads the canonical { email, userId } pair from our own backend.
+  // userId here is always app_users.id (the Google sub), never a raw
+  // Supabase uuid — TenantSwitcher etc. compare it directly against
+  // households.owner_id.
   async function fetchAppSession(): Promise<void> {
     try {
       const res = await fetch("/api/auth-session", { credentials: "include" });
@@ -43,38 +31,18 @@ export function useAuth() {
     }
   }
 
-  async function fetchAppSessionAfterSupabaseCheck(): Promise<void> {
-    const supabase = getSupabaseAuthClient();
-    const { data } = await supabase.auth.getUser();
-    if (!data.user) {
-      setSession(undefined);
-      setChecked(true);
-      return;
-    }
-    // A fresh login has no app_users/auth_user_map row yet — this call
-    // creates it. Safe to call every time: the upserts are idempotent.
-    await fetch("/api/auth-link", { method: "POST", credentials: "include" });
-    await fetchAppSession();
-  }
-
   function signInWithGoogle() {
-    if (supabaseAuthEnabled) {
-      void getSupabaseAuthClient().auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: window.location.href },
-      });
-      return;
-    }
     // Full-page navigation, not fetch — OAuth needs a top-level browser
-    // navigation to Google's consent screen.
-    window.location.href =
-      "/api/auth-google-start?returnTo=" + encodeURIComponent(window.location.href);
+    // navigation to Google's consent screen. Handled entirely server-side
+    // by api/auth-google-start.ts / api/auth-callback.ts — see
+    // docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md.
+    // returnTo is a relative path, not the full URL: the backend's
+    // isSafeReturnTo() rejects absolute URLs as an open-redirect guard.
+    const returnTo = window.location.pathname + window.location.search;
+    window.location.href = "/api/auth-google-start?returnTo=" + encodeURIComponent(returnTo);
   }
 
   async function signOut() {
-    if (supabaseAuthEnabled) {
-      await getSupabaseAuthClient().auth.signOut();
-    }
     await fetch("/api/auth-logout", { method: "POST", credentials: "include" });
     setSession(undefined);
   }

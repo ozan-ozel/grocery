@@ -2,7 +2,7 @@
 // touches Supabase data calls requireUser() first; on failure it throws
 // AuthError, which callers catch and translate to a Response via
 // authErrorResponse(). Validates a real Supabase Auth session (see
-// api/auth-link.ts for how a Supabase identity gets linked to this app's
+// api/auth-callback.ts for how a Supabase identity gets linked to this app's
 // existing app_users/household model).
 //
 // Session refresh is deliberately not implemented here — the cookie
@@ -13,7 +13,7 @@
 // the same class of tradeoff as this app's original JWT session having no
 // refresh flow.
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 export type AuthUser = {
   userId: string; // app_users.id (Google `sub`) — resolved via auth_user_map
@@ -60,6 +60,63 @@ function readOnlyCookies(request: Request) {
   };
 }
 
+export const RETURN_TO_COOKIE = "sb-return-to";
+
+// Writable cookie adapter shared by every endpoint that must set/clear
+// cookies (sign-out, the OAuth start/callback pair) — unlike
+// readOnlyCookies() above, setAll() here actually appends Set-Cookie
+// headers onto the response being built. Only these endpoints ever write
+// auth cookies; every other function only ever reads them via
+// requireUser()'s read-only adapter.
+export function writableCookies(request: Request, responseHeaders: Headers) {
+  const secure = new URL(request.url).protocol === "https:";
+  return {
+    getAll() {
+      const jar = parseCookies(request.headers.get("cookie"));
+      return Object.entries(jar).map(([name, value]) => ({ name, value }));
+    },
+    setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+      for (const { name, value, options } of cookiesToSet) {
+        const parts = [`${name}=${value}`, "Path=/", "HttpOnly", "SameSite=Lax"];
+        if (secure) parts.push("Secure");
+        if (options?.maxAge !== undefined) parts.push(`Max-Age=${options.maxAge}`);
+        responseHeaders.append("set-cookie", parts.join("; "));
+      }
+    },
+  };
+}
+
+// Builds a Set-Cookie string for RETURN_TO_COOKIE, shared by
+// api/auth-google-start.ts (setting it) and api/auth-callback.ts (clearing
+// it on both the error and success paths) so the attribute list — Secure
+// included — lives in exactly one place.
+export function returnToCookieHeader(request: Request, value: string, maxAge: number): string {
+  const secure = new URL(request.url).protocol === "https:";
+  const parts = [
+    `${RETURN_TO_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
+// Same-origin-relative path only — rejects absolute/protocol-relative URLs
+// (open-redirect guard for the OAuth returnTo param, since it round-trips
+// through a plain cookie with no signature). "/x" is fine; "//evil.com",
+// "https://evil.com", "/\\evil.com" are not. Also rejects tab/CR/LF to
+// guard against WHATWG URL normalization bypasses.
+export function isSafeReturnTo(value: string | null): value is string {
+  if (!value) return false;
+  if (/[\t\r\n]/.test(value)) return false;
+  if (!value.startsWith("/")) return false;
+  if (value.startsWith("//")) return false;
+  if (value.startsWith("/\\")) return false;
+  return true;
+}
+
 export async function requireUser(request: Request): Promise<AuthUser> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
@@ -102,7 +159,7 @@ export async function requireUser(request: Request): Promise<AuthUser> {
     throw new AuthError(502, "identity lookup failed");
   }
   if (mapRows.length === 0) {
-    throw new AuthError(409, "account not linked — call /api/auth-link first");
+    throw new AuthError(409, "account not linked — sign in again");
   }
 
   return {

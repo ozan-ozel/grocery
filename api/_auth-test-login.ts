@@ -125,7 +125,7 @@ export default {
     }
 
     // Same app_users/auth_user_map upsert as the real login-linking step
-    // (api/auth-link.ts) — the test user's "Google sub" is just a stable
+    // (api/auth-callback.ts) — the test user's "Google sub" is just a stable
     // hash of its email, since no real Google account exists for it.
     const appUserId = testAppUserId(email);
     const base = `${supabaseUrl.replace(/\/$/, "")}/rest/v1`;

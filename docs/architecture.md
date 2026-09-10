@@ -189,11 +189,15 @@ step, but a production-effecting one, with no confirmation prompt of its own.
 ## Environment variables
 
 **Required env vars** (Vercel project settings for production; `.env.local` for local dev via
-`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. Most
-`api/*.ts` functions authenticate to PostgREST as the caller's own Supabase session
-(`lib/auth.ts`'s `userRestHeaders`, built from the anon key + the caller's token); a handful of
-endpoints (`meal-entries.ts`'s writes, `nutrition.ts`'s writes, `auth-link.ts`, `_auth-test-login.ts`)
-use `SUPABASE_SERVICE_ROLE_KEY` for operations that must bypass RLS (linking identities, bootstrapping
+`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. These are
+server-only — the frontend bundle never receives Supabase credentials directly; the entire Google
+OAuth handshake (`api/auth-google-start.ts` → `api/auth-callback.ts`) runs server-side instead of
+via a browser-side Supabase client (see
+`docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md`). Most `api/*.ts` functions
+authenticate to PostgREST as the caller's own Supabase session (`lib/auth.ts`'s `userRestHeaders`,
+built from the anon key + the caller's token); a handful of endpoints (`meal-entries.ts`'s writes,
+`nutrition.ts`'s writes, `auth-callback.ts`, `_auth-test-login.ts`) use
+`SUPABASE_SERVICE_ROLE_KEY` for operations that must bypass RLS (linking identities, bootstrapping
 a test session, etc.) — see each file's own comments for which. `.env.local.example` only lists
 `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because it's scoped to the one-off
 `scripts/upload-nutrition.ts` seeding script — it does not cover `SUPABASE_ANON_KEY`, which the
@@ -204,6 +208,16 @@ that mints a real Supabase session cookie for a synthetic test user, for browser
 ever touching a real Google account. It only works when unset in production and when
 `VERCEL_ENV !== "production"` (Vercel's own env var), so it's inert on the deployed site even if
 accidentally left set. **Never set it in the production Vercel project's env vars.**
+
+Two things outside this repo have to be set for the OAuth flow to work at all: Supabase's Auth →
+URL Configuration → Redirect URLs must include `<vercel-domain>/api/auth-callback` (and the local
+dev equivalent if testing against a real Supabase project) — without it, every login fails with an
+unlisted-redirect error from Supabase, not anything this codebase can catch. And the old frontend
+env vars — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SUPABASE_AUTH_ENABLED` — should be
+removed from Vercel's project settings if still set there, since nothing reads them anymore. Manual
+QA of the OAuth flow should also include closing the browser fully and reopening it to confirm the
+session persists — the session cookie's lifetime is now this app's own responsibility via
+`writableCookies`, not the browser Supabase client's.
 
 ## Daily rollover
 

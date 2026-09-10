@@ -5,16 +5,23 @@ type Props = {
   onSignIn: () => void;
 };
 
-// This app is deployed to both Netlify and Vercel in parallel during the
-// NUT-52 migration (see docs/SESSION_CHECKPOINT.md); Netlify is slated to be
-// retired. Only the Netlify-served build should point people at the new
-// address, so the notice is hidden when already running on the Vercel domain
-// rather than gated by a build-time env var — both platforms build the exact
-// same bundle, so a runtime check is the only thing that actually differs.
+// Netlify was retired (NUT-52); this notice is now stale and can be
+// removed once nobody's still landing on the old Netlify domain via a
+// bookmark or cached link.
 const NEW_APP_URL = "https://grocery-five-ecru.vercel.app";
 
 function isRunningOnVercel(): boolean {
   return typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
+}
+
+// Set by api/auth-callback.ts's error redirect (see
+// docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md) when the
+// user declines Google consent or the OAuth exchange fails.
+function hasAuthError(): boolean {
+  return (
+    typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).has("auth_error")
+  );
 }
 
 export function LoginGate({ onSignIn }: Props) {
@@ -30,6 +37,11 @@ export function LoginGate({ onSignIn }: Props) {
         <Chrome className="size-4" />
         Google ile giriş yap
       </Button>
+      {hasAuthError() && (
+        <p className="text-center text-xs text-destructive">
+          Giriş başarısız oldu. Lütfen tekrar dene.
+        </p>
+      )}
       {!isRunningOnVercel() && (
         <p className="text-center text-xs text-muted-foreground">
           Bu adresi yakında kapatıyoruz. Yeni adresimiz:{" "}

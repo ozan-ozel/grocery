@@ -99,6 +99,10 @@ Untracked, pre-existing, unrelated to this task (left alone): `docs/VERCEL_ARCHI
 
 ## Next Steps
 
+0. **`feature/backend-only-oauth` (separate branch, not covered above):** before that branch can go
+   live, add `<vercel-domain>/api/auth-callback` to Supabase's Auth → URL Configuration → Redirect
+   URLs, and remove the now-unread `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/
+   `VITE_SUPABASE_AUTH_ENABLED` vars from Vercel's project settings — both still outstanding.
 1. Review the diff on `chore/retire-netlify` (`git diff master...chore/retire-netlify`), then CMP
    (commit, merge into `master`, push) when satisfied — the branch already exists and is checked out,
    so plain CMP applies.
