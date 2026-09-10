@@ -72,6 +72,12 @@ npm run vercel:dev    # vercel dev — the real local stack: Vite + every api/*.
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
 
+**Do not add a test suite, a test framework, or test files, and do not propose tests as part of a
+plan.** Vitest and its 9 test files were deliberately removed. Verify work by running `tsc -b`/the
+build, and by exercising the actual app (`npm run vercel:dev`) when behavior matters. If a change
+genuinely needs a check beyond that, write the smallest possible one-off script, run it, and delete
+it — do not leave a standing test behind.
+
 All backend logic lives under `api/*` (Vercel functions), with shared helpers in `lib/` (e.g.
 `lib/auth.ts`). A former `functions/api/*` Cloudflare Pages path and, later, a parallel
 `netlify/functions/*` deploy were both retired (see git history / `docs/roadmap.md`); Vercel is
