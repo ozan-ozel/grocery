@@ -61,13 +61,22 @@ for the full migration design) authenticates to PostgREST as **the caller's own 
 on `households`/`lists`/`items`/`item_category_memory`/`meal_entries`/`preparation_batches`/
 `sync_state`/`personal_plan`/`hidden_households`/`household_shares` (`supabase/19-auth-user-map-and-
 rls.sql`) are a real, independent second authorization layer behind the existing Netlify/Vercel
-function-layer checks (`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Two
+function-layer checks (`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Three
 `security definer` helper functions do the real work so policies don't have to re-implement the same
 logic: `current_app_user_id()` maps `auth.uid()` (a Supabase Auth uuid) to this app's pre-existing
-Google-`sub`-as-text identity via `auth_user_map`, and `has_household_access(hh_id)` checks
-owner-or-invited access to a household. The Netlify path (`netlify/functions/*.ts`) still runs on the
-older `service_role`-only model with RLS disabled — see `docs/superpowers/specs/2026-09-09-supabase-
-auth-migration-design.md` for why both currently coexist.
+Google-`sub`-as-text identity via `auth_user_map`, `has_household_access(hh_id)` checks
+owner-or-invited access to a household, and `has_household_share(hh_id)` isolates the invite-lookup
+half of that (see the recursion note below). They live in `app_private`, not `public`
+(`supabase/22-security-definer-functions-to-private-schema.sql`) — `public` is the only schema
+PostgREST exposes as `/rest/v1/rpc/*`, so a schema not on that list is unreachable by anon/authenticated
+callers directly while remaining fully callable from RLS policies, which invoke functions via plain
+schema-qualified SQL untouched by that setting. (An earlier attempt just revoked `EXECUTE` on the
+`public`-schema versions per role — `supabase/21-security-definer-execute-grants.sql` — but Supabase's
+linter flags a security-definer function as a warning for *any* role able to reach it via RPC, and
+`authenticated` can't lose that grant without breaking every policy that calls it; moving schemas
+instead of narrowing grants is what actually clears the warning.) The Netlify path
+(`netlify/functions/*.ts`) still runs on the older `service_role`-only model with RLS disabled — see
+`docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md` for why both currently coexist.
 
 **Hard rule: a table's own SELECT policy must never re-query that same table.** `households_select`
 originally delegated to `has_household_access(id)` for both the owner and shared-invite cases, which
