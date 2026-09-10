@@ -1,0 +1,6 @@
+{
+  "rewrites": [
+    { "source": "/api/auth-google-start", "destination": "/api/auth-google?_action=start" },
+    { "source": "/api/auth-callback", "destination": "/api/auth-google?_action=callback" }
+  ]
+}
