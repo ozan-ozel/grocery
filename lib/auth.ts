@@ -2,7 +2,7 @@
 // touches Supabase data calls requireUser() first; on failure it throws
 // AuthError, which callers catch and translate to a Response via
 // authErrorResponse(). Validates a real Supabase Auth session (see
-// api/auth-link.ts for how a Supabase identity gets linked to this app's
+// api/auth-callback.ts for how a Supabase identity gets linked to this app's
 // existing app_users/household model).
 //
 // Session refresh is deliberately not implemented here — the cookie
@@ -13,7 +13,7 @@
 // the same class of tradeoff as this app's original JWT session having no
 // refresh flow.
 
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient, type CookieOptions } from "@supabase/ssr";
 
 export type AuthUser = {
   userId: string; // app_users.id (Google `sub`) — resolved via auth_user_map
@@ -58,6 +58,42 @@ function readOnlyCookies(request: Request) {
       // Intentional no-op.
     },
   };
+}
+
+export const RETURN_TO_COOKIE = "sb-return-to";
+
+// Writable cookie adapter shared by every endpoint that must set/clear
+// cookies (sign-out, the OAuth start/callback pair) — unlike
+// readOnlyCookies() above, setAll() here actually appends Set-Cookie
+// headers onto the response being built. Only these endpoints ever write
+// auth cookies; every other function only ever reads them via
+// requireUser()'s read-only adapter.
+export function writableCookies(request: Request, responseHeaders: Headers) {
+  return {
+    getAll() {
+      const jar = parseCookies(request.headers.get("cookie"));
+      return Object.entries(jar).map(([name, value]) => ({ name, value }));
+    },
+    setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
+      for (const { name, value, options } of cookiesToSet) {
+        const parts = [`${name}=${value}`, "Path=/", "HttpOnly", "SameSite=Lax"];
+        if (options?.maxAge !== undefined) parts.push(`Max-Age=${options.maxAge}`);
+        responseHeaders.append("set-cookie", parts.join("; "));
+      }
+    },
+  };
+}
+
+// Same-origin-relative path only — rejects absolute/protocol-relative URLs
+// (open-redirect guard for the OAuth returnTo param, since it round-trips
+// through a plain cookie with no signature). "/x" is fine; "//evil.com",
+// "https://evil.com", "/\\evil.com" are not.
+export function isSafeReturnTo(value: string | null): value is string {
+  if (!value) return false;
+  if (!value.startsWith("/")) return false;
+  if (value.startsWith("//")) return false;
+  if (value.startsWith("/\\")) return false;
+  return true;
 }
 
 export async function requireUser(request: Request): Promise<AuthUser> {
