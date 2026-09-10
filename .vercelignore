@@ -1,0 +1,17 @@
+# Vercel CLI deploys the local filesystem and doesn't reliably inherit
+# .gitignore here, so mirror the excludes that matter for deploy size/content.
+
+node_modules
+dist
+*.tsbuildinfo
+.env
+.env.local
+.env.*.local
+.netlify
+.serena
+.claude
+.superpowers
+
+# Not part of the deployed app; contains copyrighted source textbooks up to
+# 600+MB, well over Vercel's 100MB per-file limit.
+nutrition-curriculum
