@@ -2,13 +2,13 @@
 
 | # | Book | Edition | Year | Authors | TOC File |
 |---|------|---------|------|---------|----------|
-| 1 | Advanced Sports Nutrition | 3rd Edition | 2021 | Dan Benardot | [01_advanced_sports_nutrition_3e.md](01_advanced_sports_nutrition_3e.md) |
-| 2 | ACSM's Nutrition for Exercise Science | 1st Edition | 2018 | Dan Benardot (ACSM-branded) | [02_acsm_nutrition_for_exercise_science_1e.md](02_acsm_nutrition_for_exercise_science_1e.md) |
-| 3 | Human Metabolism: A Regulatory Perspective | 4th Edition | 2019 | Keith N. Frayn & Rhys D. Evans | [03_human_metabolism_regulatory_perspective_4e.md](03_human_metabolism_regulatory_perspective_4e.md) |
-| 4 | Introduction to Nutrition and Metabolism | 3rd Edition | 2002 | David A Bender | [04_introduction_to_nutrition_and_metabolism_3e.md](04_introduction_to_nutrition_and_metabolism_3e.md) |
-| 5 | Nutrition Research Methodologies | Not separately numbered (2015 Wiley edition; predecessor 1e 2005 under Harlan Davidson) | 2015 | Julie A. Lovegrove, Leanne Hodson, Sangita Sharma & Susan A. Lanham-New (Editor-in-Chief) | [05_nutrition_research_methodologies_2015.md](05_nutrition_research_methodologies_2015.md) |
-| 6 | Sport Nutrition | 4th Edition | 2025 *(copyright page; filename says 2024 — see file for discrepancy note)* | Asker Jeukendrup & Michael Gleeson | [06_sport_nutrition_4e.md](06_sport_nutrition_4e.md) |
-| 7 | Krause and Mahan's Food and the Nutrition Care Process | 16th Edition | 2023 *(copyright page; filename says 2022 — see file for discrepancy note)* | Janice L. Raymond & Kelly Morrow | [07_krause_mahan_food_nutrition_care_process_16e.md](07_krause_mahan_food_nutrition_care_process_16e.md) |
+| 1 | Advanced Sports Nutrition | 3rd Edition | 2021 | Dan Benardot | [01_advanced_sports_nutrition_3e.md](01_Advanced_Sports_Nutrition_3e/01_advanced_sports_nutrition_3e.md) |
+| 2 | ACSM's Nutrition for Exercise Science | 1st Edition | 2018 | Dan Benardot (ACSM-branded) | [02_acsm_nutrition_for_exercise_science_1e.md](02_ACSM_Nutrition_for_Exercise_Science_1e/02_acsm_nutrition_for_exercise_science_1e.md) |
+| 3 | Human Metabolism: A Regulatory Perspective | 4th Edition | 2019 | Keith N. Frayn & Rhys D. Evans | [03_human_metabolism_regulatory_perspective_4e.md](03_Human_Metabolism_Regulatory_Perspective_4e/03_human_metabolism_regulatory_perspective_4e.md) |
+| 4 | Introduction to Nutrition and Metabolism | 3rd Edition | 2002 | David A Bender | [04_introduction_to_nutrition_and_metabolism_3e.md](04_Introduction_to_Nutrition_and_Metabolism_3e/04_introduction_to_nutrition_and_metabolism_3e.md) |
+| 5 | Nutrition Research Methodologies | Not separately numbered (2015 Wiley edition; predecessor 1e 2005 under Harlan Davidson) | 2015 | Julie A. Lovegrove, Leanne Hodson, Sangita Sharma & Susan A. Lanham-New (Editor-in-Chief) | [05_nutrition_research_methodologies_2015.md](05_Nutrition_Research_Methodologies/05_nutrition_research_methodologies_2015.md) |
+| 6 | Sport Nutrition | 4th Edition | 2025 *(copyright page; filename says 2024 — see file for discrepancy note)* | Asker Jeukendrup & Michael Gleeson | [06_sport_nutrition_4e.md](06_Sport_Nutrition_4e/06_sport_nutrition_4e.md) |
+| 7 | Krause and Mahan's Food and the Nutrition Care Process | 16th Edition | 2023 *(copyright page; filename says 2022 — see file for discrepancy note)* | Janice L. Raymond & Kelly Morrow | [07_krause_mahan_food_nutrition_care_process_16e.md](07_Krause_Mahan_Food_Nutrition_Care_Process_16e/07_krause_mahan_food_nutrition_care_process_16e.md) |
 
 ## Extraction Status
 

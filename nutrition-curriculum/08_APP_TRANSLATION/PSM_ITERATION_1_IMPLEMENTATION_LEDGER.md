@@ -48,6 +48,12 @@ pass (see §7, "why not more").
 
 ## 3. Full DEC-001–112 Triage
 
+> **READINESS PRECEDENCE:** `nutrition-curriculum/DEC_REGISTER.md` is authoritative for each decision's
+> implementation readiness, and carries all 112 as individual rows in plain words (`SHIPPED` / `READY` /
+> `PROVISIONAL` / `DEFERRED` / `BLOCKED` / `COVERED`) alongside the `A`–`H` category below. This section
+> is not rewritten and remains the source for the per-decision *rationale* the register only summarises.
+> Where the two disagree about a category, the register wins and this section is stale.
+
 Categories: **A**=DONE, **B**=RATIFIED/IMPLEMENTATION REMAINS, **C**=PROVISIONAL MVP CANDIDATE,
 **D**=DEFERRED, **E**=BLOCKED (do not guess), **F**=REFERENCE/SCIENTIFIC, **G**=ALREADY
 COVERED/INFORMATIONAL, **H**=OTHER.
