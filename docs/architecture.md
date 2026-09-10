@@ -22,9 +22,9 @@ mostly presentational. Persistence is split across several independent layers wi
 | Layer                                          | Key(s) / store                                                                         | Scope             | Synced to server?                                    |
 | ---------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------- | ---------------------------------------------------- |
 | Tenants (households)                           | Supabase `households` table, via `/api/households`                                     | shared (Supabase) | yes                                                  |
-| List state (`{ lists, activeId, version }`)    | `grocery.state.v1:<tenantId>` (local cache) + Supabase `sync_state` table              | per tenant        | yes, via `netlify/functions/state.ts`                |
+| List state (`{ lists, activeId, version }`)    | `grocery.state.v1:<tenantId>` (local cache) + Supabase `sync_state` table              | per tenant        | yes, via `api/state.ts`                              |
 | Category overlay (renames/hide/reorder/custom) | `grocery.categories.v1`                                                                | device            | no                                                   |
-| Item name → category memory                    | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant        | yes, via `netlify/functions/item-category-memory.ts` |
+| Item name → category memory                    | `grocery.itemCategories.v1:<tenantId>` (local cache) + Supabase `item_category_memory` | per tenant        | yes, via `api/item-category-memory.ts`               |
 | UI prefs (theme, swipe mode)                   | `grocery.theme.v1`, `grocery.swipeMode.v1`                                             | device            | no                                                   |
 | Onboarding quick-setup seen?                   | `grocery.onboarding.v1:<userId>`                                                        | device             | no                                                    |
 
@@ -45,23 +45,23 @@ typing, with a "Tümünü göster" expand) rather than kept as its own tab.
 
 **Tenants** (`src/lib/store.ts` + `src/lib/households.ts`) model separate households ("Evim" is the
 default, id `"default"`). The tenant list isn't device-local: it's rows in Supabase's `households`
-table, fetched/created/renamed/deleted through `/api/households` (`netlify/functions/households.ts`,
-service_role key for every verb, including reads). On boot `App.tsx` calls `listHouseholds()`; if
+table, fetched/created/renamed/deleted through `/api/households` (`api/households.ts`, the caller's
+own Supabase session for every verb, including reads). On boot `App.tsx` calls `listHouseholds()`; if
 Supabase has none yet, it seeds `"default"`/"Evim" via `createHousehold()` so a fresh project still
 boots. Deleting a household (`DELETE /api/households?id=`) cascades `lists`/`items`/
-`item_category_memory` via Supabase FK constraints and separately clears its `state:<id>` Blob.
+`item_category_memory`/`sync_state` via Supabase FK constraints — no manual cleanup needed.
 Switching tenants tears down and recreates the sync channel (see `App.tsx`'s sync `useEffect`) so a
 push from tenant A can never land on tenant B.
 
 ## Supabase RLS
 
-The Vercel path (`api/*.ts`, see `docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md`
-for the full migration design) authenticates to PostgREST as **the caller's own Supabase session**
+`api/*.ts` (see `docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md` for the full
+migration design) authenticates to PostgREST as **the caller's own Supabase session**
 (`lib/auth.ts`'s `userRestHeaders`), not `anon`/`service_role`, so Postgres row-level security policies
 on `households`/`lists`/`items`/`item_category_memory`/`meal_entries`/`preparation_batches`/
 `sync_state`/`personal_plan`/`hidden_households`/`household_shares` (`supabase/19-auth-user-map-and-
-rls.sql`) are a real, independent second authorization layer behind the existing Netlify/Vercel
-function-layer checks (`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Three
+rls.sql`) are a real, independent second authorization layer behind the existing function-layer checks
+(`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Three
 `security definer` helper functions do the real work so policies don't have to re-implement the same
 logic: `current_app_user_id()` maps `auth.uid()` (a Supabase Auth uuid) to this app's pre-existing
 Google-`sub`-as-text identity via `auth_user_map`, `has_household_access(hh_id)` checks
@@ -74,9 +74,7 @@ schema-qualified SQL untouched by that setting. (An earlier attempt just revoked
 `public`-schema versions per role — `supabase/21-security-definer-execute-grants.sql` — but Supabase's
 linter flags a security-definer function as a warning for *any* role able to reach it via RPC, and
 `authenticated` can't lose that grant without breaking every policy that calls it; moving schemas
-instead of narrowing grants is what actually clears the warning.) The Netlify path
-(`netlify/functions/*.ts`) still runs on the older `service_role`-only model with RLS disabled — see
-`docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md` for why both currently coexist.
+instead of narrowing grants is what actually clears the warning.)
 
 **Hard rule: a table's own SELECT policy must never re-query that same table.** `households_select`
 originally delegated to `has_household_access(id)` for both the owner and shared-invite cases, which
@@ -100,7 +98,7 @@ unless a future policy is written to re-query its own table. See NUT-53 for the 
 
 ## Sync
 
-**Sync** (`src/lib/sync/sync.ts` + `netlify/functions/state.ts`) is a polling + optimistic-concurrency
+**Sync** (`src/lib/sync/sync.ts` + `api/state.ts`) is a polling + optimistic-concurrency
 scheme, not a websocket: the client polls `GET /api/state?tenant=<id>` every 15s and on tab focus,
 and pushes `PUT` 500ms after any local change; a `PUT` with a stale `version` gets rejected with 409
 and the current server state, which the client adopts. Last-write-wins by design — deliberately good
@@ -111,12 +109,11 @@ tenant yet, `state.ts` tries a one-time hydration from the Supabase `lists`/`ite
 (`hydrateFromSupabase()`) before falling back to `state: null` — this only fires for a household that
 exists via `/api/households` but has never had a first `/api/state` PUT.
 
-`src/lib/sync/lists.ts` and `src/lib/sync/items.ts` are client wrappers around `netlify/functions/lists.ts` /
-`items.ts` (per-row CRUD against the `lists`/`items` tables in `supabase/01-schema.sql`), but
-**nothing in the app calls them yet** — no import outside those two files themselves. They read as
-scaffolding for eventually replacing the single-blob-per-tenant sync with normalized per-row Supabase
-persistence, not a wired-up feature (tracked in `docs/roadmap.md` #1). `item_category_memory` (also
-in `01-schema.sql`) is wired up — see the Categorization section below.
+A per-row Supabase CRUD path for `lists`/`items` (`supabase/01-schema.sql`) was scaffolded early on
+(client wrappers in `src/lib/sync/`, function counterparts) as groundwork for eventually replacing
+the single-blob-per-tenant sync with normalized per-row persistence, but nothing ever called it —
+it was removed as dead code (see `docs/roadmap.md` #1 for the still-open direction). `item_category_memory`
+(also in `01-schema.sql`) is wired up — see the Categorization section below.
 
 ## Categorization
 
@@ -141,7 +138,7 @@ in `01-schema.sql`) is wired up — see the Categorization section below.
 ## Nutrition
 
 **Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
-`/api/nutrition`, proxied to `netlify/functions/nutrition.ts` in production, which
+`/api/nutrition` (`api/nutrition.ts`), which
 proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
 service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
 a copy-paste LLM prompt for turning free-form nutrition text into the row JSON the uploader/bulk-paste
@@ -171,40 +168,42 @@ boundaries but do not turn the feature into medical advice.
 
 ## Deployment
 
-**`git push origin master` auto-deploys to Netlify production** — Netlify's GitHub integration
-rebuilds and ships on every push to `master`, with no manual step and no confirmation prompt. There
-is no separate "staging" push; merging into `master` and pushing it *is* the production release.
-Treat a push to `master` with the same weight as clicking "deploy to prod" — because it is one.
+**Vercel is the sole deploy target** (project `grocery`, linked via `.vercel/project.json`). A
+parallel Netlify deploy existed during the `api/*.ts` migration (`docs/netlify-vercel-migration-plan.md`,
+NUT-29) and was retired once Vercel was verified end-to-end (NUT-52); there is no Netlify site, no
+`netlify.toml`, and no `netlify/functions/` anymore.
 
-A Vercel project (`grocery`, linked via `.vercel/project.json`) also exists from the in-progress
-Netlify→Vercel migration (`docs/netlify-vercel-migration-plan.md`, NUT-29). It is **not** wired to
-auto-deploy on push — there's no GitHub App access to this repo under that account, so every deploy
-is a manual CLI invocation, run from whatever the local working tree looks like at that moment
-(uncommitted changes and all — the CLI deploys the filesystem, not a git ref):
+Vercel deploys are **not** wired to auto-deploy on push — there's no GitHub App access to this repo
+under that account, so every deploy is a manual CLI invocation, run from whatever the local working
+tree looks like at that moment (uncommitted changes and all — the CLI deploys the filesystem, not a
+git ref):
 
 - `npx vercel link` — one-time, links this directory to the Vercel project
-- `npx vercel dev` — local dev server running Vite + `api/*.ts` together (Vercel's equivalent of `npm run netlify:dev`)
+- `npx vercel dev` (`npm run vercel:dev`) — local dev server running Vite + `api/*.ts` together
 - `npx vercel` — preview deploy to a throwaway `*.vercel.app` URL, doesn't touch production
 - `npx vercel --prod` — deploys to `https://grocery-five-ecru.vercel.app`
 
-Until the migration finishes, Netlify is the one auto-deploying platform; Vercel deploys only happen
-when someone runs one of the commands above by hand.
+Treat `npx vercel --prod` with the same weight as any other "deploy to prod" action — it's a manual
+step, but a production-effecting one, with no confirmation prompt of its own.
 
 ## Environment variables
 
-**Required env vars** (Netlify site settings for production; `.env.local` or `netlify link` for local
-dev via `npm run netlify:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`.
-Most `netlify/functions/*.ts` GETs use the anon key and writes use the service_role key;
-`households.ts` is the exception and uses service_role for every verb including reads.
-`.env.local.example` only lists `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because
-it's scoped to the one-off `scripts/upload-nutrition.ts` seeding script — it does not cover
-`SUPABASE_ANON_KEY`, which the functions also need.
+**Required env vars** (Vercel project settings for production; `.env.local` for local dev via
+`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. Most
+`api/*.ts` functions authenticate to PostgREST as the caller's own Supabase session
+(`lib/auth.ts`'s `userRestHeaders`, built from the anon key + the caller's token); a handful of
+endpoints (`meal-entries.ts`'s writes, `nutrition.ts`'s writes, `auth-link.ts`, `_auth-test-login.ts`)
+use `SUPABASE_SERVICE_ROLE_KEY` for operations that must bypass RLS (linking identities, bootstrapping
+a test session, etc.) — see each file's own comments for which. `.env.local.example` only lists
+`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because it's scoped to the one-off
+`scripts/upload-nutrition.ts` seeding script — it does not cover `SUPABASE_ANON_KEY`, which the
+functions also need.
 
-`TEST_LOGIN_SECRET` (local-only, optional) enables `netlify/functions/auth-test-login.ts` — a
-Google-OAuth bypass that mints a real session cookie for a synthetic test user, for browser-driven
-QA without ever touching a real Google account. It only works when unset in production and when
-`CONTEXT !== "production"` (Netlify's own build-context var), so it's inert on the deployed site
-even if accidentally left set. **Never set it in the production Netlify site's env vars.**
+`TEST_LOGIN_SECRET` (local-only, optional) enables `api/_auth-test-login.ts` — a Google-OAuth bypass
+that mints a real Supabase session cookie for a synthetic test user, for browser-driven QA without
+ever touching a real Google account. It only works when unset in production and when
+`VERCEL_ENV !== "production"` (Vercel's own env var), so it's inert on the deployed site even if
+accidentally left set. **Never set it in the production Vercel project's env vars.**
 
 ## Daily rollover
 

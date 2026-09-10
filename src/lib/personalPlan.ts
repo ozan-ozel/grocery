@@ -49,7 +49,7 @@ function apiUrl(path: string): string {
 }
 
 // Scoped server-side to the logged-in session (no id to pass) — see
-// api/personal-plan.ts / netlify/functions/personal-plan.ts.
+// api/personal-plan.ts.
 export async function fetchPersonalPlan(): Promise<PersonalProfile | null> {
   try {
     const res = await fetch(apiUrl("/api/personal-plan"), {

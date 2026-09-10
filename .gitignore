@@ -6,10 +6,12 @@ dist
 .env.local
 .env.*.local
 .wrangler
-
-# Local Netlify folder
-.netlify
 deno.lock
+
+# Local geolocation-simulation cache written by the `vercel` CLI package
+# itself (unrelated to the retired Netlify integration — that's just its
+# internal path name).
+.netlify
 
 # Claude Code worktrees
 .claude/worktrees

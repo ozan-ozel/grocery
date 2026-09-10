@@ -9,12 +9,11 @@ already documented in `CLAUDE.md`. Nothing here is scheduled — this is a menu,
 The lowest-effort, most "intended" directions: things the codebase is already
 halfway toward.
 
-1. **Finish the Supabase-normalized persistence migration.** `items.ts`, `lists.ts`,
-   and their `netlify/functions/` counterparts already do per-row CRUD against
-   `lists`/`items`, but nothing calls them — the app still runs on the
-   single-blob-per-tenant sync in `sync.ts`/`state.ts`. This is scaffolding waiting
-   to be wired up. It would unlock real per-item conflict resolution instead of
-   last-write-wins, and per-row history queries.
+1. **Finish the Supabase-normalized persistence migration.** An earlier pass scaffolded per-row
+   CRUD against `lists`/`items` (client + function counterparts), but nothing ever called it, and
+   it's since been removed as dead code — the app still runs entirely on the single-blob-per-tenant
+   sync in `sync.ts`/`state.ts`. Re-building that per-row path (not just reviving the old one) would
+   unlock real per-item conflict resolution instead of last-write-wins, and per-row history queries.
 
 2. **PWA / offline support.** No manifest, no service worker — despite a genuinely
    offline-friendly shape (local cache + optimistic sync). Grocery-list apps live
@@ -76,9 +75,9 @@ remain out of scope until their data and safety contracts are defined.
 
 11. **Structured observability on the sync path.** NUT-10 landed console-level
     logging for the 409-conflict branch, `hydrateFromSupabase()` fallback/failure,
-    and Netlify Blobs read/write errors in `state.ts` — no longer silent locally.
+    and Supabase read/write errors in `state.ts` — no longer silent locally.
     What's still missing is aggregation: none of this is collected, rated, or
-    alerted on anywhere, so a spike in 409s or Blob failures in production is
+    alerted on anywhere, so a spike in 409s or Supabase failures in production is
     still invisible unless someone is reading function logs live.
 
 ## On tooling

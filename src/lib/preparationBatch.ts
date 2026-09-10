@@ -126,7 +126,7 @@ export function remainingComposition(
 }
 
 // ---------------------------------------------------------------------------
-// Persistence (client <-> netlify/functions/preparation-batches.ts)
+// Persistence (client <-> api/preparation-batches.ts)
 
 export async function fetchPreparationBatches(
   householdId: string

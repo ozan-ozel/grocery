@@ -65,7 +65,7 @@ function toDayPlan(entries: MealEntry[]): DayPlan {
   return plan;
 }
 
-// Persisted per household+date via netlify/functions/meal-entries.ts (Supabase
+// Persisted per household+date via api/meal-entries.ts (Supabase
 // meal_entries table) — see supabase/07-meal-entries.sql. Nutrition is never
 // stored server-side, only { foodId, quantityG }; calculateItemsNutrition
 // always derives it from the live catalog. Without a household (no tenant

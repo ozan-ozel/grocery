@@ -284,7 +284,7 @@ function pickNutrition(row: ApiRow): Nutrition {
     // built from it, e.g. useFoodCatalog's map) alias-blind while
     // fetchNutrition's POST-by-name path already resolved aliases.
     aliases: row.aliases,
-    // Now sent by netlify/functions/nutrition.ts's SELECT_COLS (see the
+    // Now sent by api/nutrition.ts's SELECT_COLS (see the
     // Nutrition type above) — carries real curated/regulatory allergen-class
     // data once supabase/14-nutrition-allergen-classes.sql has been applied.
     allergen_classes: row.allergen_classes,

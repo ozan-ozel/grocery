@@ -4,9 +4,9 @@ function apiUrl(path: string): string {
 }
 
 // Thin wrapper around fetch() that always sends the httpOnly session
-// cookie (credentials: "include") so every netlify/functions/*.ts
+// cookie (credentials: "include") so every api/*.ts
 // endpoint's requireUser() check succeeds — no Authorization header, no
-// client-readable token. See netlify/functions/_auth.ts.
+// client-readable token. See lib/auth.ts.
 export async function apiFetch(
   path: string,
   init: RequestInit = {}

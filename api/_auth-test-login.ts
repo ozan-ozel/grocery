@@ -1,8 +1,7 @@
 // GET /api/auth-test-login?secret=<TEST_LOGIN_SECRET>&email=<optional>&returnTo=<optional>
 // -> 302 redirect with a real, working Supabase session cookie set, without
-// touching real Google. Mirrors netlify/functions/auth-test-login.ts's
-// intent and double gate, ported to Supabase Auth's Admin API (this file is
-// new on the Vercel side — there was no prior api/auth-test-login.ts).
+// touching real Google. Mirrors the intent and double gate of the retired
+// Netlify auth-test-login.ts, ported to Supabase Auth's Admin API.
 //
 // Two independent gates keep this from being usable in production:
 //   1. process.env.VERCEL_ENV !== "production".

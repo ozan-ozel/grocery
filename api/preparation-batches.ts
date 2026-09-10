@@ -5,10 +5,10 @@
 // immutable snapshot of what was prepared in one cooking occasion — see
 // src/lib/preparationBatch.ts. `composition` is written once here and never
 // updated by this file — there is deliberately no PATCH/DELETE endpoint (a
-// correction creates a new batch, it never edits an existing one). This is
-// the Vercel port of netlify/functions/preparation-batches.ts — built
-// directly on the caller's-own-token pattern (userRestHeaders), since this
-// table didn't exist on Vercel before this migration.
+// correction creates a new batch, it never edits an existing one). Ported
+// from the retired Netlify preparation-batches.ts, built directly on the
+// caller's-own-token pattern (userRestHeaders), since this table didn't
+// exist on Vercel before that migration.
 //
 // composition[].food_id uses the SAME value space as meal_entries.food_id —
 // NOT the opaque Nutrition.food_id UUID. This function does not interpret
