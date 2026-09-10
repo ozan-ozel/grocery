@@ -191,12 +191,17 @@ step, but a production-effecting one, with no confirmation prompt of its own.
 **Required env vars** (Vercel project settings for production; `.env.local` for local dev via
 `npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. These are
 server-only — the frontend bundle never receives Supabase credentials directly; the entire Google
-OAuth handshake (`api/auth-google-start.ts` → `api/auth-callback.ts`) runs server-side instead of
-via a browser-side Supabase client (see
-`docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md`). Most `api/*.ts` functions
-authenticate to PostgREST as the caller's own Supabase session (`lib/auth.ts`'s `userRestHeaders`,
-built from the anon key + the caller's token); a handful of endpoints (`meal-entries.ts`'s writes,
-`nutrition.ts`'s writes, `auth-callback.ts`, `_auth-test-login.ts`) use
+OAuth handshake (public paths `/api/auth-google-start` → `/api/auth-callback`) runs server-side
+instead of via a browser-side Supabase client (see
+`docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md`). Both paths are implemented in
+one file, `api/auth-google.ts`, dispatched by an `_action` query param that `vercel.json`'s
+rewrites inject — a deliberate merge to stay under Vercel's Hobby-plan Serverless Function count
+limit (12 functions per deployment); the two public URLs are unaffected, and Supabase's Auth
+redirect-URL allow-list still targets the literal `/api/auth-callback` path. Most `api/*.ts`
+functions authenticate to PostgREST as the caller's own Supabase session (`lib/auth.ts`'s
+`userRestHeaders`, built from the anon key + the caller's token); a handful of endpoints
+(`meal-entries.ts`'s writes, `nutrition.ts`'s writes, `auth-google.ts`'s callback half,
+`_auth-test-login.ts`) use
 `SUPABASE_SERVICE_ROLE_KEY` for operations that must bypass RLS (linking identities, bootstrapping
 a test session, etc.) — see each file's own comments for which. `.env.local.example` only lists
 `SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because it's scoped to the one-off

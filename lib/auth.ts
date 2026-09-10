@@ -2,7 +2,7 @@
 // touches Supabase data calls requireUser() first; on failure it throws
 // AuthError, which callers catch and translate to a Response via
 // authErrorResponse(). Validates a real Supabase Auth session (see
-// api/auth-callback.ts for how a Supabase identity gets linked to this app's
+// api/auth-google.ts's callback half for how a Supabase identity gets linked to this app's
 // existing app_users/household model).
 //
 // Session refresh is deliberately not implemented here — the cookie
@@ -86,10 +86,10 @@ export function writableCookies(request: Request, responseHeaders: Headers) {
   };
 }
 
-// Builds a Set-Cookie string for RETURN_TO_COOKIE, shared by
-// api/auth-google-start.ts (setting it) and api/auth-callback.ts (clearing
-// it on both the error and success paths) so the attribute list — Secure
-// included — lives in exactly one place.
+// Builds a Set-Cookie string for RETURN_TO_COOKIE, shared by api/auth-google.ts's
+// start half (setting it) and its callback half (clearing it on both the
+// error and success paths) so the attribute list — Secure included — lives
+// in exactly one place.
 export function returnToCookieHeader(request: Request, value: string, maxAge: number): string {
   const secure = new URL(request.url).protocol === "https:";
   const parts = [
