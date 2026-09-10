@@ -8,6 +8,7 @@ import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { MEAL_SLOTS, type MealItem } from "@/lib/localMealPlan";
+import { occasionProteinTargetG } from "@/lib/mealPersonalization";
 import { scaleNutrition, type MacroTotals } from "@/lib/mealNutrition";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
@@ -16,9 +17,16 @@ import { MealFoodPicker } from "@/components/MealFoodPicker";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 import { BatchPlanner } from "@/components/BatchPlanner";
 
-type Props = { userId: string | null; householdId: string | null };
+type Props = {
+  userId: string | null;
+  householdId: string | null;
+  // MVP-1 PROVISIONAL (PSM Iteration 1, DEC-071): reuses the shopping tab's
+  // existing addItem exactly as-is (name + free-text qty, no unit parsing or
+  // quantity aggregation across duplicate ingredients). REVISIT AFTER QA-1.
+  onAddShoppingItem: (name: string, qty: string) => void;
+};
 
-export function MealPlanView({ userId, householdId }: Props) {
+export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
   // Own instance, matching PersonalPlanView's and useRemainingToday's own
   // pattern — NOT App.tsx's top-level `personalization`, which is mounted
@@ -36,6 +44,7 @@ export function MealPlanView({ userId, householdId }: Props) {
     goToPrevDay,
     goToNextDay,
     itemsForSlot,
+    allItems,
     addItem,
     updateItemQuantity,
     removeItem,
@@ -49,6 +58,19 @@ export function MealPlanView({ userId, householdId }: Props) {
     totals.fatG > 0 ||
     totals.carbsG > 0;
   const [dailyDetailOpen, setDailyDetailOpen] = useState(false);
+
+  // MVP-1 PROVISIONAL (DEC-071): the smallest viable meal-plan -> shopping
+  // translation — walk this day's planned items and add each one's food name
+  // + gram quantity to the active shopping list via the existing addItem
+  // (same name/alias resolution and near-duplicate dedup shopping already
+  // uses; no quantity aggregation across repeated ingredients, no
+  // pantry/store/budget awareness). REVISIT AFTER QA-1.
+  function addDayToShoppingList() {
+    for (const item of allItems()) {
+      const food = catalogMap.get(item.foodId);
+      onAddShoppingItem(food?.name_tr ?? item.foodId, `${item.quantityG}g`);
+    }
+  }
 
   return (
     <div>
@@ -95,6 +117,7 @@ export function MealPlanView({ userId, householdId }: Props) {
               allergenExclusions={allergenExclusions}
               catalog={catalogMap}
               macros={slotNutrition(slot)}
+              proteinTarget={occasionProteinTargetG(personalizationProfile.weightKg)}
               onAddItem={(foodId, quantityG) => addItem(slot, foodId, quantityG)}
               onUpdateQuantity={(itemId, quantityG) =>
                 updateItemQuantity(slot, itemId, quantityG)
@@ -121,6 +144,15 @@ export function MealPlanView({ userId, householdId }: Props) {
               </button>
             </div>
           </div>
+          {/* MVP-1 PROVISIONAL (DEC-071) — see addDayToShoppingList above. */}
+          <Button
+            type="button"
+            variant="quiet"
+            size="sm"
+            className="mt-2 w-full"
+            onClick={addDayToShoppingList}>
+            Bu günü alışveriş listesine ekle
+          </Button>
         </div>
       )}
       {dailyDetailOpen && (
@@ -152,6 +184,7 @@ function MealSection({
   allergenExclusions,
   catalog,
   macros,
+  proteinTarget,
   onAddItem,
   onUpdateQuantity,
   onRemoveItem,
@@ -163,6 +196,8 @@ function MealSection({
   allergenExclusions: AllergenClassExclusion[];
   catalog: NutritionMap;
   macros: MacroTotals;
+  // MVP-1 PROVISIONAL (DEC-033) — see occasionProteinTargetG. Display-only.
+  proteinTarget: { min: number; max: number };
   onAddItem: (foodId: string, quantityG: number) => void;
   onUpdateQuantity: (itemId: string, quantityG: number) => void;
   onRemoveItem: (itemId: string) => void;
@@ -170,9 +205,14 @@ function MealSection({
   const [detailOpen, setDetailOpen] = useState(false);
   return (
     <div className="rounded-lg border border-border p-3">
-      <span className="text-xs uppercase tracking-widest text-muted-foreground">
-        {label}
-      </span>
+      <div className="flex items-center justify-between">
+        <span className="text-xs uppercase tracking-widest text-muted-foreground">
+          {label}
+        </span>
+        <span className="text-[0.68rem] text-muted-foreground">
+          Protein hedefi {proteinTarget.min}-{proteinTarget.max} g
+        </span>
+      </div>
       {items.length === 0 ? (
         <p className="py-3 text-sm text-muted-foreground">
           Henüz besin eklenmedi.

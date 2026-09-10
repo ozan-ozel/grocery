@@ -1,15 +1,51 @@
 # Session Checkpoint
 
-_Last updated: 2026-09-09_
+_Last updated: 2026-09-10_
 
 **This is the project's single active session-continuity record.** Historical logs live outside the
 repository in `~/vault/grocery/logs/`. `nutrition-curriculum/00_PROJECT_CONTROL/PROJECT_STATUS.md`
 remains the durable phase/project status source; phase artifacts and `DECISIONS/` records remain the
 authoritative technical content. This file references those artifacts rather than duplicating them.
 
-## Current Objective
+## Current Objective (supersedes the 2026-09-09 objective below)
 
-No task is currently in progress. The last completed unit of work was implementing DEC-069 (batch
+**Branch: `feature/psm-iteration-1-dec-triage`.** PSM ("Progressive Sanding Model") Iteration 1 is
+**implemented, automated-validation clean, browser QA pending, not committed.** Full detail:
+`nutrition-curriculum/08_APP_TRANSLATION/PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md`.
+
+All 112 decisions (`DEC-001`–`112`) were re-triaged for implementation status (13 DONE, 5 PROVISIONAL
+MVP CANDIDATE, 7 DEFERRED, 72 BLOCKED — mostly behind missing subsystems like observed-data tracking,
+micronutrient data, or explicit do-not-resolve-autonomously safety parameters — 15 already adequately
+covered). Four provisional MVP decisions were implemented, each tagged `MVP-1 PROVISIONAL` /
+`REVISIT AFTER QA-1` inline in code, none reopening a canonical `DEC` record:
+
+- **DEC-046** (baseline hydration) — `waterMl` added to `PersonalTargets`, shown as a "Su" target card.
+- **DEC-009** (BMI plausibility) — a non-blocking warning for BMI outside 12–60.
+- **DEC-033** (per-occasion protein) — `occasionProteinTargetG()`, shown per meal slot.
+- **DEC-071** (meal plan → shopping) — a button in `MealPlanView` that walks the day's planned items
+  through the existing shopping `addItem`.
+
+Files changed: `src/lib/mealPersonalization.ts` (+test), `src/components/PersonalPlanView.tsx`,
+`src/components/MealPlanView.tsx`, `src/App.tsx`. No schema/migration, no new API surface, no
+Food-Identity or B3-safety-path change. Verified: 108/108 tests pass (4 new), `tsc -b`/`vite build`
+clean. **Not yet done: interactive browser QA of these four additions** (see the ledger's §11) and
+**not committed** — working tree is commit-ready but git discipline for this task withheld the commit
+without your explicit go-ahead (see the ledger's §26.10 equivalent / this file's own git-state note
+below).
+
+Also this session, unrelated to PSM: found and safely landed two pieces of in-progress work that were
+sitting uncommitted in the shared working tree — merged to `master` and pushed (`79ff13d`):
+`fix/lock-down-security-definer-rpc-execute` (moves `current_app_user_id()`/`has_household_access()`/
+`has_household_share()` into a non-PostgREST-exposed `app_private` schema, clearing a Supabase linter
+warning that per-role `EXECUTE` revocation alone couldn't clear; adds a missing index on
+`hidden_households.household_id`). **New SQL files `21`/`22`/`23` still need to be run against the live
+Supabase project by you** — not applied automatically, same convention as every prior migration here.
+
+---
+
+## Previous Objective (2026-09-09, historical — DEC-069 implementation, unaffected by PSM Iteration 1)
+
+The last completed unit of work before this session was implementing DEC-069 (batch
 cooking, leftovers, storage-aware planning) per its ratified scope and reconciled architecture, then
 live-validating it against the actual configured Supabase project.
 
