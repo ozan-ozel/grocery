@@ -69,6 +69,7 @@ export const RETURN_TO_COOKIE = "sb-return-to";
 // auth cookies; every other function only ever reads them via
 // requireUser()'s read-only adapter.
 export function writableCookies(request: Request, responseHeaders: Headers) {
+  const secure = new URL(request.url).protocol === "https:";
   return {
     getAll() {
       const jar = parseCookies(request.headers.get("cookie"));
@@ -77,11 +78,29 @@ export function writableCookies(request: Request, responseHeaders: Headers) {
     setAll(cookiesToSet: { name: string; value: string; options: CookieOptions }[]) {
       for (const { name, value, options } of cookiesToSet) {
         const parts = [`${name}=${value}`, "Path=/", "HttpOnly", "SameSite=Lax"];
+        if (secure) parts.push("Secure");
         if (options?.maxAge !== undefined) parts.push(`Max-Age=${options.maxAge}`);
         responseHeaders.append("set-cookie", parts.join("; "));
       }
     },
   };
+}
+
+// Builds a Set-Cookie string for RETURN_TO_COOKIE, shared by
+// api/auth-google-start.ts (setting it) and api/auth-callback.ts (clearing
+// it on both the error and success paths) so the attribute list — Secure
+// included — lives in exactly one place.
+export function returnToCookieHeader(request: Request, value: string, maxAge: number): string {
+  const secure = new URL(request.url).protocol === "https:";
+  const parts = [
+    `${RETURN_TO_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
 }
 
 // Same-origin-relative path only — rejects absolute/protocol-relative URLs
@@ -140,7 +159,7 @@ export async function requireUser(request: Request): Promise<AuthUser> {
     throw new AuthError(502, "identity lookup failed");
   }
   if (mapRows.length === 0) {
-    throw new AuthError(409, "account not linked — call /api/auth-link first");
+    throw new AuthError(409, "account not linked — sign in again");
   }
 
   return {

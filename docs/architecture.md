@@ -209,6 +209,16 @@ ever touching a real Google account. It only works when unset in production and 
 `VERCEL_ENV !== "production"` (Vercel's own env var), so it's inert on the deployed site even if
 accidentally left set. **Never set it in the production Vercel project's env vars.**
 
+Two things outside this repo have to be set for the OAuth flow to work at all: Supabase's Auth →
+URL Configuration → Redirect URLs must include `<vercel-domain>/api/auth-callback` (and the local
+dev equivalent if testing against a real Supabase project) — without it, every login fails with an
+unlisted-redirect error from Supabase, not anything this codebase can catch. And the old frontend
+env vars — `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SUPABASE_AUTH_ENABLED` — should be
+removed from Vercel's project settings if still set there, since nothing reads them anymore. Manual
+QA of the OAuth flow should also include closing the browser fully and reopening it to confirm the
+session persists — the session cookie's lifetime is now this app's own responsibility via
+`writableCookies`, not the browser Supabase client's.
+
 ## Daily rollover
 
 **Daily rollover** (`rolloverIfNeeded` in `store.ts`) is client-triggered, not a cron: it runs on

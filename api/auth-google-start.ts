@@ -12,7 +12,7 @@
 // exchangeCodeForSession() reads that same cookie back.
 
 import { createServerClient } from "@supabase/ssr";
-import { writableCookies, isSafeReturnTo, RETURN_TO_COOKIE } from "../lib/auth.js";
+import { writableCookies, isSafeReturnTo, returnToCookieHeader } from "../lib/auth.js";
 
 export default {
   async fetch(request: Request): Promise<Response> {
@@ -48,10 +48,7 @@ export default {
     // carries where to land the user after api/auth-callback.ts finishes,
     // since redirect_to must exactly match an allow-listed URL in
     // Supabase's Auth settings and can't carry it directly.
-    responseHeaders.append(
-      "set-cookie",
-      `${RETURN_TO_COOKIE}=${encodeURIComponent(returnTo)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=600`
-    );
+    responseHeaders.append("set-cookie", returnToCookieHeader(request, returnTo, 600));
     responseHeaders.set("location", data.url);
 
     return new Response(null, { status: 302, headers: responseHeaders });
