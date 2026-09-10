@@ -445,12 +445,16 @@ point; the 7 broken relative links in `02_TOC_AND_SOURCE_ANALYSIS/README.md` rep
 recorded in this file's reorganization log is now closed.
 
 **Maintenance rule:** any change to a decision's readiness updates `DEC_REGISTER.md` in the same commit.
-`tests/decRegister.test.ts` (run by `npm test`) guards ID coverage, the six-word vocabulary,
-word↔category consistency, the register's self-declared totals, and agreement with
-`APP_DECISION_INVENTORY.md` on IDs and domains.
+**There is no automated guard** — this project carries no test suite, and none is to be added (see
+`CLAUDE.md`). When editing the register, run a throwaway check by hand and delete it afterwards: exactly
+112 rows `DEC-001`–`DEC-112`, only the six words, each word consistent with its own `A`–`H` category,
+and the per-word row totals equal to the counts the register declares in its own legend table. The
+design spec's §5 lists these. Accepted risk: a hand-edit that changes a row without its legend count
+goes unnoticed until someone runs that check.
 
-**Verification:** 114/114 tests passing (`npm test`), `tsc -b` and `npm run build` clean. The validator
-was confirmed able to fail by injecting a wrong readiness word into one row.
+**Verification at the time of writing:** the checks above were run and passed (112 rows;
+13/0/5/7/72/15), and the per-word totals were confirmed once against the ledger's own declared counts,
+which is what establishes the transcription as faithful. `tsc -b` and `npm run build` clean.
 
 **Unchanged:** the two open migration regressions from Browser QA #1 (§6.1 P0 exclusion persistence,
 §6.2 P1 `combo_id`/`batch_id`) remain the current next task. Nothing in this pass touched `api/`.
