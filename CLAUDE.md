@@ -61,9 +61,10 @@ this project is. This file is a router and behavior layer, not the architecture 
   auto-link regardless.
 - **COL** = collaboration checkpoint for the nutrition-curriculum plan/implementation handoff. When
   the user says "COL", follow the resume procedure defined in
-  `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` — it checks the tracker and picks planning back up
-  from the last DEC covered. It is not a git shorthand like CMP/BCMP; it never commits/merges/pushes
-  by itself.
+  `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` — it checks the tracker and resumes from there.
+  Planner/implementer are fluid roles in that system, not fixed people, so `COL` asks which applies
+  whenever the continuation point is ambiguous rather than assuming. It is not a git shorthand like
+  CMP/BCMP; it never commits/merges/pushes by itself.
 
 ## Commands
 
