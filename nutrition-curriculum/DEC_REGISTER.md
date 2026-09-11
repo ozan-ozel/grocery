@@ -15,6 +15,7 @@ and which cannot?"* One row for each of the 112 decisions, `DEC-001`–`DEC-112`
 | Per-decision triage rationale in full | `08_APP_TRANSLATION/PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md` §3 |
 | Project phase status and current next task | `00_PROJECT_CONTROL/PROJECT_STATUS.md` |
 | The rules you must follow when working here | `00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md` |
+| Whether a `READY`/`PROVISIONAL` decision is actively being handed off for implementation right now | `IMPLEMENTATION_HANDOFF.md` |
 
 The `Label` column is **navigational only** — a condensed cue, not the decision's content. Cite
 `APP_DECISION_INVENTORY.md` for that, never this file.

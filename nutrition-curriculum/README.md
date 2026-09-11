@@ -11,6 +11,7 @@ Grocery app.
 | If you want… | Go to |
 |---|---|
 | **Which decision can I work on?** | [DEC_REGISTER.md](DEC_REGISTER.md) — all 112 with a readiness word |
+| **What's actively being handed off between planning and implementation right now?** | [IMPLEMENTATION_HANDOFF.md](IMPLEMENTATION_HANDOFF.md) |
 | Where everything lives, and which folder is which phase | [00_PROJECT_CONTROL/README.md](00_PROJECT_CONTROL/README.md) |
 | Current state, what's closed, the current next task | [00_PROJECT_CONTROL/PROJECT_STATUS.md](00_PROJECT_CONTROL/PROJECT_STATUS.md) |
 | The rules you must follow when working here | [00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md](00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md) |
