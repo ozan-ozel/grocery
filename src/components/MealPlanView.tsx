@@ -7,8 +7,8 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
-import { MEAL_SLOTS, type MealItem } from "@/lib/localMealPlan";
-import { occasionProteinTargetG } from "@/lib/mealPersonalization";
+import { MEAL_SLOTS, type MealItem, type MealSlot } from "@/lib/localMealPlan";
+import { occasionProteinTargetG, calculateTargets } from "@/lib/mealPersonalization";
 import { scaleNutrition, type MacroTotals } from "@/lib/mealNutrition";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
@@ -16,6 +16,9 @@ import { format } from "@/components/NutritionTableCell";
 import { MealFoodPicker } from "@/components/MealFoodPicker";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 import { BatchPlanner } from "@/components/BatchPlanner";
+import { MacroSummaryCard } from "@/components/MacroSummaryCard";
+import { MealContainer } from "@/components/MealContainer";
+import { FoodSearchModal } from "@/components/FoodSearchModal";
 
 type Props = {
   userId: string | null;
@@ -58,6 +61,25 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
     totals.fatG > 0 ||
     totals.carbsG > 0;
   const [dailyDetailOpen, setDailyDetailOpen] = useState(false);
+  const [foodModalOpen, setFoodModalOpen] = useState(false);
+  const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
+
+  const targets = calculateTargets(personalizationProfile);
+  const targetMacros: MacroTotals = {
+    kcal: targets.targetKcal,
+    proteinG: (targets.proteinG.min + targets.proteinG.max) / 2,
+    fatG: (targets.fatG.min + targets.fatG.max) / 2,
+    carbsG: (targets.carbsG.min + targets.carbsG.max) / 2,
+    fiberG: (targets.fiberG.min + targets.fiberG.max) / 2,
+  };
+
+  function handleFoodSelect(food: Nutrition, quantityG: number) {
+    if (activeSlot) {
+      addItem(activeSlot, food.name_tr, quantityG);
+      setFoodModalOpen(false);
+      setActiveSlot(null);
+    }
+  }
 
   // MVP-1 PROVISIONAL (DEC-071): the smallest viable meal-plan -> shopping
   // translation — walk this day's planned items and add each one's food name
@@ -73,8 +95,8 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between pb-4">
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
         <Button
           type="button"
           variant="quiet"
@@ -95,66 +117,64 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
           <ChevronRight className="size-4" />
         </Button>
       </div>
+
       {status === "error" && (
-        <p className="px-1 pb-3 text-xs text-muted-foreground">
+        <p className="px-1 text-xs text-muted-foreground">
           Besin verilerine ulaşılamadı. Bağlantını kontrol edip tekrar dene.
         </p>
       )}
-      <div className="flex flex-col gap-4">
-        {isLoading ? (
-          // One fetch covers every slot for the day — there's no such thing
-          // as "just kahvaltı is still loading," so one set of placeholders
-          // for the whole list is honest about that, not four independent ones.
-          MEAL_SLOTS.map(({ slot }) => <LoadingBlock key={slot} className="h-28" />)
-        ) : (
-          MEAL_SLOTS.map(({ slot, label }) => (
-            <MealSection
-              key={slot}
-              label={label}
-              items={itemsForSlot(slot)}
-              foods={foods}
-              exclusions={foodExclusions}
-              allergenExclusions={allergenExclusions}
-              catalog={catalogMap}
-              macros={slotNutrition(slot)}
-              proteinTarget={occasionProteinTargetG(personalizationProfile.weightKg)}
-              onAddItem={(foodId, quantityG) => addItem(slot, foodId, quantityG)}
-              onUpdateQuantity={(itemId, quantityG) =>
-                updateItemQuantity(slot, itemId, quantityG)
-              }
-              onRemoveItem={itemId => removeItem(slot, itemId)}
-            />
-          ))
-        )}
-      </div>
-      {hasTotals && (
-        <div className="mt-6 rounded-lg border border-border px-3 py-2">
-          <div className="flex items-center justify-between">
-            <span className="text-xs uppercase tracking-widest text-muted-foreground">
-              Günlük toplam
-            </span>
-            <div className="flex items-center gap-2">
-              <MacroSummary macros={totals} />
-              <button
-                type="button"
-                onClick={() => setDailyDetailOpen(true)}
-                aria-label="Günlük besin detayı"
-                className="rounded p-1 text-muted-foreground hover:text-foreground">
-                <Info className="size-4" />
-              </button>
-            </div>
+
+      {!isLoading && (
+        <>
+          {/* Daily Macro Summary */}
+          <MacroSummaryCard
+            remaining={totals}
+            target={targetMacros}
+            isEstimated={false}
+          />
+
+          {/* Meal Containers */}
+          <div className="space-y-3">
+            {MEAL_SLOTS.map(({ slot, label }) => (
+              <MealContainer
+                key={slot}
+                mealType={getMealType(slot)}
+                items={itemsForSlot(slot)}
+                catalog={catalogMap}
+                onSelectFood={() => {
+                  setActiveSlot(slot);
+                  setFoodModalOpen(true);
+                }}
+                onSelectRecipe={() => {
+                  setActiveSlot(slot);
+                  setFoodModalOpen(true);
+                }}
+                onRemoveItem={itemId => removeItem(slot, itemId)}
+              />
+            ))}
           </div>
-          {/* MVP-1 PROVISIONAL (DEC-071) — see addDayToShoppingList above. */}
-          <Button
-            type="button"
-            variant="quiet"
-            size="sm"
-            className="mt-2 w-full"
-            onClick={addDayToShoppingList}>
-            Bu günü alışveriş listesine ekle
-          </Button>
+        </>
+      )}
+
+      {isLoading && (
+        <div className="space-y-2">
+          {MEAL_SLOTS.map(({ slot }) => (
+            <LoadingBlock key={slot} className="h-28" />
+          ))}
         </div>
       )}
+
+      {/* Food Search Modal */}
+      <FoodSearchModal
+        title={activeSlot ? "Ürün Seç / Ara" : "Yemek Ara"}
+        foods={foods}
+        isOpen={foodModalOpen}
+        onClose={() => {
+          setFoodModalOpen(false);
+          setActiveSlot(null);
+        }}
+        onSelect={handleFoodSelect}
+      />
       {dailyDetailOpen && (
         <MealNutritionDetailSheet
           title="Günlük toplam"
@@ -164,6 +184,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
           onClose={() => setDailyDetailOpen(false)}
         />
       )}
+
       <BatchPlanner
         householdId={householdId}
         foods={foods}
@@ -172,95 +193,26 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
         allergenExclusions={allergenExclusions}
         defaultDate={date}
       />
+
+      {/* Add to shopping list button */}
+      {hasTotals && (
+        <Button
+          type="button"
+          variant="default"
+          size="sm"
+          className="w-full"
+          onClick={addDayToShoppingList}>
+          Bu günü alışveriş listesine ekle
+        </Button>
+      )}
     </div>
   );
 }
 
-function MealSection({
-  label,
-  items,
-  foods,
-  exclusions,
-  allergenExclusions,
-  catalog,
-  macros,
-  proteinTarget,
-  onAddItem,
-  onUpdateQuantity,
-  onRemoveItem,
-}: {
-  label: string;
-  items: MealItem[];
-  foods: Nutrition[];
-  exclusions: FoodExclusion[];
-  allergenExclusions: AllergenClassExclusion[];
-  catalog: NutritionMap;
-  macros: MacroTotals;
-  // MVP-1 PROVISIONAL (DEC-033) — see occasionProteinTargetG. Display-only.
-  proteinTarget: { min: number; max: number };
-  onAddItem: (foodId: string, quantityG: number) => void;
-  onUpdateQuantity: (itemId: string, quantityG: number) => void;
-  onRemoveItem: (itemId: string) => void;
-}) {
-  const [detailOpen, setDetailOpen] = useState(false);
-  return (
-    <div className="rounded-lg border border-border p-3">
-      <div className="flex items-center justify-between">
-        <span className="text-xs uppercase tracking-widest text-muted-foreground">
-          {label}
-        </span>
-        <span className="text-[0.68rem] text-muted-foreground">
-          Protein hedefi {proteinTarget.min}-{proteinTarget.max} g
-        </span>
-      </div>
-      {items.length === 0 ? (
-        <p className="py-3 text-sm text-muted-foreground">
-          Henüz besin eklenmedi.
-        </p>
-      ) : (
-        <ul className="mt-1">
-          {items.map(item => (
-            <MealItemRow
-              key={item.id}
-              item={item}
-              food={catalog.get(item.foodId)}
-              onUpdateQuantity={quantityG =>
-                onUpdateQuantity(item.id, quantityG)
-              }
-              onRemove={() => onRemoveItem(item.id)}
-            />
-          ))}
-        </ul>
-      )}
-      <MealFoodPicker
-        foods={foods}
-        exclusions={exclusions}
-        allergenExclusions={allergenExclusions}
-        onAdd={onAddItem}
-      />
-      <div className="mt-3 flex items-center justify-between border-t border-border pt-2">
-        <span className="text-xs text-muted-foreground">
-          {items.length} besin
-        </span>
-        <button
-          type="button"
-          onClick={() => setDetailOpen(true)}
-          aria-label={`${label} besin detayı`}
-          className="rounded p-1 text-muted-foreground hover:text-foreground">
-          <Info className="size-4" />
-        </button>
-      </div>
-      {detailOpen && (
-        <MealNutritionDetailSheet
-          title={label}
-          macros={macros}
-          items={items}
-          catalog={catalog}
-          onClose={() => setDetailOpen(false)}
-        />
-      )}
-    </div>
-  );
+function getMealType(slot: MealSlot): "ilk" | "ara" | "son" {
+  if (slot === "kahvalti") return "ilk";
+  if (slot === "aksam") return "son";
+  return "ara";
 }
 
 function MealItemRow({
