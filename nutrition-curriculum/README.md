@@ -36,13 +36,44 @@ Two more things that are easy to get wrong here:
 - **`PROJECT_STATUS.md` is append-oriented.** Superseded passages are marked, not rewritten. Read it
   top-down and let later entries override earlier ones.
 
+### Navigating large documents
+
+Some authoritative documents here run from ~1,000 to ~24,000 lines. Line count alone is not a reason
+to split one. Do not create duplicate summaries or parallel sources of truth just to make a document
+shorter (this would also violate §31). Navigate large documents with headings, stable IDs, section
+anchors, and targeted search plus the surrounding context — read a document in full only when the task
+genuinely requires global synthesis or consistency validation. Split a document only when there is a
+clear semantic boundary and the split materially improves retrieval, maintenance, or ownership without
+duplicating authoritative content or adding cross-reference complexity; preserve existing
+historical/authoritative material and stable references whenever such a restructuring is approved.
+
+### Curriculum → Product Translation Mindset
+
+This curriculum is the scientific foundation, not the product. Grocery's job is to translate that
+foundation into a safe, useful, personalized, understandable, and commercially viable application —
+not to expose the full complexity of the curriculum to users unless that complexity is genuinely
+useful to them. Preserve scientific rigor, provenance, uncertainty, and safety boundaries internally
+while simplifying what the user sees; a capability being scientifically correct does not make it a
+good product capability. Evaluate application work through four connected lenses: scientific validity
+→ decision usefulness → user usability → product/market value. When these conflict, do not silently
+weaken scientific or safety constraints — prefer simplification in the translation layer, explicit
+uncertainty, deferral, or a safer alternative instead. The goal is not a digital textbook; it's a
+product whose underlying intelligence is grounded in this curriculum.
+
+This connects to the Progressive Sanding Model (PSM): build a coherent working MVP before attempting
+premature perfection. Use integrated product/browser QA and observed user-facing behavior to discover
+where the architecture or decision translation needs refinement. Preserve provisional choices,
+alternatives, and uncertainty so later iterations can sand, replace, or defer them rather than treating
+early MVP choices as final scientific truth.
+
 ## What is and isn't executable right now
 
-Of the 112 decisions: 13 `SHIPPED`, 5 `PROVISIONAL`, 7 `DEFERRED`, 15 `COVERED`, and **72 `BLOCKED`** —
-most of the remaining surface depends on subsystems that do not exist yet (observed-data trend tracking,
-micronutrient data, training-data capture, pantry, cost/store data) or on safety parameters that must
-not be resolved autonomously. **`READY` is currently zero**: every executable decision today is a
-deliberately temporary `PROVISIONAL` choice. See [DEC_REGISTER.md](DEC_REGISTER.md) for the detail.
+Of the 112 decisions: 11 `SHIPPED`, 4 `PROVISIONAL`, 7 `DEFERRED`, 15 `COVERED`, 1 `PARTIAL`, and
+**74 `BLOCKED`** — most of the remaining surface depends on subsystems that do not exist yet
+(observed-data trend tracking, micronutrient data, training-data capture, pantry, cost/store data) or
+on safety parameters that must not be resolved autonomously. **`READY` is currently zero**: every
+executable decision today is a deliberately temporary `PROVISIONAL` choice. See
+[DEC_REGISTER.md](DEC_REGISTER.md) for the detail.
 
 ## Source books
 

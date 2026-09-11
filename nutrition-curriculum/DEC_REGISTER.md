@@ -23,19 +23,20 @@ The `Label` column is **navigational only** — a condensed cue, not the decisio
 
 ## The vocabulary
 
-Six words. Each maps one-to-one onto the ledger's original `A`–`H` triage category, kept in its own
-column so the two can always be reconciled.
+Seven words. Six map one-to-one onto the ledger's original `A`–`H` triage category, kept in its own
+column so the two can always be reconciled; `PARTIAL` is the one exception — see note 4 below.
 
 | Word | Ledger | Means | Can it be picked up? | Count |
 |---|---|---|---|---|
-| `SHIPPED` | A | Implemented in the app and verified | Done | **13** |
+| `SHIPPED` | A | Implemented in the app and verified | Done | **11** |
 | `READY` | B | Ratified — implement it exactly as specified | **Yes** | **0** |
-| `PROVISIONAL` | C | Implement a deliberately *temporary* MVP choice | **Yes, with care** | **5** |
+| `PROVISIONAL` | C | Implement a deliberately *temporary* MVP choice | **Yes, with care** | **4** |
 | `DEFERRED` | D | Deliberately out of scope for v1 | No | **7** |
-| `BLOCKED` | E | Waiting on a named missing subsystem, or on a human safety decision | No | **72** |
+| `BLOCKED` | E | Waiting on a named missing subsystem, or on a human safety decision | No | **74** |
 | `COVERED` | F, G, H | The app already does something adequate here | Not now | **15** |
+| `PARTIAL` | mixed (e.g. A/E) | A meaningful part of the decision is implemented and verified; the rest is blocked or incomplete | Not now — remainder needs the same gate as its blocking half | **1** |
 
-Three things a newcomer needs to know before using this table:
+Four things a newcomer needs to know before using this table:
 
 1. **`READY` is currently zero.** Every executable decision today is `PROVISIONAL`. That is a true
    fact about the project's state, not a gap in this register.
@@ -47,8 +48,16 @@ Three things a newcomer needs to know before using this table:
    is a later refinement. `DEC-022` is the clearest case: the app applies +400/−250 kcal where the
    curriculum says ±500 — "a numeric-tuning question for a human, not an architecture gap." A
    `COVERED` row is a candidate for later sanding, not a closed item.
+4. **`PARTIAL` is not `SHIPPED`, and it spans two ledger categories on purpose.** Use it only when a
+   decision genuinely splits into an implemented, verified sub-scope and a separately blocked or
+   incomplete sub-scope — not as a hedge for ordinary uncertainty. `DEC-061` is the only current case:
+   food-level restriction filtering is implemented and safety-tested (`A`); allergen-class enforcement
+   exists in code but only 19/89 foods carry curated mappings (`E`, a data-coverage gap). Marking the
+   whole row `SHIPPED` overstated the safety-relevant half; marking it `BLOCKED` would understate the
+   working half. Resolve a `PARTIAL` row by finishing its blocked half, not by reasoning it into
+   `SHIPPED`.
 
-**Why 72 are `BLOCKED`:** most of the remaining surface (Domains E, G, N, O, P, R, S and much of C/D/M)
+**Why 74 are `BLOCKED`:** most of the remaining surface (Domains E, G, N, O, P, R, S and much of C/D/M)
 depends on subsystems that do not exist yet — observed-data trend tracking, micronutrient data,
 training-data capture, pantry, cost/store data — or on explicit do-not-resolve-autonomously safety
 parameters. Unblocking one means building its subsystem first, not reasoning harder about the decision.
@@ -69,7 +78,7 @@ parameters. Unblocking one means building its subsystem first, not reasoning har
 | `DEC-008` | B · Baseline Profile | Determine how a user's refusal or inability to provide a requested profile field is handled downstream | `BLOCKED` | E | Same — no field-refusal UX exists; inventing one is a real feature, not this iteration's scope |
 | `DEC-009` | B · Baseline Profile | Determine whether provided profile data is internally plausible, and how an implausible-data flag is h… | `PROVISIONAL` | C | IMPLEMENTED |
 | `DEC-010` | B · Baseline Profile | Determine how conflicting profile information (e.g. contradictory answers given at different times) is… | `BLOCKED` | E | No profile-history mechanism exists; conflict resolution needs one first |
-| `DEC-011` | B · Baseline Profile | Determine when previously collected profile data is considered stale and should trigger a re-confirmat… | `PROVISIONAL` | C | not built, carried to Iteration 2 |
+| `DEC-011` | B · Baseline Profile | Determine when previously collected profile data is considered stale and should trigger a re-confirmat… | `BLOCKED` | E | A safe MVP is designed but needs a new `updated_at` column on `personal_plan` — a live-DB migration withheld pending your review, per this project's standing practice. Not "pick up and implement," despite `C`'s ledger origin |
 | `DEC-012` | C · Clinical Safety Boundary | Determine which disclosed populations or conditions place a user outside the application's safe automa… | `BLOCKED` | E | Explicit safety boundary, coupled to `DEC-099`, posture-only per Gate 6 — do-not-resolve-autonomously across every ga… |
 | `DEC-013` | C · Clinical Safety Boundary | Determine which reported symptoms or behavioral signals constitute a red flag requiring escalation rat… | `BLOCKED` | E | Explicit safety boundary, coupled to `DEC-099`, posture-only per Gate 6 — do-not-resolve-autonomously across every ga… |
 | `DEC-014` | C · Clinical Safety Boundary | Determine the boundary condition at which the application withholds a generated prescription pending p… | `BLOCKED` | E | Explicit safety boundary, coupled to `DEC-099`, posture-only per Gate 6 — do-not-resolve-autonomously across every ga… |
@@ -106,7 +115,7 @@ parameters. Unblocking one means building its subsystem first, not reasoning har
 | `DEC-045` | G · Micronutrients | Determine whether/how micronutrient screening or guidance differs for an identified special population… | `BLOCKED` | E | `data/nutrition.json` carries macros + fiber only, no micronutrient columns |
 | `DEC-046` | H · Hydration | Determine baseline fluid needs absent exercise or environmental data | `PROVISIONAL` | C | IMPLEMENTED |
 | `DEC-047` | H · Hydration | Determine how exercise duration/intensity modifies fluid needs | `BLOCKED` | E | Needs exercise-duration data (Domain P) that doesn't exist |
-| `DEC-048` | H · Hydration | Determine how environmental conditions (heat, altitude) further modify fluid/ electrolyte needs | `SHIPPED` | A | Already ratified-closed by declining the parameter (Gate 6) — nothing to implement |
+| `DEC-048` | H · Hydration | Determine how environmental conditions (heat, altitude) further modify fluid/ electrolyte needs | `BLOCKED` | E | Gate 6 ratified real content here (no population heat multiplier; +1–1.5 L/day altitude additive) — not a no-op. But per `APP_DECISION_INVENTORY.md` it depends on `DEC-047` and `DEC-096` output, both `BLOCKED`, and `DEC-046`'s own note confirms it is "not incorporated." Was `SHIPPED`; corrected as transitively blocked, not done |
 | `DEC-049` | H · Hydration | Determine how estimated sweat/electrolyte loss is incorporated into replacement guidance | `BLOCKED` | E | Needs sweat-rate/electrolyte data that doesn't exist |
 | `DEC-050` | H · Hydration | Determine when fluid/electrolyte signals cross from a routine-adjustment case into a safety-escalation… | `BLOCKED` | E | Hyponatremia safety escalation needs a real, sourced threshold and an escalation UX — safety-relevant, not a guessabl… |
 | `DEC-051` | I · GI Tolerance | Determine how self-reported GI symptoms are captured and used to modify food or meal-timing guidance | `BLOCKED` | E | No symptom-logging surface exists; inventing one plus its use is a real feature |
@@ -119,7 +128,7 @@ parameters. Unblocking one means building its subsystem first, not reasoning har
 | `DEC-058` | J · Meal Structure | Determine how hunger/satiety signals reported by the user influence meal structure over time | `BLOCKED` | E | Hunger/satiety-responsiveness has no principled non-invented rule to apply without real signal |
 | `DEC-059` | J · Meal Structure | Determine how practical schedule, access, or cultural constraints override a default meal structure | `BLOCKED` | E | No schedule/cultural-constraint input surface exists |
 | `DEC-060` | K · Food Selection | Determine the translation boundary between a per-occasion nutrient/macro target and a candidate set of… | `SHIPPED` | A | `scoreAllCombos` translation implemented |
-| `DEC-061` | K · Food Selection | Determine how restrictions, allergies, and preferences filter or hard-exclude candidate foods | `SHIPPED` | A | Food-level half SHIPPED; allergen-class half BLOCKED on allergen data coverage |
+| `DEC-061` | K · Food Selection | Determine how restrictions, allergies, and preferences filter or hard-exclude candidate foods | `PARTIAL` | A/E | Food-level filtering implemented and safety-tested (`A`); allergen-class enforcement code exists but only 19/89 foods have curated mappings — a data-coverage gap (`E`), not a code gap. Was `SHIPPED`; that overstated the allergen-class half |
 | `DEC-062` | K · Food Selection | Determine how food-selection candidates are prioritized by nutrient density given a fixed energy/macro… | `BLOCKED` | E | Needs micronutrient-density data (blocked at DEC-041–045) |
 | `DEC-063` | K · Food Selection | Determine how substitutions are generated when a planned or preferred food is unavailable or restricted | `BLOCKED` | E | Substitution generation is `DEC-063`'s own scope — explicitly not to be built as a side effect of another decision (s… |
 | `DEC-064` | K · Food Selection | Determine how cost, convenience, and cultural considerations weight food-selection candidates when dis… | `BLOCKED` | E | No cost/cultural data model exists |
