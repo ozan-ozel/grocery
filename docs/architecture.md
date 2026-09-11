@@ -189,7 +189,7 @@ step, but a production-effecting one, with no confirmation prompt of its own.
 ## Environment variables
 
 **Required env vars** (Vercel project settings for production; `.env.local` for local dev via
-`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`. These are
+`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`. These are
 server-only — the frontend bundle never receives Supabase credentials directly; the entire Google
 OAuth handshake (public paths `/api/auth-google-start` → `/api/auth-callback`) runs server-side
 instead of via a browser-side Supabase client (see
@@ -202,9 +202,9 @@ functions authenticate to PostgREST as the caller's own Supabase session (`lib/a
 `userRestHeaders`, built from the anon key + the caller's token); a handful of endpoints
 (`meal-entries.ts`'s writes, `nutrition.ts`'s writes, `auth-google.ts`'s callback half,
 `_auth-test-login.ts`) use
-`SUPABASE_SERVICE_ROLE_KEY` for operations that must bypass RLS (linking identities, bootstrapping
+`SUPABASE_SECRET_KEY` for operations that must bypass RLS (linking identities, bootstrapping
 a test session, etc.) — see each file's own comments for which. `.env.local.example` only lists
-`SUPABASE_URL` / `SUPABASE_SERVICE_ROLE_KEY` / `USDA_API_KEY` because it's scoped to the one-off
+`SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `USDA_API_KEY` because it's scoped to the one-off
 `scripts/upload-nutrition.ts` seeding script — it does not cover `SUPABASE_ANON_KEY`, which the
 functions also need.
 

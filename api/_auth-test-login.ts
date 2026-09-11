@@ -62,7 +62,7 @@ export default {
     const testLoginSecret = process.env.TEST_LOGIN_SECRET;
     const supabaseUrl = process.env.SUPABASE_URL;
     const anonKey = process.env.SUPABASE_ANON_KEY;
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const serviceKey = process.env.SUPABASE_SECRET_KEY;
     if (!testLoginSecret || !supabaseUrl || !anonKey || !serviceKey) return notFound();
 
     const url = new URL(request.url);

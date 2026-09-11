@@ -98,7 +98,7 @@ One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.ts
 ```
 
-Requires `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in `.env.local` (see `.env.local.example`).
+Requires `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` (see `.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`.
 
 ## Serena (optional MCP server)

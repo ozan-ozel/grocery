@@ -120,7 +120,7 @@ export function isSafeReturnTo(value: string | null): value is string {
 export async function requireUser(request: Request): Promise<AuthUser> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !anonKey || !serviceKey) throw new AuthError(500, "auth not configured");
 
   const supabase = createServerClient(supabaseUrl, anonKey, {
@@ -197,7 +197,7 @@ export async function requireHouseholdAccess(
   opts: { ownerOnly?: boolean } = {}
 ): Promise<void> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !serviceKey) throw new AuthError(500, "supabase not configured");
 
   const headers = {

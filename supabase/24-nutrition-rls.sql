@@ -16,7 +16,7 @@
 -- service_role), this is already the correct end state and matches
 -- docs/architecture.md's Nutrition section exactly: reads go through
 -- SUPABASE_ANON_KEY (allowed by this policy), writes go through
--- SUPABASE_SERVICE_ROLE_KEY in api/nutrition.ts (bypasses RLS entirely,
+-- SUPABASE_SECRET_KEY in api/nutrition.ts (bypasses RLS entirely,
 -- since there's deliberately no insert/update/delete policy for anon or
 -- authenticated). This migration just brings the repo's tracked schema back
 -- in line with reality — it changes nothing live when run against a

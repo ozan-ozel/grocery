@@ -22,7 +22,7 @@ Row schema:
 Bulk-seed flow (rare):
 1. Edit this file.
 2. Run `node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.ts`
-   with `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` set in `.env.local`.
+   with `SUPABASE_URL` and `SUPABASE_SECRET_KEY` set in `.env.local`.
 3. The upload upserts by `name_tr`, so re-running is safe.
 
 ## `combos.json`

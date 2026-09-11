@@ -79,12 +79,17 @@ function errorRedirect(request: Request, returnTo: string, responseHeaders: Head
 async function handleCallback(request: Request, url: URL): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY;
   const responseHeaders = new Headers();
   const rawReturnTo = parseCookies(request.headers.get("cookie"))[RETURN_TO_COOKIE] ?? null;
   const returnTo = isSafeReturnTo(rawReturnTo) ? rawReturnTo : "/";
 
   if (!supabaseUrl || !anonKey || !serviceKey) {
+    console.error("[auth-callback] missing env", {
+      supabaseUrl: !!supabaseUrl,
+      anonKey: !!anonKey,
+      serviceKey: !!serviceKey,
+    });
     return errorRedirect(request, returnTo, responseHeaders);
   }
 
@@ -92,6 +97,7 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
   if (!code) {
     // Google/Supabase redirects here with an error param (access_denied,
     // etc.) instead of code when the user declines consent.
+    console.error("[auth-callback] no code param", Object.fromEntries(url.searchParams));
     return errorRedirect(request, returnTo, responseHeaders);
   }
 
@@ -101,6 +107,12 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
 
   const { data, error } = await supabase.auth.exchangeCodeForSession(code);
   if (error || !data.user || !data.user.email) {
+    console.error("[auth-callback] exchangeCodeForSession failed", {
+      error: error?.message,
+      status: error?.status,
+      hasUser: !!data.user,
+      hasEmail: !!data.user?.email,
+    });
     return errorRedirect(request, returnTo, responseHeaders);
   }
 
@@ -108,6 +120,7 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
   const googleSub =
     googleIdentity?.id ?? (googleIdentity?.identity_data?.sub as string | undefined);
   if (!googleSub) {
+    console.error("[auth-callback] no googleSub", { identities: data.user.identities });
     return errorRedirect(request, returnTo, responseHeaders);
   }
 
@@ -127,15 +140,28 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
       headers: serviceHeaders,
       body: JSON.stringify({ id: googleSub, email }),
     });
-    if (!userRes.ok) return errorRedirect(request, returnTo, responseHeaders);
+    if (!userRes.ok) {
+      console.error("[auth-callback] app_users upsert failed", {
+        status: userRes.status,
+        body: await userRes.text(),
+      });
+      return errorRedirect(request, returnTo, responseHeaders);
+    }
 
     const mapRes = await fetch(`${base}/auth_user_map`, {
       method: "POST",
       headers: serviceHeaders,
       body: JSON.stringify({ supabase_uid: data.user.id, app_user_id: googleSub }),
     });
-    if (!mapRes.ok) return errorRedirect(request, returnTo, responseHeaders);
-  } catch {
+    if (!mapRes.ok) {
+      console.error("[auth-callback] auth_user_map upsert failed", {
+        status: mapRes.status,
+        body: await mapRes.text(),
+      });
+      return errorRedirect(request, returnTo, responseHeaders);
+    }
+  } catch (err) {
+    console.error("[auth-callback] unexpected error", err);
     return errorRedirect(request, returnTo, responseHeaders);
   }
 
