@@ -4,15 +4,26 @@ A university-level Human Nutrition, Metabolism, and Sport Nutrition curriculum b
 
 ## Start Here
 
-| If you want… | Read |
-|---|---|
-| **Which decision can I work on?** | `../DEC_REGISTER.md` — all 112 decisions with a readiness word |
-| Current state, what's closed, what's next | `PROJECT_STATUS.md` (this folder) — the live navigator |
-| The rules this project operates under | `PROJECT_AI_PROTOCOL.md` (this folder) |
-| A human decision's authoritative record | `DECISIONS/` (this folder) |
-| What this project is and where files live | This README |
+The corpus-wide navigation index is `../README.md`'s own "Start here" table — that copy is authoritative;
+it is not repeated here so the two can't drift out of sync with each other. This section covers only
+`00_PROJECT_CONTROL/`'s own contents.
 
 `PROJECT_STATUS.md` is the single status source of truth. It is append-oriented: superseded passages are left in place and marked rather than rewritten, so read it top-down and let later entries override earlier ones.
+
+### This folder's own files
+
+| File / folder | Purpose |
+|---|---|
+| `README.md` | This file — what the project is, where everything lives. |
+| `PROJECT_STATUS.md` | Live, append-only status log: per-phase state, the running maintenance log, current next task. |
+| `PROJECT_AI_PROTOCOL.md` | The operating rulebook every agent here follows — phase list, review-gate process, and the hard rules (e.g. §28 no premature implementation, §30 ID stability, §31 document discipline, §32 review gates are hard stops). |
+| `CHATGPT_REVIEW_REQUEST.md` | Standing mailbox for escalating an open review gate to ChatGPT/a human — a channel, not a log. Currently idle ("NO REVIEW GATE IS CURRENTLY OPEN"); gets overwritten with a live request only when a gate needs one. |
+| `DECISIONS/` | Authoritative record of every review-gate outcome and human ratification, one file per event. |
+
+**Not in this folder, but part of the same control layer:** `../DEC_REGISTER.md` (per-decision readiness)
+and `../IMPLEMENTATION_HANDOFF.md` (the active plan ↔ implementation tracker) both live at the
+`nutrition-curriculum/` root rather than here, so they're visible without opening a subfolder — see the
+root `README.md`'s own Start Here table.
 
 ## What This Project Is
 

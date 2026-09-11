@@ -458,3 +458,56 @@ which is what establishes the transcription as faithful. `tsc -b` and `npm run b
 
 **Unchanged:** the two open migration regressions from Browser QA #1 (§6.1 P0 exclusion persistence,
 §6.2 P1 `combo_id`/`batch_id`) remain the current next task. Nothing in this pass touched `api/`.
+
+---
+
+## §6.1/§6.2 Fixed, Corpus Navigation, DEC Register Correction, Handoff Tracker — 2026-09-11
+
+**Supersedes the "current next task" line above.** Both open migration regressions from Browser QA #1
+were fixed: `api/personal-plan.ts` (`food_exclusions`/`allergen_class_exclusions`/`excluded_food_ids`)
+and `api/meal-entries.ts` (`combo_id`/`batch_id`), commit `53d10eb`. This landed before the present
+session and was never recorded here — noted now for the record; the fix itself is not part of this
+pass.
+
+**`nutrition-curriculum/README.md`:** added a long-document navigation rule (headings/anchors/targeted
+search over reading 1,000–24,000-line documents in full; split only on a genuine semantic boundary,
+never to shorten) and a **Curriculum → Product Translation Mindset** section (scientific validity →
+decision usefulness → user usability → product/market value; simplify the translation layer under
+conflict, never weaken safety/science; tied to the Progressive Sanding Model). Both sit near the
+existing "If you are an agent working in this corpus" guidance. No project facts, DEC counts, phase
+status, or links were altered.
+
+**`DEC_REGISTER.md` — post-PSM-1 semantic consistency audit.** Two rows corrected against authoritative
+sources (Gate 6 ratification record, `APP_DECISION_INVENTORY.md`'s dependency chain, and the ledger's
+own §6 carry-forward note):
+
+- `DEC-011` `PROVISIONAL` → `BLOCKED` — its MVP choice needs a human-applied `updated_at` schema
+  migration on `personal_plan` that was deliberately withheld; not pickup-able despite the ledger's `C`
+  origin.
+- `DEC-048` `SHIPPED` → `BLOCKED` — Gate 6 ratified real, unimplemented content (a +1–1.5 L/day altitude
+  additive), but the decision transitively depends on `DEC-047` and `DEC-096`, both already `BLOCKED`;
+  `DEC-046`'s own note independently confirms `DEC-048` is "not incorporated."
+
+A new **`PARTIAL`** readiness word (7th, alongside the original six) was added for `DEC-061`, which
+splits cleanly into an implemented/verified half (food-level filtering) and a data-coverage-blocked half
+(only 19/89 foods carry allergen-class mappings) — no existing word could carry that without either
+overstating or understating one half. Vocabulary counts now: `SHIPPED` 11, `READY` 0, `PROVISIONAL` 4,
+`DEFERRED` 7, `BLOCKED` 74, `COVERED` 15, `PARTIAL` 1 (sums to 112). `README.md`'s summary line synced
+to match. No other DEC, decision content, or PSM category was touched.
+
+**New: `IMPLEMENTATION_HANDOFF.md` + `09_HANDOFF_SPECS/`.** A plan/spec ↔ implementation tracker for
+work split between two collaborators (one plans/specs DECs, one implements). Status vocabulary
+(`SPEC_DRAFTING`/`PUSHED`/`IN_PROGRESS`/`BLOCKED`/`DONE`), a hard one-active-item rule, self-certified
+close-out (no review gate), and a `COL` resume keyword (documented in `CLAUDE.md`'s Git shorthand
+section) that checks the Active table for a blocker first, otherwise resumes spec-drafting from the
+last DEC in the Closed table. Per-DEC specs live in `09_HANDOFF_SPECS/`, one file per `_TEMPLATE.md`.
+Cross-linked from this corpus's `README.md` and from `DEC_REGISTER.md`. **Both tables are currently
+empty — no DEC has been pushed through this system yet.**
+
+**Maintenance rule for this new tracker, recorded to prevent duplicate sources of truth:**
+`IMPLEMENTATION_HANDOFF.md` does not feed this file on every `DONE` — only at a batch checkpoint (see
+that file's own note). This entry is itself the first such checkpoint (a bootstrap one, at zero items).
+
+**Current next task:** none blocking — PSM sanding (and the deferred `§4.3`/`§4.2` items of
+`PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md`) may resume. First real use of the handoff tracker is
+unstarted.

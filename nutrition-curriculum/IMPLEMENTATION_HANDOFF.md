@@ -33,6 +33,13 @@ here at all.
 - **This table is append-only for closed rows.** Move a finished row to the Closed archive below rather
   than deleting it — history stays visible, same as `PROJECT_STATUS.md`'s pattern elsewhere in this
   corpus.
+- **This file does not feed `00_PROJECT_CONTROL/PROJECT_STATUS.md` on every `DONE`.** The two operate
+  at different granularity on purpose: this file is the fast per-DEC operational log, `PROJECT_STATUS.md`
+  is the coarse session/milestone narrative. Add a `PROJECT_STATUS.md` entry only at a batch
+  checkpoint — several DECs closed, a PSM-style milestone, or a finding worth surfacing at the project
+  level — and have it link to this file's Closed table rather than repeat its content. A
+  `PROJECT_STATUS.md` entry per individual `DONE` row would drown the project-level log in noise (see
+  `PROJECT_AI_PROTOCOL.md` §31 on not duplicating a source of truth).
 
 ## Status vocabulary
 

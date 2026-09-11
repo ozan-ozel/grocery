@@ -10,10 +10,10 @@ Grocery app.
 
 | If you want… | Go to |
 |---|---|
-| **Which decision can I work on?** | [DEC_REGISTER.md](DEC_REGISTER.md) — all 112 with a readiness word |
-| **What's actively being handed off between planning and implementation right now?** | [IMPLEMENTATION_HANDOFF.md](IMPLEMENTATION_HANDOFF.md) |
+| **Which decision can I work on?** (standing readiness, all 112) | [DEC_REGISTER.md](DEC_REGISTER.md) — a readiness word per decision |
+| **What's the one item actively moving right now** between planning and implementation? (live, per-DEC) | [IMPLEMENTATION_HANDOFF.md](IMPLEMENTATION_HANDOFF.md) |
 | Where everything lives, and which folder is which phase | [00_PROJECT_CONTROL/README.md](00_PROJECT_CONTROL/README.md) |
-| Current state, what's closed, the current next task | [00_PROJECT_CONTROL/PROJECT_STATUS.md](00_PROJECT_CONTROL/PROJECT_STATUS.md) |
+| Project-wide history: phase/gate status, milestones, past sessions (coarse — not live per-DEC status; see `IMPLEMENTATION_HANDOFF.md` for that) | [00_PROJECT_CONTROL/PROJECT_STATUS.md](00_PROJECT_CONTROL/PROJECT_STATUS.md) |
 | The rules you must follow when working here | [00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md](00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md) |
 | A human decision's authoritative record | [00_PROJECT_CONTROL/DECISIONS/](00_PROJECT_CONTROL/DECISIONS/) |
 
