@@ -19,6 +19,7 @@ import {
 } from "@/lib/allergenClasses";
 import type { Nutrition } from "@/lib/nutrition";
 import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
+import { groupByCategory } from "@/lib/categorization/categories";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useDetailsTransition } from "@/hooks/useDetailsTransition";
@@ -179,6 +180,15 @@ export function PersonalPlanView({ userId }: Props) {
         })
         .slice(0, 5)
     : [];
+  // Empty search box: browse the whole catalog by aisle instead of showing
+  // nothing — the old behaviour only let you find a food by typing its exact
+  // name. Same categorize() taxonomy as the "Tümü" nutrition tab.
+  const browsableGroups = excludeQuery.trim()
+    ? []
+    : groupByCategory(
+        foods.filter((f) => !excludedIds.has(f.name_tr)),
+        (f) => f.name_tr
+      );
 
   function addExclusion(foodId: string, reason: ExclusionReason) {
     update("foodExclusions", [
@@ -408,7 +418,7 @@ export function PersonalPlanView({ userId }: Props) {
             }
           />
         )}
-        {!pendingFood && excludeMatches.length > 0 && (
+        {!pendingFood && excludeQuery.trim() && excludeMatches.length > 0 && (
           <ul className="mt-1 divide-y divide-border rounded-md border border-border">
             {excludeMatches.map(f => (
               <li key={f.name_tr}>
@@ -421,6 +431,29 @@ export function PersonalPlanView({ userId }: Props) {
               </li>
             ))}
           </ul>
+        )}
+        {!pendingFood && !excludeQuery.trim() && browsableGroups.length > 0 && (
+          <div className="mt-2 max-h-72 overflow-y-auto rounded-md border border-border">
+            {browsableGroups.map(({ category, rows }) => (
+              <div key={category.id}>
+                <p className="ledger sticky top-0 bg-background px-2 py-1 text-xs uppercase tracking-widest text-muted-foreground">
+                  {category.label}
+                </p>
+                <ul className="divide-y divide-border">
+                  {rows.map(f => (
+                    <li key={f.name_tr}>
+                      <button
+                        type="button"
+                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                        onClick={() => setPendingFood(f)}>
+                        {f.name_tr}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
         )}
         {pendingFood && (
           <div className="mt-2 rounded-md border border-border p-2">

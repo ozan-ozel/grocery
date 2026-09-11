@@ -1,65 +1,33 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
 import { Search } from "lucide-react";
-import { browseNutritionCached, type Nutrition } from "@/lib/nutrition";
+import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { groupByCategory } from "@/lib/categorization/categories";
+import type { Nutrition } from "@/lib/nutrition";
 import { Input } from "@/components/ui/input";
 import { Cell } from "@/components/NutritionTableCell";
 
-type BrowseStatus = "idle" | "loading" | "ready" | "error";
-const BROWSE_LIMIT = 60;
-
 // Browses/searches the whole nutrition table, independent of the active
-// list. Same interaction as the Alışveriş > Liste tab's "Ürün ekle" input —
-// icon inside the input, no separate search button, live as you type — but
-// this one is backed by the DB instead of an already-loaded local catalog,
-// so typing is debounced (300ms) to avoid firing a request per keystroke.
+// list. The catalog is loaded once in full (useFoodCatalog already owns that
+// fetch + cache) and grouped by aisle client-side — no more paginated
+// "daha fazla göster", no per-keystroke network round trip.
 export function AllFoodsBrowser() {
   const [query, setQuery] = useState("");
-  const [rows, setRows] = useState<Nutrition[]>([]);
-  const [status, setStatus] = useState<BrowseStatus>("idle");
-  // True once a page comes back shorter than BROWSE_LIMIT — the signal that
-  // there's nothing left to page in for the current query.
-  const [hasMore, setHasMore] = useState(false);
-  const [loadingMore, setLoadingMore] = useState(false);
+  const { foods, status } = useFoodCatalog();
 
-  useEffect(() => {
-    let cancelled = false;
-    setStatus("loading");
-    const handle = window.setTimeout(() => {
-      browseNutritionCached(query, BROWSE_LIMIT)
-        .then((next) => {
-          if (cancelled) return;
-          setRows(next);
-          setHasMore(next.length === BROWSE_LIMIT);
-          setStatus("ready");
-        })
-        .catch((err) => {
-          if (cancelled) return;
-          console.warn(
-            "[nutrition] browse failed — if you're running locally, npm run vercel:dev serves /api/*, npm run dev does not:",
-            err
-          );
-          setStatus("error");
-        });
-    }, 300);
-    return () => {
-      cancelled = true;
-      window.clearTimeout(handle);
-    };
-  }, [query]);
+  const filtered = useMemo(() => {
+    const q = query.trim().toLocaleLowerCase("tr-TR");
+    if (!q) return foods;
+    return foods.filter(
+      (f) =>
+        f.name_tr.toLocaleLowerCase("tr-TR").includes(q) ||
+        (f.aliases ?? []).some((a) => a.toLocaleLowerCase("tr-TR").includes(q))
+    );
+  }, [foods, query]);
 
-  function loadMore() {
-    setLoadingMore(true);
-    browseNutritionCached(query, BROWSE_LIMIT, rows.length)
-      .then((next) => {
-        setRows((prev) => [...prev, ...next]);
-        setHasMore(next.length === BROWSE_LIMIT);
-      })
-      .catch((err) => {
-        console.warn("[nutrition] browse (load more) failed:", err);
-        setHasMore(false);
-      })
-      .finally(() => setLoadingMore(false));
-  }
+  const groups = useMemo(
+    () => groupByCategory(filtered, (f) => f.name_tr),
+    [filtered]
+  );
 
   return (
     <div>
@@ -75,13 +43,13 @@ export function AllFoodsBrowser() {
       </div>
 
       <p className="ledger px-1 pb-1 pt-4 text-xs uppercase tracking-widest text-muted-foreground">
-        {query.trim() ? `${rows.length} sonuç` : "alfabetik"}
+        {query.trim() ? `${filtered.length} sonuç` : `${foods.length} besin`}
       </p>
 
-      {status === "loading" && rows.length === 0 && (
+      {status === "loading" && (
         <p className="px-1 py-8 text-sm text-muted-foreground">Yükleniyor…</p>
       )}
-      {status === "ready" && rows.length === 0 && (
+      {status === "ready" && filtered.length === 0 && (
         <p className="px-1 py-8 text-sm text-muted-foreground">
           {query.trim()
             ? `"${query.trim()}" ile eşleşen besin yok.`
@@ -94,43 +62,49 @@ export function AllFoodsBrowser() {
         </p>
       )}
 
-      {rows.length > 0 && (
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b border-border text-xs text-muted-foreground">
-              <th className="py-2 pr-2 text-left font-normal">Ürün</th>
-              <th className="py-2 px-1 text-right font-normal">kcal</th>
-              <th className="py-2 px-1 text-right font-normal">P</th>
-              <th className="py-2 px-1 text-right font-normal">Y</th>
-              <th className="py-2 px-1 text-right font-normal">K</th>
-              <th className="py-2 px-1 text-right font-normal">L</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((n) => (
-              <tr key={n.name_tr} className="border-b border-border/60">
-                <td className="py-2 pr-2">{n.name_tr}</td>
-                <Cell value={n.kcal_per_100} />
-                <Cell value={n.protein_g} />
-                <Cell value={n.fat_g} />
-                <Cell value={n.carbs_g} />
-                <Cell value={n.fiber_g} />
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {groups.map(({ category, rows }) => (
+        <FoodCategorySection key={category.id} label={category.label} rows={rows} />
+      ))}
+    </div>
+  );
+}
 
-      {hasMore && (
-        <button
-          type="button"
-          onClick={loadMore}
-          disabled={loadingMore}
-          className="mt-3 w-full rounded-md border border-border py-2 text-xs text-muted-foreground transition hover:text-foreground disabled:opacity-60"
-        >
-          {loadingMore ? "Yükleniyor…" : "Daha fazla göster"}
-        </button>
-      )}
+function FoodCategorySection({
+  label,
+  rows,
+}: {
+  label: string;
+  rows: Nutrition[];
+}) {
+  return (
+    <div className="mt-4 first:mt-0">
+      <p className="ledger px-1 pb-1 text-xs uppercase tracking-widest text-muted-foreground">
+        {label}
+      </p>
+      <table className="w-full border-collapse text-sm">
+        <thead>
+          <tr className="border-b border-border text-xs text-muted-foreground">
+            <th className="py-2 pr-2 text-left font-normal">Ürün</th>
+            <th className="py-2 px-1 text-right font-normal">kcal</th>
+            <th className="py-2 px-1 text-right font-normal">P</th>
+            <th className="py-2 px-1 text-right font-normal">Y</th>
+            <th className="py-2 px-1 text-right font-normal">K</th>
+            <th className="py-2 px-1 text-right font-normal">L</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((n) => (
+            <tr key={n.name_tr} className="border-b border-border/60">
+              <td className="py-2 pr-2">{n.name_tr}</td>
+              <Cell value={n.kcal_per_100} />
+              <Cell value={n.protein_g} />
+              <Cell value={n.fat_g} />
+              <Cell value={n.carbs_g} />
+              <Cell value={n.fiber_g} />
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

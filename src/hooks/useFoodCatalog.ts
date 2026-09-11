@@ -8,11 +8,11 @@ import {
 
 export type Status = "idle" | "loading" | "ready" | "error";
 
-// There are ~64 rows total, so loading them all once (rather than the
-// debounced server-side search AllFoodsBrowser uses) and filtering
-// client-side — same pattern as AddItem.tsx's catalog suggestions — is
-// simpler and avoids a network round trip per keystroke in the Add Food picker.
-const CATALOG_LIMIT = 200;
+// The catalog is small enough to load in full and filter client-side — same
+// pattern as AddItem.tsx's catalog suggestions — avoiding a network round
+// trip per keystroke. Matches the server's BROWSE_LIMIT_MAX (api/nutrition.ts)
+// so a growing catalog doesn't silently get truncated here.
+const CATALOG_LIMIT = 1000;
 
 export function useFoodCatalog() {
   const query = useQuery({

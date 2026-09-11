@@ -2,20 +2,26 @@ import { newStemmer } from "snowball-stemmers";
 import {
   Baby,
   Beef,
+  Bird,
   Coffee,
   Cookie,
   Croissant,
   CupSoda,
   Droplet,
+  Droplets,
   Egg,
+  Fish,
+  FlaskConical,
   Home,
   Milk,
+  Nut,
   PawPrint,
   Sandwich,
   Snowflake,
   Soup,
   SprayCan,
   Tag,
+  Utensils,
   Wheat,
   type LucideIcon,
   Carrot,
@@ -40,17 +46,23 @@ const snowball = newStemmer("turkish");
 
 export type CategoryId =
   | "meyve-sebze"
-  | "sut-kahvalti"
-  | "et-tavuk-balik"
+  | "sut-urunleri"
+  | "yumurta"
+  | "kirmizi-et"
+  | "kanatli"
+  | "balik-deniz-urunleri"
   | "sarkuteri"
   | "firin"
-  | "temel-gida"
   | "kahvaltilik"
+  | "tahil-bakliyat"
+  | "yag"
+  | "baharat-cesni"
+  | "hazir-gida"
+  | "dondurulmus"
+  | "kuruyemis-tohum"
   | "atistirmalik"
   | "icecek"
   | "sicak-icecek"
-  | "dondurulmus"
-  | "hazir-gida"
   | "bebek"
   | "temizlik"
   | "kisisel-bakim"
@@ -67,22 +79,28 @@ export type CategoryDef = {
 
 export const CATEGORIES: CategoryDef[] = [
   { id: "meyve-sebze", label: "Meyve & Sebze", order: 1, icon: Carrot },
-  { id: "sut-kahvalti", label: "Süt Ürünleri", order: 2, icon: Milk },
-  { id: "et-tavuk-balik", label: "Et, Tavuk & Balık", order: 3, icon: Beef },
-  { id: "sarkuteri", label: "Şarküteri", order: 4, icon: Sandwich },
-  { id: "firin", label: "Fırın & Pastane", order: 5, icon: Croissant },
-  { id: "kahvaltilik", label: "Kahvaltılık", order: 6, icon: Egg },
-  { id: "temel-gida", label: "Temel Gıda", order: 7, icon: Wheat },
-  { id: "hazir-gida", label: "Hazır & Konserve", order: 8, icon: Soup },
-  { id: "dondurulmus", label: "Dondurulmuş", order: 9, icon: Snowflake },
-  { id: "atistirmalik", label: "Atıştırmalık", order: 10, icon: Cookie },
-  { id: "sicak-icecek", label: "Kahve & Çay", order: 11, icon: Coffee },
-  { id: "icecek", label: "İçecek", order: 12, icon: CupSoda },
-  { id: "bebek", label: "Bebek", order: 13, icon: Baby },
-  { id: "kisisel-bakim", label: "Kişisel Bakım", order: 14, icon: Droplet },
-  { id: "temizlik", label: "Temizlik", order: 15, icon: SprayCan },
-  { id: "ev-mutfak", label: "Ev & Mutfak", order: 16, icon: Home },
-  { id: "evcil-hayvan", label: "Evcil Hayvan", order: 17, icon: PawPrint },
+  { id: "sut-urunleri", label: "Süt Ürünleri", order: 2, icon: Milk },
+  { id: "yumurta", label: "Yumurta", order: 3, icon: Egg },
+  { id: "kirmizi-et", label: "Kırmızı Et", order: 4, icon: Beef },
+  { id: "kanatli", label: "Kanatlı", order: 5, icon: Bird },
+  { id: "balik-deniz-urunleri", label: "Balık & Deniz Ürünleri", order: 6, icon: Fish },
+  { id: "sarkuteri", label: "Şarküteri", order: 7, icon: Sandwich },
+  { id: "firin", label: "Fırın & Pastane", order: 8, icon: Croissant },
+  { id: "kahvaltilik", label: "Kahvaltılık", order: 9, icon: Utensils },
+  { id: "tahil-bakliyat", label: "Tahıl & Bakliyat", order: 10, icon: Wheat },
+  { id: "yag", label: "Yağ", order: 11, icon: Droplet },
+  { id: "baharat-cesni", label: "Baharat & Çeşni", order: 12, icon: FlaskConical },
+  { id: "hazir-gida", label: "Hazır & Konserve", order: 13, icon: Soup },
+  { id: "dondurulmus", label: "Dondurulmuş", order: 14, icon: Snowflake },
+  { id: "kuruyemis-tohum", label: "Kuruyemiş & Tohum", order: 15, icon: Nut },
+  { id: "atistirmalik", label: "Atıştırmalık", order: 16, icon: Cookie },
+  { id: "sicak-icecek", label: "Kahve & Çay", order: 17, icon: Coffee },
+  { id: "icecek", label: "İçecek", order: 18, icon: CupSoda },
+  { id: "bebek", label: "Bebek", order: 19, icon: Baby },
+  { id: "kisisel-bakim", label: "Kişisel Bakım", order: 20, icon: Droplets },
+  { id: "temizlik", label: "Temizlik", order: 21, icon: SprayCan },
+  { id: "ev-mutfak", label: "Ev & Mutfak", order: 22, icon: Home },
+  { id: "evcil-hayvan", label: "Evcil Hayvan", order: 23, icon: PawPrint },
   { id: "diger", label: "Diğer", order: 99, icon: Tag },
 ];
 
@@ -129,7 +147,7 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "mango", "guava", "liçi", "pitaya", "ejder meyvesi",
     "meyve", "sebze",
   ],
-  "sut-kahvalti": [
+  "sut-urunleri": [
     "süt", "tam yağlı süt", "yarım yağlı süt", "yağsız süt", "laktozsuz süt",
     "çiğ süt", "keçi sütü", "koyun sütü", "uht süt", "yoğurt", "süzme yoğurt",
     "kaymaklı yoğurt", "meyveli yoğurt", "yoğurt içeceği", "probiyotik yoğurt",
@@ -139,20 +157,23 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "cheddar", "mozzarella", "parmesan", "gouda", "brie", "kamember",
     "burrata", "ricotta", "feta", "krema", "süt kreması", "kaymak",
     "yulaf sütü", "badem sütü", "soya sütü", "hindistan cevizi sütü",
-    "pirinç sütü", "yumurta", "organik yumurta", "beyaz yumurta",
-    "kahverengi yumurta",
+    "pirinç sütü",
   ],
-  "et-tavuk-balik": [
-    // et
+  yumurta: [
+    "yumurta", "organik yumurta", "beyaz yumurta", "kahverengi yumurta",
+  ],
+  "kirmizi-et": [
     "kırmızı et", "dana", "dana kıyma", "dana bonfile", "dana antrikot",
     "kuzu", "kuzu pirzola", "kuzu but", "kuzu kol", "biftek", "antrikot",
     "bonfile", "kontrfile", "kaburga", "kıyma", "karışık kıyma", "köfte",
     "hazır köfte", "cığ köfte hazır", "çiğ köfte", "kokoreç",
-    // kanatlı
+  ],
+  kanatli: [
     "tavuk", "bütün tavuk", "tavuk göğsü", "tavuk but", "tavuk baget",
     "tavuk kanat", "tavuk şinitzel", "tavuk pirzola", "tavuk şiş",
     "hindi", "hindi fileto", "hindi göğsü",
-    // deniz ürünleri
+  ],
+  "balik-deniz-urunleri": [
     "balık", "somon", "levrek", "çupra", "hamsi", "palamut", "lüfer",
     "istavrit", "sardalya", "uskumru", "kefal", "mezgit", "orkinos",
     "midye", "karides", "kalamar", "ahtapot", "istakoz", "yengeç",
@@ -187,7 +208,7 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "günaydın", "sürülebilir çikolata", "fıstık ezmesi",
     "badem ezmesi", "kaju ezmesi",
   ],
-  "temel-gida": [
+  "tahil-bakliyat": [
     // tahıllar
     "pirinç", "baldo pirinç", "osmancık pirinç", "jasmine pirinç",
     "basmati pirinç", "yasemin pirinç", "esmer pirinç", "bulgur",
@@ -201,10 +222,18 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "un", "buğday unu", "tam buğday unu", "mısır unu", "pirinç unu",
     "çavdar unu", "nohut unu", "badem unu", "hindistan cevizi unu",
     "glutensiz un", "nişasta", "mısır nişastası", "buğday nişastası",
-    // şeker ve tatlandırıcı
-    "şeker", "toz şeker", "esmer şeker", "pudra şekeri", "kesme şeker",
-    "hindistan cevizi şekeri", "stevia", "tatlandırıcı", "akçaağaç şurubu",
-    "agave şurubu", "glikoz şurubu", "melas",
+    // bakliyat
+    "nohut", "mercimek", "kırmızı mercimek", "yeşil mercimek",
+    "sarı mercimek", "kahverengi mercimek", "kuru fasulye", "börülce",
+    "barbunya kuru", "soya", "soya fasulyesi", "bulgur", "aşurelik buğday",
+  ],
+  yag: [
+    "zeytinyağı", "sızma zeytinyağı", "erken hasat zeytinyağı",
+    "riviera zeytinyağı", "ayçiçek yağı", "mısır yağı", "kanola yağı",
+    "susam yağı", "hindistan cevizi yağı", "avokado yağı", "aspir yağı",
+    "keten tohumu yağı", "sıvı yağ", "katı yağ", "margarin", "tereyağ",
+  ],
+  "baharat-cesni": [
     // baharat
     "tuz", "kaya tuzu", "deniz tuzu", "himalaya tuzu", "iyotlu tuz",
     "karabiber", "beyaz biber", "kırmızı biber", "pul biber", "isot",
@@ -218,23 +247,12 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "beyaz şarap sirkesi",
     // salça ve konsantre
     "salça", "domates salçası", "biber salçası", "acı biber salçası",
-    // yağlar
-    "zeytinyağı", "sızma zeytinyağı", "erken hasat zeytinyağı",
-    "riviera zeytinyağı", "ayçiçek yağı", "mısır yağı", "kanola yağı",
-    "susam yağı", "hindistan cevizi yağı", "avokado yağı", "aspir yağı",
-    "keten tohumu yağı", "sıvı yağ", "katı yağ", "margarin", "tereyağ",
-    // bakliyat
-    "nohut", "mercimek", "kırmızı mercimek", "yeşil mercimek",
-    "sarı mercimek", "kahverengi mercimek", "kuru fasulye", "börülce",
-    "barbunya kuru", "soya", "soya fasulyesi", "bulgur", "aşurelik buğday",
-    // tohumlar ve süper gıdalar
-    "tohum", "chia tohumu", "keten tohumu", "susam", "haşhaş tohumu",
-    "ay çekirdeği", "kabak çekirdeği", "kenevir tohumu", "sarı tohum",
-    "goji berry", "cranberry", "yaban mersini kurusu",
-    "kakao", "kakao tozu", "kakao ezmesi",
-    // baz maddeler
-    "bulyon", "tavuk suyu", "et suyu", "sebze suyu", "hazır bulyon",
-    "et suyu tablet", "mantar suyu",
+    // şeker ve tatlandırıcı
+    "şeker", "toz şeker", "esmer şeker", "pudra şekeri", "kesme şeker",
+    "hindistan cevizi şekeri", "stevia", "tatlandırıcı", "akçaağaç şurubu",
+    "agave şurubu", "glikoz şurubu", "melas",
+    // kakao (hammadde — sıcak içecek olarak tüketilen kakao sicak-icecek'te)
+    "kakao tozu", "kakao ezmesi",
   ],
   "hazir-gida": [
     "konserve", "ton balık", "ton", "sardalya konserve", "mısır konserve",
@@ -247,6 +265,9 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "pizza sosu", "hazır yemek", "hazır köfte", "hazır kebap",
     "yemeklik hazır", "kavanoz turşu", "turşu", "salatalık turşusu",
     "biber turşusu", "karışık turşu", "sarımsak turşusu",
+    // baz maddeler
+    "bulyon", "tavuk suyu", "et suyu", "sebze suyu", "hazır bulyon",
+    "et suyu tablet", "mantar suyu",
   ],
   dondurulmus: [
     "dondurma", "dondurulmuş", "donuk", "donmuş", "hazır pizza",
@@ -255,6 +276,19 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "donuk balık", "donuk tavuk", "donuk köfte", "buz",
     "puff pastry",
   ],
+  "kuruyemis-tohum": [
+    "çerez", "leblebi", "sarı leblebi", "çıtır", "fındık", "iç fındık",
+    "kavrulmuş fındık", "badem", "iç badem", "çiğ badem", "ceviz",
+    "iç ceviz", "antep fıstığı", "iç fıstık", "yer fıstığı",
+    "amerikan fıstığı", "kaju", "brezilya fıstığı", "makademya",
+    "kuruyemiş", "kavrulmuş kuruyemiş", "karışık kuruyemiş",
+    "kuru meyve", "kuru kayısı", "kuru incir", "kuru üzüm",
+    "kuru kızılcık", "kuru mango", "kuru muz", "kuru elma",
+    // tohumlar ve süper gıdalar
+    "tohum", "chia tohumu", "keten tohumu", "susam", "haşhaş tohumu",
+    "ay çekirdeği", "kabak çekirdeği", "kenevir tohumu", "sarı tohum",
+    "goji berry", "cranberry", "yaban mersini kurusu",
+  ],
   atistirmalik: [
     "çikolata", "sütlü çikolata", "bitter çikolata", "beyaz çikolata",
     "fındıklı çikolata", "bademli çikolata", "çikolata bar",
@@ -262,14 +296,7 @@ const KEYWORDS: Record<CategoryId, string[]> = {
     "sade bisküvi", "kremalı bisküvi", "sandviç bisküvi", "kek bar",
     "kraker", "tuzlu kraker", "kepekli kraker", "cips", "patates cipsi",
     "mısır cipsi", "tortilla cipsi", "sebze cips", "elma cips",
-    "çerez", "leblebi", "sarı leblebi", "çıtır", "fındık", "iç fındık",
-    "kavrulmuş fındık", "badem", "iç badem", "çiğ badem", "ceviz",
-    "iç ceviz", "antep fıstığı", "iç fıstık", "yer fıstığı",
-    "amerikan fıstığı", "kaju", "brezilya fıstığı", "makademya",
-    "kuruyemiş", "kavrulmuş kuruyemiş", "karışık kuruyemiş",
     "şekerleme", "sakız", "jelibon", "lokum", "marşmelov",
-    "kuru meyve", "kuru kayısı", "kuru incir", "kuru üzüm",
-    "kuru kızılcık", "kuru mango", "kuru muz", "kuru elma",
     "popcorn", "patlamış mısır",
   ],
   "sicak-icecek": [
@@ -371,10 +398,10 @@ const HEAD_NOUNS: Array<[string, CategoryId]> = [
   // pet
   ["yemi", "evcil-hayvan"],
   // seeds & superfoods
-  ["tohumu", "temel-gida"],
-  ["tohum", "temel-gida"],
-  ["çekirdeği", "atistirmalik"],
-  ["çekirdek", "atistirmalik"],
+  ["tohumu", "kuruyemis-tohum"],
+  ["tohum", "kuruyemis-tohum"],
+  ["çekirdeği", "kuruyemis-tohum"],
+  ["çekirdek", "kuruyemis-tohum"],
   // grains & pantry heads
   ["ekmeği", "firin"],
   ["ekmek", "firin"],
@@ -385,58 +412,61 @@ const HEAD_NOUNS: Array<[string, CategoryId]> = [
   ["pastası", "firin"],
   ["kurabiyesi", "firin"],
   // grains/flours/legumes as heads
-  ["unu", "temel-gida"],
-  ["nişastası", "temel-gida"],
-  ["pilavı", "temel-gida"],
-  ["makarnası", "temel-gida"],
-  ["makarna", "temel-gida"],
-  ["mercimeği", "temel-gida"],
-  ["mercimek", "temel-gida"],
-  ["fasulyesi", "temel-gida"],
-  ["fasulye", "temel-gida"],
-  ["nohutu", "temel-gida"],
-  ["nohut", "temel-gida"],
-  ["bulguru", "temel-gida"],
-  ["bulgur", "temel-gida"],
-  ["pirinci", "temel-gida"],
-  ["pirinç", "temel-gida"],
-  ["yulafı", "temel-gida"],
-  ["yulaf", "temel-gida"],
-  ["irmiği", "temel-gida"],
-  ["irmik", "temel-gida"],
-  ["yağı", "temel-gida"],
-  ["yağ", "temel-gida"],
-  ["salçası", "temel-gida"],
-  ["salça", "temel-gida"],
-  ["sirkesi", "temel-gida"],
-  ["sirke", "temel-gida"],
-  ["baharatı", "temel-gida"],
-  ["baharat", "temel-gida"],
-  ["şekeri", "temel-gida"],
-  ["tuzu", "temel-gida"],
+  ["unu", "tahil-bakliyat"],
+  ["nişastası", "tahil-bakliyat"],
+  ["pilavı", "tahil-bakliyat"],
+  ["makarnası", "tahil-bakliyat"],
+  ["makarna", "tahil-bakliyat"],
+  ["mercimeği", "tahil-bakliyat"],
+  ["mercimek", "tahil-bakliyat"],
+  ["fasulyesi", "tahil-bakliyat"],
+  ["fasulye", "tahil-bakliyat"],
+  ["nohutu", "tahil-bakliyat"],
+  ["nohut", "tahil-bakliyat"],
+  ["bulguru", "tahil-bakliyat"],
+  ["bulgur", "tahil-bakliyat"],
+  ["pirinci", "tahil-bakliyat"],
+  ["pirinç", "tahil-bakliyat"],
+  ["yulafı", "tahil-bakliyat"],
+  ["yulaf", "tahil-bakliyat"],
+  ["irmiği", "tahil-bakliyat"],
+  ["irmik", "tahil-bakliyat"],
+  // oils
+  ["yağı", "yag"],
+  ["yağ", "yag"],
+  // spices & seasoning
+  ["salçası", "baharat-cesni"],
+  ["salça", "baharat-cesni"],
+  ["sirkesi", "baharat-cesni"],
+  ["sirke", "baharat-cesni"],
+  ["baharatı", "baharat-cesni"],
+  ["baharat", "baharat-cesni"],
+  ["şekeri", "baharat-cesni"],
+  ["tuzu", "baharat-cesni"],
   // dairy
-  ["sütü", "sut-kahvalti"],
-  ["yoğurdu", "sut-kahvalti"],
-  ["yoğurt", "sut-kahvalti"],
-  ["peyniri", "sut-kahvalti"],
-  ["peynir", "sut-kahvalti"],
-  ["yumurtası", "sut-kahvalti"],
-  ["yumurta", "sut-kahvalti"],
-  ["tereyağı", "sut-kahvalti"],
-  ["kreması", "sut-kahvalti"],
-  ["kefiri", "sut-kahvalti"],
-  ["ayranı", "sut-kahvalti"],
+  ["sütü", "sut-urunleri"],
+  ["yoğurdu", "sut-urunleri"],
+  ["yoğurt", "sut-urunleri"],
+  ["peyniri", "sut-urunleri"],
+  ["peynir", "sut-urunleri"],
+  ["tereyağı", "sut-urunleri"],
+  ["kreması", "sut-urunleri"],
+  ["kefiri", "sut-urunleri"],
+  ["ayranı", "sut-urunleri"],
+  // eggs
+  ["yumurtası", "yumurta"],
+  ["yumurta", "yumurta"],
   // meat & fish
-  ["kıyması", "et-tavuk-balik"],
-  ["kıyma", "et-tavuk-balik"],
-  ["tavuğu", "et-tavuk-balik"],
-  ["tavuk", "et-tavuk-balik"],
-  ["balığı", "et-tavuk-balik"],
-  ["balık", "et-tavuk-balik"],
-  ["fileto", "et-tavuk-balik"],
-  ["pirzolası", "et-tavuk-balik"],
-  ["biftek", "et-tavuk-balik"],
-  ["bonfile", "et-tavuk-balik"],
+  ["kıyması", "kirmizi-et"],
+  ["kıyma", "kirmizi-et"],
+  ["pirzolası", "kirmizi-et"],
+  ["biftek", "kirmizi-et"],
+  ["bonfile", "kirmizi-et"],
+  ["tavuğu", "kanatli"],
+  ["tavuk", "kanatli"],
+  ["fileto", "kanatli"],
+  ["balığı", "balik-deniz-urunleri"],
+  ["balık", "balik-deniz-urunleri"],
   // charcuterie
   ["sucuğu", "sarkuteri"],
   ["sucuk", "sarkuteri"],
@@ -449,8 +479,8 @@ const HEAD_NOUNS: Array<[string, CategoryId]> = [
   ["pastırması", "sarkuteri"],
   ["pastırma", "sarkuteri"],
   // snacks
-  ["kuruyemişi", "atistirmalik"],
-  ["kuruyemiş", "atistirmalik"],
+  ["kuruyemişi", "kuruyemis-tohum"],
+  ["kuruyemiş", "kuruyemis-tohum"],
   ["çikolatası", "atistirmalik"],
   ["çikolata", "atistirmalik"],
   ["cipsi", "atistirmalik"],
@@ -651,6 +681,29 @@ function matchesHead(word: string, key: string): boolean {
   const shared = Math.min(word.length, key.length);
   if (shared >= 4 && (word.startsWith(key) || key.startsWith(word))) return true;
   return false;
+}
+
+/**
+ * Groups arbitrary rows (nutrition catalog entries, in practice) into the
+ * built-in taxonomy by running each row's display name through categorize().
+ * Used to browse the nutrition catalog by aisle instead of one flat
+ * alphabetical table — see NutritionAllFoodsBrowser and PersonalPlanView's
+ * "Önerilmesin" search.
+ */
+export function groupByCategory<T>(
+  rows: T[],
+  nameOf: (row: T) => string
+): { category: CategoryDef; rows: T[] }[] {
+  const byId = new Map<CategoryId, T[]>();
+  for (const row of rows) {
+    const id = categorize(nameOf(row));
+    if (!byId.has(id)) byId.set(id, []);
+    byId.get(id)!.push(row);
+  }
+  return CATEGORIES.filter((c) => byId.has(c.id)).map((c) => ({
+    category: c,
+    rows: byId.get(c.id)!,
+  }));
 }
 
 function escapeRegex(s: string) {

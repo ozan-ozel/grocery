@@ -55,7 +55,10 @@ const JSON_HEADERS = {
 
 const MAX_NAMES = 200;
 const BROWSE_LIMIT_DEFAULT = 60;
-const BROWSE_LIMIT_MAX = 150;
+// High enough to pull the whole catalog in one request for the grouped
+// "Tümü" view and the food picker — cheap for PostgREST, still capped so a
+// caller can't force a pathological single query.
+const BROWSE_LIMIT_MAX = 1000;
 const SELECT_COLS =
   "name_tr,aliases,kcal_per_100,protein_g,fat_g,carbs_g,fiber_g,allergen_classes,food_id";
 
