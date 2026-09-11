@@ -1,5 +1,8 @@
 # Implementation Handoff — Plan/Spec ↔ Implementation Tracker
 
+**Bootstrapping a new collaborator or agent onto this system?** Send them
+`IMPLEMENTATION_HANDOFF_STARTER.md` first — a short paste-able pointer to this file, not a copy of it.
+
 **What this file is:** the live tracker for decisions currently moving between planning and
 implementation. One side writes plans/specs; the other implements — see **Roles** below for who that
 is at any given moment. This file is how the two sides — and any agent working on either side — stay
