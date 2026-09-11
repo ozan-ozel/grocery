@@ -103,6 +103,26 @@ export function returnToCookieHeader(request: Request, value: string, maxAge: nu
   return parts.join("; ");
 }
 
+export const OAUTH_STATE_COOKIE = "sb-oauth-state";
+
+// Builds a Set-Cookie string for OAUTH_STATE_COOKIE — a CSRF guard for the
+// direct Google authorize request (see api/auth-google.ts): the start half
+// stashes a random value here, the callback half requires the `state` query
+// param it gets back from Google to match it exactly before exchanging the
+// code.
+export function oauthStateCookieHeader(request: Request, value: string, maxAge: number): string {
+  const secure = new URL(request.url).protocol === "https:";
+  const parts = [
+    `${OAUTH_STATE_COOKIE}=${encodeURIComponent(value)}`,
+    "Path=/",
+    "HttpOnly",
+    "SameSite=Lax",
+    `Max-Age=${maxAge}`,
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
+}
+
 // Same-origin-relative path only — rejects absolute/protocol-relative URLs
 // (open-redirect guard for the OAuth returnTo param, since it round-trips
 // through a plain cookie with no signature). "/x" is fine; "//evil.com",

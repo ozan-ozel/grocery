@@ -1,69 +1,82 @@
-// GET /api/auth-google-start?returnTo=<path> -> 302 to Google (via
-// Supabase Auth's hosted OAuth flow). Google redirects back to Supabase,
-// which redirects to /api/auth-callback. Both public paths are rewritten
-// (see vercel.json) onto this one file — merged to stay under Vercel's
-// Hobby-plan Serverless Function count limit, with each request
-// distinguished by the `_action` query param the rewrite injects. This
-// kicks off the whole handshake server-side so the frontend never needs
-// SUPABASE_URL/SUPABASE_ANON_KEY at all — see
-// docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md.
+// GET /api/auth-google-start?returnTo=<path> -> 302 to Google, using our own
+// Google OAuth client directly (not Supabase's hosted /auth/v1/authorize
+// relay). Google redirects back here (/api/auth-callback), we exchange the
+// code with Google ourselves, then hand the resulting Google ID token to
+// Supabase via signInWithIdToken() to mint the session. Both public paths
+// are rewritten (see vercel.json) onto this one file — merged to stay under
+// Vercel's Hobby-plan Serverless Function count limit, with each request
+// distinguished by the `_action` query param the rewrite injects.
 //
-// Calling signInWithOAuth() on a server client (not the browser client) is
-// the documented @supabase/ssr pattern for starting the flow: it still
-// generates and writes the PKCE code_verifier cookie via writableCookies,
-// just from a route handler instead of client-side JS. The callback half's
-// exchangeCodeForSession() reads that same cookie back. The callback half
-// also folds in what api/auth-link.ts used to do as a separate
-// client-triggered POST: resolve the Google `sub` from the verified
-// Supabase session, upsert app_users (unchanged shape) and auth_user_map.
+// Why not Supabase's hosted relay: going through
+// `<SUPABASE_URL>/auth/v1/authorize` means Google's own consent screen
+// displays *.supabase.co (the redirect_uri Supabase registered with Google)
+// instead of this app's domain — cosmetic, but avoidable for free by doing
+// the code exchange ourselves with our own GOOGLE_CLIENT_ID/SECRET (same
+// values used by this app's original pre-Supabase-Auth JWT flow) and our
+// own domain as the redirect_uri. Supabase Auth + RLS as the actual
+// authorization layer is unchanged — only where the authorization-code
+// exchange happens moves.
+//
+// This also drops Supabase's own PKCE code_verifier cookie (no longer
+// applicable — we're not calling signInWithOAuth()) in favor of a plain
+// `state` cookie as the CSRF guard on the authorize round-trip.
 
 import { createServerClient } from "@supabase/ssr";
 import {
   writableCookies,
   RETURN_TO_COOKIE,
+  OAUTH_STATE_COOKIE,
   parseCookies,
   isSafeReturnTo,
   returnToCookieHeader,
+  oauthStateCookieHeader,
 } from "../lib/auth.js";
 
 function restBase(url: string): string {
   return `${url.replace(/\/$/, "")}/rest/v1`;
 }
 
+// Decodes (not verifies — Supabase's signInWithIdToken already verified the
+// token's signature/issuer/audience server-side by the time this runs) the
+// `sub` claim out of the Google ID token's payload, since that's the value
+// this app has always used as app_users.id / auth_user_map.app_user_id.
+function decodeGoogleSub(idToken: string): string | null {
+  const payload = idToken.split(".")[1];
+  if (!payload) return null;
+  try {
+    const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(base64);
+    const claims = JSON.parse(json) as { sub?: string };
+    return claims.sub ?? null;
+  } catch {
+    return null;
+  }
+}
+
 async function handleStart(request: Request, url: URL): Promise<Response> {
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const anonKey = process.env.SUPABASE_ANON_KEY;
-  if (!supabaseUrl || !anonKey) {
-    return new Response("supabase not configured", { status: 500 });
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  if (!clientId) {
+    return new Response("google oauth not configured", { status: 500 });
   }
 
   const requestedReturnTo = url.searchParams.get("returnTo");
   const returnTo = isSafeReturnTo(requestedReturnTo) ? requestedReturnTo : "/";
   const callbackUrl = `${url.origin}/api/auth-callback`;
+  const state = crypto.randomUUID();
+
+  const authorizeUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  authorizeUrl.searchParams.set("client_id", clientId);
+  authorizeUrl.searchParams.set("redirect_uri", callbackUrl);
+  authorizeUrl.searchParams.set("response_type", "code");
+  authorizeUrl.searchParams.set("scope", "openid email profile");
+  authorizeUrl.searchParams.set("state", state);
+  authorizeUrl.searchParams.set("access_type", "online");
+  authorizeUrl.searchParams.set("prompt", "select_account");
 
   const responseHeaders = new Headers();
-  const supabase = createServerClient(supabaseUrl, anonKey, {
-    cookies: writableCookies(request, responseHeaders),
-  });
-
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: "google",
-    options: { redirectTo: callbackUrl },
-  });
-  if (error || !data.url) {
-    return new Response(`failed to start sign-in: ${error?.message ?? "no url"}`, {
-      status: 502,
-      headers: responseHeaders,
-    });
-  }
-
-  // Stashed separately from Supabase's own PKCE cookie (already appended
-  // above by signInWithOAuth via writableCookies) — this one just carries
-  // where to land the user after the callback half finishes, since
-  // redirect_to must exactly match an allow-listed URL in Supabase's Auth
-  // settings and can't carry it directly.
   responseHeaders.append("set-cookie", returnToCookieHeader(request, returnTo, 600));
-  responseHeaders.set("location", data.url);
+  responseHeaders.append("set-cookie", oauthStateCookieHeader(request, state, 600));
+  responseHeaders.set("location", authorizeUrl.toString());
 
   return new Response(null, { status: 302, headers: responseHeaders });
 }
@@ -71,8 +84,9 @@ async function handleStart(request: Request, url: URL): Promise<Response> {
 function errorRedirect(request: Request, returnTo: string, responseHeaders: Headers): Response {
   const separator = returnTo.includes("?") ? "&" : "?";
   responseHeaders.set("location", `${returnTo}${separator}auth_error=1`);
-  // Clear any half-set returnTo cookie regardless of outcome.
+  // Clear any half-set returnTo/state cookies regardless of outcome.
   responseHeaders.append("set-cookie", returnToCookieHeader(request, "", 0));
+  responseHeaders.append("set-cookie", oauthStateCookieHeader(request, "", 0));
   return new Response(null, { status: 302, headers: responseHeaders });
 }
 
@@ -80,48 +94,90 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
   const serviceKey = process.env.SUPABASE_SECRET_KEY;
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
   const responseHeaders = new Headers();
-  const rawReturnTo = parseCookies(request.headers.get("cookie"))[RETURN_TO_COOKIE] ?? null;
+  const cookies = parseCookies(request.headers.get("cookie"));
+  const rawReturnTo = cookies[RETURN_TO_COOKIE] ?? null;
   const returnTo = isSafeReturnTo(rawReturnTo) ? rawReturnTo : "/";
 
-  if (!supabaseUrl || !anonKey || !serviceKey) {
-    console.error("[auth-callback] missing env", {
+  function fail(reason: string, extra?: unknown): Response {
+    console.error(`[auth-callback] ${reason}`, extra);
+    return errorRedirect(request, returnTo, responseHeaders);
+  }
+
+  if (!supabaseUrl || !anonKey || !serviceKey || !clientId || !clientSecret) {
+    return fail("missing env", {
       supabaseUrl: !!supabaseUrl,
       anonKey: !!anonKey,
       serviceKey: !!serviceKey,
+      clientId: !!clientId,
+      clientSecret: !!clientSecret,
     });
-    return errorRedirect(request, returnTo, responseHeaders);
+  }
+
+  const state = url.searchParams.get("state");
+  const expectedState = cookies[OAUTH_STATE_COOKIE];
+  if (!state || !expectedState || state !== expectedState) {
+    return fail("state mismatch", { hasState: !!state, hasExpected: !!expectedState });
   }
 
   const code = url.searchParams.get("code");
   if (!code) {
-    // Google/Supabase redirects here with an error param (access_denied,
-    // etc.) instead of code when the user declines consent.
-    console.error("[auth-callback] no code param", Object.fromEntries(url.searchParams));
-    return errorRedirect(request, returnTo, responseHeaders);
+    // Google redirects here with an error param (access_denied, etc.)
+    // instead of code when the user declines consent.
+    return fail("no code param", Object.fromEntries(url.searchParams));
+  }
+
+  let googleTokens: { id_token?: string; access_token?: string };
+  try {
+    const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+      method: "POST",
+      headers: { "content-type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code,
+        redirect_uri: `${url.origin}/api/auth-callback`,
+        grant_type: "authorization_code",
+      }),
+    });
+    if (!tokenRes.ok) {
+      return fail("google token exchange failed", {
+        status: tokenRes.status,
+        body: await tokenRes.text(),
+      });
+    }
+    googleTokens = (await tokenRes.json()) as typeof googleTokens;
+  } catch (err) {
+    return fail("google token exchange threw", err);
+  }
+
+  if (!googleTokens.id_token) {
+    return fail("no id_token from google", googleTokens);
+  }
+
+  const googleSub = decodeGoogleSub(googleTokens.id_token);
+  if (!googleSub) {
+    return fail("could not decode google id_token sub");
   }
 
   const supabase = createServerClient(supabaseUrl, anonKey, {
     cookies: writableCookies(request, responseHeaders),
   });
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.signInWithIdToken({
+    provider: "google",
+    token: googleTokens.id_token,
+    access_token: googleTokens.access_token,
+  });
   if (error || !data.user || !data.user.email) {
-    console.error("[auth-callback] exchangeCodeForSession failed", {
+    return fail("signInWithIdToken failed", {
       error: error?.message,
       status: error?.status,
       hasUser: !!data.user,
       hasEmail: !!data.user?.email,
     });
-    return errorRedirect(request, returnTo, responseHeaders);
-  }
-
-  const googleIdentity = data.user.identities?.find((i) => i.provider === "google");
-  const googleSub =
-    googleIdentity?.id ?? (googleIdentity?.identity_data?.sub as string | undefined);
-  if (!googleSub) {
-    console.error("[auth-callback] no googleSub", { identities: data.user.identities });
-    return errorRedirect(request, returnTo, responseHeaders);
   }
 
   const email = data.user.email.toLowerCase();
@@ -141,11 +197,10 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
       body: JSON.stringify({ id: googleSub, email }),
     });
     if (!userRes.ok) {
-      console.error("[auth-callback] app_users upsert failed", {
+      return fail("app_users upsert failed", {
         status: userRes.status,
         body: await userRes.text(),
       });
-      return errorRedirect(request, returnTo, responseHeaders);
     }
 
     const mapRes = await fetch(`${base}/auth_user_map`, {
@@ -154,20 +209,19 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
       body: JSON.stringify({ supabase_uid: data.user.id, app_user_id: googleSub }),
     });
     if (!mapRes.ok) {
-      console.error("[auth-callback] auth_user_map upsert failed", {
+      return fail("auth_user_map upsert failed", {
         status: mapRes.status,
         body: await mapRes.text(),
       });
-      return errorRedirect(request, returnTo, responseHeaders);
     }
   } catch (err) {
-    console.error("[auth-callback] unexpected error", err);
-    return errorRedirect(request, returnTo, responseHeaders);
+    return fail("unexpected error", err);
   }
 
-  // Success: clear the returnTo cookie, keep the session cookies
-  // exchangeCodeForSession already wrote via writableCookies above.
+  // Success: clear the returnTo/state cookies, keep the session cookies
+  // signInWithIdToken already wrote via writableCookies above.
   responseHeaders.append("set-cookie", returnToCookieHeader(request, "", 0));
+  responseHeaders.append("set-cookie", oauthStateCookieHeader(request, "", 0));
   responseHeaders.set("location", returnTo);
   return new Response(null, { status: 302, headers: responseHeaders });
 }
