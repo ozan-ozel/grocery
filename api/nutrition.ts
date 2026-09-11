@@ -11,6 +11,20 @@
 
 import { requireUser, authErrorResponse } from "../lib/auth.js";
 
+// Türkiye/EU 14 — see src/lib/allergenClasses.ts for the canonical
+// definition; duplicated here per this file's existing pattern of not
+// cross-importing from src/ (a separate build/deploy target).
+type AllergenClassId =
+  | "gluten_cereals" | "crustaceans" | "eggs" | "fish" | "peanuts"
+  | "soybeans" | "milk" | "tree_nuts" | "celery" | "mustard"
+  | "sesame" | "sulphites" | "lupin" | "molluscs";
+
+type AllergenClassMapping = {
+  class: AllergenClassId;
+  status: "present" | "confirmed_absent";
+  source: "regulatory" | "curated";
+};
+
 type Nutrition = {
   name_tr: string;
   aliases: string[];
@@ -19,6 +33,19 @@ type Nutrition = {
   fat_g: number;
   carbs_g: number;
   fiber_g: number;
+  // Read-only through this endpoint — see validateWrite/WriteRow below,
+  // which deliberately never accept it from client input. Curated
+  // allergen data must not be alterable through the general Besin-tab
+  // macro editor with no review step.
+  allergen_classes?: AllergenClassMapping[];
+  // Opaque, stable canonical Food identity (Phase 9 Canonical Food Identity
+  // implementation — see src/lib/foodIdentity.ts and
+  // supabase/16-nutrition-food-id.sql). Read-only through this endpoint,
+  // same as allergen_classes: WriteRow below has no food_id field, so a
+  // client can never set or override it. Assigned by the database column's
+  // own default (gen_random_uuid()) on first insert and left untouched by
+  // every subsequent merge-duplicates upsert.
+  food_id?: string;
 };
 
 const JSON_HEADERS = {
@@ -30,7 +57,7 @@ const MAX_NAMES = 200;
 const BROWSE_LIMIT_DEFAULT = 60;
 const BROWSE_LIMIT_MAX = 150;
 const SELECT_COLS =
-  "name_tr,aliases,kcal_per_100,protein_g,fat_g,carbs_g,fiber_g";
+  "name_tr,aliases,kcal_per_100,protein_g,fat_g,carbs_g,fiber_g,allergen_classes,food_id";
 
 function normalize(name: string): string {
   return name.trim().toLocaleLowerCase("tr-TR");
@@ -301,6 +328,16 @@ function coerce(row: unknown): Nutrition | null {
   const aliases: string[] = Array.isArray(r.aliases)
     ? r.aliases.filter((a): a is string => typeof a === "string")
     : [];
+  // Passed through as-is from Supabase (already validated at write time by
+  // the migration's seed data, not by this endpoint) rather than re-parsed
+  // field-by-field — undefined/malformed shapes just don't populate the
+  // catalog's allergen_classes for that row, never crash the whole read.
+  const allergen_classes = Array.isArray(r.allergen_classes)
+    ? (r.allergen_classes as AllergenClassMapping[])
+    : undefined;
+  // Absent (undefined) on a row read before supabase/16-nutrition-food-id.sql
+  // has been applied — never fabricated here.
+  const food_id = typeof r.food_id === "string" ? r.food_id : undefined;
   return {
     name_tr: r.name_tr,
     aliases,
@@ -309,6 +346,8 @@ function coerce(row: unknown): Nutrition | null {
     fat_g: r.fat_g,
     carbs_g: r.carbs_g,
     fiber_g: r.fiber_g,
+    allergen_classes,
+    food_id,
   };
 }
 
