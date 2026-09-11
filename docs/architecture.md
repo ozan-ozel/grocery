@@ -189,15 +189,20 @@ step, but a production-effecting one, with no confirmation prompt of its own.
 ## Environment variables
 
 **Required env vars** (Vercel project settings for production; `.env.local` for local dev via
-`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`. These are
-server-only — the frontend bundle never receives Supabase credentials directly; the entire Google
-OAuth handshake (public paths `/api/auth-google-start` → `/api/auth-callback`) runs server-side
-instead of via a browser-side Supabase client (see
-`docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md`). Both paths are implemented in
-one file, `api/auth-google.ts`, dispatched by an `_action` query param that `vercel.json`'s
-rewrites inject — a deliberate merge to stay under Vercel's Hobby-plan Serverless Function count
-limit (12 functions per deployment); the two public URLs are unaffected, and Supabase's Auth
-redirect-URL allow-list still targets the literal `/api/auth-callback` path. Most `api/*.ts`
+`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`,
+`GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. These are server-only — the frontend bundle never
+receives Supabase or Google credentials directly; the entire Google OAuth handshake (public paths
+`/api/auth-google-start` → `/api/auth-callback`) runs server-side instead of via a browser-side
+Supabase client. `auth-google.ts` talks to Google's own `/o/oauth2/v2/auth` and
+`oauth2.googleapis.com/token` endpoints directly with `GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`
+(this app's own OAuth client, so Google's consent screen shows this app's own domain rather than
+`*.supabase.co`) and hands the resulting Google ID token to Supabase via `signInWithIdToken()` to
+mint the session — it does not go through Supabase's hosted `/auth/v1/authorize` relay. Both paths
+are implemented in one file, `api/auth-google.ts`, dispatched by an `_action` query param that
+`vercel.json`'s rewrites inject — a deliberate merge to stay under Vercel's Hobby-plan Serverless
+Function count limit (12 functions per deployment); the two public URLs are unaffected. The Google
+Cloud OAuth client's authorized redirect URI must be set to this app's own
+`<domain>/api/auth-callback` (not a Supabase URL). Most `api/*.ts`
 functions authenticate to PostgREST as the caller's own Supabase session (`lib/auth.ts`'s
 `userRestHeaders`, built from the anon key + the caller's token); a handful of endpoints
 (`meal-entries.ts`'s writes, `nutrition.ts`'s writes, `auth-google.ts`'s callback half,
