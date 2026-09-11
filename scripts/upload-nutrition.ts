@@ -47,9 +47,9 @@ function assertRow(row: unknown, index: number): asserts row is Row {
 
 async function main() {
   const url = process.env.SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const key = process.env.SUPABASE_SECRET_KEY;
   if (!url || !key) {
-    console.error("SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY must be set (see .env.local).");
+    console.error("SUPABASE_URL and SUPABASE_SECRET_KEY must be set (see .env.local).");
     process.exit(1);
   }
 

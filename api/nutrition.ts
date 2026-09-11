@@ -203,7 +203,7 @@ async function handleRead(request: Request): Promise<Response> {
 async function handleWrite(request: Request): Promise<Response> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !anonKey || !serviceKey) {
     return json({ error: "supabase not configured" }, 500);
   }

@@ -65,7 +65,7 @@ export default {
 
 async function mealEntryHouseholdId(entryId: string): Promise<string | null> {
   const supabaseUrl = process.env.SUPABASE_URL;
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const serviceKey = process.env.SUPABASE_SECRET_KEY;
   if (!supabaseUrl || !serviceKey) throw new Error("supabase not configured");
   const headers = {
     apikey: serviceKey,
