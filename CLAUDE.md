@@ -6,6 +6,9 @@ this project is. This file is a router and behavior layer, not the architecture 
 
 ## Where things live
 
+- [docs/claude-interaction-model.md](docs/claude-interaction-model.md) — how Claude approaches every
+  task: the doc-reading sequence, skill checks, and decision pipeline. Read this to understand how
+  Claude Code makes decisions in this repository.
 - [docs/architecture.md](docs/architecture.md) — state & persistence, tenants, sync,
   categorization, the nutrition backend, env vars, daily rollover, design tokens, theming.
   Read the relevant section before touching that subsystem.
