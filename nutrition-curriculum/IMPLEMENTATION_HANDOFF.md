@@ -44,6 +44,30 @@ here at all.
 | `BLOCKED` | Implementer needs planner input — see Notes | Implementer |
 | `DONE` | Implemented, self-checked, merged to master | Implementer |
 
+## COL — collaboration checkpoint
+
+`COL` is the resume keyword for this file, said by the planner (see `CLAUDE.md`'s Git shorthand
+section — it is not a git operation and does not commit/merge/push anything by itself). On `COL`:
+
+1. **Read the Active table first.**
+   - A `BLOCKED` row → stop and surface the Notes/Blockers content to the planner. That's the whole
+     point of `COL` in this state: get the blocker in front of the person who can resolve it. Do not
+     touch the spec or the row until they respond.
+   - A `PUSHED` or `IN_PROGRESS` row → report its status and stop. Only one item may be active; do not
+     start drafting the next spec while one is still out.
+   - Nothing active → continue to step 2.
+2. **Find the last-covered DEC.** The most recent entry in the Closed table below. If Closed is also
+   empty, there is no "last DEC" — ask the planner which DEC to start with rather than guessing an
+   order from `DEC_REGISTER.md`.
+3. **Resume planning from there.** Pick up (or start) the next DEC's spec file in
+   `09_HANDOFF_SPECS/`, following `_TEMPLATE.md`. Cross-check it against `DEC_REGISTER.md` (only
+   `READY`/`PROVISIONAL` decisions are workable — see that file's vocabulary) and against
+   `APP_DECISION_INVENTORY.md` for what the decision actually covers.
+4. **Do not flip a row to `PUSHED` as part of `COL` itself.** `COL` gets planning moving again; it
+   ends with a spec draft (finished or in progress) reported back to the planner. Pushing a row is a
+   separate, deliberate step once the spec is actually done — same as `PUSHED` already requires
+   elsewhere in this file.
+
 ---
 
 ## Active

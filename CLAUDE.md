@@ -59,6 +59,11 @@ this project is. This file is a router and behavior layer, not the architecture 
   workspace details and branch-naming convention in memory (`linear-github-integration`); the
   `NUT-<n>` issue prefix only does anything once a GitHub PR exists, so plain CMP/BCMP pushes won't
   auto-link regardless.
+- **COL** = collaboration checkpoint for the nutrition-curriculum plan/implementation handoff. When
+  the user says "COL", follow the resume procedure defined in
+  `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` — it checks the tracker and picks planning back up
+  from the last DEC covered. It is not a git shorthand like CMP/BCMP; it never commits/merges/pushes
+  by itself.
 
 ## Commands
 
