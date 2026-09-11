@@ -5,15 +5,6 @@ type Props = {
   onSignIn: () => void;
 };
 
-// Netlify was retired (NUT-52); this notice is now stale and can be
-// removed once nobody's still landing on the old Netlify domain via a
-// bookmark or cached link.
-const NEW_APP_URL = "https://grocery-five-ecru.vercel.app";
-
-function isRunningOnVercel(): boolean {
-  return typeof window !== "undefined" && window.location.hostname.endsWith(".vercel.app");
-}
-
 // Set by api/auth-callback.ts's error redirect (see
 // docs/superpowers/specs/2026-09-10-backend-only-oauth-design.md) when the
 // user declines Google consent or the OAuth exchange fails.
@@ -40,17 +31,6 @@ export function LoginGate({ onSignIn }: Props) {
       {hasAuthError() && (
         <p className="text-center text-xs text-destructive">
           Giriş başarısız oldu. Lütfen tekrar dene.
-        </p>
-      )}
-      {!isRunningOnVercel() && (
-        <p className="text-center text-xs text-muted-foreground">
-          Bu adresi yakında kapatıyoruz. Yeni adresimiz:{" "}
-          <a
-            href={NEW_APP_URL}
-            className="font-medium text-foreground underline underline-offset-2"
-          >
-            {NEW_APP_URL.replace("https://", "")}
-          </a>
         </p>
       )}
     </div>
