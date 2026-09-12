@@ -410,60 +410,69 @@ export function PersonalPlanView({ userId }: Props) {
           isOpen={excludeExpanded}
           onClick={() => setExcludeExpanded(!excludeExpanded)}
         />
-        {excludeExpanded && (
-          <>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Besini işaretle ve nedenini seç — öneriler buna göre değişir: alerji
-              ve emin olmadığın besinler önerilerden tamamen çıkarılır, hassasiyet
-              daha az önerilir, sevmediğin besinler önerilmez.
-            </p>
-            {!pendingFood && (
-              <Input
-                className="mt-2"
-                placeholder="Besin ara..."
-                value={excludeQuery}
-                onInput={(event: Event) =>
-                  setExcludeQuery((event.target as HTMLInputElement).value)
-                }
-              />
-            )}
-            {!pendingFood && excludeQuery.trim() && excludeMatches.length > 0 && (
-              <ul className="mt-1 divide-y divide-border rounded-md border border-border">
-                {excludeMatches.map(f => (
-                  <li key={f.name_tr}>
-                    <button
-                      type="button"
-                      className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
-                      onClick={() => setPendingFood(f)}>
-                      {f.name_tr}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {!pendingFood && !excludeQuery.trim() && browsableGroups.length > 0 && (
-              <div className="mt-2 max-h-72 overflow-y-auto rounded-md border border-border">
-                {browsableGroups.map(({ category, rows }) => (
-                  <div key={category.id}>
-                    <p className="ledger sticky top-0 bg-background px-2 py-1 text-xs uppercase tracking-widest text-muted-foreground">
-                      {category.label}
-                    </p>
-                    <ul className="divide-y divide-border">
-                      {rows.map(f => (
-                        <li key={f.name_tr}>
-                          <button
-                            type="button"
-                            className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
-                            onClick={() => setPendingFood(f)}>
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-out",
+            excludeExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}>
+          <div className="overflow-hidden">
+            <div
+              className={cn(
+                "transition-opacity duration-200",
+                excludeExpanded ? "opacity-100 delay-100" : "pointer-events-none opacity-0",
+              )}>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Besini işaretle ve nedenini seç — öneriler buna göre değişir: alerji
+                ve emin olmadığın besinler önerilerden tamamen çıkarılır, hassasiyet
+                daha az önerilir, sevmediğin besinler önerilmez.
+              </p>
+              {!pendingFood && (
+                <Input
+                  className="mt-2"
+                  placeholder="Besin ara..."
+                  value={excludeQuery}
+                  onInput={(event: Event) =>
+                    setExcludeQuery((event.target as HTMLInputElement).value)
+                  }
+                />
+              )}
+              {!pendingFood && excludeQuery.trim() && excludeMatches.length > 0 && (
+                <ul className="mt-1 divide-y divide-border rounded-md border border-border">
+                  {excludeMatches.map(f => (
+                    <li key={f.name_tr}>
+                      <button
+                        type="button"
+                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                        onClick={() => setPendingFood(f)}>
                         {f.name_tr}
                       </button>
                     </li>
                   ))}
                 </ul>
-              </div>
-            ))}
-          </div>
-        )}
+              )}
+              {!pendingFood && !excludeQuery.trim() && browsableGroups.length > 0 && (
+                <div className="mt-2 max-h-72 overflow-y-auto rounded-md border border-border">
+                  {browsableGroups.map(({ category, rows }) => (
+                    <div key={category.id}>
+                      <p className="ledger sticky top-0 bg-background px-2 py-1 text-xs uppercase tracking-widest text-muted-foreground">
+                        {category.label}
+                      </p>
+                      <ul className="divide-y divide-border">
+                        {rows.map(f => (
+                          <li key={f.name_tr}>
+                            <button
+                              type="button"
+                              className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                              onClick={() => setPendingFood(f)}>
+                              {f.name_tr}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              )}
             {pendingFood && (
               <div className="mt-2 rounded-md border border-border p-2">
                 <p className="text-xs text-muted-foreground">
@@ -556,8 +565,9 @@ export function PersonalPlanView({ userId }: Props) {
                 bir sağlık uzmanına danış.
               </p>
             )}
-          </>
-        )}
+            </div>
+          </div>
+        </div>
       </section>
 
       <section className="rounded-lg border border-border p-3">
@@ -566,80 +576,90 @@ export function PersonalPlanView({ userId }: Props) {
           isOpen={allergenExpanded}
           onClick={() => setAllergenExpanded(!allergenExpanded)}
         />
-        {allergenExpanded && (
-          <>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Belirli bir besin yerine bütün bir alerjen grubunu (ör. "sert kabuklu
-              yemişler") hariç tutabilirsin — Türkiye/AB'nin 14 alerjen grubuna
-              göre. Bu, tek bir besini hariç tutmaktan farklıdır: grup eşleşmesi
-              bilinmeyen (henüz değerlendirilmemiş) bir besin de, alerji/emin
-              değilim nedeniyle hariç tutulmuş bir grup için önerilerden çıkarılır —
-              güvenlik için, veri eksikliği asla "güvenli" sayılmaz.
-            </p>
-            {!pendingAllergenClass && availableAllergenClasses.length > 0 && (
-              <ul className="mt-2 divide-y divide-border rounded-md border border-border">
-                {availableAllergenClasses.map(id => (
-                  <li key={id}>
-                    <button
-                      type="button"
-                      className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
-                      onClick={() => setPendingAllergenClass(id)}>
-                      {ALLERGEN_CLASS_LABEL_TR[id]}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-            {pendingAllergenClass && (
-              <div className="mt-2 rounded-md border border-border p-2">
-                <p className="text-xs text-muted-foreground">
-                  <span className="font-medium text-foreground">
-                    {ALLERGEN_CLASS_LABEL_TR[pendingAllergenClass]}
-                  </span>{" "}
-                  — nedeni ne?
-                </p>
-                <div className="mt-2 grid grid-cols-2 gap-1.5">
-                  {REASON_OPTIONS.map(opt => (
-                    <ReasonButton
-                      key={opt.value}
-                      label={opt.label}
-                      onClick={() =>
-                        addAllergenExclusion(pendingAllergenClass, opt.value)
-                      }
-                    />
+        <div
+          className={cn(
+            "grid transition-[grid-template-rows] duration-300 ease-out",
+            allergenExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+          )}>
+          <div className="overflow-hidden">
+            <div
+              className={cn(
+                "transition-opacity duration-200",
+                allergenExpanded ? "opacity-100 delay-100" : "pointer-events-none opacity-0",
+              )}>
+              <p className="mt-1 text-xs text-muted-foreground">
+                Belirli bir besin yerine bütün bir alerjen grubunu (ör. "sert kabuklu
+                yemişler") hariç tutabilirsin — Türkiye/AB'nin 14 alerjen grubuna
+                göre. Bu, tek bir besini hariç tutmaktan farklıdır: grup eşleşmesi
+                bilinmeyen (henüz değerlendirilmemiş) bir besin de, alerji/emin
+                değilim nedeniyle hariç tutulmuş bir grup için önerilerden çıkarılır —
+                güvenlik için, veri eksikliği asla "güvenli" sayılmaz.
+              </p>
+              {!pendingAllergenClass && availableAllergenClasses.length > 0 && (
+                <ul className="mt-2 divide-y divide-border rounded-md border border-border">
+                  {availableAllergenClasses.map(id => (
+                    <li key={id}>
+                      <button
+                        type="button"
+                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                        onClick={() => setPendingAllergenClass(id)}>
+                        {ALLERGEN_CLASS_LABEL_TR[id]}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {pendingAllergenClass && (
+                <div className="mt-2 rounded-md border border-border p-2">
+                  <p className="text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">
+                      {ALLERGEN_CLASS_LABEL_TR[pendingAllergenClass]}
+                    </span>{" "}
+                    — nedeni ne?
+                  </p>
+                  <div className="mt-2 grid grid-cols-2 gap-1.5">
+                    {REASON_OPTIONS.map(opt => (
+                      <ReasonButton
+                        key={opt.value}
+                        label={opt.label}
+                        onClick={() =>
+                          addAllergenExclusion(pendingAllergenClass, opt.value)
+                        }
+                      />
+                    ))}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setPendingAllergenClass(null)}
+                    className="mt-2 text-xs text-muted-foreground underline underline-offset-2">
+                    Vazgeç
+                  </button>
+                </div>
+              )}
+              {profile.allergenExclusions.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {profile.allergenExclusions.map(e => (
+                    <span
+                      key={e.allergenClass}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs">
+                      {ALLERGEN_CLASS_LABEL_TR[e.allergenClass]}
+                      <span className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
+                        {REASON_LABEL_SHORT[e.reason]}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => removeAllergenExclusion(e.allergenClass)}
+                        aria-label={`${ALLERGEN_CLASS_LABEL_TR[e.allergenClass]} hariç tutmayı kaldır`}
+                        className="text-muted-foreground">
+                        ×
+                      </button>
+                    </span>
                   ))}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setPendingAllergenClass(null)}
-                  className="mt-2 text-xs text-muted-foreground underline underline-offset-2">
-                  Vazgeç
-                </button>
-              </div>
-            )}
-            {profile.allergenExclusions.length > 0 && (
-              <div className="mt-2 flex flex-wrap gap-1.5">
-                {profile.allergenExclusions.map(e => (
-                  <span
-                    key={e.allergenClass}
-                    className="inline-flex items-center gap-1 rounded-full border border-border px-2 py-0.5 text-xs">
-                    {ALLERGEN_CLASS_LABEL_TR[e.allergenClass]}
-                    <span className="text-[0.65rem] uppercase tracking-wide text-muted-foreground">
-                      {REASON_LABEL_SHORT[e.reason]}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => removeAllergenExclusion(e.allergenClass)}
-                      aria-label={`${ALLERGEN_CLASS_LABEL_TR[e.allergenClass]} hariç tutmayı kaldır`}
-                      className="text-muted-foreground">
-                      ×
-                    </button>
-                  </span>
-                ))}
-              </div>
-            )}
-          </>
-        )}
+              )}
+            </div>
+          </div>
+        </div>
       </section>
 
       {targets && (
