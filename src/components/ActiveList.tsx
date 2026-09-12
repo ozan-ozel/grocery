@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, LayoutList, MoreHorizontal, ShoppingBasket, Tags, Trash2 } from "lucide-react";
+import { Check, Eye, EyeOff, LayoutList, MoreHorizontal, ShoppingBasket, Tags, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -36,6 +36,8 @@ type Props = {
   ) => void;
   onCategorize: () => void;
   onToggleGrouping: () => void;
+  showNutritionValues: boolean;
+  onToggleShowNutritionValues: () => void;
 };
 
 export function ActiveList({
@@ -57,6 +59,8 @@ export function ActiveList({
   onEdit,
   onCategorize,
   onToggleGrouping,
+  showNutritionValues,
+  onToggleShowNutritionValues,
 }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -114,28 +118,50 @@ export function ActiveList({
   return (
     <div>
       <div className="flex items-center justify-between gap-2 pb-2">
-        <Button
-          type="button"
-          variant="quiet"
-          size="sm"
-          onClick={onToggleGrouping}
-          title={
-            groupByCategory
-              ? "Düz listeye geri dön"
-              : "Ürünleri kategorilere göre grupla"
-          }>
-          {groupByCategory ? (
-            <>
-              <LayoutList className="size-3.5" />
-              Düz liste
-            </>
-          ) : (
-            <>
-              <Tags className="size-3.5" />
-              Kategorilere göre grupla
-            </>
-          )}
-        </Button>
+        <div className="flex items-center gap-1">
+          <Button
+            type="button"
+            variant="quiet"
+            size="sm"
+            onClick={onToggleGrouping}
+            title={
+              groupByCategory
+                ? "Düz listeye geri dön"
+                : "Ürünleri kategorilere göre grupla"
+            }>
+            {groupByCategory ? (
+              <>
+                <LayoutList className="size-3.5" />
+                Düz liste
+              </>
+            ) : (
+              <>
+                <Tags className="size-3.5" />
+                Kategorilere göre grupla
+              </>
+            )}
+          </Button>
+          <Button
+            type="button"
+            variant="quiet"
+            size="sm"
+            onClick={onToggleShowNutritionValues}
+            title={
+              showNutritionValues
+                ? "Besin değerlerini gizle"
+                : "Besin değerlerini göster"
+            }>
+            {showNutritionValues ? (
+              <>
+                <Eye className="size-3.5" />
+              </>
+            ) : (
+              <>
+                <EyeOff className="size-3.5" />
+              </>
+            )}
+          </Button>
+        </div>
         <div className="flex items-center gap-2">
           {groupByCategory &&
             pending.some(i => !i.category || i.category === "diger") && (

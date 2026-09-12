@@ -37,6 +37,8 @@ type Props = {
   onReorderCategories: (ids: AnyCategoryId[]) => void;
   onAddCategory: (label: string) => void;
   onRemoveCategory: (id: string) => void;
+  showNutritionValues: boolean;
+  onToggleShowNutritionValues: () => void;
 };
 
 export function AppShoppingTabs({
@@ -70,6 +72,8 @@ export function AppShoppingTabs({
   onReorderCategories,
   onAddCategory,
   onRemoveCategory,
+  showNutritionValues,
+  onToggleShowNutritionValues,
 }: Props) {
   return (
     <>
@@ -95,6 +99,8 @@ export function AppShoppingTabs({
             onEdit={onEditItem}
             onCategorize={onCategorize}
             onToggleGrouping={onToggleGrouping}
+            showNutritionValues={showNutritionValues}
+            onToggleShowNutritionValues={onToggleShowNutritionValues}
           />
         </div>
       </TabsContent>

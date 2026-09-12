@@ -6,8 +6,10 @@ import {
   writeTabToUrl,
 } from "@/lib/store";
 import {
+  loadShowNutritionValues,
   loadSwipeMode,
   loadTheme,
+  saveShowNutritionValues,
   saveSwipeMode,
   saveTheme,
   THEME_META_COLOR,
@@ -34,6 +36,7 @@ function initialTab(): Tab {
 export function useUiPrefs() {
   const [theme, setTheme] = useState<Theme>(() => loadTheme());
   const [swipeMode, setSwipeMode] = useState(() => loadSwipeMode());
+  const [showNutritionValues, setShowNutritionValues] = useState(() => loadShowNutritionValues());
   const [section, setSection] = useState<Section>(initialSection);
   const [tab, setTab] = useState<Tab>(initialTab);
 
@@ -56,8 +59,16 @@ export function useUiPrefs() {
     saveSwipeMode(swipeMode);
   }, [swipeMode]);
 
+  useEffect(() => {
+    saveShowNutritionValues(showNutritionValues);
+  }, [showNutritionValues]);
+
   function toggleSwipeMode() {
     setSwipeMode(s => !s);
+  }
+
+  function toggleShowNutritionValues() {
+    setShowNutritionValues(s => !s);
   }
 
   return {
@@ -65,6 +76,8 @@ export function useUiPrefs() {
     setTheme,
     swipeMode,
     toggleSwipeMode,
+    showNutritionValues,
+    toggleShowNutritionValues,
     section,
     setSection,
     tab,

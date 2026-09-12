@@ -154,6 +154,8 @@ function AppShell({
     setTheme,
     swipeMode,
     toggleSwipeMode,
+    showNutritionValues,
+    toggleShowNutritionValues,
     section,
     setSection,
     tab,
@@ -316,7 +318,10 @@ function AppShell({
             onSkip={onboarding.skip}
           />
         ) : section === "besin" ? (
-          <NutritionView items={active.items} />
+          <NutritionView
+            items={active.items}
+            showNutritionValues={showNutritionValues}
+          />
         ) : section === "yemek" ? (
           <MealPlanView
             userId={currentUserId}
@@ -357,6 +362,8 @@ function AppShell({
             onReorderCategories={reorderCats}
             onAddCategory={addCategory}
             onRemoveCategory={removeCategory}
+            showNutritionValues={showNutritionValues}
+            onToggleShowNutritionValues={toggleShowNutritionValues}
           />
         )}
       </main>

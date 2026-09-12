@@ -68,6 +68,7 @@ export const THEME_SIGNAL_COLOR: Record<Theme, string> = {
 
 const THEME_KEY = "grocery.theme.v1";
 const SWIPE_KEY = "grocery.swipeMode.v1";
+const NUTRITION_VALUES_KEY = "grocery.showNutritionValues.v1";
 
 export function loadTheme(): Theme {
   try {
@@ -101,6 +102,22 @@ export function loadSwipeMode(): boolean {
 export function saveSwipeMode(enabled: boolean) {
   try {
     localStorage.setItem(SWIPE_KEY, enabled ? "1" : "0");
+  } catch {
+    // Ignored — preference just won't persist across sessions.
+  }
+}
+
+export function loadShowNutritionValues(): boolean {
+  try {
+    return localStorage.getItem(NUTRITION_VALUES_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function saveShowNutritionValues(enabled: boolean) {
+  try {
+    localStorage.setItem(NUTRITION_VALUES_KEY, enabled ? "1" : "0");
   } catch {
     // Ignored — preference just won't persist across sessions.
   }

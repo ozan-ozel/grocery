@@ -22,6 +22,7 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 
 type Props = {
   items: Item[];
+  showNutritionValues: boolean;
 };
 
 type Status = "idle" | "loading" | "ready" | "error";
@@ -35,13 +36,12 @@ function initialScope(): Scope {
   return "list";
 }
 
-export function NutritionView({ items }: Props) {
+export function NutritionView({ items, showNutritionValues }: Props) {
   const [scope, setScope] = useState<Scope>(initialScope);
   const [map, setMap] = useState<NutritionMap>(() => new Map());
   const [status, setStatus] = useState<Status>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
-  const [showNutritionValues, setShowNutritionValues] = useState(false);
 
   const names = useMemo(() => items.map((i) => i.name), [items]);
   const namesKey = names.join(" ");
@@ -133,58 +133,31 @@ export function NutritionView({ items }: Props) {
     return (
       <div>
         <div className="mb-3">
-          <div className="flex items-center gap-2 -mx-1">
-            <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-              <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
-                <TabsTrigger
-                  value="list"
-                  onClick={() => setScope("list")}
-                  className="px-3 py-1.5 text-sm"
-                >
-                  Listedeki ürünler
-                </TabsTrigger>
-                <TabsTrigger
-                  value="all"
-                  onClick={() => setScope("all")}
-                  className="px-3 py-1.5 text-sm"
-                >
-                  Tümü
-                </TabsTrigger>
-                <TabsTrigger
-                  value="cats"
-                  onClick={() => setScope("cats")}
-                  className="px-3 py-1.5 text-sm"
-                >
-                  Kategoriler
-                </TabsTrigger>
-                <TabsTrigger
-                  value="compare"
-                  onClick={() => setScope("compare")}
-                  className="px-3 py-1.5 text-sm"
-                >
-                  Karşılaştır
-                </TabsTrigger>
-              </TabsList>
-            </div>
+          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
+              <TabsTrigger
+                value="all"
+                onClick={() => setScope("all")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Tümü
+              </TabsTrigger>
+              <TabsTrigger
+                value="cats"
+                onClick={() => setScope("cats")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Kategoriler
+              </TabsTrigger>
+              <TabsTrigger
+                value="compare"
+                onClick={() => setScope("compare")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Karşılaştır
+              </TabsTrigger>
+            </TabsList>
           </div>
-        </div>
-
-        <div className="mb-3 flex items-center gap-2 px-1">
-          <input
-            type="checkbox"
-            id="showNutrition"
-            checked={showNutritionValues}
-            onChange={(e) =>
-              setShowNutritionValues((e.target as HTMLInputElement).checked)
-            }
-            className="size-4 rounded cursor-pointer"
-          />
-          <label
-            htmlFor="showNutrition"
-            className="text-xs font-medium cursor-pointer"
-          >
-            Besin değerlerini göster
-          </label>
         </div>
 
         <div className="flex items-center justify-between px-1 pb-3">
