@@ -289,6 +289,23 @@
   --color-ring: #2b2620;
 }
 
+/* Smooth Pill (SP) active-tab shadow — a single global rule, not a
+   Tailwind utility class, keyed off a shared `.sp-trigger` marker plus
+   whichever "active" signal the tab implementation actually has: Radix's
+   native data-state="active" (TabsTrigger) or our own data-active="true"
+   (a plain button, e.g. SmoothPillTabs). Written as a plain CSS selector
+   specifically so every current and future SP tab gets it automatically
+   just by carrying the marker — no per-usage utility/variant composition
+   to get wrong. (An earlier version tried `data-[state=active]:shadow-*`
+   as a composed Tailwind class; Tailwind v4 doesn't generate variants for
+   hand-written utility classes, only ones declared via @utility/built-ins,
+   so it silently did nothing on Radix-driven tabs. See CLAUDE.md §
+   UI patterns.) */
+.sp-trigger[data-state="active"],
+.sp-trigger[data-active="true"] {
+  box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--color-signal) 22%, transparent);
+}
+
 @layer base {
   * {
     border-color: var(--color-border);
@@ -434,6 +451,7 @@
     box-shadow: 0 6px 18px -6px
       color-mix(in oklab, var(--color-signal) 35%, transparent);
   }
+
 
   /* Same signal→secondary formula as .gradient-edge, but the gradient itself
      breathes back and forth for a "living" edge. Animates transform (not

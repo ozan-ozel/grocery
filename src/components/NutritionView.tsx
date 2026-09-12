@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 import { Pencil } from "lucide-react";
-import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   readNutritionScopeFromUrl,
   writeNutritionScopeToUrl,
@@ -15,6 +14,7 @@ import {
   type NutritionMap,
 } from "@/lib/nutrition";
 import { cn } from "@/lib/utils";
+import { SmoothPillTabs } from "@/components/ui/smooth-pill";
 import { AllFoodsBrowser } from "@/components/NutritionAllFoodsBrowser";
 import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { CategoriesView } from "@/components/CategoriesView";
@@ -150,37 +150,25 @@ export function NutritionView({
     });
   }
 
+  const scopeToggle = (
+    <div className="mb-3">
+      <SmoothPillTabs
+        value={scope}
+        onChange={setScope}
+        items={[
+          { value: "all", label: "Tümü" },
+          { value: "cats", label: "Kategoriler" },
+          { value: "compare", label: "Karşılaştır" },
+        ]}
+      />
+    </div>
+  );
+
   // List view with checkbox and grid
   if (items.length > 0 && scope === "list") {
     return (
       <div>
-        <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
-              <TabsTrigger
-                value="all"
-                onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Tümü
-              </TabsTrigger>
-              <TabsTrigger
-                value="cats"
-                onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Kategoriler
-              </TabsTrigger>
-              <TabsTrigger
-                value="compare"
-                onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Karşılaştır
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
+        {scopeToggle}
 
         <div className="flex items-center justify-between px-1 pb-3">
           <p className="text-xs text-muted-foreground">
@@ -330,33 +318,7 @@ export function NutritionView({
   if (scope === "all") {
     return (
       <div>
-        <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
-              <TabsTrigger
-                value="all"
-                onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Tümü
-              </TabsTrigger>
-              <TabsTrigger
-                value="cats"
-                onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Kategoriler
-              </TabsTrigger>
-              <TabsTrigger
-                value="compare"
-                onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Karşılaştır
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
+        {scopeToggle}
         <AllFoodsBrowser />
       </div>
     );
@@ -366,33 +328,7 @@ export function NutritionView({
   if (scope === "compare") {
     return (
       <div>
-        <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
-              <TabsTrigger
-                value="all"
-                onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Tümü
-              </TabsTrigger>
-              <TabsTrigger
-                value="cats"
-                onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Kategoriler
-              </TabsTrigger>
-              <TabsTrigger
-                value="compare"
-                onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Karşılaştır
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
+        {scopeToggle}
         <NutritionCompareView />
       </div>
     );
@@ -402,33 +338,7 @@ export function NutritionView({
   if (scope === "cats") {
     return (
       <div>
-        <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
-              <TabsTrigger
-                value="all"
-                onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Tümü
-              </TabsTrigger>
-              <TabsTrigger
-                value="cats"
-                onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Kategoriler
-              </TabsTrigger>
-              <TabsTrigger
-                value="compare"
-                onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
-              >
-                Karşılaştır
-              </TabsTrigger>
-            </TabsList>
-          </div>
-        </div>
+        {scopeToggle}
         <CategoriesView
           merged={mergedCategories}
           overlay={overlay}
@@ -446,33 +356,7 @@ export function NutritionView({
   // Empty state
   return (
     <div>
-      <div className="mb-3">
-        <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-          <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
-            <TabsTrigger
-              value="all"
-              onClick={() => setScope("all")}
-              className="px-3 py-1.5 text-sm"
-            >
-              Tümü
-            </TabsTrigger>
-            <TabsTrigger
-              value="cats"
-              onClick={() => setScope("cats")}
-              className="px-3 py-1.5 text-sm"
-            >
-              Kategoriler
-            </TabsTrigger>
-            <TabsTrigger
-              value="compare"
-              onClick={() => setScope("compare")}
-              className="px-3 py-1.5 text-sm"
-            >
-              Karşılaştır
-            </TabsTrigger>
-          </TabsList>
-        </div>
-      </div>
+      {scopeToggle}
       <div className="flex items-center justify-between px-1 py-3">
         <p className="text-sm text-muted-foreground">
           Önce listene bir şeyler ekle. Besin değerleri burada görünür.

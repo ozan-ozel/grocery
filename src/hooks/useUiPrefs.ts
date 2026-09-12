@@ -18,15 +18,16 @@ import {
   type Theme,
 } from "@/lib/preferences";
 
-export type Section = "alisveris" | "besin" | "yemek" | "kisisel";
-export type Tab = "today" | "list" | "history" | "cats";
-const TABS: Tab[] = ["today", "list", "history", "cats"];
+export type Section = "alisveris" | "besin" | "yemek" | "kisisel" | "ayarlar";
+export type Tab = "today" | "list" | "history";
+const TABS: Tab[] = ["today", "list", "history"];
 
 function initialSection(): Section {
   const fromUrl = readSectionFromUrl();
   if (fromUrl === "besin") return "besin";
   if (fromUrl === "yemek") return "yemek";
   if (fromUrl === "kisisel") return "kisisel";
+  if (fromUrl === "ayarlar") return "ayarlar";
   return "alisveris";
 }
 

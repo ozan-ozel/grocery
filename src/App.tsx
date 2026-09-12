@@ -1,10 +1,12 @@
 import { useMemo, useRef } from "react";
+import { CloudOff, RefreshCw } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShoppingTabs } from "@/components/AppShoppingTabs";
 import { NutritionView } from "@/components/NutritionView";
 import { MealPlanView } from "@/components/MealPlanView";
 import { PersonalPlanView } from "@/components/PersonalPlanView";
+import { SettingsView } from "@/components/SettingsView";
 import { UndoToast } from "@/components/UndoToast";
 import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
@@ -92,9 +94,9 @@ function AppBootSkeleton() {
   );
 }
 
-// Liste → Geçmiş → Kategoriler, matching AppHeader's TabsTrigger
-// order, so a left/right swipe moves the same direction the tab bar reads.
-const SHOPPING_TAB_ORDER: Tab[] = ["list", "history", "cats"];
+// Liste → Geçmiş, matching AppHeader's TabsTrigger order, so a left/right
+// swipe moves the same direction the tab bar reads.
+const SHOPPING_TAB_ORDER: Tab[] = ["list", "history"];
 const SWIPE_MIN_DISTANCE_PX = 60;
 // Anything that owns its own horizontal touch gesture (a list row's
 // swipe-to-check/delete when swipeMode is on, the horizontally-scrolling tab
@@ -275,7 +277,9 @@ function AppShell({
         ? "nutrition"
         : section === "yemek"
           ? "meals"
-          : "personal";
+          : section === "kisisel"
+            ? "personal"
+            : "settings";
 
   function handleNavTabChange(navTab: NavTab) {
     const sectionMap: Record<NavTab, Section> = {
@@ -283,6 +287,7 @@ function AppShell({
       nutrition: "besin",
       meals: "yemek",
       personal: "kisisel",
+      settings: "ayarlar",
     };
     selectSection(sectionMap[navTab]);
   }
@@ -291,9 +296,26 @@ function AppShell({
     <Tabs
       value={tab}
       onValueChange={v => setTab(v as Tab)}
-      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 py-6 pb-32">
+      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pt-3 pb-32">
+      {/* Shared across every section (including ones with no AppHeader of
+          their own) so the sync indicator appears in the same spot
+          regardless of tab, and takes up zero space once synced. */}
+      {syncStatus !== "synced" && (
+        <div
+          title={
+            syncStatus === "offline"
+              ? "Çevrimdışı — bağlantı gelince senkronize edilecek"
+              : "Senkronize ediliyor…"
+          }
+          className="flex items-center gap-1 pb-2 text-muted-foreground">
+          {syncStatus === "offline" ? (
+            <CloudOff className="size-4 text-signal" />
+          ) : (
+            <RefreshCw className="size-4" />
+          )}
+        </div>
+      )}
       <AppHeader
-        syncStatus={syncStatus}
         section={section}
         active={active}
         onRenameActive={renameActive}
@@ -301,7 +323,7 @@ function AppShell({
       />
 
       <main
-        className="pt-5"
+        className="pt-3"
         onTouchStart={swipeTabs.onTouchStart as never}
         onTouchEnd={swipeTabs.onTouchEnd as never}>
         {onboarding.status === "unseen" && personalization.remoteChecked ? (
@@ -338,6 +360,22 @@ function AppShell({
           />
         ) : section === "kisisel" ? (
           <PersonalPlanView userId={currentUserId} />
+        ) : section === "ayarlar" ? (
+          <SettingsView
+            onSignOut={onSignOut}
+            onDeleteAccount={onDeleteAccount}
+            tenants={tenants}
+            activeTenantId={activeTenantId}
+            hiddenTenantIds={hiddenIds}
+            currentUserId={currentUserId}
+            onSelectTenant={selectTenant}
+            onAddTenant={addTenant}
+            onRenameTenant={renameTenant}
+            onDeleteTenant={deleteTenant}
+            onToggleHiddenTenant={toggleHiddenTenant}
+            theme={theme}
+            onSelectTheme={setTheme}
+          />
         ) : (
           <AppShoppingTabs
             catalog={catalog}
@@ -375,18 +413,6 @@ function AppShell({
       <BottomNavigation
         activeTab={currentNavTab}
         onTabChange={handleNavTabChange}
-        onSignOut={onSignOut}
-        onDeleteAccount={onDeleteAccount}
-        tenants={tenants}
-        activeTenantId={activeTenantId}
-        hiddenTenantIds={hiddenIds}
-        onSelectTenant={selectTenant}
-        onAddTenant={addTenant}
-        onRenameTenant={renameTenant}
-        onDeleteTenant={deleteTenant}
-        onToggleHiddenTenant={toggleHiddenTenant}
-        theme={theme}
-        onSelectTheme={setTheme}
       />
     </Tabs>
   );

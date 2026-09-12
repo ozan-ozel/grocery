@@ -1,14 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { CloudOff, FilePlus2, RefreshCw } from "lucide-react";
+import { FilePlus2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SP_CONTAINER_CLASS, SP_TRIGGER_CLASS } from "@/components/ui/smooth-pill";
 import { defaultTitle, type List } from "@/lib/store";
-import type { SyncStatus } from "@/lib/sync/sync";
 import type { Section } from "@/hooks/useUiPrefs";
 
 type Props = {
-  syncStatus: SyncStatus;
   section: Section;
   active: List;
   onRenameActive: (title: string) => void;
@@ -16,7 +15,6 @@ type Props = {
 };
 
 export function AppHeader({
-  syncStatus,
   section,
   active,
   onRenameActive,
@@ -46,7 +44,12 @@ export function AppHeader({
     return () => window.removeEventListener("resize", updateTabScrollFade);
   }, [section]);
 
-  if (section === "yemek") {
+  // Alışveriş is the only section with real header content (title, tally,
+  // list/history/category tabs) — every other section renders its own
+  // content starting directly under the shared sync strip in App.tsx, so
+  // all tabs share the same top offset instead of this header reserving
+  // empty space for sections that have nothing to put in it.
+  if (section !== "alisveris") {
     return null;
   }
 
@@ -58,92 +61,63 @@ export function AppHeader({
 
   return (
     <>
-      <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-6 backdrop-blur">
-        <div className="flex items-center justify-between gap-2 pb-2">
-          <div className="flex items-center gap-1">
-            {syncStatus !== "synced" && (
-              <span
-                title={
-                  syncStatus === "offline"
-                    ? "Çevrimdışı — bağlantı gelince senkronize edilecek"
-                    : "Senkronize ediliyor…"
-                }
-                className="flex items-center px-1.5 text-muted-foreground">
-                {syncStatus === "offline" ? (
-                  <CloudOff className="size-4 text-signal" />
-                ) : (
-                  <RefreshCw className="size-4 animate-spin" />
-                )}
-              </span>
-            )}
-          </div>
+      <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-2 backdrop-blur">
+        <div className="flex items-baseline gap-3">
+          <input
+            value={active.title}
+            aria-label="Liste adı"
+            onInput={(e: Event) =>
+              onRenameActive((e.target as HTMLInputElement).value)
+            }
+            onBlur={() => {
+              if (!active.title.trim())
+                onRenameActive(defaultTitle(active.createdAt));
+            }}
+            className="min-w-0 flex-1 border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight outline-none"
+          />
+          <span className="ledger shrink-0 text-lg">
+            <span
+              className={done > 0 ? "text-signal" : "text-muted-foreground"}>
+              {String(done).padStart(2, "0")}
+            </span>
+            <span className="text-muted-foreground">
+              /{String(total).padStart(2, "0")}
+            </span>
+          </span>
         </div>
 
-        {section === "alisveris" && (
-          <>
-            <div className="mt-3 flex items-baseline gap-3">
-              <input
-                value={active.title}
-                aria-label="Liste adı"
-                onInput={(e: Event) =>
-                  onRenameActive((e.target as HTMLInputElement).value)
-                }
-                onBlur={() => {
-                  if (!active.title.trim())
-                    onRenameActive(defaultTitle(active.createdAt));
-                }}
-                className="min-w-0 flex-1 border-0 bg-transparent p-0 text-2xl font-semibold tracking-tight outline-none"
-              />
-              <span className="ledger shrink-0 text-lg">
-                <span
-                  className={done > 0 ? "text-signal" : "text-muted-foreground"}>
-                  {String(done).padStart(2, "0")}
-                </span>
-                <span className="text-muted-foreground">
-                  /{String(total).padStart(2, "0")}
-                </span>
-              </span>
-            </div>
+        {/* The tally line fills as the cart fills — the one moving part. */}
+        <div className="mt-3 h-px w-full bg-border">
+          <div
+            className="h-px bg-signal transition-[width] duration-300 ease-out"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
 
-            {/* The tally line fills as the cart fills — the one moving part. */}
-            <div className="mt-3 h-px w-full bg-border">
-              <div
-                className="h-px bg-signal transition-[width] duration-300 ease-out"
-                style={{ width: `${progress}%` }}
-              />
+        <div className="flex items-center gap-2 pt-3">
+          <div
+            ref={tabScrollRef}
+            onScroll={updateTabScrollFade}
+            className="-mx-1 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            style={{ maskImage: tabScrollMask, WebkitMaskImage: tabScrollMask }}>
+            <div className={SP_CONTAINER_CLASS}>
+              <TabsList className="p-0 gap-1">
+                <TabsTrigger value="list" className={SP_TRIGGER_CLASS}>Liste</TabsTrigger>
+                <TabsTrigger value="history" className={SP_TRIGGER_CLASS}>Geçmiş</TabsTrigger>
+              </TabsList>
             </div>
-          </>
-        )}
-
-        {section === "alisveris" ? (
-          <div className="flex items-center gap-2 pt-3">
-            <div
-              ref={tabScrollRef}
-              onScroll={updateTabScrollFade}
-              className="-mx-1 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              style={{ maskImage: tabScrollMask, WebkitMaskImage: tabScrollMask }}>
-              <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
-                <TabsList className="p-0.5">
-                  <TabsTrigger value="list" className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]">Liste</TabsTrigger>
-                  <TabsTrigger value="history" className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]">Geçmiş</TabsTrigger>
-                  <TabsTrigger value="cats" className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]">Kategoriler</TabsTrigger>
-                </TabsList>
-              </div>
-            </div>
-            <Button
-              variant="quiet"
-              size="sm"
-              onClick={() => setConfirmingNewList(true)}
-              disabled={active.items.length === 0}
-              title="Bu listeyi arşivle ve yenisini başlat"
-              className="h-auto shrink-0 items-start border-b-2 border-transparent px-2 pb-2 pt-0 active:text-foreground">
-              <FilePlus2 className="size-3.5" />
-              Yeni liste
-            </Button>
           </div>
-        ) : (
-          <div className="pt-3" />
-        )}
+          <Button
+            variant="quiet"
+            size="sm"
+            onClick={() => setConfirmingNewList(true)}
+            disabled={active.items.length === 0}
+            title="Bu listeyi arşivle ve yenisini başlat"
+            className="h-auto shrink-0 items-start border-b-2 border-transparent px-2 pb-2 pt-0 active:text-foreground">
+            <FilePlus2 className="size-3.5" />
+            Yeni liste
+          </Button>
+        </div>
         <div className="-mx-5 h-px bg-border" />
       </header>
       {confirmingNewList && (

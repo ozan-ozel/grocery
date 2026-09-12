@@ -25,6 +25,26 @@ this project is. This file is a router and behavior layer, not the architecture 
   (e.g. the nutrition view). Historical rationale; check each spec's own status note before
   trusting implementation details as current.
 
+## UI patterns
+
+- **Smooth Pill (SP)** — the standard tab style across the app: a light `bg-accent/50` container
+  (`rounded-lg p-1`), with the active tab rendered as its own `bg-background` pill
+  (`rounded-md shadow-signal-sm`) and inactive tabs as plain
+  `text-muted-foreground hover:text-foreground` text, no visible border. `shadow-signal-sm` (defined
+  in [src/index.css](src/index.css)) is the same footprint as Tailwind's `shadow-sm` but tinted with
+  `--color-signal` via `color-mix` instead of flat black, so it stays theme-aware.
+  Implemented once in [src/components/ui/smooth-pill.tsx](src/components/ui/smooth-pill.tsx):
+  `<SmoothPillTabs value={...} onChange={...} items={[{ value, label }]} />` for the common case
+  (a plain button group not already wired to a Radix `Tabs` root — see its usage in
+  [src/components/NutritionView.tsx](src/components/NutritionView.tsx)), plus exported class
+  constants (`SP_CONTAINER_CLASS`, `SP_TRIGGER_CLASS`) for a Radix `TabsTrigger` that must also
+  drive a `Tabs` root elsewhere in the tree — see the Liste/Geçmiş/Kategoriler tabs in
+  [src/components/AppHeader.tsx](src/components/AppHeader.tsx). `SP_TRIGGER_CLASS` already cancels
+  the base `TabsTrigger`'s default `border-b-2`/`data-[state=active]:border-foreground` underline
+  (from [src/components/ui/tabs.tsx](src/components/ui/tabs.tsx)), which otherwise draws a dark
+  bottom border through the pill background — if you ever build a new Radix-based SP trigger by
+  hand instead of using the constant, remember to cancel that underline yourself.
+
 ## Session continuity
 
 - `docs/SESSION_CHECKPOINT.md` is the single active project checkpoint. It records the current

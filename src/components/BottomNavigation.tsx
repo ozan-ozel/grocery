@@ -1,110 +1,41 @@
 import { ShoppingCart, Apple, UtensilsCrossed, User, Settings } from "lucide-react";
-import { useState } from "react";
-import { ProfileMenu } from "./ProfileMenu";
-import type { Tenant } from "@/lib/store";
-import type { Theme } from "@/lib/preferences";
 
-export type NavTab = "shopping" | "nutrition" | "meals" | "personal";
+export type NavTab = "shopping" | "nutrition" | "meals" | "personal" | "settings";
 
 type Props = {
   activeTab: NavTab;
   onTabChange: (tab: NavTab) => void;
-  onSignOut: () => void;
-  onDeleteAccount: () => void;
-  tenants: Tenant[];
-  activeTenantId: string;
-  hiddenTenantIds: string[];
-  onSelectTenant: (id: string) => void;
-  onAddTenant: (name: string) => void;
-  onRenameTenant: (id: string, name: string) => void;
-  onDeleteTenant: (id: string) => void;
-  onToggleHiddenTenant: (id: string) => void;
-  theme: Theme;
-  onSelectTheme: (theme: Theme) => void;
 };
 
-export function BottomNavigation({
-  activeTab,
-  onTabChange,
-  onSignOut,
-  onDeleteAccount,
-  tenants,
-  activeTenantId,
-  hiddenTenantIds,
-  onSelectTenant,
-  onAddTenant,
-  onRenameTenant,
-  onDeleteTenant,
-  onToggleHiddenTenant,
-  theme,
-  onSelectTheme,
-}: Props) {
-  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
-
+export function BottomNavigation({ activeTab, onTabChange }: Props) {
   const tabs: Array<{ id: NavTab; label: string; icon: typeof ShoppingCart }> =
     [
       { id: "shopping", label: "Alışveriş", icon: ShoppingCart },
       { id: "nutrition", label: "Besin Değerleri", icon: Apple },
       { id: "meals", label: "Yemek Planı", icon: UtensilsCrossed },
       { id: "personal", label: "Kişisel Plan", icon: User },
+      { id: "settings", label: "Ayarlar", icon: Settings },
     ];
 
   return (
     <>
-      {/* Profile Menu Modal */}
-      <ProfileMenu
-        isOpen={profileMenuOpen}
-        onClose={() => setProfileMenuOpen(false)}
-        onSignOut={onSignOut}
-        onDeleteAccount={onDeleteAccount}
-        tenants={tenants}
-        activeTenantId={activeTenantId}
-        hiddenTenantIds={hiddenTenantIds}
-        currentUserId={null}
-        onSelectTenant={onSelectTenant}
-        onAddTenant={onAddTenant}
-        onRenameTenant={onRenameTenant}
-        onDeleteTenant={onDeleteTenant}
-        onToggleHiddenTenant={onToggleHiddenTenant}
-        theme={theme}
-        onSelectTheme={onSelectTheme}
-      />
-
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-card shadow-lg">
-        <div className="flex items-center justify-between px-2 py-3">
-          {/* Regular Tabs */}
-          <div className="flex flex-1 justify-around">
-            {tabs.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => onTabChange(id)}
-                className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                  activeTab === id
-                    ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-                aria-label={label}>
-                <Icon className="size-5" />
-                <span className="hidden sm:inline">{label}</span>
-              </button>
-            ))}
-          </div>
-
-          {/* Profile Button */}
-          <div className="border-l border-border pl-2">
+        <div className="flex items-center justify-around px-2 py-3">
+          {tabs.map(({ id, label, icon: Icon }) => (
             <button
-              onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+              key={id}
+              onClick={() => onTabChange(id)}
               className={`flex flex-col items-center gap-1 rounded-lg px-3 py-2 text-xs font-medium transition-colors ${
-                profileMenuOpen
+                activeTab === id
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
-              aria-label="Ayarlar">
-              <Settings className="size-5" />
-              <span className="hidden sm:inline">Ayarlar</span>
+              aria-label={label}>
+              <Icon className="size-5" />
+              <span className="text-[10px] leading-none">{label}</span>
             </button>
-          </div>
+          ))}
         </div>
       </nav>
 
