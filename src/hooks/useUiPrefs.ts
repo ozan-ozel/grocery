@@ -12,6 +12,8 @@ import {
   saveShowNutritionValues,
   saveSwipeMode,
   saveTheme,
+  loadShoppingTab,
+  saveShoppingTab,
   THEME_META_COLOR,
   type Theme,
 } from "@/lib/preferences";
@@ -42,11 +44,20 @@ export function useUiPrefs() {
 
   useEffect(() => {
     writeSectionToUrl(section);
+    // When switching to Shopping section, restore the last Shopping tab (default to "list")
+    if (section === "alisveris") {
+      const lastShoppingTab = loadShoppingTab();
+      setTab(lastShoppingTab);
+    }
   }, [section]);
 
   useEffect(() => {
     writeTabToUrl(tab);
-  }, [tab]);
+    // Save Shopping tab when in Shopping section and tab changes
+    if (section === "alisveris" && (tab === "list" || tab === "history")) {
+      saveShoppingTab(tab);
+    }
+  }, [tab, section]);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;

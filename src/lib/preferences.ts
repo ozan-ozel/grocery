@@ -69,6 +69,7 @@ export const THEME_SIGNAL_COLOR: Record<Theme, string> = {
 const THEME_KEY = "grocery.theme.v1";
 const SWIPE_KEY = "grocery.swipeMode.v1";
 const NUTRITION_VALUES_KEY = "grocery.showNutritionValues.v1";
+const SHOPPING_TAB_KEY = "grocery.shoppingTab.v1";
 
 export function loadTheme(): Theme {
   try {
@@ -118,6 +119,23 @@ export function loadShowNutritionValues(): boolean {
 export function saveShowNutritionValues(enabled: boolean) {
   try {
     localStorage.setItem(NUTRITION_VALUES_KEY, enabled ? "1" : "0");
+  } catch {
+    // Ignored — preference just won't persist across sessions.
+  }
+}
+
+export function loadShoppingTab(): "list" | "history" {
+  try {
+    const stored = localStorage.getItem(SHOPPING_TAB_KEY);
+    return stored === "history" ? "history" : "list";
+  } catch {
+    return "list";
+  }
+}
+
+export function saveShoppingTab(tab: "list" | "history") {
+  try {
+    localStorage.setItem(SHOPPING_TAB_KEY, tab);
   } catch {
     // Ignored — preference just won't persist across sessions.
   }
