@@ -16,7 +16,7 @@ export function DropdownChevronButton({ label, isOpen, onClick }: Props) {
       <h2 className="text-sm font-semibold">{label}</h2>
       <ChevronDown
         className={cn(
-          "size-4 text-muted-foreground transition-transform",
+          "size-5 text-muted-foreground transition-transform",
           isOpen && "rotate-180"
         )}
       />

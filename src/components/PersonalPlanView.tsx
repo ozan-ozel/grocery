@@ -1,6 +1,7 @@
 import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { DropdownChevronButton } from "@/components/DropdownChevronButton";
 import {
   ACTIVITY_OPTIONS,
   activityLabel,
@@ -404,20 +405,11 @@ export function PersonalPlanView({ userId }: Props) {
       </section>
 
       <section className="rounded-lg border border-border p-3">
-        <button
-          type="button"
+        <DropdownChevronButton
+          label="Önerilmesin"
+          isOpen={excludeExpanded}
           onClick={() => setExcludeExpanded(!excludeExpanded)}
-          className="flex items-center justify-between w-full">
-          <span
-            aria-hidden="true"
-            className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
-            <ChevronRight
-              className="size-4 transition-transform"
-              style={{ transform: excludeExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
-            />
-          </span>
-          <h2 className="text-sm font-semibold flex-1 ml-2">Önerilmesin</h2>
-        </button>
+        />
         {excludeExpanded && (
           <>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -569,20 +561,11 @@ export function PersonalPlanView({ userId }: Props) {
       </section>
 
       <section className="rounded-lg border border-border p-3">
-        <button
-          type="button"
+        <DropdownChevronButton
+          label="Alerjen grubu hariç tut"
+          isOpen={allergenExpanded}
           onClick={() => setAllergenExpanded(!allergenExpanded)}
-          className="flex items-center justify-between w-full">
-          <span
-            aria-hidden="true"
-            className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
-            <ChevronRight
-              className="size-4 transition-transform"
-              style={{ transform: allergenExpanded ? "rotate(90deg)" : "rotate(0deg)" }}
-            />
-          </span>
-          <h2 className="text-sm font-semibold flex-1 ml-2">Alerjen grubu hariç tut</h2>
-        </button>
+        />
         {allergenExpanded && (
           <>
             <p className="mt-1 text-xs text-muted-foreground">
