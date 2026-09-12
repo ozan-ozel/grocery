@@ -1,6 +1,7 @@
-import { BookOpen, ChevronRight, ChevronDown, ExternalLink } from "lucide-react";
+import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useMemo, useState } from "react";
 import { Input } from "@/components/ui/input";
+import { DropdownChevronButton } from "@/components/DropdownChevronButton";
 import {
   ACTIVITY_OPTIONS,
   activityLabel,
@@ -404,17 +405,11 @@ export function PersonalPlanView({ userId }: Props) {
       </section>
 
       <section className="rounded-lg border border-border p-3">
-        <button
-          type="button"
+        <DropdownChevronButton
+          label="Önerilmesin"
+          isOpen={excludeExpanded}
           onClick={() => setExcludeExpanded(!excludeExpanded)}
-          className="flex items-center justify-between w-full">
-          <h2 className="text-sm font-semibold">Önerilmesin</h2>
-          <ChevronDown
-            className={`size-4 text-muted-foreground transition-transform ${
-              excludeExpanded ? "rotate-180" : ""
-            }`}
-          />
-        </button>
+        />
         {excludeExpanded && (
           <>
             <p className="mt-1 text-xs text-muted-foreground">
@@ -566,17 +561,11 @@ export function PersonalPlanView({ userId }: Props) {
       </section>
 
       <section className="rounded-lg border border-border p-3">
-        <button
-          type="button"
+        <DropdownChevronButton
+          label="Alerjen grubu hariç tut"
+          isOpen={allergenExpanded}
           onClick={() => setAllergenExpanded(!allergenExpanded)}
-          className="flex items-center justify-between w-full">
-          <h2 className="text-sm font-semibold">Alerjen grubu hariç tut</h2>
-          <ChevronDown
-            className={`size-4 text-muted-foreground transition-transform ${
-              allergenExpanded ? "rotate-180" : ""
-            }`}
-          />
-        </button>
+        />
         {allergenExpanded && (
           <>
             <p className="mt-1 text-xs text-muted-foreground">
