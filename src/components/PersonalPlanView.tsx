@@ -331,13 +331,13 @@ export function PersonalPlanView({ userId }: Props) {
           </Field>
         </div>
         <details className="group mt-3" open>
-          <summary className="flex cursor-pointer list-none items-center gap-2 text-xs font-medium text-muted-foreground">
+          <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-medium text-muted-foreground">
+            <span>Varsayılan olarak dolduruldu — istersen değiştir</span>
             <span
               aria-hidden="true"
               className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
               <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
             </span>
-            Varsayılan olarak dolduruldu — istersen değiştir
           </summary>
           <div className="mt-2 grid grid-cols-2 gap-3">
             <Field label="Denklem seçimi">
