@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Pencil } from "lucide-react";
+import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   readNutritionScopeFromUrl,
   writeNutritionScopeToUrl,
@@ -18,14 +19,13 @@ import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { EditorRow } from "@/components/NutritionEditorRow";
 import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
 import { LoadingBlock } from "@/components/LoadingBlock";
-import { ScopeDropdown, type ScopeOption } from "@/components/ScopeDropdown";
 
 type Props = {
   items: Item[];
 };
 
 type Status = "idle" | "loading" | "ready" | "error";
-type Scope = ScopeOption;
+type Scope = "list" | "all" | "cats" | "compare";
 
 function initialScope(): Scope {
   const fromUrl = readNutritionScopeFromUrl();
@@ -128,31 +128,45 @@ export function NutritionView({ items }: Props) {
     });
   }
 
-  const scopeDropdownOptions = [
-    { id: "all" as const, label: "Tümü" },
-    { id: "cats" as const, label: "Kategoriler" },
-    { id: "compare" as const, label: "Karşılaştır" },
-  ];
-
   // List view with checkbox and grid
   if (items.length > 0 && scope === "list") {
     return (
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <button
-              type="button"
-              className="rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm"
-            >
-              Listedeki ürünler
-            </button>
+        <div className="mb-3">
+          <div className="flex items-center gap-2 -mx-1">
+            <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+              <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
+                <TabsTrigger
+                  value="list"
+                  onClick={() => setScope("list")}
+                  className="px-3 py-1.5 text-sm"
+                >
+                  Listedeki ürünler
+                </TabsTrigger>
+                <TabsTrigger
+                  value="all"
+                  onClick={() => setScope("all")}
+                  className="px-3 py-1.5 text-sm"
+                >
+                  Tümü
+                </TabsTrigger>
+                <TabsTrigger
+                  value="cats"
+                  onClick={() => setScope("cats")}
+                  className="px-3 py-1.5 text-sm"
+                >
+                  Kategoriler
+                </TabsTrigger>
+                <TabsTrigger
+                  value="compare"
+                  onClick={() => setScope("compare")}
+                  className="px-3 py-1.5 text-sm"
+                >
+                  Karşılaştır
+                </TabsTrigger>
+              </TabsList>
+            </div>
           </div>
-          <ScopeDropdown
-            activeScope={scope}
-            onSelectScope={setScope}
-            options={scopeDropdownOptions}
-            label="Varsayılan olarak dolduruldu — istersen değiştir"
-          />
         </div>
 
         <div className="mb-3 flex items-center gap-2 px-1">
@@ -321,20 +335,39 @@ export function NutritionView({ items }: Props) {
   if (scope === "all") {
     return (
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setScope("list")}
-            className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            Listedeki ürünler
-          </button>
-          <ScopeDropdown
-            activeScope={scope}
-            onSelectScope={setScope}
-            options={scopeDropdownOptions}
-            label="Varsayılan olarak dolduruldu — istersen değiştir"
-          />
+        <div className="mb-3">
+          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+            <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
+              <TabsTrigger
+                value="list"
+                onClick={() => setScope("list")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Listedeki ürünler
+              </TabsTrigger>
+              <TabsTrigger
+                value="all"
+                onClick={() => setScope("all")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Tümü
+              </TabsTrigger>
+              <TabsTrigger
+                value="cats"
+                onClick={() => setScope("cats")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Kategoriler
+              </TabsTrigger>
+              <TabsTrigger
+                value="compare"
+                onClick={() => setScope("compare")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Karşılaştır
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
         <AllFoodsBrowser />
       </div>
@@ -345,20 +378,39 @@ export function NutritionView({ items }: Props) {
   if (scope === "compare") {
     return (
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setScope("list")}
-            className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            Listedeki ürünler
-          </button>
-          <ScopeDropdown
-            activeScope={scope}
-            onSelectScope={setScope}
-            options={scopeDropdownOptions}
-            label="Varsayılan olarak dolduruldu — istersen değiştir"
-          />
+        <div className="mb-3">
+          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+            <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
+              <TabsTrigger
+                value="list"
+                onClick={() => setScope("list")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Listedeki ürünler
+              </TabsTrigger>
+              <TabsTrigger
+                value="all"
+                onClick={() => setScope("all")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Tümü
+              </TabsTrigger>
+              <TabsTrigger
+                value="cats"
+                onClick={() => setScope("cats")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Kategoriler
+              </TabsTrigger>
+              <TabsTrigger
+                value="compare"
+                onClick={() => setScope("compare")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Karşılaştır
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
         <NutritionCompareView />
       </div>
@@ -369,20 +421,39 @@ export function NutritionView({ items }: Props) {
   if (scope === "cats") {
     return (
       <div>
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => setScope("list")}
-            className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
-          >
-            Listedeki ürünler
-          </button>
-          <ScopeDropdown
-            activeScope={scope}
-            onSelectScope={setScope}
-            options={scopeDropdownOptions}
-            label="Varsayılan olarak dolduruldu — istersen değiştir"
-          />
+        <div className="mb-3">
+          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+            <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
+              <TabsTrigger
+                value="list"
+                onClick={() => setScope("list")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Listedeki ürünler
+              </TabsTrigger>
+              <TabsTrigger
+                value="all"
+                onClick={() => setScope("all")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Tümü
+              </TabsTrigger>
+              <TabsTrigger
+                value="cats"
+                onClick={() => setScope("cats")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Kategoriler
+              </TabsTrigger>
+              <TabsTrigger
+                value="compare"
+                onClick={() => setScope("compare")}
+                className="px-3 py-1.5 text-sm"
+              >
+                Karşılaştır
+              </TabsTrigger>
+            </TabsList>
+          </div>
         </div>
         <div className="px-1 py-3 text-xs text-muted-foreground">
           Kategoriler görünümü yapım aşamasında.
@@ -394,19 +465,39 @@ export function NutritionView({ items }: Props) {
   // Empty state
   return (
     <div>
-      <div className="mb-3 flex items-center justify-between">
-        <button
-          type="button"
-          className="rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm"
-        >
-          Listedeki ürünler
-        </button>
-        <ScopeDropdown
-          activeScope={scope}
-          onSelectScope={setScope}
-          options={scopeDropdownOptions}
-          label="Varsayılan olarak dolduruldu — istersen değiştir"
-        />
+      <div className="mb-3">
+        <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+          <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
+            <TabsTrigger
+              value="list"
+              onClick={() => setScope("list")}
+              className="px-3 py-1.5 text-sm"
+            >
+              Listedeki ürünler
+            </TabsTrigger>
+            <TabsTrigger
+              value="all"
+              onClick={() => setScope("all")}
+              className="px-3 py-1.5 text-sm"
+            >
+              Tümü
+            </TabsTrigger>
+            <TabsTrigger
+              value="cats"
+              onClick={() => setScope("cats")}
+              className="px-3 py-1.5 text-sm"
+            >
+              Kategoriler
+            </TabsTrigger>
+            <TabsTrigger
+              value="compare"
+              onClick={() => setScope("compare")}
+              className="px-3 py-1.5 text-sm"
+            >
+              Karşılaştır
+            </TabsTrigger>
+          </TabsList>
+        </div>
       </div>
       <div className="flex items-center justify-between px-1 py-3">
         <p className="text-sm text-muted-foreground">

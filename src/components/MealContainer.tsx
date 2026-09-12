@@ -1,5 +1,6 @@
 import { Plus } from "lucide-react";
 import type { MealItem } from "@/lib/localMealPlan";
+import { calculateItemsNutrition } from "@/lib/localMealPlan";
 import type { NutritionMap } from "@/lib/nutrition";
 import { MealItemCard } from "./MealItemCard";
 
@@ -29,10 +30,19 @@ export function MealContainer({
   onRemoveItem,
 }: Props) {
   const label = MEAL_LABELS[mealType];
+  const totals = items.length > 0 ? calculateItemsNutrition(items, catalog) : null;
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
-      <h3 className="font-semibold text-foreground">{label.tr}</h3>
+      <div className="flex items-baseline justify-between gap-2">
+        <h3 className="font-semibold text-foreground">{label.tr}</h3>
+        {totals && (
+          <p className="text-xs text-muted-foreground">
+            {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g · K:{" "}
+            {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
+          </p>
+        )}
+      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <button

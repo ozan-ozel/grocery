@@ -1,5 +1,9 @@
 {
   "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(timeout 15 npm run vercel:dev)"
+    ],
     "deny": [
       "Read(.env)",
       "Read(.env.*)",

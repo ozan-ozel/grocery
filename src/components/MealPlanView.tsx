@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -10,7 +10,6 @@ import { calculateTargets } from "@/lib/mealPersonalization";
 import { type MacroTotals } from "@/lib/mealNutrition";
 import type { Nutrition } from "@/lib/nutrition";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
-import { BatchPlanner } from "@/components/BatchPlanner";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
 import { MealContainer } from "@/components/MealContainer";
 import { FoodSearchModal } from "@/components/FoodSearchModal";
@@ -26,17 +25,8 @@ type Props = {
 
 export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
-  // Own instance, matching PersonalPlanView's and useRemainingToday's own
-  // pattern — NOT App.tsx's top-level `personalization`, which is mounted
-  // once at the app root and never remounts on a tab switch, so it would
-  // never observe an edit made through one of those other instances
-  // (confirmed by manual QA: threading App.tsx's stale copy down as a prop
-  // showed exclusions set moments earlier in Kişisel Plan as absent here).
   const { profile: personalizationProfile } = useMealPersonalization(userId);
-  const foodExclusions = personalizationProfile.foodExclusions;
-  const allergenExclusions = personalizationProfile.allergenExclusions;
   const {
-    date,
     dateLabel,
     isLoading,
     goToPrevDay,
@@ -57,8 +47,6 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [comboModalOpen, setComboModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
-  const [recommendedModalOpen, setRecommendedModalOpen] = useState(false);
-  const [recommendedExpanded, setRecommendedExpanded] = useState(false);
 
   const targets = calculateTargets(personalizationProfile);
   const targetMacros: MacroTotals = targets ? {
@@ -155,40 +143,6 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
               />
             ))}
           </div>
-
-          {/* Recommended Foods for Shopping */}
-          <div className="space-y-3 mt-6 pt-4 border-t border-border">
-            <button
-              type="button"
-              onClick={() => setRecommendedExpanded(!recommendedExpanded)}
-              className="flex items-center justify-between w-full">
-              <h3 className="text-sm font-semibold text-foreground">
-                Alışveriş Listesine Ekle
-              </h3>
-              <ChevronDown
-                className={`size-4 text-muted-foreground transition-transform ${
-                  recommendedExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-            {recommendedExpanded && (
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                {foods.slice(0, 12).map((food) => (
-                  <button
-                    key={food.name_tr}
-                    onClick={() => setRecommendedModalOpen(true)}
-                    className="rounded-lg border border-border bg-background p-3 hover:bg-accent transition-colors text-left">
-                    <p className="text-sm font-medium text-foreground truncate">
-                      {food.name_tr}
-                    </p>
-                    <p className="text-xs text-muted-foreground mt-1">
-                      {Math.round(food.kcal_per_100)} kcal
-                    </p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </>
       )}
 
@@ -224,18 +178,6 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
         onSelect={handleFoodSelect}
       />
 
-      {/* Recommended Foods Modal for Shopping */}
-      <FoodSearchModal
-        title="Alışveriş Listesine Ekle"
-        foods={foods}
-        isOpen={recommendedModalOpen}
-        onClose={() => setRecommendedModalOpen(false)}
-        onSelect={(food, quantityG) => {
-          onAddShoppingItem(food.name_tr, `${quantityG}g`);
-          setRecommendedModalOpen(false);
-        }}
-      />
-
       {dailyDetailOpen && (
         <MealNutritionDetailSheet
           title="Günlük toplam"
@@ -245,15 +187,6 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
           onClose={() => setDailyDetailOpen(false)}
         />
       )}
-
-      <BatchPlanner
-        householdId={householdId}
-        foods={foods}
-        catalog={catalogMap}
-        exclusions={foodExclusions}
-        allergenExclusions={allergenExclusions}
-        defaultDate={date}
-      />
 
       {/* Add to shopping list button */}
       {hasTotals && (

@@ -46,6 +46,10 @@ export function AppHeader({
     return () => window.removeEventListener("resize", updateTabScrollFade);
   }, [section]);
 
+  if (section === "yemek") {
+    return null;
+  }
+
   // Only fades the edge that actually has more tabs to reveal, so the mask
   // stays a no-op (fully opaque) once there's nothing left to scroll to.
   const tabScrollMask = `linear-gradient(to right, ${
