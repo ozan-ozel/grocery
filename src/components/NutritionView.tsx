@@ -332,14 +332,7 @@ export function NutritionView({
       <div>
         <div className="mb-3">
           <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
-              <TabsTrigger
-                value="list"
-                onClick={() => setScope("list")}
-                className="px-3 py-1.5 text-sm"
-              >
-                Listedeki ürünler
-              </TabsTrigger>
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
@@ -375,14 +368,7 @@ export function NutritionView({
       <div>
         <div className="mb-3">
           <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
-              <TabsTrigger
-                value="list"
-                onClick={() => setScope("list")}
-                className="px-3 py-1.5 text-sm"
-              >
-                Listedeki ürünler
-              </TabsTrigger>
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
@@ -418,14 +404,7 @@ export function NutritionView({
       <div>
         <div className="mb-3">
           <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
-              <TabsTrigger
-                value="list"
-                onClick={() => setScope("list")}
-                className="px-3 py-1.5 text-sm"
-              >
-                Listedeki ürünler
-              </TabsTrigger>
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
@@ -469,14 +448,7 @@ export function NutritionView({
     <div>
       <div className="mb-3">
         <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-          <TabsList className="grid w-auto grid-cols-4 h-auto p-1">
-            <TabsTrigger
-              value="list"
-              onClick={() => setScope("list")}
-              className="px-3 py-1.5 text-sm"
-            >
-              Listedeki ürünler
-            </TabsTrigger>
+          <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
             <TabsTrigger
               value="all"
               onClick={() => setScope("all")}
