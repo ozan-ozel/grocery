@@ -511,3 +511,63 @@ that file's own note). This entry is itself the first such checkpoint (a bootstr
 **Current next task:** none blocking — PSM sanding (and the deferred `§4.3`/`§4.2` items of
 `PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md`) may resume. First real use of the handoff tracker is
 unstarted.
+
+---
+
+## Energy Individualization Research Spec — 2026-09-12
+
+**New: `12_ENERGY_INDIVIDUALIZATION/`**, holding one cross-cutting research document,
+`ENERGY_INDIVIDUALIZATION_RESEARCH_SPEC.md`, plus a folder `README.md`. Not a new phase — the folder
+number continues the existing "folder numbers do not track phase numbers" discontinuity, and its
+Directory Structure row reads Phase `9 (cross-cutting)`.
+
+**Subject:** how the application would move its energy figure from a population formula to the user's
+own observed response. The concrete trigger is `src/lib/mealPersonalization.ts`'s `calculateTargets()`
+— Mifflin-St Jeor REE × a single-point PAL constant → maintenance → a fixed goal offset → macros, with
+no observed-response input anywhere and `personal_plan` holding one `weight_kg` and no history.
+
+**Deliberately not implementation-ready.** The document selects no formula, coefficient, threshold,
+window, cadence, interval width or macro percentage; creates, renames, retires or amends no `DEC`; adds
+no schema, migration, UI or API; and opens no `IMPLEMENTATION_HANDOFF.md` row (both its tables remain
+empty). Every number in it is a cited external finding attributed to its source, never a project value.
+`DEC_REGISTER.md` was read, not edited — still 112 rows, no readiness word changed.
+
+**What it contains:** 18 sections — problem definition; the relevant `DEC` IDs with the §2 Principle
+each stage boundary protects; 10 research questions tagged to decisions; 14 rated evidence domains;
+five candidate architectures (A static / B weighted / C intake-balance back-calculation / D recursive
+state estimator / E formula-prior-plus-observation-likelihood) compared but **not chosen**; required
+inputs split into already-present / capturable-today / needs-a-new-subsystem; a `{value, interval,
+source, evidence_basis, as_of}` output shape stated conceptually; longitudinal and data-quality
+requirements; uncertainty representation extending `DEC-024`/`112`; the personalization loop with each
+arrow labelled by its owning `DEC` and the Principle that forbids merging it; the one-directional
+energy→macro and macro→meal boundaries mapped onto Phase 9 §1's five-layer model; open questions; the
+human-approval list; implementation prerequisites in dependency order; and a hard not-yet fence.
+
+**Two contradiction findings recorded, neither applied.** Both are written up in the new document's
+§15 and listed in its §16; **no `DECISION_LOGIC_SPECIFICATION.md`, `DEC_REGISTER.md` or `DECISIONS/`
+file was touched.**
+
+1. `DEC-022`'s ±500 kcal is derived in `DECISION_LOGIC_SPECIFICATION.md` §3.1 from the ~3,500 kcal/lb
+   approximation, which the 2013 IJO Thomas/Hall exchange finds systematically over-predicts loss
+   because it ignores expenditure adaptation. Challenges the kcal↔rate **conversion** only —
+   `DEC-027`'s 1–2 lb/week rate is externally sourced (`EVIDENCE_AND_CONTENT_INSPECTION_REGISTER.md`
+   §3.9) and unaffected.
+2. `DEC-018`/`DEC-019` cite 2005-era DRI/IOM PAL bands; NASEM 2023 supersedes that framework, changes
+   the PAL category scheme, and publishes a SEPV — the uncertainty quantity `DEC-024` currently has no
+   source for.
+
+**One correction made in passing, to this document's own transcription only:** the commissioning
+brief's readiness summary differed from `DEC_REGISTER.md` on three lines (baseline sufficiency is
+`COVERED` ×3 not ×4; macro allocation `SHIPPED` ×4 not ×5, since `DEC-032` is `COVERED`;
+uncertainty/governance `COVERED` ×2 not ×3). The register was treated as authoritative and left
+unedited; the discrepancy is recorded in the new document's §2.
+
+**Eight decisions now standing as requiring human approval** (new document §16): NASEM 2023 vs the 2005
+PAL bands; re-deriving `DEC-022`'s kcal↔rate conversion; which architecture A–E; the `DEC-021`/`DEC-110`
+deviation-cap value (Gate 5 §4.1 item 1, still open, retention not assumed); the `DEC-090`
+circuit-breaker parameters (Gate 5 §4.1 item 2, still open); the minimum observation window and
+weigh-in cadence; whether device/step data is admitted at all; and whether an energy-availability floor
+gates deficit prescriptions for disclosed trainees.
+
+**Current next task: unchanged** — none blocking; the entry above still stands. This pass added a
+research layer and closed nothing.

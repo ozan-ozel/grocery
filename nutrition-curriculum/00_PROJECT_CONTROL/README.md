@@ -49,6 +49,7 @@ Current scale: **213 stable topic IDs**, **112 application decisions (`DEC-001`�
 | `10_PHASE_7_DECISION_ENGINE_SPECIFICATION/` | 7 | `DECISION_LOGIC_SPECIFICATION.md` — the 112 decisions resolved into drafted specifications, `BLOCKED` entries, and judgment items. |
 | `11_PHASE_8_PRACTICAL_TRANSLATION/` | 8 | The practical-translation analysis, the Gate 6 culinary corpus extension, and the On Cooking 7e execution record. |
 | `08_APP_TRANSLATION/` | 9 | Application/product architecture: `PHASE_9_APPLICATION_CAPABILITY_ARCHITECTURE.md` (the primary artifact), the per-`DEC` investigations that fed the Phase 9 ratifications, and the PSM Iteration 1 implementation ledger and browser QA. |
+| `12_ENERGY_INDIVIDUALIZATION/` | 9 (cross-cutting) | `ENERGY_INDIVIDUALIZATION_RESEARCH_SPEC.md` — research and specification on moving the energy figure from a population formula to the user's own observed response. Cross-cutting rather than a new phase: it draws on Phases 3, 7 and 9 and amends none of them. Deliberately **not implementation-ready** — no formula, coefficient, threshold or macro percentage is selected, and no `DEC` is created or changed. |
 | `99_ARCHIVE/` | — | Superseded or historical files kept for project history — not part of the active analysis. |
 
 Phase 10 (Validation & Iteration) has no folder yet; it has not started.
