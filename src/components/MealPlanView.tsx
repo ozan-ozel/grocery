@@ -59,24 +59,6 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
   const [recommendedModalOpen, setRecommendedModalOpen] = useState(false);
 
-  // Filter combos from foods (simple heuristic: foods with Turkish dish names)
-  const combos = foods.filter(f => {
-    const lowerName = f.name_tr.toLowerCase();
-    return (
-      lowerName.includes('pilav') ||
-      lowerName.includes('çorbası') ||
-      lowerName.includes('ızgara') ||
-      lowerName.includes('fırında') ||
-      lowerName.includes('yemek') ||
-      lowerName.includes('sos') ||
-      lowerName.includes('kızartma') ||
-      lowerName.includes('kebab') ||
-      lowerName.includes('pide') ||
-      lowerName.includes('döner') ||
-      lowerName.includes('tatlı')
-    );
-  }).slice(0, 30);
-
   const targets = calculateTargets(personalizationProfile);
   const targetMacros: MacroTotals = targets ? {
     kcal: targets.targetKcal,
@@ -220,7 +202,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
       {/* Combo Search Modal */}
       <FoodSearchModal
         title={activeSlot ? "Kombo Seç" : "Kombo Ara"}
-        foods={combos}
+        foods={foods}
         isOpen={comboModalOpen}
         onClose={() => {
           setComboModalOpen(false);

@@ -304,7 +304,6 @@ function AppShell({
         theme={theme}
         onSelectTheme={setTheme}
         section={section}
-        onSelectSection={selectSection}
         active={active}
         onRenameActive={renameActive}
         onStartNewList={startNewList}

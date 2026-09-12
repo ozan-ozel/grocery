@@ -6,7 +6,6 @@ import { ConfirmModal } from "@/components/ConfirmModal";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { TenantSwitcher } from "@/components/TenantSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { cn } from "@/lib/utils";
 import { defaultTitle, type List, type Tenant } from "@/lib/store";
 import type { SyncStatus } from "@/lib/sync/sync";
 import type { Theme } from "@/lib/preferences";
@@ -26,7 +25,6 @@ type Props = {
   theme: Theme;
   onSelectTheme: (theme: Theme) => void;
   section: Section;
-  onSelectSection: (section: Section) => void;
   active: List;
   onRenameActive: (title: string) => void;
   onStartNewList: () => void;
@@ -48,7 +46,6 @@ export function AppHeader({
   theme,
   onSelectTheme,
   section,
-  onSelectSection,
   active,
   onRenameActive,
   onStartNewList,
@@ -121,53 +118,6 @@ export function AppHeader({
             )}
             <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
           </div>
-        </div>
-
-        <div className="inline-flex max-w-full items-center gap-1 overflow-x-auto rounded-lg bg-accent/50 p-1">
-          <button
-            type="button"
-            onClick={() => onSelectSection("alisveris")}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              section === "alisveris"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}>
-            Alışveriş
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectSection("besin")}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              section === "besin"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}>
-            Besin değerleri
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectSection("yemek")}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              section === "yemek"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}>
-            Yemek Planı
-          </button>
-          <button
-            type="button"
-            onClick={() => onSelectSection("kisisel")}
-            className={cn(
-              "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-              section === "kisisel"
-                ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground",
-            )}>
-            Kişisel Plan
-          </button>
         </div>
 
         {section === "alisveris" && (
