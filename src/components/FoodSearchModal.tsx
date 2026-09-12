@@ -68,7 +68,7 @@ export function FoodSearchModal({
             type="text"
             placeholder="Yemek veya ürün ara..."
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => setQuery((e.target as HTMLInputElement).value)}
             autoFocus
             className="w-full rounded-lg border border-border bg-background px-9 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
           />
@@ -118,7 +118,7 @@ export function FoodSearchModal({
                 min="1"
                 step="1"
                 value={quantity}
-                onChange={(e) => setQuantity(e.target.value)}
+                onChange={(e) => setQuantity((e.target as HTMLInputElement).value)}
                 className="ledger w-24 rounded border border-border px-2 py-1.5 text-right text-sm"
                 aria-label="Quantity"
               />

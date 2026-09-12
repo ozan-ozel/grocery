@@ -1,19 +1,14 @@
-import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Info, X } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ConfirmDeleteButton } from "@/components/ConfirmDeleteButton";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
-import { MEAL_SLOTS, type MealItem, type MealSlot } from "@/lib/localMealPlan";
-import { occasionProteinTargetG, calculateTargets } from "@/lib/mealPersonalization";
-import { scaleNutrition, type MacroTotals } from "@/lib/mealNutrition";
-import type { Nutrition, NutritionMap } from "@/lib/nutrition";
-import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
-import { format } from "@/components/NutritionTableCell";
-import { MealFoodPicker } from "@/components/MealFoodPicker";
+import { MEAL_SLOTS, type MealSlot } from "@/lib/localMealPlan";
+import { calculateTargets } from "@/lib/mealPersonalization";
+import { type MacroTotals } from "@/lib/mealNutrition";
+import type { Nutrition } from "@/lib/nutrition";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 import { BatchPlanner } from "@/components/BatchPlanner";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
@@ -49,9 +44,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
     itemsForSlot,
     allItems,
     addItem,
-    updateItemQuantity,
     removeItem,
-    slotNutrition,
     dailyNutrition,
   } = useMealPlan(householdId, catalogMap);
   const totals = dailyNutrition();
@@ -65,12 +58,18 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
 
   const targets = calculateTargets(personalizationProfile);
-  const targetMacros: MacroTotals = {
+  const targetMacros: MacroTotals = targets ? {
     kcal: targets.targetKcal,
     proteinG: (targets.proteinG.min + targets.proteinG.max) / 2,
     fatG: (targets.fatG.min + targets.fatG.max) / 2,
     carbsG: (targets.carbsG.min + targets.carbsG.max) / 2,
     fiberG: (targets.fiberG.min + targets.fiberG.max) / 2,
+  } : {
+    kcal: 0,
+    proteinG: 0,
+    fatG: 0,
+    carbsG: 0,
+    fiberG: 0,
   };
 
   function handleFoodSelect(food: Nutrition, quantityG: number) {
@@ -135,7 +134,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
 
           {/* Meal Containers */}
           <div className="space-y-3">
-            {MEAL_SLOTS.map(({ slot, label }) => (
+            {MEAL_SLOTS.map(({ slot }) => (
               <MealContainer
                 key={slot}
                 mealType={getMealType(slot)}
@@ -213,77 +212,4 @@ function getMealType(slot: MealSlot): "ilk" | "ara" | "son" {
   if (slot === "kahvalti") return "ilk";
   if (slot === "aksam") return "son";
   return "ara";
-}
-
-function MealItemRow({
-  item,
-  food,
-  onUpdateQuantity,
-  onRemove,
-}: {
-  item: MealItem;
-  food: Nutrition | undefined;
-  onUpdateQuantity: (quantityG: number) => void;
-  onRemove: () => void;
-}) {
-  const [text, setText] = useState(String(item.quantityG));
-  useEffect(() => setText(String(item.quantityG)), [item.quantityG]);
-  function commit() {
-    const quantityG = Number(text);
-    if (Number.isFinite(quantityG) && quantityG > 0)
-      onUpdateQuantity(quantityG);
-    else setText(String(item.quantityG));
-  }
-  const name = food?.name_tr ?? item.foodId;
-  const itemMacros = food ? scaleNutrition(food, item.quantityG) : null;
-  return (
-    <li className="flex items-center gap-2 border-b border-border py-2">
-      <div className="min-w-0 flex-1">
-        <div className="text-[0.975rem]">
-          {name}
-          {item.batchId && (
-            <span className="ml-1.5 rounded-full border border-border px-1.5 py-0.5 text-[0.6rem] uppercase tracking-wide text-muted-foreground">
-              Parti
-            </span>
-          )}
-        </div>
-        {itemMacros && (
-          <div className="ledger mt-0.5 text-xs tabular-nums text-muted-foreground">
-            {Math.round(itemMacros.kcal)} kcal · P {format(itemMacros.proteinG)}{" "}
-            · Y {format(itemMacros.fatG)} · K {format(itemMacros.carbsG)} · L{" "}
-            {format(itemMacros.fiberG)}
-          </div>
-        )}
-      </div>
-      <Input
-        type="number"
-        inputMode="decimal"
-        min="1"
-        step="1"
-        value={text}
-        aria-label={`${name} miktarı (gram)`}
-        onInput={(event: Event) =>
-          setText((event.target as HTMLInputElement).value)
-        }
-        onBlur={commit}
-        className="ledger h-9 w-16 px-2 text-right tabular-nums"
-      />
-      <span className="text-xs text-muted-foreground">g</span>
-      <ConfirmDeleteButton
-        onConfirm={onRemove}
-        label={`${name} kaldır`}
-        triggerIcon={X}
-        iconClassName="size-4"
-      />
-    </li>
-  );
-}
-
-function MacroSummary({ macros }: { macros: MacroTotals }) {
-  return (
-    <span className="ledger tabular-nums text-sm">
-      {Math.round(macros.kcal)} kcal · P {format(macros.proteinG)} · Y{" "}
-      {format(macros.fatG)} · K {format(macros.carbsG)}
-    </span>
-  );
 }

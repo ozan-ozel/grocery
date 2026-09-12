@@ -2,10 +2,9 @@ import { useMemo, useState } from "react";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { MealItem, MealSlot } from "@/lib/localMealPlan";
 import { MacroSummaryCard } from "./MacroSummaryCard";
-import { MealContainer, type MealType } from "./MealContainer";
+import { MealContainer } from "./MealContainer";
 import { FoodSearchModal } from "./FoodSearchModal";
 import type { MacroTotals } from "@/lib/mealNutrition";
-import { calculateItemsNutrition } from "@/lib/localMealPlan";
 
 type Props = {
   foods: Nutrition[];
@@ -18,12 +17,6 @@ type Props = {
   onRemoveItem: (itemId: string) => void;
 };
 
-const SLOT_TO_MEAL_TYPE: Record<MealSlot, MealType> = {
-  kahvalti: "ilk",
-  ogle: "ara",
-  aksam: "son",
-  ara: "ara",
-};
 
 export function MealTrackingView({
   foods,

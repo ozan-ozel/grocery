@@ -23,6 +23,7 @@ const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
 export function MealContainer({
   mealType,
   items,
+  catalog,
   onSelectFood,
   onSelectRecipe,
   onRemoveItem,
