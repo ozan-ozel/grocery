@@ -35,14 +35,7 @@ export function MealContainer({
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
-      <div className="flex items-center justify-between">
-        <h3 className="font-semibold text-foreground">{label.tr}</h3>
-        <button
-          type="button"
-          className="text-sm font-medium text-primary hover:text-primary/80">
-          Öğün Hazırla ↓
-        </button>
-      </div>
+      <h3 className="font-semibold text-foreground">{label.tr}</h3>
 
       {/* Tab Navigation */}
       <div className="flex gap-2 border-b border-border -mx-4 px-4">
