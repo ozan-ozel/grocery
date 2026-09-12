@@ -17,7 +17,6 @@ type Props = {
   onRemoveItem: (itemId: string) => void;
 };
 
-
 export function MealTrackingView({
   foods,
   items,
@@ -84,6 +83,9 @@ export function MealTrackingView({
           onSelectFood={() => handleSelectFood("kahvalti")}
           onSelectRecipe={() => handleSelectRecipe("kahvalti")}
           onRemoveItem={onRemoveItem}
+          onUpdateItemQuantity={() => {}}
+          isOnShoppingList={() => false}
+          onToggleShoppingList={() => {}}
         />
         <MealContainer
           mealType="ara"
@@ -92,6 +94,9 @@ export function MealTrackingView({
           onSelectFood={() => handleSelectFood("ara")}
           onSelectRecipe={() => handleSelectRecipe("ara")}
           onRemoveItem={onRemoveItem}
+          onUpdateItemQuantity={() => {}}
+          isOnShoppingList={() => false}
+          onToggleShoppingList={() => {}}
         />
         <MealContainer
           mealType="son"
@@ -100,6 +105,9 @@ export function MealTrackingView({
           onSelectFood={() => handleSelectFood("aksam")}
           onSelectRecipe={() => handleSelectRecipe("aksam")}
           onRemoveItem={onRemoveItem}
+          onUpdateItemQuantity={() => {}}
+          isOnShoppingList={() => false}
+          onToggleShoppingList={() => {}}
         />
       </div>
 

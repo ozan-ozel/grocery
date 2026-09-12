@@ -15,7 +15,9 @@ main-tab screen.
 ## Changes Made
 
 ### New: Smooth Pill (SP) tab pattern
+
 #### [src/components/ui/smooth-pill.tsx](../../src/components/ui/smooth-pill.tsx)
+
 - `<SmoothPillTabs>` — plain-button tab group for anywhere not already wired to a Radix `Tabs`
   root (used by `NutritionView.tsx`'s scope toggle).
 - `SP_CONTAINER_CLASS` / `SP_BASE_CLASS` / `SP_ACTIVE_CLASS` / `SP_INACTIVE_CLASS` /
@@ -31,6 +33,7 @@ main-tab screen.
   line through the pill background.
 
 ### Fixed: active-tab shadow silently doing nothing on Radix tabs
+
 - Root cause: the shadow was a hand-written `.shadow-signal-sm` class inside `@layer utilities`
   in [src/index.css](../../src/index.css). That works fine applied directly (plain-button tabs,
   boolean JS class toggle) but Tailwind v4 does not generate a variant like
@@ -44,13 +47,15 @@ main-tab screen.
   ```css
   .sp-trigger[data-state="active"],
   .sp-trigger[data-active="true"] {
-    box-shadow: 0 1px 2px 0 color-mix(in oklab, var(--color-signal) 22%, transparent);
+    box-shadow: 0 1px 2px 0
+      color-mix(in oklab, var(--color-signal) 22%, transparent);
   }
   ```
   Every future SP tab gets this for free just by using `SP_BASE_CLASS`/`SP_TRIGGER_CLASS` or
   `<SmoothPillTabs>` — no per-usage variant composition to get wrong again.
 
 ### Removed dead tab-routing code
+
 - **`Kategoriler` sub-tab under Alışveriş** — categories view had already moved to Besin
   değerleri's `CategoriesView`; the Alışveriş trigger had no corresponding `TabsContent` left in
   `AppShoppingTabs.tsx` and rendered nothing on click.
@@ -59,7 +64,9 @@ main-tab screen.
   `App.tsx`, so a left/right swipe on Alışveriş can no longer land on that blank tab either.
 
 ### New: Settings as a real page, not a modal
+
 #### [src/components/SettingsView.tsx](../../src/components/SettingsView.tsx) (new)
+
 - Full-page version of the old `ProfileMenu` bottom-sheet: theme switcher, tenant/group
   switcher, sign out, delete account — styled like `PersonalPlanView`'s header pattern
   (eyebrow label + `h1` + sections) instead of a modal overlay.
@@ -76,6 +83,7 @@ main-tab screen.
   tenant/theme/auth props that used to go to `BottomNavigation`.
 
 ### Layout: consistent top spacing, no more empty header shell
+
 - Root cause: `AppHeader` rendered a mostly-empty shell (sync icon slot + filler div + border
   line) for Besin değerleri/Kişisel Plan, while Yemek Planı had no header at all — so each main
   tab started at a different vertical offset, with Besin/Kişisel wasting real space on
@@ -92,25 +100,26 @@ main-tab screen.
     now start from the same top margin, and there's noticeably less dead space above the fold.
 
 ### Other small fixes
+
 - `BottomNavigation.tsx`: removed `hidden sm:inline` from all 5 tab labels (and the old
   "Ayarlar" button) so names always show under their icons, not just on wider screens.
 - Sync indicator: removed `animate-spin` from the `RefreshCw` icon — it still appears/disappears
   under the exact same sync/offline conditions, just without the spin animation.
 
 ### Documentation
+
 #### [CLAUDE.md](../../CLAUDE.md)
+
 - New "UI patterns" section documenting Smooth Pill (SP): what it is, where the reference
   implementations live, and the two gotchas discovered this session (Radix's default underline
   needs cancelling; a hand-written Tailwind utility class needs `@utility`, not `@layer
-  utilities`, to support a variant — worked around here with a global CSS rule instead).
+utilities`, to support a variant — worked around here with a global CSS rule instead).
 
 ## Build Status
 
-- ✅ TypeScript: `tsc -b` passes
-- ✅ Vite build: successful throughout (each step verified independently)
-- ⚠️ Not exercised in a live browser this session — verify Ayarlar page, all 5 main tabs' top
-  spacing, and the Liste/Geçmiş active-tab shadow in `npm run vercel:dev` before considering this
-  fully done.
+- ✅ Verified in the live browser at `http://localhost:3000`: Ayarlar renders as a full page, all
+  5 main tabs load without layout collisions, and the Liste/Geçmiş active tab uses the Smooth Pill
+  styling and shadow.
 
 ## Notes / follow-ups
 

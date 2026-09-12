@@ -5,14 +5,18 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
-import { MEAL_SLOTS, type MealSlot } from "@/lib/localMealPlan";
+import { MEAL_SLOTS, type MealItem, type MealSlot } from "@/lib/localMealPlan";
 import { calculateTargets } from "@/lib/mealPersonalization";
 import { type MacroTotals } from "@/lib/mealNutrition";
-import type { Nutrition } from "@/lib/nutrition";
+import { lookupNutrition, type Nutrition } from "@/lib/nutrition";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
 import { MealContainer } from "@/components/MealContainer";
 import { FoodSearchModal } from "@/components/FoodSearchModal";
+import { MealShoppingConfirmModal } from "@/components/MealShoppingConfirmModal";
+import { RecipeSearchModal } from "@/components/RecipeSearchModal";
+import { ALL_COMBOS } from "@/lib/combos";
+import { scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 
 type Props = {
   userId: string | null;
@@ -21,9 +25,17 @@ type Props = {
   // existing addItem exactly as-is (name + free-text qty, no unit parsing or
   // quantity aggregation across duplicate ingredients). REVISIT AFTER QA-1.
   onAddShoppingItem: (name: string, qty: string) => void;
+  isOnShoppingList: (name: string) => boolean;
+  onRemoveShoppingItem: (name: string) => void;
 };
 
-export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) {
+export function MealPlanView({
+  userId,
+  householdId,
+  onAddShoppingItem,
+  isOnShoppingList,
+  onRemoveShoppingItem,
+}: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
   const { profile: personalizationProfile } = useMealPersonalization(userId);
   const {
@@ -34,34 +46,54 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
     itemsForSlot,
     allItems,
     addItem,
+    updateItemQuantity,
     removeItem,
     dailyNutrition,
   } = useMealPlan(householdId, catalogMap);
   const totals = dailyNutrition();
+  const dayItems = allItems();
   const hasTotals =
     totals.kcal > 0 ||
     totals.proteinG > 0 ||
     totals.fatG > 0 ||
     totals.carbsG > 0;
+  const dayAlreadyOnList =
+    dayItems.length > 0 &&
+    dayItems.every(item =>
+      isOnShoppingList(catalogMap.get(item.foodId)?.name_tr ?? item.foodId),
+    );
   const [dailyDetailOpen, setDailyDetailOpen] = useState(false);
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [comboModalOpen, setComboModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
+  const [shoppingConfirm, setShoppingConfirm] = useState<{
+    mode: "add" | "remove";
+    item: MealItem;
+  } | null>(null);
+
+  const scoredCombos = scoreAllCombos(
+    ALL_COMBOS,
+    personalizationProfile.foodExclusions,
+    personalizationProfile.allergenExclusions,
+    catalogMap,
+  );
 
   const targets = calculateTargets(personalizationProfile);
-  const targetMacros: MacroTotals = targets ? {
-    kcal: targets.targetKcal,
-    proteinG: (targets.proteinG.min + targets.proteinG.max) / 2,
-    fatG: (targets.fatG.min + targets.fatG.max) / 2,
-    carbsG: (targets.carbsG.min + targets.carbsG.max) / 2,
-    fiberG: (targets.fiberG.min + targets.fiberG.max) / 2,
-  } : {
-    kcal: 0,
-    proteinG: 0,
-    fatG: 0,
-    carbsG: 0,
-    fiberG: 0,
-  };
+  const targetMacros: MacroTotals = targets
+    ? {
+        kcal: targets.targetKcal,
+        proteinG: (targets.proteinG.min + targets.proteinG.max) / 2,
+        fatG: (targets.fatG.min + targets.fatG.max) / 2,
+        carbsG: (targets.carbsG.min + targets.carbsG.max) / 2,
+        fiberG: (targets.fiberG.min + targets.fiberG.max) / 2,
+      }
+    : {
+        kcal: 0,
+        proteinG: 0,
+        fatG: 0,
+        carbsG: 0,
+        fiberG: 0,
+      };
 
   function handleFoodSelect(food: Nutrition, quantityG: number) {
     if (activeSlot) {
@@ -71,16 +103,52 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
     }
   }
 
+  function handleComboSelect(combo: ScoredCombo) {
+    if (!activeSlot) return;
+    for (const item of combo.items) {
+      const nutrition = lookupNutrition(catalogMap, item.foodId);
+      if (nutrition) {
+        addItem(activeSlot, nutrition.name_tr, item.grams, combo.id);
+      }
+    }
+    setComboModalOpen(false);
+    setActiveSlot(null);
+  }
+
+  function requestShoppingToggle(item: MealItem) {
+    const name = catalogMap.get(item.foodId)?.name_tr ?? item.foodId;
+    setShoppingConfirm({
+      mode: isOnShoppingList(name) ? "remove" : "add",
+      item,
+    });
+  }
+
+  function confirmShoppingToggle() {
+    if (!shoppingConfirm) return;
+    const food = catalogMap.get(shoppingConfirm.item.foodId);
+    const name = food?.name_tr ?? shoppingConfirm.item.foodId;
+    if (shoppingConfirm.mode === "add") {
+      onAddShoppingItem(name, `${shoppingConfirm.item.quantityG}g`);
+    } else {
+      onRemoveShoppingItem(name);
+    }
+    setShoppingConfirm(null);
+  }
+
   // MVP-1 PROVISIONAL (DEC-071): the smallest viable meal-plan -> shopping
   // translation — walk this day's planned items and add each one's food name
   // + gram quantity to the active shopping list via the existing addItem
   // (same name/alias resolution and near-duplicate dedup shopping already
   // uses; no quantity aggregation across repeated ingredients, no
   // pantry/store/budget awareness). REVISIT AFTER QA-1.
-  function addDayToShoppingList() {
-    for (const item of allItems()) {
-      const food = catalogMap.get(item.foodId);
-      onAddShoppingItem(food?.name_tr ?? item.foodId, `${item.quantityG}g`);
+  function toggleDayShoppingList() {
+    for (const item of dayItems) {
+      const name = catalogMap.get(item.foodId)?.name_tr ?? item.foodId;
+      if (dayAlreadyOnList) {
+        onRemoveShoppingItem(name);
+      } else {
+        onAddShoppingItem(name, `${item.quantityG}g`);
+      }
     }
   }
 
@@ -140,6 +208,13 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
                   setComboModalOpen(true);
                 }}
                 onRemoveItem={itemId => removeItem(slot, itemId)}
+                onUpdateItemQuantity={(itemId, quantityG) =>
+                  updateItemQuantity(slot, itemId, quantityG)
+                }
+                isOnShoppingList={foodId =>
+                  isOnShoppingList(catalogMap.get(foodId)?.name_tr ?? foodId)
+                }
+                onToggleShoppingList={requestShoppingToggle}
               />
             ))}
           </div>
@@ -166,17 +241,33 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
         onSelect={handleFoodSelect}
       />
 
-      {/* Combo Search Modal */}
-      <FoodSearchModal
-        title={activeSlot ? "Kombo Seç" : "Kombo Ara"}
-        foods={foods}
+      {/* Meal picker */}
+      <RecipeSearchModal
+        title="Yemekler"
+        combos={scoredCombos}
         isOpen={comboModalOpen}
         onClose={() => {
           setComboModalOpen(false);
           setActiveSlot(null);
         }}
-        onSelect={handleFoodSelect}
+        onSelect={handleComboSelect}
       />
+
+      {shoppingConfirm && (
+        <MealShoppingConfirmModal
+          mode={shoppingConfirm.mode}
+          items={[
+            {
+              name:
+                catalogMap.get(shoppingConfirm.item.foodId)?.name_tr ??
+                shoppingConfirm.item.foodId,
+              qty: `${shoppingConfirm.item.quantityG}g`,
+            },
+          ]}
+          onConfirm={confirmShoppingToggle}
+          onCancel={() => setShoppingConfirm(null)}
+        />
+      )}
 
       {dailyDetailOpen && (
         <MealNutritionDetailSheet
@@ -195,8 +286,10 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
           variant="default"
           size="sm"
           className="w-full"
-          onClick={addDayToShoppingList}>
-          Bu günü alışveriş listesine ekle
+          onClick={toggleDayShoppingList}>
+          {dayAlreadyOnList
+            ? "Bu günü alışveriş listesinden çıkar"
+            : "Bu günü alışveriş listesine ekle"}
         </Button>
       )}
     </div>

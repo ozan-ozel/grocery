@@ -1,4 +1,3 @@
-import { Plus } from "lucide-react";
 import type { MealItem } from "@/lib/localMealPlan";
 import { calculateItemsNutrition } from "@/lib/localMealPlan";
 import type { NutritionMap } from "@/lib/nutrition";
@@ -13,6 +12,9 @@ type Props = {
   onSelectFood: () => void;
   onSelectRecipe: () => void;
   onRemoveItem: (itemId: string) => void;
+  onUpdateItemQuantity?: (itemId: string, quantityG: number) => void;
+  isOnShoppingList: (foodId: string) => boolean;
+  onToggleShoppingList: (item: MealItem) => void;
 };
 
 const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
@@ -28,9 +30,14 @@ export function MealContainer({
   onSelectFood,
   onSelectRecipe,
   onRemoveItem,
+  onUpdateItemQuantity,
+  isOnShoppingList,
+  onToggleShoppingList,
 }: Props) {
+  const updateItemQuantity = onUpdateItemQuantity ?? (() => {});
   const label = MEAL_LABELS[mealType];
-  const totals = items.length > 0 ? calculateItemsNutrition(items, catalog) : null;
+  const totals =
+    items.length > 0 ? calculateItemsNutrition(items, catalog) : null;
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
@@ -38,8 +45,8 @@ export function MealContainer({
         <h3 className="font-semibold text-foreground">{label.tr}</h3>
         {totals && (
           <p className="text-xs text-muted-foreground">
-            {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g · K:{" "}
-            {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
+            {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g ·
+            K: {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
           </p>
         )}
       </div>
@@ -49,26 +56,31 @@ export function MealContainer({
           type="button"
           onClick={onSelectFood}
           className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary">
-          <Plus className="size-4" />
+          <span aria-hidden="true">+</span>
           Ürünler
         </button>
         <button
           type="button"
           onClick={onSelectRecipe}
           className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary">
-          <Plus className="size-4" />
-          Kombo
+          <span aria-hidden="true">+</span>
+          Yemekler
         </button>
       </div>
 
       {items.length > 0 && (
         <div className="space-y-2 border-t border-border pt-3">
-          {items.map((item) => (
+          {items.map(item => (
             <MealItemCard
               key={item.id}
               item={item}
               nutrition={catalog.get(item.foodId)}
               onRemove={() => onRemoveItem(item.id)}
+              onUpdateQuantity={quantityG =>
+                updateItemQuantity(item.id, quantityG)
+              }
+              isOnShoppingList={isOnShoppingList(item.foodId)}
+              onToggleShoppingList={() => onToggleShoppingList(item)}
             />
           ))}
         </div>
