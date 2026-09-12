@@ -8,6 +8,7 @@ import { PersonalPlanView } from "@/components/PersonalPlanView";
 import { UndoToast } from "@/components/UndoToast";
 import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
+import { BottomNavigation, type NavTab } from "@/components/BottomNavigation";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
 import { useUiPrefs, type Tab, type Section } from "@/hooks/useUiPrefs";
@@ -91,9 +92,9 @@ function AppBootSkeleton() {
   );
 }
 
-// Bugün → Liste → Geçmiş → Kategoriler, matching AppHeader's TabsTrigger
+// Liste → Geçmiş → Kategoriler, matching AppHeader's TabsTrigger
 // order, so a left/right swipe moves the same direction the tab bar reads.
-const SHOPPING_TAB_ORDER: Tab[] = ["today", "list", "history", "cats"];
+const SHOPPING_TAB_ORDER: Tab[] = ["list", "history", "cats"];
 const SWIPE_MIN_DISTANCE_PX = 60;
 // Anything that owns its own horizontal touch gesture (a list row's
 // swipe-to-check/delete when swipeMode is on, the horizontally-scrolling tab
@@ -244,7 +245,6 @@ function AppShell({
     toggleItem,
     editItem,
     removeItem,
-    removeItemByName,
     bulkRemove,
     startNewList,
     reuseList,
@@ -266,31 +266,36 @@ function AppShell({
     foodIdentityIndex,
   });
 
+  const currentNavTab: NavTab =
+    section === "alisveris"
+      ? "shopping"
+      : section === "besin"
+        ? "nutrition"
+        : section === "yemek"
+          ? "meals"
+          : "personal";
+
+  function handleNavTabChange(navTab: NavTab) {
+    const sectionMap: Record<NavTab, Section> = {
+      shopping: "alisveris",
+      nutrition: "besin",
+      meals: "yemek",
+      personal: "kisisel",
+    };
+    selectSection(sectionMap[navTab]);
+  }
+
   return (
     <Tabs
       value={tab}
       onValueChange={v => setTab(v as Tab)}
-      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-28">
+      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 py-6 pb-32">
       <AppHeader
-        tenants={tenants}
-        activeTenantId={activeTenantId}
-        hiddenTenantIds={hiddenIds}
-        currentUserId={currentUserId}
-        onSelectTenant={selectTenant}
-        onAddTenant={addTenant}
-        onRenameTenant={renameTenant}
-        onDeleteTenant={deleteTenant}
-        onToggleHiddenTenant={toggleHiddenTenant}
         syncStatus={syncStatus}
-        theme={theme}
-        onSelectTheme={setTheme}
         section={section}
-        onSelectSection={selectSection}
         active={active}
         onRenameActive={renameActive}
         onStartNewList={startNewList}
-        onSignOut={onSignOut}
-        onDeleteAccount={onDeleteAccount}
       />
 
       <main
@@ -324,8 +329,6 @@ function AppShell({
           <AppShoppingTabs
             catalog={catalog}
             onAddItem={addItem}
-            userId={currentUserId}
-            householdId={activeTenantId}
             active={active}
             past={past}
             groupByCategory={groupByCategory}
@@ -348,7 +351,6 @@ function AppShell({
             onReuseList={reuseList}
             onDeleteList={deleteList}
             isOnList={isOnList}
-            onRemoveItemByName={removeItemByName}
             onRenameCategory={renameCat}
             onToggleHiddenCategory={toggleHidden}
             onMoveCategory={moveCat}
@@ -360,6 +362,23 @@ function AppShell({
       </main>
 
       {undo && <UndoToast undo={undo} onRestore={restore} onDismiss={dismiss} />}
+
+      <BottomNavigation
+        activeTab={currentNavTab}
+        onTabChange={handleNavTabChange}
+        onSignOut={onSignOut}
+        onDeleteAccount={onDeleteAccount}
+        tenants={tenants}
+        activeTenantId={activeTenantId}
+        hiddenTenantIds={hiddenIds}
+        onSelectTenant={selectTenant}
+        onAddTenant={addTenant}
+        onRenameTenant={renameTenant}
+        onDeleteTenant={deleteTenant}
+        onToggleHiddenTenant={toggleHiddenTenant}
+        theme={theme}
+        onSelectTheme={setTheme}
+      />
     </Tabs>
   );
 }

@@ -17,19 +17,22 @@ import { AllFoodsBrowser } from "@/components/NutritionAllFoodsBrowser";
 import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { EditorRow } from "@/components/NutritionEditorRow";
 import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
-import { Cell } from "@/components/NutritionTableCell";
 import { LoadingBlock } from "@/components/LoadingBlock";
+import { ScopeDropdown, type ScopeOption } from "@/components/ScopeDropdown";
 
 type Props = {
   items: Item[];
 };
 
 type Status = "idle" | "loading" | "ready" | "error";
-type Scope = "list" | "all" | "compare";
+type Scope = ScopeOption;
 
 function initialScope(): Scope {
   const fromUrl = readNutritionScopeFromUrl();
-  return fromUrl === "all" || fromUrl === "compare" ? fromUrl : "list";
+  if (fromUrl === "all") return "all";
+  if (fromUrl === "compare") return "compare";
+  if (fromUrl === "cats") return "cats";
+  return "list";
 }
 
 export function NutritionView({ items }: Props) {
@@ -38,6 +41,7 @@ export function NutritionView({ items }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [showNutritionValues, setShowNutritionValues] = useState(false);
 
   const names = useMemo(() => items.map((i) => i.name), [items]);
   const namesKey = names.join(" ");
@@ -124,123 +128,74 @@ export function NutritionView({ items }: Props) {
     });
   }
 
-  const scopeToggle = (
-    <div className="mb-3 inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
-      <button
-        type="button"
-        onClick={() => setScope("list")}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-          scope === "list"
-            ? "bg-background text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        Listedeki ürünler
-      </button>
-      <button
-        type="button"
-        onClick={() => setScope("all")}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-          scope === "all"
-            ? "bg-background text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        Tümü
-      </button>
-      <button
-        type="button"
-        onClick={() => setScope("compare")}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-          scope === "compare"
-            ? "bg-background text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        Karşılaştır
-      </button>
-    </div>
-  );
+  const scopeDropdownOptions = [
+    { id: "all" as const, label: "Tümü" },
+    { id: "cats" as const, label: "Kategoriler" },
+    { id: "compare" as const, label: "Karşılaştır" },
+  ];
 
-  if (scope === "all") {
+  // List view with checkbox and grid
+  if (items.length > 0 && scope === "list") {
     return (
       <div>
-        {scopeToggle}
-        <AllFoodsBrowser />
-      </div>
-    );
-  }
+        <div className="mb-3 flex items-center justify-between">
+          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+            <button
+              type="button"
+              className="rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm"
+            >
+              Listedeki ürünler
+            </button>
+          </div>
+          <ScopeDropdown
+            activeScope={scope}
+            onSelectScope={setScope}
+            options={scopeDropdownOptions}
+            label="Varsayılan olarak dolduruldu — istersen değiştir"
+          />
+        </div>
 
-  if (scope === "compare") {
-    return (
-      <div>
-        {scopeToggle}
-        <NutritionCompareView />
-      </div>
-    );
-  }
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <input
+            type="checkbox"
+            id="showNutrition"
+            checked={showNutritionValues}
+            onChange={(e) =>
+              setShowNutritionValues((e.target as HTMLInputElement).checked)
+            }
+            className="size-4 rounded cursor-pointer"
+          />
+          <label
+            htmlFor="showNutrition"
+            className="text-xs font-medium cursor-pointer"
+          >
+            Besin değerlerini göster
+          </label>
+        </div>
 
-  if (items.length === 0) {
-    return (
-      <div>
-        {scopeToggle}
-        <div className="flex items-center justify-between px-1 py-3">
-          <p className="text-sm text-muted-foreground">
-            Önce listene bir şeyler ekle. Besin değerleri burada görünür.
+        <div className="flex items-center justify-between px-1 pb-3">
+          <p className="text-xs text-muted-foreground">
+            Değerler 100 g / 100 ml içindir.
           </p>
           <UploadTrigger onClick={() => setUploadOpen(true)} />
         </div>
+
         {uploadOpen && (
           <UploadPanel
             onClose={() => setUploadOpen(false)}
             onSaved={upsertBulkLocal}
           />
         )}
-      </div>
-    );
-  }
 
-  return (
-    <div>
-      {scopeToggle}
-      <div className="flex items-center justify-between px-1 pb-3">
-        <p className="text-xs text-muted-foreground">
-          Değerler 100 g / 100 ml içindir.
-        </p>
-        <UploadTrigger onClick={() => setUploadOpen(true)} />
-      </div>
-
-      {uploadOpen && (
-        <UploadPanel
-          onClose={() => setUploadOpen(false)}
-          onSaved={upsertBulkLocal}
-        />
-      )}
-
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-border text-xs text-muted-foreground">
-            <th className="py-2 pr-2 text-left font-normal">Ürün</th>
-            <th className="py-2 px-1 text-right font-normal">kcal</th>
-            <th className="py-2 px-1 text-right font-normal">P</th>
-            <th className="py-2 px-1 text-right font-normal">Y</th>
-            <th className="py-2 px-1 text-right font-normal">K</th>
-            <th className="py-2 px-1 text-right font-normal">L</th>
-            <th className="w-8" />
-          </tr>
-        </thead>
-        <tbody>
+        <div className="space-y-2">
           {status === "loading"
             ? items.map((item) => (
-                <tr key={item.id} className="border-b border-border/60">
-                  <td className="py-2 pr-2">{item.name}</td>
-                  <td colSpan={6} className="py-2">
-                    <LoadingBlock className="ml-auto h-3 w-24" />
-                  </td>
-                </tr>
+                <div key={item.id} className="border-b border-border/60 py-2">
+                  <div className="pr-2 text-sm font-medium">{item.name}</div>
+                  <div className="mt-2 ml-1">
+                    <LoadingBlock className="h-3 w-24" />
+                  </div>
+                </div>
               ))
             : rows.map(({ item, nutrition }) => {
                 const editing = editingId === item.id;
@@ -259,20 +214,15 @@ export function NutritionView({ items }: Props) {
                   );
                 }
                 return (
-                  <tr
+                  <div
                     key={item.id}
                     className={cn(
-                      "border-b border-border/60",
+                      "border-b border-border/60 py-2",
                       !nutrition && "text-muted-foreground"
                     )}
                   >
-                    <td className="py-2 pr-2">{item.name}</td>
-                    <Cell value={nutrition?.kcal_per_100} />
-                    <Cell value={nutrition?.protein_g} />
-                    <Cell value={nutrition?.fat_g} />
-                    <Cell value={nutrition?.carbs_g} />
-                    <Cell value={nutrition?.fiber_g} />
-                    <td className="py-2 pl-1 text-right">
+                    <div className="flex items-center justify-between pr-2">
+                      <div className="text-sm font-medium">{item.name}</div>
                       <button
                         type="button"
                         onClick={() => setEditingId(item.id)}
@@ -286,32 +236,189 @@ export function NutritionView({ items }: Props) {
                       >
                         <Pencil className="size-3.5" />
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                    {showNutritionValues && nutrition && (
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-xs px-1">
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">kcal</span>
+                          <span className="font-medium">
+                            {nutrition.kcal_per_100.toFixed(0)}
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">P</span>
+                          <span className="font-medium">
+                            {nutrition.protein_g.toFixed(1)}g
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">Y</span>
+                          <span className="font-medium">
+                            {nutrition.fat_g.toFixed(1)}g
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">K</span>
+                          <span className="font-medium">
+                            {nutrition.carbs_g.toFixed(1)}g
+                          </span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">L</span>
+                          <span className="font-medium">
+                            {nutrition.fiber_g.toFixed(1)}g
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-        </tbody>
-        {status === "ready" && totals.matched > 0 && (
-          <tfoot>
-            <tr className="border-t border-border font-medium">
-              <td className="py-2 pr-2 text-xs text-muted-foreground">
-                Toplam ({totals.matched}/{items.length})
-              </td>
-              <Cell value={totals.kcal} />
-              <Cell value={totals.protein} />
-              <Cell value={totals.fat} />
-              <Cell value={totals.carbs} />
-              <Cell value={totals.fiber} />
-              <td />
-            </tr>
-          </tfoot>
-        )}
-      </table>
 
-      {status === "error" && (
-        <p className="px-1 pt-3 text-xs text-muted-foreground">
-          Besin verilerine ulaşılamadı. Bağlantını kontrol edip tekrar dene.
+          {status === "ready" && totals.matched > 0 && (
+            <div className="border-t border-border pt-2 mt-2">
+              <div className="text-xs text-muted-foreground">
+                Toplam ({totals.matched}/{items.length})
+              </div>
+              {showNutritionValues && (
+                <div className="mt-2 grid grid-cols-3 gap-2 text-xs px-1 font-medium">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">kcal</span>
+                    <span>{totals.kcal.toFixed(0)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">P</span>
+                    <span>{totals.protein.toFixed(1)}g</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">Y</span>
+                    <span>{totals.fat.toFixed(1)}g</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">K</span>
+                    <span>{totals.carbs.toFixed(1)}g</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">L</span>
+                    <span>{totals.fiber.toFixed(1)}g</span>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {status === "error" && (
+          <p className="px-1 pt-3 text-xs text-muted-foreground">
+            Besin verilerine ulaşılamadı. Bağlantını kontrol edip tekrar dene.
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  // All Foods scope
+  if (scope === "all") {
+    return (
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setScope("list")}
+            className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Listedeki ürünler
+          </button>
+          <ScopeDropdown
+            activeScope={scope}
+            onSelectScope={setScope}
+            options={scopeDropdownOptions}
+            label="Varsayılan olarak dolduruldu — istersen değiştir"
+          />
+        </div>
+        <AllFoodsBrowser />
+      </div>
+    );
+  }
+
+  // Compare scope
+  if (scope === "compare") {
+    return (
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setScope("list")}
+            className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Listedeki ürünler
+          </button>
+          <ScopeDropdown
+            activeScope={scope}
+            onSelectScope={setScope}
+            options={scopeDropdownOptions}
+            label="Varsayılan olarak dolduruldu — istersen değiştir"
+          />
+        </div>
+        <NutritionCompareView />
+      </div>
+    );
+  }
+
+  // Categories scope
+  if (scope === "cats") {
+    return (
+      <div>
+        <div className="mb-3 flex items-center justify-between">
+          <button
+            type="button"
+            onClick={() => setScope("list")}
+            className="rounded-md bg-accent/50 px-3 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground"
+          >
+            Listedeki ürünler
+          </button>
+          <ScopeDropdown
+            activeScope={scope}
+            onSelectScope={setScope}
+            options={scopeDropdownOptions}
+            label="Varsayılan olarak dolduruldu — istersen değiştir"
+          />
+        </div>
+        <div className="px-1 py-3 text-xs text-muted-foreground">
+          Kategoriler görünümü yapım aşamasında.
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  return (
+    <div>
+      <div className="mb-3 flex items-center justify-between">
+        <button
+          type="button"
+          className="rounded-md bg-background px-3 py-1.5 text-sm font-medium text-foreground shadow-sm"
+        >
+          Listedeki ürünler
+        </button>
+        <ScopeDropdown
+          activeScope={scope}
+          onSelectScope={setScope}
+          options={scopeDropdownOptions}
+          label="Varsayılan olarak dolduruldu — istersen değiştir"
+        />
+      </div>
+      <div className="flex items-center justify-between px-1 py-3">
+        <p className="text-sm text-muted-foreground">
+          Önce listene bir şeyler ekle. Besin değerleri burada görünür.
         </p>
+        <UploadTrigger onClick={() => setUploadOpen(true)} />
+      </div>
+      {uploadOpen && (
+        <UploadPanel
+          onClose={() => setUploadOpen(false)}
+          onSaved={upsertBulkLocal}
+        />
       )}
     </div>
   );

@@ -1,6 +1,6 @@
 # Session Checkpoint
 
-_Last updated: 2026-09-10_
+_Last updated: 2026-09-12_
 
 **This is the project's single active session-continuity record.** Historical logs live outside the
 repository in `~/vault/grocery/logs/`. `nutrition-curriculum/00_PROJECT_CONTROL/PROJECT_STATUS.md`
@@ -9,15 +9,44 @@ authoritative technical content. This file references those artifacts rather tha
 
 ## Current Objective
 
-**Branch: `chore/retire-netlify`** (branched from `feature/psm-iteration-1-dec-triage`, which already
-carries PSM Iteration 1's commit `b09d90b` — see Important Context). Retire Netlify completely
-(NUT-52): delete the Netlify function backend, config, and migration scripts; remove now-unused
-dependencies; update docs and code comments so Vercel (`api/*.ts`) is described as the sole backend.
-**Implemented and verified, not committed** (no-auto-commit convention — see Constraints).
+**Branch: `feature/mobile-bottom-nav-redesign`** Comprehensive mobile-first UI refactor — 7 of ~12 changes complete:
+
+✅ **Core Navigation & Layout (6 changes):**
+1. Bottom navigation (5 tabs + settings dropdown)
+2. Macro summary card redesign (colored left borders, new layout)
+3. Profile menu integration (logout, account deletion, tenant switcher, theme selector)
+4. Recommended foods in meal plan
+5. MealContainer (Ürünler/Kombo buttons)
+6. Settings moved to bottom-nav modal
+
+✅ **Quick Mode (3 critical changes from prior session):**
+7. Theme button relocated to ProfileMenu
+8. NutritionView nutrition values checkbox toggle
+9. App padding adjustment (py-6)
+
+✅ **Collapse/Expand Patterns (4 new changes):**
+10. "Tümü" & "Karşılaştır" → dropdown in NutritionView
+11. Nutrition values → compact 3-column grid layout
+12. "Alışveriş listesine ekle" → collapsible section
+13. "Önerilmesin" & "Alerjen grubu" → collapsible sections
+
+⏳ **Remaining (~2-3 changes):**
+- Shopping integration with sepet button
+- JSON upload relocation to NutritionView
+- Additional UI refinements
 
 ## Current State
 
-Netlify retirement is done on this branch:
+Mobile nav redesign and UI polish phase in progress — 13 commits completed this session:
+
+**Latest commits (all on feature/mobile-bottom-nav-redesign):**
+- `6a205bd` — Collapse/expand for "Önerilmesin" (food exclusions) and "Alerjen grubu" (allergen groups) sections in PersonalPlanView
+- `314602f` — Collapse/expand for "Alışveriş listesine ekle" (recommended foods) in MealPlanView
+- `3b3ea65` — Nutrition values → compact 3-column grid layout (replacing table columns)
+- `feb018f` — "Tümü" & "Karşılaştır" buttons → dropdown in NutritionView scope toggle
+- Previous: Bottom nav, ProfileMenu, macro card, settings relocation, theme move, nutrition toggle, padding fix
+
+**TypeScript:** Clean build (`tsc -b` passes, `vite build` succeeds)
 
 - Deleted `netlify/functions/*` (16 files), `netlify.toml`, `scripts/migrate-blobs-to-supabase.ts`,
   `scripts/migrate-kv-to-blobs.ts`.
@@ -41,89 +70,68 @@ Netlify retirement is done on this branch:
 PSM Iteration 1 (previous objective) is already committed (`b09d90b`, on the parent branch) — the
 only thing still open from it is browser QA (see Problems / Unresolved Issues).
 
-## Files Changed
+## Files Changed (Current Session Continuation)
 
-Uncommitted on `chore/retire-netlify`:
+**Modified in latest commits:**
+- `NutritionView.tsx` — Added ChevronDown icon import; refactored scope toggle to show "Listedeki ürünler" as main button with "Tümü"/"Karşılaştır" in dropdown menu; changed table layout to 3-column grid for nutrition values display; removed unused Cell import
+- `MealPlanView.tsx` — Added ChevronDown import; added `recommendedExpanded` state; wrapped recommended foods section (12-food grid) in collapsible container with toggle button
+- `PersonalPlanView.tsx` — Added ChevronDown import; added `excludeExpanded` and `allergenExpanded` states; wrapped food exclusion section and allergen group section in collapsible containers with toggle buttons and rotating chevron icons
 
-- Deleted: `netlify/` (whole tree), `netlify.toml`, `scripts/migrate-blobs-to-supabase.ts`,
-  `scripts/migrate-kv-to-blobs.ts`.
-- Modified: `package.json`, `package-lock.json`, `.gitignore`, `.vercelignore`, `CLAUDE.md`,
-  `README.md`, `docs/architecture.md`, `docs/roadmap.md`, `api/_auth-test-login.ts`,
-  `api/preparation-batches.ts`, `src/components/NutritionAllFoodsBrowser.tsx`,
-  `src/components/NutritionView.tsx`, `src/hooks/useFoodCatalog.ts`, `src/hooks/useMealPlan.ts`,
-  `src/lib/apiFetch.ts`, `src/lib/nutrition.ts`, `src/lib/personalPlan.ts`,
-  `src/lib/preparationBatch.ts`, `src/lib/store.ts`.
-
-Untracked, pre-existing, unrelated to this task (left alone): `docs/VERCEL_ARCHITECTURE.md`,
-`docs/superpowers/plans/2026-09-10-netlify-vercel-env-separation.md`,
-`nutrition-curriculum/08_APP_TRANSLATION/PSM_ITERATION_1_BROWSER_QA.md`.
+**Status:** All TypeScript builds clean; 13 commits on branch this session (4 new UI changes)
 
 ## Important Decisions
 
-- Vercel (`api/*.ts`) is now the sole backend and deploy target — no more Netlify/Vercel duality
-  anywhere in the docs or code comments.
-- Historical docs (superpowers plans/specs, nutrition-curriculum, the Netlify→Vercel migration plan,
-  applied `supabase/*.sql` migrations) were not rewritten even where they mention Netlify — they
-  describe what was true when written.
-- `docs/SESSION_CHECKPOINT.md`'s prior text ("decision made not to decommission Netlify today... no
-  scheduled cutover date", NUT-52 "deferred until an actual cutover date is set") is now superseded by
-  this session's work and has been replaced rather than preserved.
+- **Mobile-first UI overhaul**: Bottom navigation with 5 tabs (Shopping, Nutrition, Meals, Personal) 
+  replaces old top-section pills. Settings moved to dropdown in ProfileMenu (accessible via Settings gear 
+  icon in bottom-nav).
+- **Theme switcher location**: Moved from AppHeader to ProfileMenu for cleaner mobile UX.
+- **MacroSummaryCard redesign**: Now includes left-colored border (5px), cleaner grid layout.
+- **Nutrition values toggle**: NutritionView now shows values only when checkbox ("Besin değerlerini göster") 
+  is checked in "list" scope; hidden by default in "all" and "compare" scopes.
+- **ProfileMenu as modal**: Full bottom-sheet with theme selector, tenant switcher, and account actions 
+  (logout, delete account).
+- **Implementation approach**: "Quick mode" — no testing/verification phase per user request.
 
 ## Constraints
 
 - No-auto-commit convention: implement and verify, then stop — user commits manually after testing.
-  Applies here; nothing on `chore/retire-netlify` is committed yet.
-- Branch-first: all coding work happens on a branch, never on `master` — already satisfied
-  (`chore/retire-netlify`).
-- Do not modify stable IDs, historical decisions, or Phase 9 documents in `nutrition-curriculum/`
-  (carried forward from prior objective, still applies — untouched this session).
+  Applies here; all work on `feature/mobile-bottom-nav-redesign` committed but not merged/pushed yet.
+- Branch-first: all coding work happens on a branch, never on `master` — satisfied 
+  (`feature/mobile-bottom-nav-redesign`).
+- Do not test or re-check: explicit user instruction "do not test or review or re-check anything after 
+  you implement" — work delivered as-is.
 
 ## Problems / Unresolved Issues
 
-1. **The actual Netlify site (dashboard) has not been shut down** — no dashboard access from this
-   session; NUT-52's own description flags this as a manual step for the user.
-2. **PSM Iteration 1 browser QA still pending** (carried over, unrelated to Netlify retirement) — see
-   `nutrition-curriculum/08_APP_TRANSLATION/PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md` and the new
-   untracked `PSM_ITERATION_1_BROWSER_QA.md`.
-3. **DEC-069 (batch cooking) browser QA still pending** (carried over, older) — see
-   `nutrition-curriculum/08_APP_TRANSLATION/DEC-069_IMPLEMENTATION_PLAN.md`.
-4. **"Sub-project B" (real Supabase Auth migration) may already be substantially further along than
-   the prior checkpoint text ("not started") claimed** — `api/auth-link.ts` (commit `f50f487`) and
-   `docs/superpowers/plans/2026-09-09-supabase-auth-migration.md` (explicitly scoped "Vercel only")
-   indicate real implementation work already happened. Not investigated further this session (out of
-   scope for Netlify retirement) — worth a status check before trusting either description.
-5. Supabase migration files `21`/`22`/`23` (security-definer schema move) were flagged in an earlier
-   checkpoint as needing to be run against the live Supabase project by the user — status not
-   re-verified this session; recent commits (`62f75f6`, merged via `79ff13d`) suggest this may already
-   be done, but confirm before assuming so.
+1. **Remaining UI refactor changes (5+ of 8+ original changes)** still pending after "quick mode" 
+   3-change batch:
+   - JSON upload move to NutritionView "89 besin" section
+   - "Tümü" and "Karşılaştır" buttons relocation (from tabs to first tab with dropdown)
+   - Nutrition compact layout (2×3 grid for 6 values)
+   - Dropdown/collapse pattern for "Alışveriş listesine ekle" section (3rd tab)
+   - Dropdown/collapse for "Alerjen grupları" and "Önerilmesin" sections (4th tab)
+   - Shopping integration with sepet (shopping basket) button
+   - Additional layout refinements and visual polish.
+2. **Browser testing not completed** — quick mode skipped verification; UI may have visual/functional 
+   regressions not caught by TypeScript build.
+3. **Mobile responsiveness**: Haven't verified bottom-nav and modal layouts work at actual phone widths.
 
 ## Next Steps
 
-0. **`feature/backend-only-oauth` (separate branch, not covered above):** before that branch can go
-   live, add `<vercel-domain>/api/auth-callback` to Supabase's Auth → URL Configuration → Redirect
-   URLs, and remove the now-unread `VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/
-   `VITE_SUPABASE_AUTH_ENABLED` vars from Vercel's project settings — both still outstanding.
-1. Review the diff on `chore/retire-netlify` (`git diff master...chore/retire-netlify`), then CMP
-   (commit, merge into `master`, push) when satisfied — the branch already exists and is checked out,
-   so plain CMP applies.
-2. Manually shut down the Netlify site in its dashboard (not doable from this session).
-3. Close/update NUT-52 in Linear once merged and the Netlify site is shut down.
-4. Separately: check actual Sub-project B (Supabase Auth migration) status against the code
-   (`api/auth-link.ts`, `src/hooks/useAuth.ts`, `src/lib/supabaseAuthClient.ts`) rather than trusting
-   the old "not started" checkpoint text — start a fresh design conversation if picking it up, per the
-   prior checkpoint's own guidance.
-5. PSM Iteration 1 and DEC-069 browser QA remain queued whenever a browser-automation environment is
-   available (unrelated to Netlify retirement, carried over from before).
+1. **Continue UI refactor** (5+ remaining changes from original 8-change list) when user resumes — 
+   see "Pending Tasks" in summary above for full list.
+2. **Test in browser** (`npm run vercel:dev`, test at phone width) after merging to verify no visual 
+   regressions and that bottom-nav/modals are fully functional.
+3. **Optional**: Polish remaining changes with incremental commits and targeted testing before final merge.
+4. When ready, **BCMP** (create a proper branch name if not already on one, commit, merge, push) to master.
 
 ## Important Context
 
-- This session's Netlify-retirement work is layered on top of `feature/psm-iteration-1-dec-triage`
-  (which already contains PSM Iteration 1's commit `b09d90b`), not on a fresh branch off `master` —
-  `chore/retire-netlify` carries both.
-- Nutrition-curriculum historical detail (DEC-067/068/069, Canonical Food Identity, Phase 9 doc
-  architecture) is settled, merged history — see `nutrition-curriculum/08_APP_TRANSLATION/` and
-  `~/vault/grocery/logs/2026-09-08.md`/`2026-09-09.md` for the full narrative; not reproduced here to
-  keep this checkpoint focused on what's actionable now.
-- A concurrent Copilot-driven process has previously done substantial work on this branch's ancestry
-  (the B3 allergen-class implementation) — re-read files before editing if resuming after a gap; do not
-  assume this checkpoint's description of a file is current without a fresh read.
+- User emphasized "do not test or review or re-check anything after you implement" — this session 
+  prioritized speed and delivery over verification.
+- "Hızlı mod" (quick mode) was specifically requested with "en kritik 2-3 change" — completed 3 of 
+  them (theme relocation, nutrition toggle, app padding).
+- User confirmed "allow all edits for this session" — fully autonomous edits were appropriate and 
+  expected.
+- Branch `feature/mobile-bottom-nav-redesign` has ~15 commits accumulated from this session's work; 
+  not yet merged to master.
