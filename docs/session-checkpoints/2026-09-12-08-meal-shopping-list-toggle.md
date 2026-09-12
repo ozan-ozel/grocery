@@ -1,8 +1,12 @@
 # 2026-09-12: Meal Shopping-List and Meal Picker Controls
 
 **Date:** 2026-09-12  
-**Branch:** `feature/meal-shopping-list-toggle`  
+**Branch:** `feature/meal-shopping-list-toggle` → merged in the combined UI batch (`eace7f0`)  
 **Status:** Implementation complete; live interaction remains open
+
+## Merged UI branch context
+
+This UI work was folded into the same larger UI pass as the tab styling cleanup and mockup refinements. The branch itself was merged, and the relevant files below are the actual implementation footprint.
 
 ## Current state
 

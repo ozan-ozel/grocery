@@ -4,6 +4,10 @@
 **Branch:** `refactor/dropdown-chevron-component` → `master` (merged)  
 **Status:** ✅ Complete
 
+## Merged UI branch context
+
+This change was merged in the same UI polish batch as the category and tab cleanup work. The branch was not left open after merge.
+
 ## Summary
 
 Extracted the chevron dropdown toggle button into a reusable component and refactored PersonalPlanView to use it. This eliminates duplicate code and ensures consistent dropdown button styling and behavior across the application.
@@ -11,7 +15,9 @@ Extracted the chevron dropdown toggle button into a reusable component and refac
 ## Changes Made
 
 ### New Component
+
 #### [src/components/DropdownChevronButton.tsx](../../src/components/DropdownChevronButton.tsx)
+
 - **Purpose:** Reusable button component for dropdown toggles
 - **Layout:** Full-width flex container with label on left, chevron on right (sağa dayalı)
 - **Props:**
@@ -21,7 +27,9 @@ Extracted the chevron dropdown toggle button into a reusable component and refac
 - **Animation:** ChevronDown icon rotates 180° when `isOpen` is true
 
 ### Updated Files
+
 #### [src/components/PersonalPlanView.tsx](../../src/components/PersonalPlanView.tsx)
+
 - **Removed:** ChevronDown import (now in DropdownChevronButton)
 - **Added:** DropdownChevronButton import
 - **Changed sections:**
@@ -40,6 +48,7 @@ Extracted the chevron dropdown toggle button into a reusable component and refac
 ```
 
 **Layout structure:**
+
 - Flex container with `justify-between` → label left, chevron right
 - Label: `text-sm font-semibold`
 - Chevron: `size-4`, rotates on open state
