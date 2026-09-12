@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil } from "lucide-react";
+import { Pencil, ChevronDown } from "lucide-react";
 import {
   readNutritionScopeFromUrl,
   writeNutritionScopeToUrl,
@@ -39,6 +39,7 @@ export function NutritionView({ items }: Props) {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [showNutritionValues, setShowNutritionValues] = useState(false);
+  const [scopeDropdownOpen, setScopeDropdownOpen] = useState(false);
 
   const names = useMemo(() => items.map((i) => i.name), [items]);
   const namesKey = names.join(" ");
@@ -126,43 +127,66 @@ export function NutritionView({ items }: Props) {
   }
 
   const scopeToggle = (
-    <div className="mb-3 inline-flex items-center gap-1 rounded-lg bg-accent/50 p-1">
-      <button
-        type="button"
-        onClick={() => setScope("list")}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-          scope === "list"
-            ? "bg-background text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
+    <div className="mb-3 flex items-center gap-1">
+      <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
+        <button
+          type="button"
+          onClick={() => setScope("list")}
+          className={cn(
+            "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
+            scope === "list"
+              ? "bg-background text-foreground shadow-sm"
+              : "text-muted-foreground hover:text-foreground"
+          )}
+        >
+          Listedeki ürünler
+        </button>
+      </div>
+
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setScopeDropdownOpen(!scopeDropdownOpen)}
+          className="inline-flex items-center gap-1 rounded-lg bg-accent/50 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+        >
+          <ChevronDown className="size-4" />
+        </button>
+
+        {scopeDropdownOpen && (
+          <div className="absolute top-full left-0 mt-1 z-10 rounded-lg bg-card border border-border shadow-md overflow-hidden">
+            <button
+              type="button"
+              onClick={() => {
+                setScope("all");
+                setScopeDropdownOpen(false);
+              }}
+              className={cn(
+                "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                scope === "all"
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              )}
+            >
+              Tümü
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setScope("compare");
+                setScopeDropdownOpen(false);
+              }}
+              className={cn(
+                "w-full text-left px-3 py-2 text-sm font-medium transition-colors",
+                scope === "compare"
+                  ? "bg-accent text-foreground"
+                  : "text-muted-foreground hover:bg-accent/50 hover:text-foreground"
+              )}
+            >
+              Karşılaştır
+            </button>
+          </div>
         )}
-      >
-        Listedeki ürünler
-      </button>
-      <button
-        type="button"
-        onClick={() => setScope("all")}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-          scope === "all"
-            ? "bg-background text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        Tümü
-      </button>
-      <button
-        type="button"
-        onClick={() => setScope("compare")}
-        className={cn(
-          "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
-          scope === "compare"
-            ? "bg-background text-foreground shadow-sm"
-            : "text-muted-foreground hover:text-foreground"
-        )}
-      >
-        Karşılaştır
-      </button>
+      </div>
     </div>
   );
 
