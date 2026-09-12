@@ -125,6 +125,43 @@ only thing still open from it is browser QA (see Problems / Unresolved Issues).
 3. **Optional**: Polish remaining changes with incremental commits and targeted testing before final merge.
 4. When ready, **BCMP** (create a proper branch name if not already on one, commit, merge, push) to master.
 
+## Separate Pending Work — Yemek Planı UX Plan Batch (2026-09-12)
+
+Unrelated to the `feature/mobile-bottom-nav-redesign` objective above — a planning-only session
+produced 11 implementation plans in `docs/superpowers/plans/2026-09-12-*.md` for a Yemek Planı
+(meal-plan) UX overhaul plus a short-lived agent login mechanism. **None of these have been
+implemented yet.** Each plan carries its own "Recommended Model" and "Scope" (Backend/Frontend)
+header, and notes its dependencies on sibling plans in its Global Constraints section.
+
+- `2026-09-12-agent-test-login.md` — Backend, Opus 5 — short-lived (10 min) magic-link-style
+  login for QA/test agents, no Google OAuth required. Needs an explicit production go/no-go
+  decision (Task 4) before deploying.
+- `2026-09-12-meal-plan-header-cleanup.md` — Frontend, Haiku 4.5 — remove the sync-status header
+  bar + divider above the Yemek Planı screen.
+- `2026-09-12-daily-macros-layout.md` — Frontend, Haiku 4.5 — two-row macro summary card
+  (kcal+protein / carbs+fat+fiber), smaller overall.
+- `2026-09-12-recipe-picker.md` — Frontend, Sonnet 5 — "+Kombo" → "+Tarif" rename, and fixes a
+  real bug (the recipe modal was wired to the raw food catalog instead of actual recipes).
+- `2026-09-12-meal-row-macro-totals.md` — Frontend, Haiku 4.5 — per-meal summed macros in each
+  meal row.
+- `2026-09-12-editable-meal-item-grams.md` — Frontend, Sonnet 5 — editable gram quantities per
+  meal item (backend support already existed, unused until this).
+- `2026-09-12-meal-to-shopping-list-toggle.md` — Frontend, Sonnet 5 — per-meal shopping-cart
+  add/remove toggle with a confirmation dialog.
+- `2026-09-12-saved-meal-templates.md` — Backend + Frontend, Opus 5 — save/reload a meal's
+  contents as a named template (new Supabase table + endpoint).
+- `2026-09-12-recent-favorites-quick-add.md` — Frontend, Sonnet 5 — "Son Kullanılanlar" search
+  dialog, multi-meal quick-add.
+- `2026-09-12-meal-plan-shopping-cleanup.md` — Frontend, Haiku 4.5 — remove the batch-prep and
+  recommended-foods sections; make the daily shopping-list button a toggle.
+- `2026-09-12-gram-unit-conversion-ux.md` — Frontend, Sonnet 5 — spoon/glass/ladle equivalents
+  for gram quantities, via a small hand-authored data file.
+
+Suggested execution order given the noted cross-plan dependencies: header cleanup → macros
+layout → recipe picker → meal-row totals → editable grams → shopping-list toggle → shopping
+cleanup → gram-unit conversion. `saved-meal-templates`, `recent-favorites-quick-add`, and
+`agent-test-login` have no dependencies on the others and can be done independently/in parallel.
+
 ## Important Context
 
 - User emphasized "do not test or review or re-check anything after you implement" — this session 
