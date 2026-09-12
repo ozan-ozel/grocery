@@ -155,26 +155,26 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
+          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
@@ -331,26 +331,26 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
+          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
@@ -367,26 +367,26 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
+          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
@@ -403,26 +403,26 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
+          <div className="inline-flex items-center rounded-lg bg-muted/40 p-1 gap-1">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-1">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "all" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "cats" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
+                className={cn("px-3 py-1.5 text-sm rounded-md text-muted-foreground", (scope as Scope) === "compare" && "bg-background text-foreground shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
