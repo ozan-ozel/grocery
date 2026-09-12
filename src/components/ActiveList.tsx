@@ -113,6 +113,7 @@ export function ActiveList({
     onToggle,
     onRemove,
     onEdit,
+    showNutritionValues,
   };
 
   return (

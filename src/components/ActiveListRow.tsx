@@ -1,10 +1,12 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Check, Pencil, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { categorize } from "@/lib/categorization/categories";
 import { parseEntry, type AnyCategoryId, type Item } from "@/lib/store";
 import type { MergedCategory } from "@/lib/categorization/userCategories";
+import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { lookupNutrition } from "@/lib/nutrition";
 
 type RowProps = {
   item: Item;
@@ -19,6 +21,7 @@ type RowProps = {
   onToggle: (id: string) => void;
   onRemove: (id: string) => void;
   onEdit: (id: string, name: string, qty: string, category?: AnyCategoryId) => void;
+  showNutritionValues?: boolean;
 };
 
 const SWIPE_MAX = 88;
@@ -37,9 +40,32 @@ export function Row({
   onToggle,
   onRemove,
   onEdit,
+  showNutritionValues,
 }: RowProps) {
   const isEditing = editingId === item.id;
   const swipeActive = swipeMode && !selectMode;
+  const { foods } = useFoodCatalog();
+
+  const nutritionDisplay = useMemo(() => {
+    if (!showNutritionValues || !foods.length) return null;
+
+    const nutrition = lookupNutrition(
+      new Map(foods.map(f => [f.name_tr.toLocaleLowerCase("tr-TR"), f])),
+      item.name
+    );
+
+    if (!nutrition) return null;
+
+    const qty = item.qty ? parseFloat(item.qty) : 100;
+    const multiplier = qty / 100;
+
+    return {
+      kcal: Math.round(nutrition.kcal_per_100 * multiplier),
+      protein: (nutrition.protein_g * multiplier).toFixed(1),
+      carbs: (nutrition.carbs_g * multiplier).toFixed(1),
+      fat: (nutrition.fat_g * multiplier).toFixed(1),
+    };
+  }, [showNutritionValues, item.name, item.qty, foods]);
 
   const [dragX, setDragX] = useState(0);
   const draggingRef = useRef(false);
@@ -150,20 +176,32 @@ export function Row({
             onCheckedChange={() => onToggle(item.id)}
             id={`item-${item.id}`}
           />
-          <label
-            htmlFor={`item-${item.id}`}
-            className={cn(
-              "flex-1 cursor-pointer select-none text-[0.975rem] transition-colors",
-              item.checked &&
-                "text-muted-foreground line-through decoration-[1.5px]",
-            )}>
-            {item.name}
-          </label>
+          <div className="flex-1 min-w-0">
+            <label
+              htmlFor={`item-${item.id}`}
+              className={cn(
+                "flex-1 cursor-pointer select-none text-[0.975rem] transition-colors block",
+                item.checked &&
+                  "text-muted-foreground line-through decoration-[1.5px]",
+              )}>
+              {item.name}
+            </label>
+            {nutritionDisplay && (
+              <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
+                <div className="flex gap-2">
+                  <span>P: {nutritionDisplay.protein}g</span>
+                  <span>K: {nutritionDisplay.carbs}g</span>
+                  <span>Y: {nutritionDisplay.fat}g</span>
+                  <span className="font-medium text-foreground">{nutritionDisplay.kcal} kcal</span>
+                </div>
+              </div>
+            )}
+          </div>
 
           {item.qty && (
             <span
               className={cn(
-                "ledger text-sm text-muted-foreground",
+                "ledger text-sm text-muted-foreground shrink-0",
                 item.checked && "line-through",
               )}>
               {item.qty}
