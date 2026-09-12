@@ -1,11 +1,9 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
 import type { MealItem } from "@/lib/localMealPlan";
 import type { NutritionMap } from "@/lib/nutrition";
 import { MealItemCard } from "./MealItemCard";
 
 export type MealType = "ilk" | "ara" | "son";
-type TabType = "products" | "combos";
 
 type Props = {
   mealType: MealType;
@@ -30,45 +28,28 @@ export function MealContainer({
   onSelectRecipe,
   onRemoveItem,
 }: Props) {
-  const [activeTab, setActiveTab] = useState<TabType>("products");
   const label = MEAL_LABELS[mealType];
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
       <h3 className="font-semibold text-foreground">{label.tr}</h3>
 
-      {/* Tab Navigation */}
-      <div className="flex gap-2 border-b border-border -mx-4 px-4">
+      <div className="grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={() => setActiveTab("products")}
-          className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "products"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}>
+          onClick={onSelectFood}
+          className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary">
+          <Plus className="size-4" />
           Ürünler
         </button>
         <button
           type="button"
-          onClick={() => setActiveTab("combos")}
-          className={`px-3 py-2 text-sm font-medium border-b-2 transition-colors ${
-            activeTab === "combos"
-              ? "border-primary text-primary"
-              : "border-transparent text-muted-foreground hover:text-foreground"
-          }`}>
+          onClick={onSelectRecipe}
+          className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary">
+          <Plus className="size-4" />
           Kombo
         </button>
       </div>
-
-      {/* Add Button */}
-      <button
-        type="button"
-        onClick={activeTab === "products" ? onSelectFood : onSelectRecipe}
-        className="w-full flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary hover:text-primary">
-        <Plus className="size-4" />
-        {activeTab === "products" ? "Ürün Seç" : "Kombo Seç"}
-      </button>
 
       {items.length > 0 && (
         <div className="space-y-2 border-t border-border pt-3">
