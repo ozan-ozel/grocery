@@ -122,11 +122,11 @@ export function AppHeader({
               onScroll={updateTabScrollFade}
               className="-mx-1 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               style={{ maskImage: tabScrollMask, WebkitMaskImage: tabScrollMask }}>
-              <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1 shadow-[0_4px_12px_rgba(232,86,74,0.15)]">
+              <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
                 <TabsList className="p-0.5">
-                  <TabsTrigger value="list" className="px-3 py-1.5 text-sm rounded-md">Liste</TabsTrigger>
-                  <TabsTrigger value="history" className="px-3 py-1.5 text-sm rounded-md">Geçmiş</TabsTrigger>
-                  <TabsTrigger value="cats" className="px-3 py-1.5 text-sm rounded-md">Kategoriler</TabsTrigger>
+                  <TabsTrigger value="list" className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]">Liste</TabsTrigger>
+                  <TabsTrigger value="history" className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]">Geçmiş</TabsTrigger>
+                  <TabsTrigger value="cats" className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]">Kategoriler</TabsTrigger>
                 </TabsList>
               </div>
             </div>

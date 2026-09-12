@@ -155,12 +155,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1 shadow-[0_4px_12px_rgba(232,86,74,0.15)]">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
             <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md"
+                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
               >
                 Tümü
               </TabsTrigger>
@@ -331,12 +331,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1 shadow-[0_4px_12px_rgba(232,86,74,0.15)]">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
             <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md"
+                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
               >
                 Tümü
               </TabsTrigger>
@@ -367,12 +367,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1 shadow-[0_4px_12px_rgba(232,86,74,0.15)]">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
             <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md"
+                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
               >
                 Tümü
               </TabsTrigger>
@@ -403,12 +403,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1 shadow-[0_4px_12px_rgba(232,86,74,0.15)]">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border/50 p-1">
             <TabsList className="grid w-auto grid-cols-3 h-auto p-0.5">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md"
+                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
               >
                 Tümü
               </TabsTrigger>
