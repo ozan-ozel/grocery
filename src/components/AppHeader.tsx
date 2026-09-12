@@ -3,16 +3,12 @@ import { CloudOff, FilePlus2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ThemeSwitcher } from "@/components/ThemeSwitcher";
 import { defaultTitle, type List } from "@/lib/store";
 import type { SyncStatus } from "@/lib/sync/sync";
-import type { Theme } from "@/lib/preferences";
 import type { Section } from "@/hooks/useUiPrefs";
 
 type Props = {
   syncStatus: SyncStatus;
-  theme: Theme;
-  onSelectTheme: (theme: Theme) => void;
   section: Section;
   active: List;
   onRenameActive: (title: string) => void;
@@ -21,8 +17,6 @@ type Props = {
 
 export function AppHeader({
   syncStatus,
-  theme,
-  onSelectTheme,
   section,
   active,
   onRenameActive,
@@ -78,7 +72,6 @@ export function AppHeader({
                 )}
               </span>
             )}
-            <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
           </div>
         </div>
 

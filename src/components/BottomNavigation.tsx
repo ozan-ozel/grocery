@@ -2,6 +2,7 @@ import { ShoppingCart, Apple, UtensilsCrossed, User, Settings } from "lucide-rea
 import { useState } from "react";
 import { ProfileMenu } from "./ProfileMenu";
 import type { Tenant } from "@/lib/store";
+import type { Theme } from "@/lib/preferences";
 
 export type NavTab = "shopping" | "nutrition" | "meals" | "personal";
 
@@ -18,6 +19,8 @@ type Props = {
   onRenameTenant: (id: string, name: string) => void;
   onDeleteTenant: (id: string) => void;
   onToggleHiddenTenant: (id: string) => void;
+  theme: Theme;
+  onSelectTheme: (theme: Theme) => void;
 };
 
 export function BottomNavigation({
@@ -33,6 +36,8 @@ export function BottomNavigation({
   onRenameTenant,
   onDeleteTenant,
   onToggleHiddenTenant,
+  theme,
+  onSelectTheme,
 }: Props) {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -61,6 +66,8 @@ export function BottomNavigation({
         onRenameTenant={onRenameTenant}
         onDeleteTenant={onDeleteTenant}
         onToggleHiddenTenant={onToggleHiddenTenant}
+        theme={theme}
+        onSelectTheme={onSelectTheme}
       />
 
       {/* Bottom Navigation Bar */}

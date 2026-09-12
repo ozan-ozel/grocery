@@ -1,6 +1,8 @@
 import { LogOut, Trash2, X } from "lucide-react";
 import { TenantSwitcher } from "./TenantSwitcher";
+import { ThemeSwitcher } from "./ThemeSwitcher";
 import type { Tenant } from "@/lib/store";
+import type { Theme } from "@/lib/preferences";
 
 type Props = {
   isOpen: boolean;
@@ -16,6 +18,8 @@ type Props = {
   onRenameTenant: (id: string, name: string) => void;
   onDeleteTenant: (id: string) => void;
   onToggleHiddenTenant: (id: string) => void;
+  theme: Theme;
+  onSelectTheme: (theme: Theme) => void;
 };
 
 export function ProfileMenu({
@@ -32,6 +36,8 @@ export function ProfileMenu({
   onRenameTenant,
   onDeleteTenant,
   onToggleHiddenTenant,
+  theme,
+  onSelectTheme,
 }: Props) {
   if (!isOpen) return null;
 
@@ -61,6 +67,12 @@ export function ProfileMenu({
             className="p-1 text-muted-foreground hover:text-foreground transition-colors">
             <X className="size-5" />
           </button>
+        </div>
+
+        {/* Theme Switcher */}
+        <div className="space-y-2">
+          <h3 className="text-sm font-semibold text-foreground">Tema</h3>
+          <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
         </div>
 
         {/* Tenant Switcher */}

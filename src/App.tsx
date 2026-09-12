@@ -289,11 +289,9 @@ function AppShell({
     <Tabs
       value={tab}
       onValueChange={v => setTab(v as Tab)}
-      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-32">
+      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 py-6 pb-32">
       <AppHeader
         syncStatus={syncStatus}
-        theme={theme}
-        onSelectTheme={setTheme}
         section={section}
         active={active}
         onRenameActive={renameActive}
@@ -378,6 +376,8 @@ function AppShell({
         onRenameTenant={renameTenant}
         onDeleteTenant={deleteTenant}
         onToggleHiddenTenant={toggleHiddenTenant}
+        theme={theme}
+        onSelectTheme={setTheme}
       />
     </Tabs>
   );

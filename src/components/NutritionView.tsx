@@ -38,6 +38,7 @@ export function NutritionView({ items }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [uploadOpen, setUploadOpen] = useState(false);
+  const [showNutritionValues, setShowNutritionValues] = useState(false);
 
   const names = useMemo(() => items.map((i) => i.name), [items]);
   const namesKey = names.join(" ");
@@ -206,6 +207,20 @@ export function NutritionView({ items }: Props) {
   return (
     <div>
       {scopeToggle}
+      {scope === "list" && (
+        <div className="mb-3 flex items-center gap-2 px-1">
+          <input
+            type="checkbox"
+            id="showNutrition"
+            checked={showNutritionValues}
+            onChange={(e) => setShowNutritionValues(e.target.checked)}
+            className="size-4 rounded cursor-pointer"
+          />
+          <label htmlFor="showNutrition" className="text-xs font-medium cursor-pointer">
+            Besin değerlerini göster
+          </label>
+        </div>
+      )}
       <div className="flex items-center justify-between px-1 pb-3">
         <p className="text-xs text-muted-foreground">
           Değerler 100 g / 100 ml içindir.
@@ -220,15 +235,20 @@ export function NutritionView({ items }: Props) {
         />
       )}
 
+      {scope === "list" && (
       <table className="w-full border-collapse text-sm">
         <thead>
           <tr className="border-b border-border text-xs text-muted-foreground">
             <th className="py-2 pr-2 text-left font-normal">Ürün</th>
-            <th className="py-2 px-1 text-right font-normal">kcal</th>
-            <th className="py-2 px-1 text-right font-normal">P</th>
-            <th className="py-2 px-1 text-right font-normal">Y</th>
-            <th className="py-2 px-1 text-right font-normal">K</th>
-            <th className="py-2 px-1 text-right font-normal">L</th>
+            {showNutritionValues && (
+              <>
+                <th className="py-2 px-1 text-right font-normal">kcal</th>
+                <th className="py-2 px-1 text-right font-normal">P</th>
+                <th className="py-2 px-1 text-right font-normal">Y</th>
+                <th className="py-2 px-1 text-right font-normal">K</th>
+                <th className="py-2 px-1 text-right font-normal">L</th>
+              </>
+            )}
             <th className="w-8" />
           </tr>
         </thead>
@@ -267,11 +287,15 @@ export function NutritionView({ items }: Props) {
                     )}
                   >
                     <td className="py-2 pr-2">{item.name}</td>
-                    <Cell value={nutrition?.kcal_per_100} />
-                    <Cell value={nutrition?.protein_g} />
-                    <Cell value={nutrition?.fat_g} />
-                    <Cell value={nutrition?.carbs_g} />
-                    <Cell value={nutrition?.fiber_g} />
+                    {showNutritionValues && (
+                      <>
+                        <Cell value={nutrition?.kcal_per_100} />
+                        <Cell value={nutrition?.protein_g} />
+                        <Cell value={nutrition?.fat_g} />
+                        <Cell value={nutrition?.carbs_g} />
+                        <Cell value={nutrition?.fiber_g} />
+                      </>
+                    )}
                     <td className="py-2 pl-1 text-right">
                       <button
                         type="button"
@@ -297,16 +321,21 @@ export function NutritionView({ items }: Props) {
               <td className="py-2 pr-2 text-xs text-muted-foreground">
                 Toplam ({totals.matched}/{items.length})
               </td>
-              <Cell value={totals.kcal} />
-              <Cell value={totals.protein} />
-              <Cell value={totals.fat} />
-              <Cell value={totals.carbs} />
-              <Cell value={totals.fiber} />
+              {showNutritionValues && (
+                <>
+                  <Cell value={totals.kcal} />
+                  <Cell value={totals.protein} />
+                  <Cell value={totals.fat} />
+                  <Cell value={totals.carbs} />
+                  <Cell value={totals.fiber} />
+                </>
+              )}
               <td />
             </tr>
           </tfoot>
         )}
       </table>
+      )}
 
       {status === "error" && (
         <p className="px-1 pt-3 text-xs text-muted-foreground">
