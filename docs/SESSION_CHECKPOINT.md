@@ -9,31 +9,44 @@ authoritative technical content. This file references those artifacts rather tha
 
 ## Current Objective
 
-**Branch: `feature/mobile-bottom-nav-redesign`** Comprehensive mobile-first UI refactor with:
-1. ✅ Bottom navigation (5 tabs + settings dropdown)
-2. ✅ Macro summary card redesign (colored left borders, new layout)
-3. ✅ Profile menu integration (logout, account deletion, tenant switcher, theme selector)
-4. ✅ Recommended foods in meal plan
-5. ✅ MealContainer tabs (Ürünler/Kombo)
-6. ✅ Settings moved to bottom-nav modal
-7. ✅ Theme button relocated to ProfileMenu
-8. ⏳ NutritionView switch for nutrition values display (IN PROGRESS - partially done)
-9. ⏳ Remaining UI refactor changes (JSON upload relocation, layout compacting, etc.)
+**Branch: `feature/mobile-bottom-nav-redesign`** Comprehensive mobile-first UI refactor — 7 of ~12 changes complete:
+
+✅ **Core Navigation & Layout (6 changes):**
+1. Bottom navigation (5 tabs + settings dropdown)
+2. Macro summary card redesign (colored left borders, new layout)
+3. Profile menu integration (logout, account deletion, tenant switcher, theme selector)
+4. Recommended foods in meal plan
+5. MealContainer (Ürünler/Kombo buttons)
+6. Settings moved to bottom-nav modal
+
+✅ **Quick Mode (3 critical changes from prior session):**
+7. Theme button relocated to ProfileMenu
+8. NutritionView nutrition values checkbox toggle
+9. App padding adjustment (py-6)
+
+✅ **Collapse/Expand Patterns (4 new changes):**
+10. "Tümü" & "Karşılaştır" → dropdown in NutritionView
+11. Nutrition values → compact 3-column grid layout
+12. "Alışveriş listesine ekle" → collapsible section
+13. "Önerilmesin" & "Alerjen grubu" → collapsible sections
+
+⏳ **Remaining (~2-3 changes):**
+- Shopping integration with sepet button
+- JSON upload relocation to NutritionView
+- Additional UI refinements
 
 ## Current State
 
-Mobile nav redesign largely complete; currently in UI polish phase:
+Mobile nav redesign and UI polish phase in progress — 13 commits completed this session:
 
-**Completed commits (all on feature/mobile-bottom-nav-redesign):**
-- Mobile bottom navigation with 5 tabs + profile dropdown
-- MacroSummaryCard with colored left borders + layout reorganization
-- ProfileMenu as full bottom-sheet modal with settings
-- Recommended foods section in MealPlanView
-- MealContainer refactored to Ürünler/Kombo buttons
-- Settings (AccountMenu, TenantSwitcher) moved to ProfileMenu
-- "Bugün" (Today) tab removed from shopping
-- Theme button moved to ProfileMenu
-- NutritionView switch for nutrition values (partial - 3 of 8+ UI changes)
+**Latest commits (all on feature/mobile-bottom-nav-redesign):**
+- `6a205bd` — Collapse/expand for "Önerilmesin" (food exclusions) and "Alerjen grubu" (allergen groups) sections in PersonalPlanView
+- `314602f` — Collapse/expand for "Alışveriş listesine ekle" (recommended foods) in MealPlanView
+- `3b3ea65` — Nutrition values → compact 3-column grid layout (replacing table columns)
+- `feb018f` — "Tümü" & "Karşılaştır" buttons → dropdown in NutritionView scope toggle
+- Previous: Bottom nav, ProfileMenu, macro card, settings relocation, theme move, nutrition toggle, padding fix
+
+**TypeScript:** Clean build (`tsc -b` passes, `vite build` succeeds)
 
 - Deleted `netlify/functions/*` (16 files), `netlify.toml`, `scripts/migrate-blobs-to-supabase.ts`,
   `scripts/migrate-kv-to-blobs.ts`.
@@ -57,16 +70,14 @@ Mobile nav redesign largely complete; currently in UI polish phase:
 PSM Iteration 1 (previous objective) is already committed (`b09d90b`, on the parent branch) — the
 only thing still open from it is browser QA (see Problems / Unresolved Issues).
 
-## Files Changed (Latest Session)
+## Files Changed (Current Session Continuation)
 
-Committed on `feature/mobile-bottom-nav-redesign`:
+**Modified in latest commits:**
+- `NutritionView.tsx` — Added ChevronDown icon import; refactored scope toggle to show "Listedeki ürünler" as main button with "Tümü"/"Karşılaştır" in dropdown menu; changed table layout to 3-column grid for nutrition values display; removed unused Cell import
+- `MealPlanView.tsx` — Added ChevronDown import; added `recommendedExpanded` state; wrapped recommended foods section (12-food grid) in collapsible container with toggle button
+- `PersonalPlanView.tsx` — Added ChevronDown import; added `excludeExpanded` and `allergenExpanded` states; wrapped food exclusion section and allergen group section in collapsible containers with toggle buttons and rotating chevron icons
 
-- **New components**: BottomNavigation.tsx, ProfileMenu.tsx
-- **Modified**: MealPlanView.tsx, MealContainer.tsx, MealItemCard.tsx, MacroSummaryCard.tsx,
-  FoodSearchModal.tsx, App.tsx, AppHeader.tsx, AppShoppingTabs.tsx, NutritionView.tsx
-- **Removed from AppHeader**: ThemeSwitcher import/logic, theme-related props
-- **Removed**: "Today" (Bugün) tab from shopping, old MealItemRow/MacroSummary components
-- **Current**: All TypeScript builds clean; UI work spans multiple commits (~15 commits this session)
+**Status:** All TypeScript builds clean; 13 commits on branch this session (4 new UI changes)
 
 ## Important Decisions
 
