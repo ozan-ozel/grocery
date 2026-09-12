@@ -146,7 +146,7 @@ export function NutritionView({ items }: Props) {
         <button
           type="button"
           onClick={() => setScopeDropdownOpen(!scopeDropdownOpen)}
-          className="inline-flex items-center gap-1 rounded-lg bg-accent/50 px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
+          className="inline-flex items-center gap-1 rounded-lg bg-accent px-2 py-1.5 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ChevronDown className="size-4" />
         </button>
