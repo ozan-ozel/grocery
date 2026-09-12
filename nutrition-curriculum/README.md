@@ -17,6 +17,7 @@ Grocery app.
 | Project-wide history: phase/gate status, milestones, past sessions (coarse — not live per-DEC status; see `IMPLEMENTATION_HANDOFF.md` for that) | [00_PROJECT_CONTROL/PROJECT_STATUS.md](00_PROJECT_CONTROL/PROJECT_STATUS.md) |
 | The rules you must follow when working here | [00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md](00_PROJECT_CONTROL/PROJECT_AI_PROTOCOL.md) |
 | A human decision's authoritative record | [00_PROJECT_CONTROL/DECISIONS/](00_PROJECT_CONTROL/DECISIONS/) |
+| Why the energy target is a population formula and what individualizing it would take (research only — selects nothing, changes no `DEC`) | [12_ENERGY_INDIVIDUALIZATION/ENERGY_INDIVIDUALIZATION_RESEARCH_SPEC.md](12_ENERGY_INDIVIDUALIZATION/ENERGY_INDIVIDUALIZATION_RESEARCH_SPEC.md) |
 
 ## If you are an agent working in this corpus
 
