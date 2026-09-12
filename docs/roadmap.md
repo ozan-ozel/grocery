@@ -44,7 +44,12 @@ remain out of scope until their data and safety contracts are defined.
 5. **Meal planning / recipes → auto-generate list.** The nutrition table and
    `NutritionView.tsx` already model per-item nutrition data; a recipe layer that
    expands "tavuklu pilav" into its ingredient list is a natural extension of that
-   data model, not a new subsystem.
+   data model, not a new subsystem. A concrete UX plan batch for the Yemek Planı screen exists
+   for this (2026-09-12): `docs/superpowers/plans/2026-09-12-*.md` covers a real recipe picker
+   (the existing "+Kombo" button was wired to the wrong data), per-meal macro totals, editable
+   gram quantities with household-unit (spoon/glass) equivalents, per-meal shopping-list
+   toggling, saved meal templates, and a recent/favorites quick-add dialog. Plans only — none
+   implemented yet.
 
 6. **Budget / price tracking.** `qty` exists on items but no price field —
    storing price history alongside `buildCatalog()`'s existing
@@ -79,6 +84,12 @@ remain out of scope until their data and safety contracts are defined.
     What's still missing is aggregation: none of this is collected, rated, or
     alerted on anywhere, so a spike in 409s or Supabase failures in production is
     still invisible unless someone is reading function logs live.
+
+12. **Short-lived login for QA/test agents.** A plan exists
+    (`docs/superpowers/plans/2026-09-12-agent-test-login.md`) for a 10-minute, single-use
+    magic-link-style login, separate from the existing local-only `_auth-test-login.ts`
+    backdoor, gated to require an explicit production go/no-go decision before it can work
+    against the deployed app. Not implemented yet.
 
 ## On tooling
 
