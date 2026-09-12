@@ -213,7 +213,7 @@ export function NutritionView({ items }: Props) {
             type="checkbox"
             id="showNutrition"
             checked={showNutritionValues}
-            onChange={(e) => setShowNutritionValues(e.target.checked)}
+            onChange={(e) => setShowNutritionValues((e.target as HTMLInputElement).checked)}
             className="size-4 rounded cursor-pointer"
           />
           <label htmlFor="showNutrition" className="text-xs font-medium cursor-pointer">
