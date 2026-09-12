@@ -28,6 +28,27 @@ export class AuthError extends Error {
   }
 }
 
+// `vercel dev` (and tunnels like ngrok pointed at it) terminate TLS in front
+// of a plain-HTTP local server, so `new URL(request.url).protocol` is always
+// "http:" even when the public-facing URL is https. Trust
+// `x-forwarded-proto`/`x-forwarded-host` (which ngrok and Vercel's real edge
+// both set) when present so redirect_uri construction and the cookie Secure
+// flag reflect the URL the browser/Google actually see.
+export function requestOrigin(request: Request): string {
+  const url = new URL(request.url);
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  const protocol = forwardedProto ? forwardedProto.split(",")[0].trim() : url.protocol.replace(":", "");
+  const forwardedHost = request.headers.get("x-forwarded-host");
+  const host = forwardedHost ?? url.host;
+  return `${protocol}://${host}`;
+}
+
+function isRequestSecure(request: Request): boolean {
+  const forwardedProto = request.headers.get("x-forwarded-proto");
+  if (forwardedProto) return forwardedProto.split(",")[0].trim() === "https";
+  return new URL(request.url).protocol === "https:";
+}
+
 // Hand-rolled: zero cookie-parsing exists anywhere in this repo yet and the
 // format needed is trivial. Not adding the `cookie` npm dependency for this.
 export function parseCookies(header: string | null): Record<string, string> {
@@ -69,7 +90,7 @@ export const RETURN_TO_COOKIE = "sb-return-to";
 // auth cookies; every other function only ever reads them via
 // requireUser()'s read-only adapter.
 export function writableCookies(request: Request, responseHeaders: Headers) {
-  const secure = new URL(request.url).protocol === "https:";
+  const secure = isRequestSecure(request);
   return {
     getAll() {
       const jar = parseCookies(request.headers.get("cookie"));
@@ -91,7 +112,7 @@ export function writableCookies(request: Request, responseHeaders: Headers) {
 // error and success paths) so the attribute list — Secure included — lives
 // in exactly one place.
 export function returnToCookieHeader(request: Request, value: string, maxAge: number): string {
-  const secure = new URL(request.url).protocol === "https:";
+  const secure = isRequestSecure(request);
   const parts = [
     `${RETURN_TO_COOKIE}=${encodeURIComponent(value)}`,
     "Path=/",
@@ -111,7 +132,7 @@ export const OAUTH_STATE_COOKIE = "sb-oauth-state";
 // param it gets back from Google to match it exactly before exchanging the
 // code.
 export function oauthStateCookieHeader(request: Request, value: string, maxAge: number): string {
-  const secure = new URL(request.url).protocol === "https:";
+  const secure = isRequestSecure(request);
   const parts = [
     `${OAUTH_STATE_COOKIE}=${encodeURIComponent(value)}`,
     "Path=/",

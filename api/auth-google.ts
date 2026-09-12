@@ -30,6 +30,7 @@ import {
   isSafeReturnTo,
   returnToCookieHeader,
   oauthStateCookieHeader,
+  requestOrigin,
 } from "../lib/auth.js";
 
 function restBase(url: string): string {
@@ -61,7 +62,7 @@ async function handleStart(request: Request, url: URL): Promise<Response> {
 
   const requestedReturnTo = url.searchParams.get("returnTo");
   const returnTo = isSafeReturnTo(requestedReturnTo) ? requestedReturnTo : "/";
-  const callbackUrl = `${url.origin}/api/auth-callback`;
+  const callbackUrl = `${requestOrigin(request)}/api/auth-callback`;
   const state = crypto.randomUUID();
 
   const authorizeUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
@@ -138,7 +139,7 @@ async function handleCallback(request: Request, url: URL): Promise<Response> {
         client_id: clientId,
         client_secret: clientSecret,
         code,
-        redirect_uri: `${url.origin}/api/auth-callback`,
+        redirect_uri: `${requestOrigin(request)}/api/auth-callback`,
         grant_type: "authorization_code",
       }),
     });
