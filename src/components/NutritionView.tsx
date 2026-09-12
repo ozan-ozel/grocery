@@ -155,12 +155,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
-            <TabsList className="grid w-auto grid-cols-3 h-auto">
+          <div className="inline-flex items-center rounded-lg p-0">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-0 bg-transparent">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm"
+                className="px-3 py-2 text-sm border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent rounded-none"
               >
                 Tümü
               </TabsTrigger>
@@ -331,12 +331,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
-            <TabsList className="grid w-auto grid-cols-3 h-auto">
+          <div className="inline-flex items-center rounded-lg p-0">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-0 bg-transparent">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm"
+                className="px-3 py-2 text-sm border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent rounded-none"
               >
                 Tümü
               </TabsTrigger>
@@ -367,12 +367,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
-            <TabsList className="grid w-auto grid-cols-3 h-auto">
+          <div className="inline-flex items-center rounded-lg p-0">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-0 bg-transparent">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm"
+                className="px-3 py-2 text-sm border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent rounded-none"
               >
                 Tümü
               </TabsTrigger>
@@ -403,12 +403,12 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
-            <TabsList className="grid w-auto grid-cols-3 h-auto">
+          <div className="inline-flex items-center rounded-lg p-0">
+            <TabsList className="grid w-auto grid-cols-3 h-auto p-0 gap-0 bg-transparent">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm"
+                className="px-3 py-2 text-sm border-b-2 border-transparent data-[state=active]:border-foreground data-[state=active]:bg-transparent bg-transparent rounded-none"
               >
                 Tümü
               </TabsTrigger>
