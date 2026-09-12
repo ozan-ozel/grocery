@@ -3,15 +3,12 @@ import { AddItem } from "@/components/AddItem";
 import { ActiveList } from "@/components/ActiveList";
 import { CategoriesView } from "@/components/CategoriesView";
 import { HistoryView } from "@/components/HistoryView";
-import { TodayView } from "@/components/TodayView";
 import type { AnyCategoryId, CatalogEntry, List } from "@/lib/store";
 import type { CategoryOverlay, MergedCategory } from "@/lib/categorization/userCategories";
 
 type Props = {
   catalog: CatalogEntry[];
   onAddItem: (name: string, qty: string) => void;
-  userId: string | null;
-  householdId: string | null;
   active: List;
   past: List[];
   groupByCategory: boolean;
@@ -34,7 +31,6 @@ type Props = {
   onReuseList: (listId: string) => void;
   onDeleteList: (listId: string) => void;
   isOnList: (name: string) => boolean;
-  onRemoveItemByName: (name: string) => void;
   onRenameCategory: (id: AnyCategoryId, label: string) => void;
   onToggleHiddenCategory: (id: string, hidden: boolean) => void;
   onMoveCategory: (id: AnyCategoryId, direction: "up" | "down") => void;
@@ -46,8 +42,6 @@ type Props = {
 export function AppShoppingTabs({
   catalog,
   onAddItem,
-  userId,
-  householdId,
   active,
   past,
   groupByCategory,
@@ -70,7 +64,6 @@ export function AppShoppingTabs({
   onReuseList,
   onDeleteList,
   isOnList,
-  onRemoveItemByName,
   onRenameCategory,
   onToggleHiddenCategory,
   onMoveCategory,
@@ -80,16 +73,6 @@ export function AppShoppingTabs({
 }: Props) {
   return (
     <>
-      <TabsContent value="today">
-        <TodayView
-          userId={userId}
-          householdId={householdId}
-          onAddItem={onAddItem}
-          isOnList={isOnList}
-          onRemoveItemByName={onRemoveItemByName}
-        />
-      </TabsContent>
-
       <TabsContent value="list">
         <AddItem catalog={catalog} onAdd={onAddItem} isOnList={isOnList} />
         <div className="pt-2">

@@ -56,6 +56,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
   const [dailyDetailOpen, setDailyDetailOpen] = useState(false);
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
+  const [recommendedModalOpen, setRecommendedModalOpen] = useState(false);
 
   const targets = calculateTargets(personalizationProfile);
   const targetMacros: MacroTotals = targets ? {
@@ -152,6 +153,28 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
               />
             ))}
           </div>
+
+          {/* Recommended Foods for Shopping */}
+          <div className="space-y-3 mt-6 pt-4 border-t border-border">
+            <h3 className="text-sm font-semibold text-foreground">
+              Alışveriş Listesine Ekle
+            </h3>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              {foods.slice(0, 12).map((food) => (
+                <button
+                  key={food.name_tr}
+                  onClick={() => setRecommendedModalOpen(true)}
+                  className="rounded-lg border border-border bg-background p-3 hover:bg-accent transition-colors text-left">
+                  <p className="text-sm font-medium text-foreground truncate">
+                    {food.name_tr}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {Math.round(food.kcal_per_100)} kcal
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
         </>
       )}
 
@@ -174,6 +197,19 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
         }}
         onSelect={handleFoodSelect}
       />
+
+      {/* Recommended Foods Modal for Shopping */}
+      <FoodSearchModal
+        title="Alışveriş Listesine Ekle"
+        foods={foods}
+        isOpen={recommendedModalOpen}
+        onClose={() => setRecommendedModalOpen(false)}
+        onSelect={(food, quantityG) => {
+          onAddShoppingItem(food.name_tr, `${quantityG}g`);
+          setRecommendedModalOpen(false);
+        }}
+      />
+
       {dailyDetailOpen && (
         <MealNutritionDetailSheet
           title="Günlük toplam"

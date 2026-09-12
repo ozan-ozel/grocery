@@ -92,9 +92,9 @@ function AppBootSkeleton() {
   );
 }
 
-// Bugün → Liste → Geçmiş → Kategoriler, matching AppHeader's TabsTrigger
+// Liste → Geçmiş → Kategoriler, matching AppHeader's TabsTrigger
 // order, so a left/right swipe moves the same direction the tab bar reads.
-const SHOPPING_TAB_ORDER: Tab[] = ["today", "list", "history", "cats"];
+const SHOPPING_TAB_ORDER: Tab[] = ["list", "history", "cats"];
 const SWIPE_MIN_DISTANCE_PX = 60;
 // Anything that owns its own horizontal touch gesture (a list row's
 // swipe-to-check/delete when swipeMode is on, the horizontally-scrolling tab
@@ -245,7 +245,6 @@ function AppShell({
     toggleItem,
     editItem,
     removeItem,
-    removeItemByName,
     bulkRemove,
     startNewList,
     reuseList,
@@ -344,8 +343,6 @@ function AppShell({
           <AppShoppingTabs
             catalog={catalog}
             onAddItem={addItem}
-            userId={currentUserId}
-            householdId={activeTenantId}
             active={active}
             past={past}
             groupByCategory={groupByCategory}
@@ -368,7 +365,6 @@ function AppShell({
             onReuseList={reuseList}
             onDeleteList={deleteList}
             isOnList={isOnList}
-            onRemoveItemByName={removeItemByName}
             onRenameCategory={renameCat}
             onToggleHiddenCategory={toggleHidden}
             onMoveCategory={moveCat}
