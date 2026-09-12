@@ -160,21 +160,21 @@ export function NutritionView({
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
@@ -336,21 +336,21 @@ export function NutritionView({
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
@@ -372,21 +372,21 @@ export function NutritionView({
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
@@ -408,21 +408,21 @@ export function NutritionView({
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
-                className="px-3 py-1.5 text-sm rounded-md data-[state=active]:shadow-[0_4px_12px_rgba(232,86,74,0.15)]"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "all" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Tümü
               </TabsTrigger>
               <TabsTrigger
                 value="cats"
                 onClick={() => setScope("cats")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "cats" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Kategoriler
               </TabsTrigger>
               <TabsTrigger
                 value="compare"
                 onClick={() => setScope("compare")}
-                className="px-3 py-1.5 text-sm"
+                className={cn("px-3 py-1.5 text-sm rounded-md", (scope as Scope) === "compare" && "shadow-[0_4px_12px_rgba(232,86,74,0.15)]")}
               >
                 Karşılaştır
               </TabsTrigger>
