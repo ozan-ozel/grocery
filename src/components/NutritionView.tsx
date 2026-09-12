@@ -5,6 +5,7 @@ import {
   readNutritionScopeFromUrl,
   writeNutritionScopeToUrl,
   type Item,
+  type AnyCategoryId,
 } from "@/lib/store";
 import {
   fetchNutritionCached,
@@ -16,13 +17,23 @@ import {
 import { cn } from "@/lib/utils";
 import { AllFoodsBrowser } from "@/components/NutritionAllFoodsBrowser";
 import { NutritionCompareView } from "@/components/NutritionCompareView";
+import { CategoriesView } from "@/components/CategoriesView";
 import { EditorRow } from "@/components/NutritionEditorRow";
 import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
 import { LoadingBlock } from "@/components/LoadingBlock";
+import type { CategoryOverlay, MergedCategory } from "@/lib/categorization/userCategories";
 
 type Props = {
   items: Item[];
   showNutritionValues: boolean;
+  mergedCategories: MergedCategory[];
+  overlay: CategoryOverlay;
+  onRenameCategory: (id: AnyCategoryId, label: string) => void;
+  onToggleHiddenCategory: (id: string, hidden: boolean) => void;
+  onMoveCategory: (id: AnyCategoryId, direction: "up" | "down") => void;
+  onReorderCategories: (ids: AnyCategoryId[]) => void;
+  onAddCategory: (label: string) => void;
+  onRemoveCategory: (id: string) => void;
 };
 
 type Status = "idle" | "loading" | "ready" | "error";
@@ -36,7 +47,18 @@ function initialScope(): Scope {
   return "list";
 }
 
-export function NutritionView({ items, showNutritionValues }: Props) {
+export function NutritionView({
+  items,
+  showNutritionValues,
+  mergedCategories,
+  overlay,
+  onRenameCategory,
+  onToggleHiddenCategory,
+  onMoveCategory,
+  onReorderCategories,
+  onAddCategory,
+  onRemoveCategory,
+}: Props) {
   const [scope, setScope] = useState<Scope>(initialScope);
   const [map, setMap] = useState<NutritionMap>(() => new Map());
   const [status, setStatus] = useState<Status>("idle");
@@ -428,9 +450,16 @@ export function NutritionView({ items, showNutritionValues }: Props) {
             </TabsList>
           </div>
         </div>
-        <div className="px-1 py-3 text-xs text-muted-foreground">
-          Kategoriler görünümü yapım aşamasında.
-        </div>
+        <CategoriesView
+          merged={mergedCategories}
+          overlay={overlay}
+          onRename={onRenameCategory}
+          onToggleHidden={onToggleHiddenCategory}
+          onMove={onMoveCategory}
+          onReorder={onReorderCategories}
+          onAdd={onAddCategory}
+          onRemoveCustom={onRemoveCategory}
+        />
       </div>
     );
   }

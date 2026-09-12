@@ -321,6 +321,14 @@ function AppShell({
           <NutritionView
             items={active.items}
             showNutritionValues={showNutritionValues}
+            mergedCategories={mergedCategories}
+            overlay={overlay}
+            onRenameCategory={renameCat}
+            onToggleHiddenCategory={toggleHidden}
+            onMoveCategory={moveCat}
+            onReorderCategories={reorderCats}
+            onAddCategory={addCategory}
+            onRemoveCategory={removeCategory}
           />
         ) : section === "yemek" ? (
           <MealPlanView
@@ -356,12 +364,6 @@ function AppShell({
             onReuseList={reuseList}
             onDeleteList={deleteList}
             isOnList={isOnList}
-            onRenameCategory={renameCat}
-            onToggleHiddenCategory={toggleHidden}
-            onMoveCategory={moveCat}
-            onReorderCategories={reorderCats}
-            onAddCategory={addCategory}
-            onRemoveCategory={removeCategory}
             showNutritionValues={showNutritionValues}
             onToggleShowNutritionValues={toggleShowNutritionValues}
           />

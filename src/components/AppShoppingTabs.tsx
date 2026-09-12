@@ -1,7 +1,6 @@
 import { TabsContent } from "@/components/ui/tabs";
 import { AddItem } from "@/components/AddItem";
 import { ActiveList } from "@/components/ActiveList";
-import { CategoriesView } from "@/components/CategoriesView";
 import { HistoryView } from "@/components/HistoryView";
 import type { AnyCategoryId, CatalogEntry, List } from "@/lib/store";
 import type { CategoryOverlay, MergedCategory } from "@/lib/categorization/userCategories";
@@ -31,12 +30,6 @@ type Props = {
   onReuseList: (listId: string) => void;
   onDeleteList: (listId: string) => void;
   isOnList: (name: string) => boolean;
-  onRenameCategory: (id: AnyCategoryId, label: string) => void;
-  onToggleHiddenCategory: (id: string, hidden: boolean) => void;
-  onMoveCategory: (id: AnyCategoryId, direction: "up" | "down") => void;
-  onReorderCategories: (ids: AnyCategoryId[]) => void;
-  onAddCategory: (label: string) => void;
-  onRemoveCategory: (id: string) => void;
   showNutritionValues: boolean;
   onToggleShowNutritionValues: () => void;
 };
@@ -66,12 +59,6 @@ export function AppShoppingTabs({
   onReuseList,
   onDeleteList,
   isOnList,
-  onRenameCategory,
-  onToggleHiddenCategory,
-  onMoveCategory,
-  onReorderCategories,
-  onAddCategory,
-  onRemoveCategory,
   showNutritionValues,
   onToggleShowNutritionValues,
 }: Props) {
@@ -107,19 +94,6 @@ export function AppShoppingTabs({
 
       <TabsContent value="history">
         <HistoryView lists={past} onReuse={onReuseList} onDelete={onDeleteList} />
-      </TabsContent>
-
-      <TabsContent value="cats">
-        <CategoriesView
-          merged={mergedCategories}
-          overlay={overlay}
-          onRename={onRenameCategory}
-          onToggleHidden={onToggleHiddenCategory}
-          onMove={onMoveCategory}
-          onReorder={onReorderCategories}
-          onAdd={onAddCategory}
-          onRemoveCustom={onRemoveCategory}
-        />
       </TabsContent>
     </>
   );
