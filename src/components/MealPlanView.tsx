@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { useMealPlan } from "@/hooks/useMealPlan";
@@ -58,6 +58,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
   const [comboModalOpen, setComboModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
   const [recommendedModalOpen, setRecommendedModalOpen] = useState(false);
+  const [recommendedExpanded, setRecommendedExpanded] = useState(false);
 
   const targets = calculateTargets(personalizationProfile);
   const targetMacros: MacroTotals = targets ? {
@@ -157,24 +158,36 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
 
           {/* Recommended Foods for Shopping */}
           <div className="space-y-3 mt-6 pt-4 border-t border-border">
-            <h3 className="text-sm font-semibold text-foreground">
-              Alışveriş Listesine Ekle
-            </h3>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-              {foods.slice(0, 12).map((food) => (
-                <button
-                  key={food.name_tr}
-                  onClick={() => setRecommendedModalOpen(true)}
-                  className="rounded-lg border border-border bg-background p-3 hover:bg-accent transition-colors text-left">
-                  <p className="text-sm font-medium text-foreground truncate">
-                    {food.name_tr}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    {Math.round(food.kcal_per_100)} kcal
-                  </p>
-                </button>
-              ))}
-            </div>
+            <button
+              type="button"
+              onClick={() => setRecommendedExpanded(!recommendedExpanded)}
+              className="flex items-center justify-between w-full">
+              <h3 className="text-sm font-semibold text-foreground">
+                Alışveriş Listesine Ekle
+              </h3>
+              <ChevronDown
+                className={`size-4 text-muted-foreground transition-transform ${
+                  recommendedExpanded ? "rotate-180" : ""
+                }`}
+              />
+            </button>
+            {recommendedExpanded && (
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                {foods.slice(0, 12).map((food) => (
+                  <button
+                    key={food.name_tr}
+                    onClick={() => setRecommendedModalOpen(true)}
+                    className="rounded-lg border border-border bg-background p-3 hover:bg-accent transition-colors text-left">
+                    <p className="text-sm font-medium text-foreground truncate">
+                      {food.name_tr}
+                    </p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                      {Math.round(food.kcal_per_100)} kcal
+                    </p>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </>
       )}
