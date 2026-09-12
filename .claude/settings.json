@@ -1,4 +1,9 @@
 {
+  "skills": [
+    "checkpoint-and-compact",
+    "checkpoint-user",
+    "session-log"
+  ],
   "permissions": {
     "deny": [
       "Read(.env)",

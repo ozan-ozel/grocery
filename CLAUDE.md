@@ -29,6 +29,9 @@ this project is. This file is a router and behavior layer, not the architecture 
 
 - `docs/SESSION_CHECKPOINT.md` is the single active project checkpoint. It records the current
   state and what the next agent needs to continue.
+- After creating a branch for a plan or task, create a dated session record under
+  `docs/session-checkpoints/` and link it from `docs/SESSION_CHECKPOINT.md`; use an ISO date prefix
+  and sequence number so records sort chronologically.
 - Historical session logs belong outside the repository in `~/vault/grocery/logs/` and are written
   only for meaningful session history, not every conversation.
 - Project-specific durable architecture notes belong in `~/vault/grocery/architecture/`.
