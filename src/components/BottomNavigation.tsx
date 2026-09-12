@@ -1,6 +1,7 @@
-import { ShoppingCart, Apple, UtensilsCrossed, User, ChevronUp } from "lucide-react";
+import { ShoppingCart, Apple, UtensilsCrossed, User, Settings } from "lucide-react";
 import { useState } from "react";
 import { ProfileMenu } from "./ProfileMenu";
+import type { Tenant } from "@/lib/store";
 
 export type NavTab = "shopping" | "nutrition" | "meals" | "personal";
 
@@ -9,6 +10,14 @@ type Props = {
   onTabChange: (tab: NavTab) => void;
   onSignOut: () => void;
   onDeleteAccount: () => void;
+  tenants: Tenant[];
+  activeTenantId: string;
+  hiddenTenantIds: string[];
+  onSelectTenant: (id: string) => void;
+  onAddTenant: (name: string) => void;
+  onRenameTenant: (id: string, name: string) => void;
+  onDeleteTenant: (id: string) => void;
+  onToggleHiddenTenant: (id: string) => void;
 };
 
 export function BottomNavigation({
@@ -16,6 +25,14 @@ export function BottomNavigation({
   onTabChange,
   onSignOut,
   onDeleteAccount,
+  tenants,
+  activeTenantId,
+  hiddenTenantIds,
+  onSelectTenant,
+  onAddTenant,
+  onRenameTenant,
+  onDeleteTenant,
+  onToggleHiddenTenant,
 }: Props) {
   const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
@@ -29,14 +46,22 @@ export function BottomNavigation({
 
   return (
     <>
-      {/* Profile Menu Dropdown */}
-      {profileMenuOpen && (
-        <ProfileMenu
-          onClose={() => setProfileMenuOpen(false)}
-          onSignOut={onSignOut}
-          onDeleteAccount={onDeleteAccount}
-        />
-      )}
+      {/* Profile Menu Modal */}
+      <ProfileMenu
+        isOpen={profileMenuOpen}
+        onClose={() => setProfileMenuOpen(false)}
+        onSignOut={onSignOut}
+        onDeleteAccount={onDeleteAccount}
+        tenants={tenants}
+        activeTenantId={activeTenantId}
+        hiddenTenantIds={hiddenTenantIds}
+        currentUserId={null}
+        onSelectTenant={onSelectTenant}
+        onAddTenant={onAddTenant}
+        onRenameTenant={onRenameTenant}
+        onDeleteTenant={onDeleteTenant}
+        onToggleHiddenTenant={onToggleHiddenTenant}
+      />
 
       {/* Bottom Navigation Bar */}
       <nav className="fixed bottom-0 left-0 right-0 border-t border-border bg-card shadow-lg">
@@ -68,14 +93,9 @@ export function BottomNavigation({
                   ? "text-primary"
                   : "text-muted-foreground hover:text-foreground"
               }`}
-              aria-label="Profil">
-              <div className="relative">
-                <User className="size-5" />
-                {profileMenuOpen && (
-                  <ChevronUp className="absolute -top-1 right-0 size-3 text-primary" />
-                )}
-              </div>
-              <span className="hidden sm:inline">Profil</span>
+              aria-label="Ayarlar">
+              <Settings className="size-5" />
+              <span className="hidden sm:inline">Ayarlar</span>
             </button>
           </div>
         </div>

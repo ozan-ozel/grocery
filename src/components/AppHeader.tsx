@@ -1,26 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { CloudOff, FilePlus2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { AccountMenu } from "@/components/AccountMenu";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { TenantSwitcher } from "@/components/TenantSwitcher";
 import { ThemeSwitcher } from "@/components/ThemeSwitcher";
-import { defaultTitle, type List, type Tenant } from "@/lib/store";
+import { defaultTitle, type List } from "@/lib/store";
 import type { SyncStatus } from "@/lib/sync/sync";
 import type { Theme } from "@/lib/preferences";
 import type { Section } from "@/hooks/useUiPrefs";
 
 type Props = {
-  tenants: Tenant[];
-  activeTenantId: string;
-  hiddenTenantIds: string[];
-  currentUserId: string | null;
-  onSelectTenant: (id: string) => void;
-  onAddTenant: (name: string) => void;
-  onRenameTenant: (id: string, name: string) => void;
-  onDeleteTenant: (id: string) => void;
-  onToggleHiddenTenant: (id: string) => void;
   syncStatus: SyncStatus;
   theme: Theme;
   onSelectTheme: (theme: Theme) => void;
@@ -28,20 +17,9 @@ type Props = {
   active: List;
   onRenameActive: (title: string) => void;
   onStartNewList: () => void;
-  onSignOut: () => void;
-  onDeleteAccount: () => void;
 };
 
 export function AppHeader({
-  tenants,
-  activeTenantId,
-  hiddenTenantIds,
-  currentUserId,
-  onSelectTenant,
-  onAddTenant,
-  onRenameTenant,
-  onDeleteTenant,
-  onToggleHiddenTenant,
   syncStatus,
   theme,
   onSelectTheme,
@@ -49,8 +27,6 @@ export function AppHeader({
   active,
   onRenameActive,
   onStartNewList,
-  onSignOut,
-  onDeleteAccount,
 }: Props) {
   const total = active.items.length;
   const done = active.items.filter(i => i.checked).length;
@@ -86,20 +62,6 @@ export function AppHeader({
     <>
       <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-6 backdrop-blur">
         <div className="flex items-center justify-between gap-2 pb-2">
-          <div className="flex items-center gap-1">
-            <AccountMenu onSignOut={onSignOut} onDeleteAccount={onDeleteAccount} />
-            <TenantSwitcher
-              tenants={tenants}
-              activeId={activeTenantId}
-              hiddenIds={hiddenTenantIds}
-              currentUserId={currentUserId}
-              onSelect={onSelectTenant}
-              onAdd={onAddTenant}
-              onRename={onRenameTenant}
-              onDelete={onDeleteTenant}
-              onToggleHidden={onToggleHiddenTenant}
-            />
-          </div>
           <div className="flex items-center gap-1">
             {syncStatus !== "synced" && (
               <span
@@ -164,7 +126,6 @@ export function AppHeader({
               className="-mx-1 flex-1 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
               style={{ maskImage: tabScrollMask, WebkitMaskImage: tabScrollMask }}>
               <TabsList className="px-1">
-                <TabsTrigger value="today">Bugün</TabsTrigger>
                 <TabsTrigger value="list">Liste</TabsTrigger>
                 <TabsTrigger value="history">Geçmiş</TabsTrigger>
                 <TabsTrigger value="cats">Kategoriler</TabsTrigger>

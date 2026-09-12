@@ -291,15 +291,6 @@ function AppShell({
       onValueChange={v => setTab(v as Tab)}
       className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-32">
       <AppHeader
-        tenants={tenants}
-        activeTenantId={activeTenantId}
-        hiddenTenantIds={hiddenIds}
-        currentUserId={currentUserId}
-        onSelectTenant={selectTenant}
-        onAddTenant={addTenant}
-        onRenameTenant={renameTenant}
-        onDeleteTenant={deleteTenant}
-        onToggleHiddenTenant={toggleHiddenTenant}
         syncStatus={syncStatus}
         theme={theme}
         onSelectTheme={setTheme}
@@ -307,8 +298,6 @@ function AppShell({
         active={active}
         onRenameActive={renameActive}
         onStartNewList={startNewList}
-        onSignOut={onSignOut}
-        onDeleteAccount={onDeleteAccount}
       />
 
       <main
@@ -381,6 +370,14 @@ function AppShell({
         onTabChange={handleNavTabChange}
         onSignOut={onSignOut}
         onDeleteAccount={onDeleteAccount}
+        tenants={tenants}
+        activeTenantId={activeTenantId}
+        hiddenTenantIds={hiddenIds}
+        onSelectTenant={selectTenant}
+        onAddTenant={addTenant}
+        onRenameTenant={renameTenant}
+        onDeleteTenant={deleteTenant}
+        onToggleHiddenTenant={toggleHiddenTenant}
       />
     </Tabs>
   );
