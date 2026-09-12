@@ -55,8 +55,27 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
     totals.carbsG > 0;
   const [dailyDetailOpen, setDailyDetailOpen] = useState(false);
   const [foodModalOpen, setFoodModalOpen] = useState(false);
+  const [comboModalOpen, setComboModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
   const [recommendedModalOpen, setRecommendedModalOpen] = useState(false);
+
+  // Filter combos from foods (simple heuristic: foods with Turkish dish names)
+  const combos = foods.filter(f => {
+    const lowerName = f.name_tr.toLowerCase();
+    return (
+      lowerName.includes('pilav') ||
+      lowerName.includes('çorbası') ||
+      lowerName.includes('ızgara') ||
+      lowerName.includes('fırında') ||
+      lowerName.includes('yemek') ||
+      lowerName.includes('sos') ||
+      lowerName.includes('kızartma') ||
+      lowerName.includes('kebab') ||
+      lowerName.includes('pide') ||
+      lowerName.includes('döner') ||
+      lowerName.includes('tatlı')
+    );
+  }).slice(0, 30);
 
   const targets = calculateTargets(personalizationProfile);
   const targetMacros: MacroTotals = targets ? {
@@ -147,7 +166,7 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
                 }}
                 onSelectRecipe={() => {
                   setActiveSlot(slot);
-                  setFoodModalOpen(true);
+                  setComboModalOpen(true);
                 }}
                 onRemoveItem={itemId => removeItem(slot, itemId)}
               />
@@ -193,6 +212,18 @@ export function MealPlanView({ userId, householdId, onAddShoppingItem }: Props) 
         isOpen={foodModalOpen}
         onClose={() => {
           setFoodModalOpen(false);
+          setActiveSlot(null);
+        }}
+        onSelect={handleFoodSelect}
+      />
+
+      {/* Combo Search Modal */}
+      <FoodSearchModal
+        title={activeSlot ? "Kombo Seç" : "Kombo Ara"}
+        foods={combos}
+        isOpen={comboModalOpen}
+        onClose={() => {
+          setComboModalOpen(false);
           setActiveSlot(null);
         }}
         onSelect={handleFoodSelect}
