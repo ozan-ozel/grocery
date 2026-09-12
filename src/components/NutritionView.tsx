@@ -155,8 +155,8 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
+            <TabsList className="grid w-auto grid-cols-3 h-auto">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
@@ -331,8 +331,8 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
+            <TabsList className="grid w-auto grid-cols-3 h-auto">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
@@ -367,8 +367,8 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
+            <TabsList className="grid w-auto grid-cols-3 h-auto">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
@@ -403,8 +403,8 @@ export function NutritionView({
     return (
       <div>
         <div className="mb-3">
-          <div className="inline-flex items-center rounded-lg bg-accent/50 p-1">
-            <TabsList className="grid w-auto grid-cols-3 h-auto p-1">
+          <div className="inline-flex items-center rounded-lg bg-card border border-border p-2 shadow-sm">
+            <TabsList className="grid w-auto grid-cols-3 h-auto">
               <TabsTrigger
                 value="all"
                 onClick={() => setScope("all")}
