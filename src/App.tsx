@@ -8,6 +8,7 @@ import { PersonalPlanView } from "@/components/PersonalPlanView";
 import { UndoToast } from "@/components/UndoToast";
 import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
+import { BottomNavigation, type NavTab } from "@/components/BottomNavigation";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
 import { useUiPrefs, type Tab, type Section } from "@/hooks/useUiPrefs";
@@ -266,11 +267,30 @@ function AppShell({
     foodIdentityIndex,
   });
 
+  const currentNavTab: NavTab =
+    section === "alisveris"
+      ? "shopping"
+      : section === "besin"
+        ? "nutrition"
+        : section === "yemek"
+          ? "meals"
+          : "personal";
+
+  function handleNavTabChange(navTab: NavTab) {
+    const sectionMap: Record<NavTab, Section> = {
+      shopping: "alisveris",
+      nutrition: "besin",
+      meals: "yemek",
+      personal: "kisisel",
+    };
+    selectSection(sectionMap[navTab]);
+  }
+
   return (
     <Tabs
       value={tab}
       onValueChange={v => setTab(v as Tab)}
-      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-28">
+      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pb-32">
       <AppHeader
         tenants={tenants}
         activeTenantId={activeTenantId}
@@ -360,6 +380,13 @@ function AppShell({
       </main>
 
       {undo && <UndoToast undo={undo} onRestore={restore} onDismiss={dismiss} />}
+
+      <BottomNavigation
+        activeTab={currentNavTab}
+        onTabChange={handleNavTabChange}
+        onSignOut={onSignOut}
+        onDeleteAccount={onDeleteAccount}
+      />
     </Tabs>
   );
 }
