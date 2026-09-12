@@ -1,0 +1,1635 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Grocery UI options</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+        :root {
+            --paper: #f2f5f2;
+            --paper-deep: #e5ece7;
+            --surface: #ffffff;
+            --surface-soft: #eaf0ec;
+            --ink: #16211d;
+            --muted: #6b7b74;
+            --line: #d5dfd9;
+            --signal: #d8402f;
+            --signal-soft: #f4ddd8;
+            --shadow: 0 18px 46px rgba(22, 33, 29, .12);
+            --font: 'Archivo', ui-sans-serif, sans-serif;
+            --mono: 'DM Mono', ui-monospace, monospace;
+        }
+
+        [data-theme='night'] {
+            --paper: #141b18;
+            --paper-deep: #1d2823;
+            --surface: #202b26;
+            --surface-soft: #26342e;
+            --ink: #eff4ef;
+            --muted: #91a29a;
+            --line: #35443c;
+            --signal: #ee6251;
+            --signal-soft: #482d29;
+            --shadow: 0 18px 46px rgba(0, 0, 0, .28);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            color: var(--ink);
+            background-color: var(--paper);
+            background-image: radial-gradient(var(--line) .7px, transparent .7px);
+            background-size: 18px 18px;
+            font-family: var(--font);
+            transition: background-color .25s ease, color .25s ease;
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .review-bar {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 20px;
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 22px 28px;
+        }
+
+        .controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .control-group {
+            display: flex;
+            gap: 3px;
+            padding: 4px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--surface);
+        }
+
+        .control {
+            border: 0;
+            border-radius: 7px;
+            padding: 8px 11px;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .control:hover {
+            color: var(--ink);
+        }
+
+        .control[aria-selected='true'] {
+            color: var(--ink);
+            background: var(--surface-soft);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
+        }
+
+        main {
+            max-width: 1240px;
+            margin: 0 auto;
+            padding: 0 28px 56px;
+        }
+
+        .option {
+            display: none;
+            animation: rise .45s ease both;
+        }
+
+        .option.active {
+            display: block;
+        }
+
+        @keyframes rise {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .canvas {
+            min-height: 590px;
+            overflow: hidden;
+            border: 1px solid var(--line);
+            border-radius: 14px;
+            background: var(--surface);
+            box-shadow: var(--shadow);
+        }
+
+        .app-strip {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            min-height: 44px;
+            padding: 0 22px;
+            border-bottom: 1px solid var(--line);
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .app-strip strong {
+            color: var(--ink);
+            font-family: var(--font);
+            font-size: 12px;
+        }
+
+        .app-strip .sync {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+        }
+
+        .sync-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--signal);
+        }
+
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+            padding: 5px 8px;
+            border-radius: 5px;
+            background: var(--signal-soft);
+            color: var(--signal);
+            font: 10px var(--mono);
+            text-transform: uppercase;
+        }
+
+        .stat {
+            font: 12px var(--mono);
+        }
+
+        .stat strong {
+            color: var(--signal);
+        }
+
+        .muted {
+            color: var(--muted);
+        }
+
+        /* Option A: a calm desktop command center. */
+        .desk-layout {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 270px;
+            min-height: 546px;
+        }
+
+        .desk-main {
+            padding: 35px 38px;
+        }
+
+        .desk-title {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .desk-title h3 {
+            margin: 8px 0 4px;
+            font-size: 32px;
+            letter-spacing: -.055em;
+        }
+
+        .desk-title p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 13px;
+        }
+
+        .tally {
+            text-align: right;
+        }
+
+        .tally strong {
+            display: block;
+            font: 31px var(--mono);
+            letter-spacing: -.08em;
+        }
+
+        .progress {
+            height: 4px;
+            margin: 26px 0 27px;
+            background: var(--surface-soft);
+        }
+
+        .progress span {
+            display: block;
+            width: 44%;
+            height: 100%;
+            background: var(--signal);
+        }
+
+        .section-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 11px;
+        }
+
+        .section-head h4 {
+            margin: 0;
+            font-size: 11px;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .section-head span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .list-row {
+            display: grid;
+            grid-template-columns: 22px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .check {
+            display: grid;
+            place-items: center;
+            width: 20px;
+            height: 20px;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            color: transparent;
+        }
+
+        .list-row.done .check {
+            border-color: var(--signal);
+            color: var(--surface);
+            background: var(--signal);
+        }
+
+        .list-row.done .item-name {
+            color: var(--muted);
+            text-decoration: line-through;
+        }
+
+        .item-name {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .item-meta {
+            margin-top: 3px;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .quantity {
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .desk-side {
+            padding: 30px 22px;
+            border-left: 1px solid var(--line);
+            background: var(--surface-soft);
+        }
+
+        .desk-side h4 {
+            margin: 0 0 18px;
+            font-size: 12px;
+        }
+
+        .aisle {
+            display: flex;
+            justify-content: space-between;
+            padding: 11px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 12px;
+        }
+
+        .aisle span {
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .side-note {
+            margin-top: 46px;
+            padding-top: 15px;
+            border-top: 2px solid var(--signal);
+        }
+
+        .side-note p {
+            margin: 7px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* Option B: split the planning context from the act of shopping. */
+        .split-layout {
+            padding: 30px;
+        }
+
+        .split-top {
+            display: grid;
+            grid-template-columns: 1.1fr .9fr;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .focus-panel,
+        .meal-panel {
+            padding: 24px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+        }
+
+        .focus-panel {
+            min-height: 178px;
+            background: var(--ink);
+            color: var(--surface);
+        }
+
+        .focus-panel .tag {
+            color: var(--surface);
+            background: rgba(255, 255, 255, .12);
+        }
+
+        .focus-panel h3 {
+            max-width: 300px;
+            margin: 29px 0 0;
+            font-size: 25px;
+            letter-spacing: -.045em;
+        }
+
+        .meal-panel {
+            background: var(--surface-soft);
+        }
+
+        .meal-panel h4 {
+            margin: 0 0 18px;
+            font-size: 12px;
+        }
+
+        .meal-line {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 12px;
+        }
+
+        .meal-line:last-child {
+            border-bottom: 0;
+        }
+
+        .meal-line b {
+            width: 42px;
+            color: var(--muted);
+            font: 10px var(--mono);
+            text-transform: uppercase;
+        }
+
+        .split-list {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .split-list .section-head {
+            padding: 15px 19px;
+            margin: 0;
+            background: var(--surface-soft);
+        }
+
+        .split-list .list-row {
+            padding: 15px 19px;
+        }
+
+        .split-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-top: 17px;
+        }
+
+        .text-button {
+            border: 0;
+            padding: 0;
+            color: var(--signal);
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .primary-button {
+            border: 0;
+            border-radius: 6px;
+            padding: 10px 14px;
+            color: #fff;
+            background: var(--signal);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Option C: a mobile-first, high-frequency checklist. */
+        .mobile-layout {
+            max-width: 690px;
+            margin: 0 auto;
+            padding: 34px 26px 32px;
+        }
+
+        .mobile-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+        }
+
+        .mobile-top h3 {
+            margin: 10px 0 4px;
+            font-size: 27px;
+            letter-spacing: -.05em;
+        }
+
+        .mobile-top p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .mobile-tally {
+            color: var(--signal);
+            font: 25px var(--mono);
+        }
+
+        .mobile-tabs {
+            display: flex;
+            gap: 5px;
+            margin: 32px 0 21px;
+            padding: 4px;
+            border-radius: 8px;
+            background: var(--surface-soft);
+        }
+
+        .mobile-tab {
+            flex: 1;
+            border: 0;
+            border-radius: 5px;
+            padding: 9px;
+            color: var(--muted);
+            background: transparent;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .mobile-tab.active {
+            color: var(--ink);
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .1);
+        }
+
+        .mobile-group {
+            margin-top: 25px;
+        }
+
+        .mobile-group-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .mobile-group-head h4 {
+            margin: 0;
+            font-size: 12px;
+        }
+
+        .mobile-group-head span {
+            color: var(--muted);
+            font: 10px var(--mono);
+        }
+
+        .current-layout {
+            min-height: 590px;
+            padding: 28px 20px 0;
+        }
+
+        .current-app {
+            width: min(100%, 30rem);
+            min-height: 590px;
+            margin: 0 auto;
+        }
+
+        .current-header {
+            border-bottom: 1px solid var(--line);
+        }
+
+        .current-title-row {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 16px;
+            padding-bottom: 16px;
+        }
+
+        .current-title-row h3 {
+            margin: 0;
+            font-size: 23px;
+            letter-spacing: -.04em;
+        }
+
+        .current-count {
+            color: var(--muted);
+            font: 18px var(--mono);
+        }
+
+        .current-tabs {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid var(--line);
+            padding: 12px 0 5px;
+        }
+
+        .current-tab {
+            border: 0;
+            border-radius: 7px;
+            padding: 8px 12px;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .current-tab.active {
+            color: var(--ink);
+            background: var(--surface-soft);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .current-new {
+            border: 0;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .current-add {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 14px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 13px 14px;
+            color: var(--muted);
+            background: var(--surface);
+            font-size: 14px;
+        }
+
+        .current-add strong {
+            color: var(--ink);
+            font-size: 20px;
+            font-weight: 400;
+        }
+
+        .current-tools {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 8px 12px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .current-tool {
+            border: 0;
+            color: inherit;
+            background: transparent;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .current-items {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .current-item {
+            display: grid;
+            grid-template-columns: 22px 1fr auto;
+            align-items: center;
+            gap: 14px;
+            min-height: 58px;
+            border-bottom: 1px solid var(--line);
+            font-size: 14px;
+        }
+
+        .current-check {
+            width: 22px;
+            height: 22px;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            background: var(--surface);
+        }
+
+        .current-quantity {
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .current-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            align-items: end;
+            gap: 8px;
+            margin: 70px -20px 0;
+            padding: 17px 10px 12px;
+            border-top: 1px solid var(--line);
+            background: var(--surface);
+        }
+
+        .current-nav-item {
+            display: grid;
+            justify-items: center;
+            gap: 6px;
+            border: 0;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        .current-nav-item.active {
+            color: var(--ink);
+        }
+
+        .current-nav-item strong {
+            color: var(--ink);
+            font-size: 20px;
+            font-weight: 400;
+        }
+
+        .current-view {
+            display: none;
+        }
+
+        .current-view.active {
+            display: block;
+        }
+
+        .current-view-title {
+            margin: 0 0 20px;
+            font-size: 23px;
+            letter-spacing: -.04em;
+        }
+
+        .current-view-kicker {
+            margin: 0 0 6px;
+            color: var(--muted);
+            font: 10px var(--mono);
+            text-transform: uppercase;
+        }
+
+        .current-filter-row {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 20px;
+            padding: 4px;
+            border-radius: 8px;
+            background: var(--surface-soft);
+        }
+
+        .current-filter-row button {
+            flex: 1;
+            border: 0;
+            border-radius: 5px;
+            padding: 8px 4px;
+            color: var(--muted);
+            background: transparent;
+            font-size: 11px;
+        }
+
+        .current-filter-row button.active {
+            color: var(--ink);
+            background: var(--surface);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+        }
+
+        .current-card {
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--line);
+            padding: 15px 0;
+        }
+
+        .current-card strong {
+            font-size: 14px;
+        }
+
+        .current-card p {
+            margin: 5px 0 0;
+            color: var(--muted);
+            font-size: 12px;
+            line-height: 1.45;
+        }
+
+        .current-meal-day {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+            padding: 13px 0;
+            font-size: 13px;
+        }
+
+        .current-meal-day span {
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .current-macro-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1px;
+            margin-bottom: 26px;
+            border: 1px solid var(--line);
+            background: var(--line);
+        }
+
+        .current-macro {
+            padding: 13px;
+            background: var(--surface);
+        }
+
+        .current-macro span {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .current-macro strong {
+            display: block;
+            margin-top: 4px;
+            font: 20px var(--mono);
+        }
+
+        .current-macro em {
+            display: block;
+            margin-top: 3px;
+            color: var(--signal);
+            font: 10px var(--mono);
+            font-style: normal;
+        }
+
+        .current-meal-card {
+            margin-bottom: 12px;
+            border: 1px solid var(--line);
+            border-radius: 7px;
+            padding: 14px;
+            background: var(--surface);
+        }
+
+        .current-meal-card-head {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .current-meal-card-head strong {
+            font-size: 14px;
+        }
+
+        .current-meal-card-head span {
+            color: var(--muted);
+            font: 10px var(--mono);
+        }
+
+        .current-food {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 8px 0;
+            border-top: 1px solid var(--line);
+            font-size: 12px;
+        }
+
+        .current-food span {
+            color: var(--muted);
+            font: 10px var(--mono);
+        }
+
+        .current-plan-action {
+            width: 100%;
+            margin-top: 8px;
+            border: 0;
+            border-radius: 6px;
+            padding: 12px;
+            color: var(--surface);
+            background: var(--ink);
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .current-form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .current-field {
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 10px;
+            color: var(--muted);
+            background: var(--surface);
+            font-size: 12px;
+        }
+
+        .current-section-label {
+            margin: 25px 0 8px;
+            color: var(--muted);
+            font: 10px var(--mono);
+            text-transform: uppercase;
+        }
+
+        .north-layout {
+            min-height: 590px;
+            padding: 26px 22px 24px;
+        }
+
+        .north-top {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 22px;
+        }
+
+        .north-top h3 {
+            margin: 5px 0 0;
+            font-size: 26px;
+            letter-spacing: -.05em;
+        }
+
+        .north-date {
+            color: var(--muted);
+            font: 11px var(--mono);
+        }
+
+        .north-score {
+            text-align: right;
+        }
+
+        .north-score strong {
+            display: block;
+            font: 23px var(--mono);
+        }
+
+        .north-score span {
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        .north-budget {
+            display: grid;
+            grid-template-columns: 1.25fr 1fr 1fr;
+            gap: 1px;
+            margin-bottom: 24px;
+            border: 1px solid var(--line);
+            background: var(--line);
+        }
+
+        .north-budget-item {
+            padding: 14px 12px;
+            background: var(--surface);
+        }
+
+        .north-budget-item:first-child {
+            background: var(--ink);
+            color: var(--surface);
+        }
+
+        .north-budget-item span {
+            display: block;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .north-budget-item:first-child span {
+            color: var(--surface-soft);
+        }
+
+        .north-budget-item strong {
+            display: block;
+            margin-top: 6px;
+            font: 21px var(--mono);
+        }
+
+        .north-budget-item em {
+            display: block;
+            margin-top: 3px;
+            color: var(--signal);
+            font: 10px var(--mono);
+            font-style: normal;
+        }
+
+        .north-section-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 9px;
+        }
+
+        .north-section-head h4 {
+            margin: 0;
+            font-size: 12px;
+        }
+
+        .north-section-head button {
+            border: 0;
+            color: var(--signal);
+            background: transparent;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .north-meal {
+            display: grid;
+            grid-template-columns: 86px 1fr auto;
+            align-items: center;
+            gap: 12px;
+            min-height: 68px;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .north-meal-time {
+            color: var(--muted);
+            font: 10px var(--mono);
+            text-transform: uppercase;
+        }
+
+        .north-meal-name {
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .north-meal-meta {
+            margin-top: 4px;
+            color: var(--muted);
+            font-size: 10px;
+        }
+
+        .north-meal-kcal {
+            color: var(--muted);
+            font: 10px var(--mono);
+        }
+
+        .north-empty {
+            display: grid;
+            min-height: 62px;
+            place-items: center start;
+            border-bottom: 1px dashed var(--line);
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .north-action {
+            width: 100%;
+            margin-top: 23px;
+            border: 0;
+            border-radius: 6px;
+            padding: 13px;
+            color: var(--surface);
+            background: var(--signal);
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .north-subview {
+            display: none;
+        }
+
+        .north-subview.active {
+            display: block;
+        }
+
+        .north-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 5px;
+            margin: 28px -22px -24px;
+            border-top: 1px solid var(--line);
+            padding: 15px 8px 10px;
+            background: var(--surface);
+        }
+
+        .north-nav-item {
+            display: grid;
+            justify-items: center;
+            gap: 5px;
+            border: 0;
+            color: var(--muted);
+            background: transparent;
+            cursor: pointer;
+            font-size: 9px;
+            text-align: center;
+        }
+
+        .north-nav-item strong {
+            color: inherit;
+            font-size: 18px;
+            font-weight: 400;
+        }
+
+        .north-nav-item.active {
+            color: var(--ink);
+        }
+
+        .google-button {
+            display: flex;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            border: 0;
+            border-radius: 6px;
+            padding: 11px 14px;
+            color: var(--surface);
+            background: var(--ink);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .google-mark {
+            display: grid;
+            width: 16px;
+            height: 16px;
+            place-items: center;
+            border-radius: 50%;
+            color: var(--ink);
+            background: var(--surface);
+            font: 11px Arial, sans-serif;
+            font-weight: 700;
+        }
+
+        .mobile-layout .list-row {
+            padding: 16px 0;
+        }
+
+        .mobile-bottom {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 30px;
+            padding-top: 18px;
+            border-top: 1px solid var(--line);
+        }
+
+        @media (max-width: 720px) {
+
+            .review-bar,
+            main {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .review-bar {
+                display: block;
+            }
+
+            .controls {
+                justify-content: flex-start;
+                margin-top: 18px;
+            }
+
+            .desk-layout,
+            .split-top {
+                grid-template-columns: 1fr;
+            }
+
+            .desk-side {
+                display: none;
+            }
+
+            .desk-main {
+                padding: 26px 20px;
+            }
+
+            .desk-title h3 {
+                font-size: 27px;
+            }
+
+            .split-layout {
+                padding: 17px;
+            }
+
+            .focus-panel h3 {
+                margin-top: 22px;
+            }
+
+            .mobile-layout {
+                padding: 26px 20px;
+            }
+        }
+    </style>
+</head>
+
+<body data-theme="paper">
+    <header class="review-bar">
+        <div class="controls" aria-label="Mockup controls">
+            <div class="control-group" role="tablist" aria-label="Layout options">
+                <button class="control" role="tab" aria-selected="true" data-option="desk">01 Desk</button>
+                <button class="control" role="tab" aria-selected="false" data-option="split">02 Split</button>
+                <button class="control" role="tab" aria-selected="false" data-option="mobile">03 Sweep</button>
+                <button class="control" role="tab" aria-selected="false" data-option="current">04 Current</button>
+                <button class="control" role="tab" aria-selected="false" data-option="north">05 North Star</button>
+            </div>
+            <div class="control-group" role="group" aria-label="Theme options">
+                <button class="control" aria-selected="true" data-theme-choice="paper">Paper</button>
+                <button class="control" aria-selected="false" data-theme-choice="night">Night</button>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <section class="option active" data-panel="desk" role="tabpanel">
+            <div class="canvas">
+                <div class="app-strip"><strong>Pantry / Saturday shop</strong><span class="sync"><i
+                            class="sync-dot"></i>Synced just now</span></div>
+                <div class="desk-layout">
+                    <div class="desk-main">
+                        <div class="desk-title">
+                            <div><span class="tag">Weekly list</span>
+                                <h3>Saturday shop</h3>
+                                <p>12 items across 4 aisles</p>
+                            </div>
+                            <div class="tally"><strong>05<span class="muted">/12</span></strong><span
+                                    class="muted">checked</span></div>
+                        </div>
+                        <div class="progress"><span></span></div>
+                        <div class="section-head">
+                            <h4>Produce</h4><span>2 items</span>
+                        </div>
+                        <ul class="list">
+                            <li class="list-row done"><span class="check">x</span>
+                                <div>
+                                    <div class="item-name">Cherry tomatoes</div>
+                                    <div class="item-meta">Loose · salad</div>
+                                </div><span class="quantity">500 g</span>
+                            </li>
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Baby spinach</div>
+                                    <div class="item-meta">Fresh · greens</div>
+                                </div><span class="quantity">1 bag</span>
+                            </li>
+                        </ul>
+                        <div class="section-head" style="margin-top:27px">
+                            <h4>Chilled</h4><span>2 items</span>
+                        </div>
+                        <ul class="list">
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Greek yogurt</div>
+                                    <div class="item-meta">Plain · high protein</div>
+                                </div><span class="quantity">2 tubs</span>
+                            </li>
+                            <li class="list-row done"><span class="check">x</span>
+                                <div>
+                                    <div class="item-name">Oat milk</div>
+                                    <div class="item-meta">Barista · unsweetened</div>
+                                </div><span class="quantity">1 carton</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <aside class="desk-side">
+                        <h4>By aisle</h4>
+                        <div class="aisle">Produce <span>01 / 02</span></div>
+                        <div class="aisle">Chilled <span>01 / 02</span></div>
+                        <div class="aisle">Pantry <span>02 / 04</span></div>
+                        <div class="aisle">Household <span>01 / 04</span></div>
+                        <div class="side-note"><span class="tag">Next up</span>
+                            <p>Pantry has the most unchecked items. Walk there after chilled.</p>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        </section>
+
+        <section class="option" data-panel="split" role="tabpanel">
+            <div class="canvas">
+                <div class="app-strip"><strong>Pantry / Saturday shop</strong><span class="stat"><strong>05</strong> of
+                        12 complete</span></div>
+                <div class="split-layout">
+                    <div class="split-top">
+                        <div class="focus-panel"><span class="tag">This week's anchor</span>
+                            <h3>Build a better breakfast.</h3>
+                        </div>
+                        <div class="meal-panel">
+                            <h4>What these ingredients are for</h4>
+                            <div class="meal-line"><b>Sat</b> Yogurt bowls <span class="muted">+ fruit</span></div>
+                            <div class="meal-line"><b>Sun</b> Green toast <span class="muted">+ eggs</span></div>
+                            <div class="meal-line"><b>Mon</b> Packed lunch <span class="muted">+ greens</span></div>
+                        </div>
+                    </div>
+                    <div class="split-list">
+                        <div class="section-head">
+                            <h4>Shopping list</h4><span>Sorted by aisle</span>
+                        </div>
+                        <ul class="list">
+                            <li class="list-row done"><span class="check">x</span>
+                                <div>
+                                    <div class="item-name">Cherry tomatoes</div>
+                                    <div class="item-meta">Produce / salad</div>
+                                </div><span class="quantity">500 g</span>
+                            </li>
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Baby spinach</div>
+                                    <div class="item-meta">Produce / greens</div>
+                                </div><span class="quantity">1 bag</span>
+                            </li>
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Greek yogurt</div>
+                                    <div class="item-meta">Chilled / breakfast</div>
+                                </div><span class="quantity">2 tubs</span>
+                            </li>
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Oat milk</div>
+                                    <div class="item-meta">Chilled / coffee</div>
+                                </div><span class="quantity">1 carton</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="split-footer"><button class="text-button">+ Add an item</button><button
+                            class="primary-button">Review 7 remaining</button></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="option" data-panel="mobile" role="tabpanel">
+            <div class="canvas">
+                <div class="app-strip"><strong>Pantry</strong><span class="sync"><i class="sync-dot"></i>Saved</span>
+                </div>
+                <div class="mobile-layout">
+                    <div class="mobile-top">
+                        <div><span class="tag">In the shop</span>
+                            <h3>Saturday shop</h3>
+                            <p>Keep moving. You are nearly halfway there.</p>
+                        </div>
+                        <div class="mobile-tally">05/12</div>
+                    </div>
+                    <div class="progress"><span style="width:44%"></span></div>
+                    <div class="mobile-tabs"><button class="mobile-tab active">All items</button><button
+                            class="mobile-tab">Remaining</button><button class="mobile-tab">Aisles</button></div>
+                    <div class="mobile-group">
+                        <div class="mobile-group-head">
+                            <h4>Produce</h4><span>1 of 2 done</span>
+                        </div>
+                        <ul class="list">
+                            <li class="list-row done"><span class="check">x</span>
+                                <div>
+                                    <div class="item-name">Cherry tomatoes</div>
+                                    <div class="item-meta">500 g / loose</div>
+                                </div>
+                            </li>
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Baby spinach</div>
+                                    <div class="item-meta">1 bag / fresh</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mobile-group">
+                        <div class="mobile-group-head">
+                            <h4>Chilled</h4><span>0 of 2 done</span>
+                        </div>
+                        <ul class="list">
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Greek yogurt</div>
+                                    <div class="item-meta">2 tubs / plain</div>
+                                </div>
+                            </li>
+                            <li class="list-row"><span class="check"></span>
+                                <div>
+                                    <div class="item-name">Oat milk</div>
+                                    <div class="item-meta">1 carton / barista</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="mobile-bottom"><button class="text-button">+ Add item</button><span
+                            class="muted mono">Swipe-ready list</span></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="option" data-panel="current" role="tabpanel">
+            <div class="canvas">
+                <div class="current-layout">
+                    <div class="current-app">
+                        <div class="current-view" data-current-view="shopping">
+                            <div class="current-header">
+                                <div class="current-title-row">
+                                    <h3>12 Eyl Cumartesi</h3><span class="current-count">00/03</span>
+                                </div>
+                                <div class="current-tabs">
+                                    <div><button class="current-tab active" type="button">Liste</button><button
+                                            class="current-tab" type="button">Geçmiş</button></div><button
+                                        class="current-new" type="button">⇧ Yeni liste</button>
+                                </div>
+                            </div>
+                            <div class="current-add"><strong>+</strong>Ürün ekle</div>
+                            <div class="current-tools"><button class="current-tool" type="button">◇ &nbsp;Kategorilere
+                                    göre grupla</button><button class="current-tool" type="button">◌</button><button
+                                    class="current-tool" type="button">•••</button></div>
+                            <ul class="current-items">
+                                <li class="current-item"><span
+                                        class="current-check"></span><span>Tahin</span><span></span></li>
+                                <li class="current-item"><span class="current-check"></span><span>Armut</span><span
+                                        class="current-quantity">100g</span></li>
+                                <li class="current-item"><span class="current-check"></span><span>antep
+                                        fıstığı</span><span class="current-quantity">100g</span></li>
+                            </ul>
+                        </div>
+
+                        <div class="current-view" data-current-view="nutrition">
+                            <p class="current-view-kicker">BESİN DEĞERLERİ</p>
+                            <h3 class="current-view-title">Besin Değerleri</h3>
+                            <div class="current-filter-row"><button class="active" type="button">Tümü</button><button
+                                    type="button">Kategoriler</button><button type="button">Karşılaştır</button></div>
+                            <p class="muted" style="font-size:12px">Değerler 100 g / 100 ml içindir.</p>
+                            <div class="current-card"><strong>antep fıstığı</strong>
+                                <p>Kalori &nbsp; 562 kcal &nbsp; · &nbsp; Protein 20.3 g</p>
+                            </div>
+                            <div class="current-card"><strong>Armut</strong>
+                                <p>Kalori &nbsp; 57 kcal &nbsp; · &nbsp; Lif 3.1 g</p>
+                            </div>
+                            <div class="current-card"><strong>Tahin</strong>
+                                <p>Kalori &nbsp; 595 kcal &nbsp; · &nbsp; Yağ 53.8 g</p>
+                            </div>
+                        </div>
+
+                        <div class="current-view active" data-current-view="meals">
+                            <p class="current-view-kicker">YEMEK PLANI</p>
+                            <h3 class="current-view-title">12 Eyl Cumartesi</h3>
+                            <div class="current-macro-grid">
+                                <div class="current-macro"><span>Kalori</span><strong>2880</strong><em>+1317</em></div>
+                                <div class="current-macro"><span>Protein</span><strong>94 g</strong><em>+40</em></div>
+                                <div class="current-macro"><span>Karbonhidrat</span><strong>420 g</strong><em>+198</em>
+                                </div>
+                                <div class="current-macro"><span>Yağ</span><strong>88 g</strong><em>+47</em></div>
+                            </div>
+                            <div class="current-meal-card">
+                                <div class="current-meal-card-head"><strong>İlk Öğün</strong><span>918 kcal · P: 27g ·
+                                        K: 107g · Y: 46g</span></div>
+                                <div class="current-food">antep fıstığı <span>100g · 560 kcal</span></div>
+                                <div class="current-food">baldo pirinç <span>100g · 358 kcal</span></div>
+                            </div>
+                            <div class="current-meal-card">
+                                <div class="current-meal-card-head"><strong>Ara Öğün</strong><span>57 kcal · P: 0g · K:
+                                        15g · Y: 0g</span></div>
+                                <div class="current-food">armut <span>100g · 57 kcal</span></div>
+                            </div>
+                            <div class="current-meal-card">
+                                <div class="current-meal-card-head"><strong>Son Öğün</strong><span>342 kcal · P: 12g ·
+                                        K: 76g · Y: 1g</span></div>
+                                <div class="current-food">bulgur <span>100g · 342 kcal</span></div>
+                            </div>
+                            <button class="current-plan-action" type="button">Bu günü alışveriş listesine ekle</button>
+                        </div>
+
+                        <div class="current-view" data-current-view="plan">
+                            <p class="current-view-kicker">KİŞİSEL PLAN</p>
+                            <h3 class="current-view-title">Sana göre günlük hedefler</h3>
+                            <p class="muted" style="font-size:12px;line-height:1.5">Tahmini enerji ihtiyacını ve dengeli
+                                beslenme aralıklarını kendi bilgilerinle oluştur.</p>
+                            <p class="current-section-label">Profil</p>
+                            <div class="current-form-row">
+                                <div class="current-field">Profil adı</div>
+                                <div class="current-field">Yaş (yıl)</div>
+                            </div>
+                            <div class="current-form-row">
+                                <div class="current-field">Boy (cm)</div>
+                                <div class="current-field">Kilo (kg)</div>
+                            </div>
+                            <p class="current-section-label">Günlük aktivite</p>
+                            <div class="current-filter-row"><button class="active">Hareketsiz</button><button>Az
+                                    aktif</button><button>Aktif</button></div>
+                        </div>
+
+                        <div class="current-view" data-current-view="settings">
+                            <p class="current-view-kicker">AYARLAR</p>
+                            <h3 class="current-view-title">Hesap ve tercihler</h3>
+                            <div class="current-card"><strong>Tema</strong>
+                                <p>Seçili tema</p>
+                            </div>
+                            <div class="current-card"><strong>Grup</strong>
+                                <p>Akbük</p>
+                            </div>
+                            <div class="current-card"><strong>Çıkış Yap</strong></div>
+                            <div class="current-card"><strong>Hesabı Sil</strong></div>
+                        </div>
+
+                        <nav class="current-nav" aria-label="Ana menü">
+                            <button class="current-nav-item active" type="button"
+                                data-current-nav="meals"><strong>⌁</strong>Yemek Planı</button><button
+                                class="current-nav-item" type="button"
+                                data-current-nav="shopping"><strong>⌑</strong>Alışveriş</button><button
+                                class="current-nav-item" type="button"
+                                data-current-nav="nutrition"><strong>♡</strong>Besin Değerleri</button><button
+                                class="current-nav-item" type="button" data-current-nav="plan"><strong>♙</strong>Kişisel
+                                Plan</button><button class="current-nav-item" type="button"
+                                data-current-nav="settings"><strong>⚙</strong>Ayarlar</button>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="option" data-panel="north" role="tabpanel">
+            <div class="canvas">
+                <div class="north-layout">
+                    <div class="north-top">
+                        <div><span class="north-date">SATURDAY · 12 SEP</span>
+                            <h3>Plan my day</h3>
+                        </div>
+                        <div class="north-score"><strong>2,880</strong><span>kcal target</span></div>
+                    </div>
+                    <div class="north-subview active" data-north-view="meals">
+                        <div class="north-budget">
+                            <div class="north-budget-item"><span>Daily balance</span><strong>1,317
+                                    kcal</strong><em>remaining</em></div>
+                            <div class="north-budget-item"><span>Protein</span><strong>94 g</strong><em>+40 g</em></div>
+                            <div class="north-budget-item"><span>Carbs</span><strong>420 g</strong><em>+198 g</em></div>
+                        </div>
+                        <div class="north-section-head">
+                            <h4>Today's meals</h4><button type="button">Quick fill</button>
+                        </div>
+                        <div class="north-meal"><span class="north-meal-time">First meal</span>
+                            <div>
+                                <div class="north-meal-name">Pistachio rice bowl</div>
+                                <div class="north-meal-meta">2 foods · balanced</div>
+                            </div><span class="north-meal-kcal">918 kcal</span>
+                        </div>
+                        <div class="north-meal"><span class="north-meal-time">Snack</span>
+                            <div>
+                                <div class="north-meal-name">Pear</div>
+                                <div class="north-meal-meta">1 food · light</div>
+                            </div><span class="north-meal-kcal">57 kcal</span>
+                        </div>
+                        <div class="north-meal"><span class="north-meal-time">Last meal</span>
+                            <div>
+                                <div class="north-meal-name">Bulgur plate</div>
+                                <div class="north-meal-meta">1 food · high carb</div>
+                            </div><span class="north-meal-kcal">342 kcal</span>
+                        </div>
+                        <div class="north-empty">+ Add a meal to close today's macro gap</div>
+                        <button class="north-action" type="button">Build shopping list from this day</button>
+                    </div>
+                    <div class="north-subview" data-north-view="shopping">
+                        <p class="current-view-kicker">SHOPPING FROM PLAN</p>
+                        <h3 class="current-view-title">Ready for the shop</h3>
+                        <div class="current-item"><span class="current-check"></span><span>antep fıstığı</span><span
+                                class="current-quantity">100g</span></div>
+                        <div class="current-item"><span class="current-check"></span><span>baldo pirinç</span><span
+                                class="current-quantity">100g</span></div>
+                        <div class="current-item"><span class="current-check"></span><span>armut</span><span
+                                class="current-quantity">100g</span></div>
+                        <button class="north-action" type="button">Start shopping</button>
+                    </div>
+                    <div class="north-subview" data-north-view="nutrition">
+                        <p class="current-view-kicker">NUTRITION</p>
+                        <h3 class="current-view-title">Macro targets</h3>
+                        <div class="north-budget">
+                            <div class="north-budget-item"><span>Calories</span><strong>2,880</strong><em>daily
+                                    target</em></div>
+                            <div class="north-budget-item"><span>Protein</span><strong>134 g</strong><em>target</em>
+                            </div>
+                            <div class="north-budget-item"><span>Fat</span><strong>88 g</strong><em>target</em></div>
+                        </div>
+                    </div>
+                    <div class="north-subview" data-north-view="plan">
+                        <p class="current-view-kicker">PERSONAL PLAN</p>
+                        <h3 class="current-view-title">Tune your targets</h3>
+                        <div class="current-form-row">
+                            <div class="current-field">Activity: Moderate</div>
+                            <div class="current-field">Goal: Maintain</div>
+                        </div><button class="north-action" type="button">Update daily targets</button>
+                    </div>
+                    <div class="north-subview" data-north-view="settings">
+                        <p class="current-view-kicker">SETTINGS</p>
+                        <h3 class="current-view-title">Your planning space</h3>
+                        <div class="current-card"><strong>Theme</strong>
+                            <p>Paper</p>
+                        </div>
+                        <div class="current-card"><strong>Group</strong>
+                            <p>Akbük</p>
+                        </div>
+                    </div>
+                    <nav class="north-nav" aria-label="North Star navigation"><button class="north-nav-item active"
+                            type="button" data-north-nav="meals"><strong>⌁</strong>Yemek Planı</button><button
+                            class="north-nav-item" type="button"
+                            data-north-nav="shopping"><strong>⌑</strong>Alışveriş</button><button class="north-nav-item"
+                            type="button" data-north-nav="nutrition"><strong>♡</strong>Besin Değerleri</button><button
+                            class="north-nav-item" type="button" data-north-nav="plan"><strong>♙</strong>Kişisel
+                            Plan</button><button class="north-nav-item" type="button"
+                            data-north-nav="settings"><strong>⚙</strong>Ayarlar</button></nav>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const body = document.body;
+        const optionButtons = document.querySelectorAll('[data-option]');
+        const panels = document.querySelectorAll('[data-panel]');
+        const themeButtons = document.querySelectorAll('[data-theme-choice]');
+
+        optionButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const option = button.dataset.option;
+                optionButtons.forEach((item) => item.setAttribute('aria-selected', String(item === button)));
+                panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.panel === option));
+            });
+        });
+
+        themeButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const theme = button.dataset.themeChoice;
+                body.dataset.theme = theme;
+                themeButtons.forEach((item) => item.setAttribute('aria-selected', String(item === button)));
+            });
+        });
+
+        const currentNavButtons = document.querySelectorAll('[data-current-nav]');
+        const currentViews = document.querySelectorAll('[data-current-view]');
+        currentNavButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const view = button.dataset.currentNav;
+                currentNavButtons.forEach((item) => item.classList.toggle('active', item === button));
+                currentViews.forEach((item) => item.classList.toggle('active', item.dataset.currentView === view));
+            });
+        });
+
+        const northNavButtons = document.querySelectorAll('[data-north-nav]');
+        const northViews = document.querySelectorAll('[data-north-view]');
+        northNavButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const view = button.dataset.northNav;
+                northNavButtons.forEach((item) => item.classList.toggle('active', item === button));
+                northViews.forEach((item) => item.classList.toggle('active', item.dataset.northView === view));
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,5 +1,4 @@
 import { useMemo, useRef } from "react";
-import { CloudOff, RefreshCw } from "lucide-react";
 import { Tabs } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShoppingTabs } from "@/components/AppShoppingTabs";
@@ -29,7 +28,8 @@ import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
 
 export function App() {
-  const { session, checked, signInWithGoogle, signOut, deleteAccount } = useAuth();
+  const { session, checked, signInWithGoogle, signOut, deleteAccount } =
+    useAuth();
 
   if (!checked) {
     return <AppBootSkeleton />;
@@ -128,7 +128,10 @@ function useSwipeTabs(section: string, tab: Tab, setTab: (t: Tab) => void) {
     const dy = t.clientY - from.y;
     // Horizontal-dominant and past a real swipe distance, so an ordinary
     // vertical scroll (even a slightly diagonal one) never triggers this.
-    if (Math.abs(dx) < SWIPE_MIN_DISTANCE_PX || Math.abs(dx) < Math.abs(dy) * 1.5)
+    if (
+      Math.abs(dx) < SWIPE_MIN_DISTANCE_PX ||
+      Math.abs(dx) < Math.abs(dy) * 1.5
+    )
       return;
     const idx = SHOPPING_TAB_ORDER.indexOf(tab);
     if (idx === -1) return;
@@ -178,9 +181,9 @@ function AppShell({
     consumeFreshTenantId,
   } = useTenants();
 
-  const { state, setState, updateState, stateRef, syncStatus } = useListSync(
+  const { state, setState, updateState, stateRef } = useListSync(
     activeTenantId,
-    consumeFreshTenantId
+    consumeFreshTenantId,
   );
 
   const { undo, showUndo, restore, dismiss } = useUndo(updateState, setState);
@@ -201,7 +204,10 @@ function AppShell({
     useItemCategories(activeTenantId);
 
   const personalization = useMealPersonalization(currentUserId);
-  const onboarding = useOnboarding(currentUserId, personalization.hasSavedProfile);
+  const onboarding = useOnboarding(
+    currentUserId,
+    personalization.hasSavedProfile,
+  );
 
   const catalog = useMemo(
     () => buildCatalog(state?.lists ?? []),
@@ -249,6 +255,7 @@ function AppShell({
     toggleItem,
     editItem,
     removeItem,
+    removeItemByName,
     bulkRemove,
     startNewList,
     reuseList,
@@ -297,24 +304,6 @@ function AppShell({
       value={tab}
       onValueChange={v => setTab(v as Tab)}
       className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pt-3 pb-32">
-      {/* Shared across every section (including ones with no AppHeader of
-          their own) so the sync indicator appears in the same spot
-          regardless of tab, and takes up zero space once synced. */}
-      {syncStatus !== "synced" && (
-        <div
-          title={
-            syncStatus === "offline"
-              ? "Çevrimdışı — bağlantı gelince senkronize edilecek"
-              : "Senkronize ediliyor…"
-          }
-          className="flex items-center gap-1 pb-2 text-muted-foreground">
-          {syncStatus === "offline" ? (
-            <CloudOff className="size-4 text-signal" />
-          ) : (
-            <RefreshCw className="size-4" />
-          )}
-        </div>
-      )}
       <AppHeader
         section={section}
         active={active}
@@ -329,7 +318,7 @@ function AppShell({
         {onboarding.status === "unseen" && personalization.remoteChecked ? (
           <OnboardingQuickSetup
             initialProfile={personalization.profile}
-            onFinish={(answers) => {
+            onFinish={answers => {
               personalization.update("ageYears", answers.ageYears);
               personalization.update("heightCm", answers.heightCm);
               personalization.update("weightKg", answers.weightKg);
@@ -357,6 +346,8 @@ function AppShell({
             userId={currentUserId}
             householdId={activeTenantId}
             onAddShoppingItem={addItem}
+            isOnShoppingList={isOnList}
+            onRemoveShoppingItem={removeItemByName}
           />
         ) : section === "kisisel" ? (
           <PersonalPlanView userId={currentUserId} />
@@ -408,7 +399,9 @@ function AppShell({
         )}
       </main>
 
-      {undo && <UndoToast undo={undo} onRestore={restore} onDismiss={dismiss} />}
+      {undo && (
+        <UndoToast undo={undo} onRestore={restore} onDismiss={dismiss} />
+      )}
 
       <BottomNavigation
         activeTab={currentNavTab}

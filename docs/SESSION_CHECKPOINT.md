@@ -10,6 +10,8 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 3. [Checkpoint-folder migration session](session-checkpoints/2026-09-12-03-checkpoint-folder-migration.md)
 4. [Food recommendation and recipe research](session-checkpoints/2026-09-12-04-food-recommendation-recipe-research.md)
 5. [Smooth Pill tab system, dedicated Settings page, layout cleanup](session-checkpoints/2026-09-12-07-smooth-pill-tabs-and-settings-page.md)
+6. [Meal shopping-list toggle](session-checkpoints/2026-09-12-08-meal-shopping-list-toggle.md)
+7. [Version 2 North Star UI](session-checkpoints/2026-09-12-09-version-2-north-star-ui.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain
