@@ -17,7 +17,6 @@ import { AllFoodsBrowser } from "@/components/NutritionAllFoodsBrowser";
 import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { EditorRow } from "@/components/NutritionEditorRow";
 import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
-import { Cell } from "@/components/NutritionTableCell";
 import { LoadingBlock } from "@/components/LoadingBlock";
 
 type Props = {
@@ -260,31 +259,15 @@ export function NutritionView({ items }: Props) {
       )}
 
       {scope === "list" && (
-      <table className="w-full border-collapse text-sm">
-        <thead>
-          <tr className="border-b border-border text-xs text-muted-foreground">
-            <th className="py-2 pr-2 text-left font-normal">Ürün</th>
-            {showNutritionValues && (
-              <>
-                <th className="py-2 px-1 text-right font-normal">kcal</th>
-                <th className="py-2 px-1 text-right font-normal">P</th>
-                <th className="py-2 px-1 text-right font-normal">Y</th>
-                <th className="py-2 px-1 text-right font-normal">K</th>
-                <th className="py-2 px-1 text-right font-normal">L</th>
-              </>
-            )}
-            <th className="w-8" />
-          </tr>
-        </thead>
-        <tbody>
+        <div className="space-y-2">
           {status === "loading"
             ? items.map((item) => (
-                <tr key={item.id} className="border-b border-border/60">
-                  <td className="py-2 pr-2">{item.name}</td>
-                  <td colSpan={6} className="py-2">
-                    <LoadingBlock className="ml-auto h-3 w-24" />
-                  </td>
-                </tr>
+                <div key={item.id} className="border-b border-border/60 py-2">
+                  <div className="pr-2 text-sm font-medium">{item.name}</div>
+                  <div className="mt-2 ml-1">
+                    <LoadingBlock className="h-3 w-24" />
+                  </div>
+                </div>
               ))
             : rows.map(({ item, nutrition }) => {
                 const editing = editingId === item.id;
@@ -303,24 +286,15 @@ export function NutritionView({ items }: Props) {
                   );
                 }
                 return (
-                  <tr
+                  <div
                     key={item.id}
                     className={cn(
-                      "border-b border-border/60",
+                      "border-b border-border/60 py-2",
                       !nutrition && "text-muted-foreground"
                     )}
                   >
-                    <td className="py-2 pr-2">{item.name}</td>
-                    {showNutritionValues && (
-                      <>
-                        <Cell value={nutrition?.kcal_per_100} />
-                        <Cell value={nutrition?.protein_g} />
-                        <Cell value={nutrition?.fat_g} />
-                        <Cell value={nutrition?.carbs_g} />
-                        <Cell value={nutrition?.fiber_g} />
-                      </>
-                    )}
-                    <td className="py-2 pl-1 text-right">
+                    <div className="flex items-center justify-between pr-2">
+                      <div className="text-sm font-medium">{item.name}</div>
                       <button
                         type="button"
                         onClick={() => setEditingId(item.id)}
@@ -334,31 +308,67 @@ export function NutritionView({ items }: Props) {
                       >
                         <Pencil className="size-3.5" />
                       </button>
-                    </td>
-                  </tr>
+                    </div>
+                    {showNutritionValues && nutrition && (
+                      <div className="mt-2 grid grid-cols-3 gap-2 text-xs px-1">
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">kcal</span>
+                          <span className="font-medium">{nutrition.kcal_per_100.toFixed(0)}</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">P</span>
+                          <span className="font-medium">{nutrition.protein_g.toFixed(1)}g</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">Y</span>
+                          <span className="font-medium">{nutrition.fat_g.toFixed(1)}g</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">K</span>
+                          <span className="font-medium">{nutrition.carbs_g.toFixed(1)}g</span>
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="text-muted-foreground">L</span>
+                          <span className="font-medium">{nutrition.fiber_g.toFixed(1)}g</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 );
               })}
-        </tbody>
-        {status === "ready" && totals.matched > 0 && (
-          <tfoot>
-            <tr className="border-t border-border font-medium">
-              <td className="py-2 pr-2 text-xs text-muted-foreground">
+
+          {status === "ready" && totals.matched > 0 && (
+            <div className="border-t border-border pt-2 mt-2">
+              <div className="text-xs text-muted-foreground">
                 Toplam ({totals.matched}/{items.length})
-              </td>
+              </div>
               {showNutritionValues && (
-                <>
-                  <Cell value={totals.kcal} />
-                  <Cell value={totals.protein} />
-                  <Cell value={totals.fat} />
-                  <Cell value={totals.carbs} />
-                  <Cell value={totals.fiber} />
-                </>
+                <div className="mt-2 grid grid-cols-3 gap-2 text-xs px-1 font-medium">
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">kcal</span>
+                    <span>{totals.kcal.toFixed(0)}</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">P</span>
+                    <span>{totals.protein.toFixed(1)}g</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">Y</span>
+                    <span>{totals.fat.toFixed(1)}g</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">K</span>
+                    <span>{totals.carbs.toFixed(1)}g</span>
+                  </div>
+                  <div className="flex flex-col">
+                    <span className="text-muted-foreground text-xs">L</span>
+                    <span>{totals.fiber.toFixed(1)}g</span>
+                  </div>
+                </div>
               )}
-              <td />
-            </tr>
-          </tfoot>
-        )}
-      </table>
+            </div>
+          )}
+        </div>
       )}
 
       {status === "error" && (
