@@ -163,17 +163,19 @@ export function CategoriesView({
                     <Pencil className="size-4" />
                   </button>
 
+                  <div className="flex-1" />
+
                   {c.builtin ? (
                     <button
                       type="button"
                       aria-label={c.hidden ? `${c.label} göster` : `${c.label} gizle`}
                       onClick={() => onToggleHidden(c.id as string, !c.hidden)}
-                      className="rounded p-1 text-muted-foreground transition hover:text-foreground"
+                      className="rounded p-1.5 text-muted-foreground transition hover:text-foreground"
                     >
                       {c.hidden ? (
-                        <EyeOff className="size-4" />
+                        <EyeOff className="size-5" />
                       ) : (
-                        <Eye className="size-4" />
+                        <Eye className="size-5" />
                       )}
                     </button>
                   ) : (
@@ -183,9 +185,9 @@ export function CategoriesView({
                       onClick={() => {
                         if (isCustomId(c.id)) onRemoveCustom(c.id as string);
                       }}
-                      className="rounded p-1 text-muted-foreground transition hover:text-signal"
+                      className="rounded p-1.5 text-muted-foreground transition hover:text-signal"
                     >
-                      <X className="size-4" />
+                      <X className="size-5" />
                     </button>
                   )}
                 </>
