@@ -1,0 +1,555 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Energy Individualization — Phase 1 MVP Architecture</title>
+<style>
+  :root{
+    color-scheme: light;
+    --plane:#f9f9f7; --surface:#fcfcfb;
+    --ink:#0b0b0b; --ink-2:#52514e; --muted:#898781;
+    --rule:#e1e0d9; --border:rgba(11,11,11,0.10);
+    --p1:#2a78d6;         /* Phase 1 — profile-derived */
+    --p2:#eb6834;         /* Phase 2 — observation-derived, optional */
+    --critical:#d03b3b;   /* caution / open parameter */
+    --code:#f0efec;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:where(:not([data-theme="light"])){
+      color-scheme: dark;
+      --plane:#0d0d0d; --surface:#1a1a19;
+      --ink:#ffffff; --ink-2:#c3c2b7; --muted:#898781;
+      --rule:#2c2c2a; --border:rgba(255,255,255,0.10);
+      --p1:#3987e5; --p2:#d95926; --critical:#d03b3b;
+      --code:#242423;
+    }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;padding:40px 24px 72px;background:var(--plane);color:var(--ink);
+       font:15px/1.55 system-ui,-apple-system,"Segoe UI",sans-serif}
+  main{max-width:1080px;margin:0 auto}
+  h1{font-size:26px;line-height:1.2;margin:0 0 6px}
+  h2{font-size:17px;margin:44px 0 14px;padding-bottom:7px;border-bottom:1px solid var(--rule)}
+  h3{font-size:14px;margin:0 0 8px}
+  p{margin:0 0 12px;color:var(--ink-2)}
+  .sub{color:var(--muted);font-size:13px;margin:0 0 20px}
+  .banner{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--critical);
+          border-radius:6px;padding:14px 16px;margin:0 0 8px;font-size:13.5px;color:var(--ink-2)}
+  .banner b{color:var(--ink)}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:13.5px}
+  li{margin:5px 0}
+  figure{margin:0;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 4px 4px}
+  svg{display:block;width:100%;height:auto}
+  .legend{display:flex;flex-wrap:wrap;gap:18px;padding:10px 16px 4px;font-size:12.5px;color:var(--ink-2)}
+  .legend span{display:flex;align-items:center;gap:7px}
+  .sw{width:12px;height:3px;border-radius:2px;flex:none}
+  .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--critical)}
+  .calc{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin:0 0 12px}
+  .calc header{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+  .tag{font:600 11px/1 system-ui;letter-spacing:.06em;text-transform:uppercase}
+  .chip{font:600 10.5px/1 system-ui;letter-spacing:.05em;text-transform:uppercase;
+        border:1px solid var(--border);border-radius:20px;padding:4px 9px;color:var(--ink-2)}
+  .chip.ratify{border-color:var(--critical);color:var(--critical)}
+  pre{margin:0 0 10px;background:var(--code);border-radius:6px;padding:12px 14px;overflow-x:auto;
+      font:13px/1.65 ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--ink)}
+  dl{display:grid;grid-template-columns:78px 1fr;gap:4px 14px;margin:0;font-size:13px}
+  dt{color:var(--muted)}
+  dd{margin:0;color:var(--ink-2)}
+  .gl{display:grid;grid-template-columns:max-content 1fr;gap:7px 14px;margin:0;font-size:13px}
+  .gl dt{color:var(--ink);font-weight:600;white-space:nowrap}
+  .gl dd{margin:0;color:var(--ink-2)}
+  .gl .sym{font:600 13px/1.4 ui-monospace,SFMono-Regular,Consolas,monospace}
+  .grid3{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  table{width:100%;border-collapse:collapse;font-size:13.5px}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--rule);vertical-align:top}
+  th{color:var(--muted);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:.04em}
+  td:first-child{color:var(--ink)}
+  .num{font-variant-numeric:tabular-nums;white-space:nowrap}
+  .flag{color:var(--critical);font-weight:600}
+  a{color:var(--p1)}
+  footer{margin-top:44px;padding-top:14px;border-top:1px solid var(--rule);font-size:12.5px;color:var(--muted)}
+  @media (max-width:760px){.grid2,.grid3{grid-template-columns:1fr}dl{grid-template-columns:1fr}
+                           .gl{grid-template-columns:max-content 1fr}}
+</style>
+</head>
+<body>
+<main>
+
+  <h1>Energy Individualization — Phase 1 MVP Architecture</h1>
+  <p class="sub">Individualization from a richer profile, with weigh-in and intake logging demoted to an
+    optional second phase. Companion to <code>ENERGY_INDIVIDUALIZATION_RESEARCH_SPEC.md</code>,
+    <code>…_ARCHITECTURE.md</code> and <code>…_CALCULATIONS.md</code>.</p>
+
+  <div class="banner">
+    <b>Status: proposal for human ratification, not a ratified design.</b>
+    Scope is a recommendation; every item marked <b>RATIFY</b> is an open decision reserved for a human.
+    No <code>DEC</code> ID is created or amended, no readiness word changes, and no coefficient is invented.
+    <b>Several inputs proposed in §4 have no coverage anywhere in the corpus</b> — they are new capture
+    surfaces that need a source before any number attaches to them.
+  </div>
+
+  <h2>1 · The shape of Phase 1</h2>
+  <p>Logging is optional, so Phase 1 has to be complete and honest on its own. The honest consequence is
+    worth stating plainly: <b>without observation you cannot verify an estimate, so the interval never
+    narrows.</b> What a richer profile buys is not confirmation — it is better resolution and, more
+    importantly here, <b>less upward bias</b> (§3). The optional Phase 2 is the only thing that can
+    actually close the loop, and it stays strictly additive: a user who never weighs in still gets a
+    complete product, just a permanently wider one.</p>
+  <div class="grid2">
+    <div class="card">
+      <h3 style="color:var(--p1)">Phase 1 — required, no logging</h3>
+      <ul>
+        <li><b>Enriched one-time profile</b> — work, habitual movement, training, sleep (§4).</li>
+        <li><b>Decomposed activity estimate</b> — baseline PAL and declared training counted separately, so training is counted <i>once</i>.</li>
+        <li><b>Banded output</b> — a range with an honest width, never a bare point.</li>
+        <li><b>Conservative anchoring</b> — the fix for the estimate reading high (§3).</li>
+        <li><b>One-shot plausibility check</b> — self-reported 3-month weight direction; no logging required.</li>
+        <li><b>Conservative prescription</b> — deficit taken from the low edge of the band.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3 style="color:var(--p2)">Phase 2 — optional, opt-in</h3>
+      <ul>
+        <li><b>Weigh-in series</b> and <b>intake completeness</b> — only if the user opts in.</li>
+        <li><b>EWMA trend</b> + noise-floor check.</li>
+        <li><b>Sufficiency gate</b>, then <b>intake-balance back-calculation</b>.</li>
+        <li><b>Hard switchover</b> — replaces the band's value, no blending function invented.</li>
+        <li><b>Never a precondition.</b> Nothing in Phase 1 may degrade, nag, or withhold a target because this is off.</li>
+        <li><b>Still excluded:</b> wearable expenditure feeds, Kalman/EKF estimators, independent macro loops, retrospective re-estimation.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h2>2 · Flow</h2>
+  <figure>
+    <svg viewBox="0 0 1040 830" role="img" aria-label="Phase 1 flow: enriched profile to decomposed activity to a banded maintenance estimate, a plausibility check, and a conservative prescription; an optional Phase 2 panel adds weigh-in logging, trend, gate and back-calculation that can replace the band's value.">
+      <defs>
+        <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--p1)"/></marker>
+        <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--p2)"/></marker>
+        <marker id="aC" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="var(--critical)"/></marker>
+      </defs>
+      <style>
+        .bx{fill:var(--surface);stroke-width:1.5;rx:7}
+        .t1{font:600 12.5px system-ui,sans-serif;fill:var(--ink)}
+        .t2{font:11px system-ui,sans-serif;fill:var(--ink-2)}
+        .tg{font:700 10.5px system-ui,sans-serif}
+        .lb{font:10.5px system-ui,sans-serif;fill:var(--muted)}
+        .hd{font:700 11px system-ui,sans-serif;letter-spacing:.08em;text-transform:uppercase}
+        .ln{fill:none;stroke-width:1.5}
+      </style>
+
+      <rect x="60" y="20" width="14" height="3" rx="1.5" fill="var(--p1)"/>
+      <text class="hd" x="82" y="26" fill="var(--p1)">Phase 1 — required, no logging</text>
+
+      <!-- row A: intake -->
+      <rect class="bx" x="60" y="44" width="205" height="56" stroke="var(--p1)"/>
+      <text class="t1" x="74" y="68">Anthropometrics</text>
+      <text class="t2" x="74" y="86">age · sex · height · weight</text>
+
+      <rect class="bx" x="285" y="44" width="205" height="56" stroke="var(--p1)"/>
+      <text class="t1" x="299" y="68">Work</text>
+      <text class="t2" x="299" y="86">job type · hours on feet</text>
+
+      <rect class="bx" x="510" y="44" width="205" height="56" stroke="var(--p1)"/>
+      <text class="t1" x="524" y="68">Habitual movement</text>
+      <text class="t2" x="524" y="86">steps · commute · sleep</text>
+
+      <rect class="bx" x="735" y="44" width="205" height="56" stroke="var(--p1)"/>
+      <text class="t1" x="749" y="68">Structured training</text>
+      <text class="t2" x="749" y="86">sessions/wk · min · modality</text>
+
+      <!-- row B -->
+      <rect class="bx" x="60" y="134" width="205" height="56" stroke="var(--p1)"/>
+      <text class="tg" x="74" y="158" fill="var(--p1)">C1</text>
+      <text class="t1" x="96" y="158">Resting energy</text>
+      <text class="t2" x="74" y="176">Mifflin-St Jeor — shipped</text>
+
+      <rect class="bx" x="285" y="134" width="655" height="56" stroke="var(--p1)"/>
+      <circle cx="924" cy="150" r="4.5" fill="var(--critical)"/>
+      <text class="tg" x="299" y="158" fill="var(--p1)">C2</text>
+      <text class="t1" x="321" y="158">Decomposed activity → PAL band</text>
+      <text class="t2" x="299" y="176">baseline PAL from work + movement, then declared training added once — never a point</text>
+
+      <!-- row C -->
+      <rect class="bx" x="60" y="224" width="880" height="56" stroke="var(--p1)"/>
+      <circle cx="924" cy="240" r="4.5" fill="var(--critical)"/>
+      <text class="tg" x="74" y="248" fill="var(--p1)">C3</text>
+      <text class="t1" x="96" y="248">Maintenance band</text>
+      <text class="t2" x="74" y="266">REE × PAL band → { value, interval, source, evidence_basis, as_of }</text>
+
+      <!-- row D -->
+      <rect class="bx" x="60" y="314" width="880" height="56" stroke="var(--critical)" stroke-dasharray="5 3"/>
+      <text class="tg" x="74" y="338" fill="var(--critical)">C4</text>
+      <text class="t1" x="96" y="338">Day-1 plausibility check</text>
+      <text class="t2" x="74" y="356">self-reported 3-month weight direction — flags an estimate that reads high, widens the band</text>
+
+      <!-- row E -->
+      <rect class="bx" x="60" y="404" width="880" height="56" stroke="var(--p1)"/>
+      <circle cx="924" cy="420" r="4.5" fill="var(--critical)"/>
+      <text class="tg" x="74" y="428" fill="var(--p1)">C5</text>
+      <text class="t1" x="96" y="428">Conservative prescription</text>
+      <text class="t2" x="74" y="446">deficit taken from the low edge of the band, not its midpoint</text>
+
+      <!-- row F -->
+      <rect class="bx" x="60" y="494" width="880" height="56" stroke="var(--ink)"/>
+      <text class="t1" x="74" y="518">Targets</text>
+      <text class="t2" x="74" y="536">kcal + macros — shipped formulas, unchanged; macros recompute downstream only</text>
+
+      <!-- phase 2 panel -->
+      <rect x="40" y="596" width="970" height="190" rx="10" fill="none" stroke="var(--p2)" stroke-dasharray="6 4" stroke-width="1.5" opacity="0.8"/>
+      <rect x="58" y="586" width="14" height="3" rx="1.5" fill="var(--p2)"/>
+      <text class="hd" x="80" y="592" fill="var(--p2)">Phase 2 — optional, opt-in, never required</text>
+
+      <rect class="bx" x="70" y="640" width="200" height="56" stroke="var(--p2)"/>
+      <text class="t1" x="84" y="664">Weigh-in + log</text>
+      <text class="t2" x="84" y="682">opt-in · one weight/day</text>
+
+      <rect class="bx" x="308" y="640" width="200" height="56" stroke="var(--p2)"/>
+      <circle cx="492" cy="656" r="4.5" fill="var(--critical)"/>
+      <text class="tg" x="322" y="664" fill="var(--p2)">C6</text>
+      <text class="t1" x="344" y="664">Trend</text>
+      <text class="t2" x="322" y="682">EWMA + noise floor</text>
+
+      <rect class="bx" x="546" y="640" width="200" height="56" stroke="var(--p2)"/>
+      <circle cx="730" cy="656" r="4.5" fill="var(--critical)"/>
+      <text class="tg" x="560" y="664" fill="var(--p2)">C7</text>
+      <text class="t1" x="582" y="664">Gate</text>
+      <text class="t2" x="560" y="682">weeks · completeness</text>
+
+      <rect class="bx" x="784" y="640" width="200" height="56" stroke="var(--p2)"/>
+      <circle cx="968" cy="656" r="4.5" fill="var(--critical)"/>
+      <text class="tg" x="798" y="664" fill="var(--p2)">C8</text>
+      <text class="t1" x="820" y="664">Back-calculation</text>
+      <text class="t2" x="798" y="682">intake balance → ± SE</text>
+
+      <text class="lb" x="70" y="730" fill="var(--p2)">If the user never opts in, Phase 1 is the whole product — no nag, no withheld target, no degraded state.</text>
+      <text class="lb" x="70" y="750">The band stays wide instead of narrowing. That is the honest cost of optional logging, not a defect.</text>
+
+      <!-- arrows -->
+      <path class="ln" d="M162,100 L162,132" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M387,100 L387,132" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M612,100 L612,132" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M837,100 L837,132" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M162,190 L162,222" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M612,190 L612,222" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M500,280 L500,312" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M500,370 L500,402" stroke="var(--p1)" marker-end="url(#a1)"/>
+      <path class="ln" d="M500,460 L500,492" stroke="var(--p1)" marker-end="url(#a1)"/>
+
+      <path class="ln" d="M270,668 L306,668" stroke="var(--p2)" marker-end="url(#a2)"/>
+      <path class="ln" d="M508,668 L544,668" stroke="var(--p2)" marker-end="url(#a2)"/>
+      <path class="ln" d="M746,668 L782,668" stroke="var(--p2)" marker-end="url(#a2)"/>
+      <path class="ln" d="M984,668 L1022,668 L1022,252 L942,252" stroke="var(--p2)" stroke-dasharray="5 4" marker-end="url(#a2)"/>
+      <text class="lb" transform="translate(1014,450) rotate(-90)" text-anchor="middle" fill="var(--p2)">replaces the band's value — hard switchover</text>
+    </svg>
+    <div class="legend">
+      <span><i class="sw" style="background:var(--p1)"></i>Phase 1 — profile-derived, required</span>
+      <span><i class="sw" style="background:var(--p2)"></i>Phase 2 — observation-derived, optional</span>
+      <span><i class="dot"></i>Open parameter — requires ratification</span>
+    </div>
+  </figure>
+
+  <h2>3 · Why the estimate reads high — and the four corrections</h2>
+  <p>Your test observation is reproducible from the corpus itself. <b>The shipped PAL points sit at or
+    above the top of the project's own drafted bands</b> — and in the sedentary case, entirely above it.</p>
+
+  <table>
+    <thead><tr><th>App category</th><th class="num">Shipped PAL</th><th>Drafted DRI/IOM band</th><th>Position</th></tr></thead>
+    <tbody>
+      <tr><td>sedentary</td><td class="num">1.40</td><td class="num">1.2 – 1.3</td><td class="flag">above the band entirely</td></tr>
+      <tr><td>light</td><td class="num">1.55</td><td class="num">1.375 – 1.55</td><td>top edge</td></tr>
+      <tr><td>moderate</td><td class="num">1.70</td><td class="num">1.55 – 1.725</td><td>near top edge</td></tr>
+      <tr><td>high</td><td class="num">1.90</td><td class="num">1.725 – 1.9</td><td>top edge</td></tr>
+      <tr><td>very_high</td><td class="num">2.10</td><td class="num">1.9 – 2.4</td><td>mid-band</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px"><b>Illustrative magnitude</b> (arithmetic on the values above, not a new project value):
+    at a resting energy of 1600 kcal/day, a sedentary user gets <span class="num">1600 × 1.40 = 2240</span> kcal/day today,
+    against <span class="num">1600 × 1.25 = 2000</span> kcal/day at the drafted band's midpoint — roughly
+    <b>+240 kcal/day, about +12%</b>, before any of the other three mechanisms below.</p>
+
+  <div class="grid2" style="margin-top:16px">
+    <div class="card">
+      <h3>Four mechanisms, all established</h3>
+      <ul>
+        <li><b>Points above their band.</b> The table above. Largest and most easily fixed.</li>
+        <li><b>Double-counted training.</b> The category describes a whole day, but users self-select it by how often they train — so training is counted in the category and again in any later exercise allowance.</li>
+        <li><b>Self-report inflation.</b> Self-report over-estimates activity while MET tables under-estimate the cost of what was done; the literature describes these as compounding, not cancelling.</li>
+        <li><b>Band collapsed to a point.</b> Collapsing a range always discards the conservative edge, and the app has already done this twice (activity, and the fluid figure).</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3>Four corrections — each needs sign-off</h3>
+      <ul>
+        <li><b>Re-anchor to the drafted bands</b>, so no category ships a point above its own band.</li>
+        <li><b>Emit a band, not a point</b>, all the way to the UI.</li>
+        <li><b>Separate baseline PAL from declared training</b>, so training is added exactly once and is visible as its own line.</li>
+        <li><b>Take deficits from the low edge</b> of the maintenance band, so an over-estimated maintenance cannot silently become an over-generous target.</li>
+      </ul>
+    </div>
+  </div>
+  <p style="margin-top:12px"><b>One caution on the decomposition itself:</b> asking more questions improves
+    <i>resolution and auditability</i> — a user can correct the one component that is wrong instead of a vague
+    category — but it does not automatically improve accuracy. The same compounding self-report and
+    MET-table errors apply to each component, so a decomposed estimate must still be reported as a band.
+    A more detailed number that is presented more confidently would be a net loss.</p>
+
+  <h2>4 · Profile inputs to add</h2>
+  <p>Your four, plus seven more worth considering. <b>Almost none of these exists anywhere in the
+    corpus</b> — a search for NEAT, occupational activity, or step counts returns nothing — so each is a
+    new capture surface that needs a cited source before a coefficient attaches to it.</p>
+  <table>
+    <thead><tr><th>Input</th><th>What it resolves</th><th>Priority</th><th>Standing</th></tr></thead>
+    <tbody>
+      <tr><td><b>3-month weight direction</b> + rough amount</td><td>A one-shot check on whether the estimate reads high, with zero logging. The only Phase-1 input that is actually about this person's response</td><td><b>High</b></td><td>New; no corpus coverage</td></tr>
+      <tr><td><b>Job type</b> (desk / mixed / on-feet / manual)</td><td>The largest non-exercise discriminator between two people with identical bodies</td><td><b>High</b></td><td>New; no corpus coverage</td></tr>
+      <tr><td><b>Hours on feet vs seated</b></td><td>Turns job type from a label into a quantity; catches the standing-desk and hybrid cases</td><td><b>High</b></td><td>New</td></tr>
+      <tr><td><b>Structured training</b>: sessions/wk × minutes × modality</td><td>Lets training be counted once, explicitly, instead of being smuggled into the category choice</td><td><b>High</b></td><td>Hook already specified (training capture, currently blocked) as a <i>refinement</i> to the activity term, not a replacement</td></tr>
+      <tr><td><b>Typical daily step count</b></td><td>The best movement proxy a user can self-report</td><td>Medium</td><td>New, and adjacent to an open question: whether device/step-derived activity data is admitted at all. A self-reported typical count is not a device feed — different error profile — but the admission question is unsettled either way</td></tr>
+      <tr><td><b>Commute</b>: mode + minutes/day</td><td>The actual content of "office vs home"</td><td>Medium</td><td>New</td></tr>
+      <tr><td><b>Sleep hours</b></td><td>Sets the non-waking share of the day the whole PAL construction divides up</td><td>Medium</td><td>New</td></tr>
+      <tr><td><b>Household / caregiving load</b></td><td>Large, invisible movement in adults with young children or physical chores</td><td>Medium</td><td>New</td></tr>
+      <tr><td><b>Prior dieting / weight-loss history</b></td><td>Flags possible expenditure adaptation (commonly reported ≈90–180 kcal/d after moderate loss). Use it to <i>widen the band</i> — never to subtract a correction term, which would be an invented coefficient</td><td>Medium</td><td>Evidence exists; no corpus decision</td></tr>
+      <tr><td><b>Office vs home</b> (as its own field)</td><td>Mostly a proxy for commute + hours on feet. Keep only if those two are not asked directly</td><td>Low</td><td>New</td></tr>
+      <tr><td><b>Shift work / irregular schedule</b></td><td>Breaks the "typical day" assumption the entire PAL model rests on — worth a flag even if nothing consumes it yet</td><td>Low</td><td>New</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:12px"><b>Deliberately not proposed:</b> medical conditions, medications, and
+    eating-disorder screening — clinical criteria are out of scope and remain deferred. Nothing above
+    should be framed to the user as a diagnostic question.</p>
+
+  <h2>5 · Exact calculations</h2>
+
+  <div class="calc">
+    <header><span class="tag" style="color:var(--p1)">C1</span><b>Resting energy expenditure</b>
+      <span class="chip">Shipped · unchanged</span></header>
+    <pre>REE = 9.99·W + 6.25·H − 4.92·A + s        s = +5 (male) | −161 (female)</pre>
+    <dl>
+      <dt>Inputs</dt><dd>W kg, H cm, A years, equation sex</dd>
+      <dt>Output</dt><dd>REE, kcal/day</dd>
+      <dt>Source</dt><dd>Mifflin-St Jeor; validity <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10687135/">PMC10687135</a>, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7299486/">PMC7299486</a></dd>
+      <dt>Note</dt><dd>Not the source of the high readings — accuracy here is a <i>spread</i> (within ±10% for ~56–73% of adults), not a systematic upward bias. The bias is in C2</dd>
+    </dl>
+  </div>
+
+  <div class="calc">
+    <header><span class="tag" style="color:var(--p1)">C2</span><b>Decomposed activity → PAL band</b>
+      <span class="chip ratify">Ratify — component source</span><span class="chip ratify">Ratify — re-anchoring</span></header>
+    <pre>PAL_base  = [low, high]   from occupational category + habitual movement + sleep
+PAL_train = [low, high]   from declared sessions/wk × minutes × modality, added ONCE
+PAL       = PAL_base + PAL_train
+TEE_band  = REE × PAL                              → a range, never collapsed to a point</pre>
+    <dl>
+      <dt>Inputs</dt><dd>Job type, hours on feet, commute, typical steps, sleep, declared training (§4)</dd>
+      <dt>Output</dt><dd>A PAL band and a TEE band, plus a per-component breakdown the user can correct</dd>
+      <dt>Anchor</dt><dd>Drafted DRI/IOM bands — sedentary 1.2–1.3 · lightly active 1.375–1.55 · moderately active 1.55–1.725 · very active 1.725–1.9 · extremely active 1.9–2.4. The shipped points sit at or above the top of these (§3)</dd>
+      <dt>Ratify</dt><dd>(a) Which published table maps the new §4 fields onto band positions — no component coefficient is printed here, because none has been transcribed from a primary source. (b) The re-anchoring itself, since it changes shipped behaviour and will lower most users' targets</dd>
+      <dt>Caution</dt><dd>Structured training <i>refines</i> the activity term; it does not replace the method. Adding it on top of a category that already implied it is the double-count this decomposition exists to prevent</dd>
+    </dl>
+  </div>
+
+  <div class="calc">
+    <header><span class="tag" style="color:var(--p1)">C3</span><b>Maintenance band and its width</b>
+      <span class="chip ratify">Ratify — width source</span></header>
+    <pre>maintenance = { value:    midpoint of TEE_band,
+                interval: the band itself, widened by the prior's published width,
+                source:   "population_formula",
+                evidence_basis: "profile_only",
+                as_of:    timestamp }</pre>
+    <dl>
+      <dt>Inputs</dt><dd>TEE band (C2)</dd>
+      <dt>Output</dt><dd>The typed maintenance figure every downstream consumer reads</dd>
+      <dt>Candidate width</dt><dd>Published standard error of predicted value — 342 kcal/d for men ≥19y, 241 kcal/d for women (<a href="https://www.ncbi.nlm.nih.gov/books/NBK591034/">NASEM 2023</a>). The only citable prior width found</dd>
+      <dt>Ratify</dt><dd>Whether that published width is adopted, and how it combines with C2's own band rather than double-counting it</dd>
+    </dl>
+  </div>
+
+  <div class="calc">
+    <header><span class="tag" style="color:var(--critical)">C4</span><b>Day-1 plausibility check</b>
+      <span class="chip">No logging required</span><span class="chip ratify">Ratify — response</span></header>
+    <pre>ask: over the last ~3 months, has your weight gone up / down / stayed about the same,
+     and roughly how much?
+
+if reported stable AND reported habitual intake ≪ computed maintenance:
+        the estimate reads high, or intake is under-reported, or both
+        → widen the band · surface the assumption · never silently trust the formula</pre>
+    <dl>
+      <dt>Inputs</dt><dd>One self-reported question; optionally a rough habitual-intake answer</dd>
+      <dt>Output</dt><dd>A plausibility flag and a band adjustment — not a corrected value</dd>
+      <dt>Why</dt><dd>It is the only Phase-1 signal about this individual's actual response, and it costs one question. It is <b>coarse</b>: self-reported weight history and self-reported intake are both biased, and under-reporting of 5–25% is typical, so this can flag a problem but cannot resolve it</dd>
+      <dt>Ratify</dt><dd>What the flag is allowed to <i>do</i>. Widening a band is defensible; shifting the point estimate by a fixed amount would be an invented coefficient and is not proposed</dd>
+    </dl>
+  </div>
+
+  <div class="calc">
+    <header><span class="tag" style="color:var(--p1)">C5</span><b>Conservative prescription</b>
+      <span class="chip ratify">Ratify — edge policy</span></header>
+    <pre>loss:      target = M_low − deficit          ← low edge, not the midpoint
+gain:      target = M_low + surplus          ← accepts slower gain over accidental overfeeding
+maintain:  target = M_low … M_high           ← presented as the band
+floor:     target = max(target, MIN_CALORIES)</pre>
+    <dl>
+      <dt>Inputs</dt><dd>Maintenance band (C3), goal</dd>
+      <dt>Output</dt><dd>Energy prescription, tagged with the edge policy that produced it</dd>
+      <dt>Why</dt><dd>Directly addresses the high readings: if maintenance is over-estimated, a deficit measured from the midpoint inherits the whole error. Measuring from the low edge spends the band's width on caution</dd>
+      <dt>Ratify</dt><dd>The edge policy per goal direction — the loss case is the safety-relevant one; gain and maintain are conventions, not safety choices, and could reasonably differ</dd>
+      <dt>Unchanged</dt><dd>The deficit and surplus magnitudes themselves, and every macro formula downstream</dd>
+    </dl>
+  </div>
+
+  <div class="calc">
+    <header><span class="tag" style="color:var(--p2)">C6 – C8</span><b>Optional observation path</b>
+      <span class="chip">Opt-in only</span><span class="chip ratify">Ratify — α, k, N, c, ΔES</span></header>
+    <pre>C6  Tₜ = α·Mₜ + (1 − α)·Tₜ₋₁              EWMA over daily scale mass
+    rate = OLS slope of T over k days      noise floor: SD ≈ 0.53% (1d), 0.69% (7d)
+
+C7  pass ⇔ weeks ≥ N ∧ logged_days/window ≥ c ∧ weigh_ins/week ≥ q
+    gaps are never zero-filled
+
+C8  EE_maint = mean(EI over window) − ΔES / Δt
+    ΔES partitioned across fat / fat-free mass by a dynamic body-weight model
+    interval: SE(EE_maint) = |∂ES/∂mass| × SE(slope)
+
+    then: hard switchover — the observed value replaces the band's value. No blend.</pre>
+    <dl>
+      <dt>Inputs</dt><dd>Opt-in weight series, logged intake, window length</dd>
+      <dt>Output</dt><dd>Maintenance with <code>source: observation</code>, <code>evidence_basis: n_weeks_observed</code>, and a narrowed interval</dd>
+      <dt>Source</dt><dd>Method validated in <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4515869/">Sanghvi et al., AJCN 2015</a> — reproduced two-year intake change to within 40 kcal/d of a DLW+DXA reference. Dynamic model: <a href="https://pubmed.ncbi.nlm.nih.gov/21872751/">Hall et al., Lancet 2011</a> / <a href="https://niddk.nih.gov/research-funding/at-niddk/labs-branches/laboratory-biological-modeling/integrative-physiology-section/research/body-weight-planner">NIH Body Weight Planner</a>. Noise floor: <a href="https://pubmed.ncbi.nlm.nih.gov/37955103/">PubMed 37955103</a></dd>
+      <dt>Ratify</dt><dd>α, k, N, c, q, and which model supplies ΔES with its coefficients transcribed from the primary source. The <code>3500 kcal/lb</code> shortcut is not acceptable: it over-predicted loss at 27.6 ± 16.0 lb against 20.1 ± 11.3 lb observed (<a href="https://www.nature.com/articles/ijo2013112">Thomas et al. 2013</a>)</dd>
+      <dt>Boundary</dt><dd>A divergence safeguard still applies: a large gap between observed and profile-derived values is checked against data quality <i>first</i>, never adopted as a metabolic finding by default</dd>
+    </dl>
+  </div>
+
+  <h2>6 · What a human must sign off</h2>
+  <table>
+    <thead><tr><th>Where</th><th>Open decision</th><th>Why it cannot be defaulted</th></tr></thead>
+    <tbody>
+      <tr><td>C2</td><td><b>Re-anchor the PAL ladder to the drafted bands</b></td><td>Changes shipped behaviour and lowers most users' targets — the single highest-impact item here</td></tr>
+      <tr><td>C2</td><td>Which published table maps the new profile fields onto band positions</td><td>The corpus has no occupational/NEAT/step content at all; inventing component coefficients is barred</td></tr>
+      <tr><td>C2 / §4</td><td>Whether self-reported step counts are admitted, given the open device-data question</td><td>Self-report and device feeds have different error profiles, but neither has been ruled in</td></tr>
+      <tr><td>C3</td><td>Adopt a published width, and how it composes with C2's band</td><td>Naive addition would double-count uncertainty</td></tr>
+      <tr><td>C4</td><td>What the plausibility flag may do</td><td>Widening a band is defensible; shifting the estimate is an invented correction</td></tr>
+      <tr><td>C5</td><td>Band-edge policy per goal direction</td><td>A safety-relevant convention, not a derivable value</td></tr>
+      <tr><td>C6 – C8</td><td>α, k, N, c, q, ΔES model + coefficients</td><td>Only reachable if Phase 2 is built; all remain open</td></tr>
+    </tbody>
+  </table>
+
+  <h2>7 · Sources</h2>
+  <table>
+    <tbody>
+      <tr><td>REE equation</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC10687135/">PMC10687135</a>, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7299486/">PMC7299486</a></td></tr>
+      <tr><td>PAL method + its error sources</td><td><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC13007108/">PMC13007108</a>, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7004509/">PMC7004509</a></td></tr>
+      <tr><td>Prior width (SEPV)</td><td><a href="https://www.ncbi.nlm.nih.gov/books/NBK591034/">NASEM 2023 DRI for Energy</a>, <a href="https://www.ncbi.nlm.nih.gov/books/NBK591020/">applications chapter</a></td></tr>
+      <tr><td>Intake under-reporting</td><td><a href="https://www.nature.com/articles/s43016-024-01089-5">Nature Food 2024</a>, <a href="https://link.springer.com/article/10.1186/s12874-025-02568-4">BMC MRM 2025</a></td></tr>
+      <tr><td>Expenditure adaptation</td><td><a href="https://ajcn.nutrition.org/article/S0002-9165(22)00885-1/fulltext">AJCN review</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/34839398/">PubMed 34839398</a></td></tr>
+      <tr><td>Weight noise floor</td><td><a href="https://pubmed.ncbi.nlm.nih.gov/37955103/">PubMed 37955103</a>, <a href="https://physoc.onlinelibrary.wiley.com/doi/full/10.14814/phy2.13336">phy2.13336</a></td></tr>
+      <tr><td>Intake balance + dynamic model</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC4515869/">PMC4515869</a>, <a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5485536/">PMC5485536</a>, <a href="https://pubmed.ncbi.nlm.nih.gov/21872751/">Hall 2011</a></td></tr>
+      <tr><td>3500 kcal/lb rejected</td><td><a href="https://www.nature.com/articles/ijo2013112">Thomas et al. 2013</a>, <a href="https://www.nature.com/articles/ijo2013113">Hall response</a></td></tr>
+      <tr><td>Excluded: wearable feeds</td><td><a href="https://www.ncbi.nlm.nih.gov/pmc/articles/PMC11560992/">PMC11560992</a></td></tr>
+      <tr><td>Excluded: recursive estimators</td><td><a href="https://arxiv.org/abs/2604.26803">PM-EKF</a>, <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5001697/">PMC5001697</a></td></tr>
+      <tr><td>Drafted PAL bands + training hook</td><td><code>DECISION_LOGIC_SPECIFICATION.md</code> §3.1, §3.13 (in-corpus)</td></tr>
+    </tbody>
+  </table>
+
+  <h2>Appendix · Abbreviations, symbols and terms</h2>
+  <p>Everything shorthand that appears in this document, in the three companion documents, or in the
+    cited sources.</p>
+
+  <div class="grid3">
+    <div class="card">
+      <h3>Energy and physiology</h3>
+      <dl class="gl">
+        <dt>BMR</dt><dd>Basal metabolic rate — energy at complete rest. The field name in the shipped code (<code>bmrKcal</code>)</dd>
+        <dt>REE</dt><dd>Resting energy expenditure — what C1 estimates. Measured under less strict conditions than BMR; the two are used interchangeably here</dd>
+        <dt>RMR</dt><dd>Resting metabolic rate — the same quantity as REE; the term the cited source titles use</dd>
+        <dt>TEE</dt><dd>Total energy expenditure — everything burned in a day. REE × PAL</dd>
+        <dt>TDEE</dt><dd>Total daily energy expenditure — the same quantity as TEE; the name consumer products use</dd>
+        <dt>EER</dt><dd>Estimated energy requirement — the output of the NASEM framework (C3)</dd>
+        <dt>PAL</dt><dd>Physical activity level — the multiplier that turns REE into TEE, i.e. TEE ÷ REE. The source of the high readings (§3)</dd>
+        <dt>MET</dt><dd>Metabolic equivalent of task — activity cost as a multiple of a conventional resting rate. The 1-MET convention over-states real RMR by 10–30%</dd>
+        <dt>NEAT</dt><dd>Non-exercise activity thermogenesis — movement that is not deliberate exercise: work, commute, chores, fidgeting. What the §4 fields try to resolve</dd>
+        <dt>EI / EE</dt><dd>Energy intake / energy expenditure (C8)</dd>
+        <dt>ES</dt><dd>Body energy stores; <span class="sym">ΔES</span> is their change across a window (C8)</dd>
+        <dt>FM / FFM</dt><dd>Fat mass / fat-free mass — the two compartments a dynamic model partitions weight change across</dd>
+        <dt>BMI</dt><dd>Body mass index — context only in this app, never a calorie input</dd>
+        <dt>LEA</dt><dd>Low energy availability — intake minus exercise expenditure, relative to fat-free mass</dd>
+        <dt>REDs</dt><dd>Relative Energy Deficiency in Sport — the consensus framework around LEA. Out of scope for this MVP</dd>
+        <dt>CAT2</dt><dd>The clinical assessment tool, version 2, used for REDs screening</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Measurement and statistics</h3>
+      <dl class="gl">
+        <dt>SD</dt><dd>Standard deviation — spread within a sample. Used for the weigh-in noise floor</dd>
+        <dt>SE</dt><dd>Standard error — the uncertainty of an estimated quantity, e.g. of a fitted trend slope (C6, C8)</dd>
+        <dt>SEPV</dt><dd><b>Standard error of predicted value</b> — how far a prediction equation typically misses for one individual. Published per equation: 342 kcal/d for men ≥19y, 241 kcal/d for women. This document's candidate width for the prior (C3). <b>Not the same as SEE</b> (standard error of the estimate), which these documents do not use anywhere</dd>
+        <dt>MAPE</dt><dd>Mean absolute percentage error — reported above 30% for wearable expenditure, which is why wearables are excluded</dd>
+        <dt>EWMA</dt><dd>Exponentially weighted moving average — the smoother that extracts a weight trend from a noisy daily series (C6)</dd>
+        <dt>OLS</dt><dd>Ordinary least squares — plain linear regression; used for the slope of the trend (C6)</dd>
+        <dt>EKF</dt><dd>Extended Kalman filter — a recursive state estimator. Named only to record that it is <i>excluded</i></dd>
+        <dt>DLW</dt><dd>Doubly labeled water — the reference method for measuring free-living expenditure. What the authoritative equations are built on and validated against</dd>
+        <dt>DXA</dt><dd>Dual-energy X-ray absorptiometry — the body-composition reference method used alongside DLW in the validation study</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:16px">
+    <div class="card">
+      <h3>Bodies, publications, corpus</h3>
+      <dl class="gl">
+        <dt>DRI</dt><dd>Dietary Reference Intakes — the reference-value framework the PAL bands come from</dd>
+        <dt>NASEM</dt><dd>National Academies of Sciences, Engineering, and Medicine — publisher of the 2023 energy DRI</dd>
+        <dt>IOM</dt><dd>Institute of Medicine — NASEM's former name; the source of the 2005-era bands still cited in the drafted spec</dd>
+        <dt>NIDDK</dt><dd>National Institute of Diabetes and Digestive and Kidney Diseases — home of the dynamic body-weight model and the public Body Weight Planner</dd>
+        <dt>IOC</dt><dd>International Olympic Committee — publisher of the REDs consensus</dd>
+        <dt>AJCN</dt><dd>American Journal of Clinical Nutrition</dd>
+        <dt>IJO</dt><dd>International Journal of Obesity</dd>
+        <dt>CALERIE</dt><dd>The long-term calorie-restriction trial whose data validated the intake-balance method to within 40 kcal/d</dd>
+        <dt>DEC</dt><dd>This corpus's decision identifier, e.g. <code>DEC-019</code>. Readiness words attached to them — <code>SHIPPED</code>, <code>COVERED</code>, <code>PROVISIONAL</code>, <code>BLOCKED</code>, <code>DEFERRED</code> — are defined and owned by <code>DEC_REGISTER.md</code>; the gloss here is navigational only</dd>
+        <dt>MVP</dt><dd>Minimum viable product — here, the smallest set that individualizes honestly</dd>
+      </dl>
+    </div>
+
+    <div class="card">
+      <h3>Symbols</h3>
+      <dl class="gl">
+        <dt class="sym">α</dt><dd>EWMA smoothing constant, between 0 and 1. Higher reacts faster and stays noisier; lower is steadier and lags. Open parameter (C6)</dd>
+        <dt class="sym">Δ</dt><dd>Change in — <span class="sym">ΔES</span> is change in energy stores, <span class="sym">Δt</span> the elapsed time</dd>
+        <dt class="sym">∂ES/∂mass</dt><dd>Partial derivative — kcal per kg of body-mass change; the coefficient a dynamic model supplies (C8)</dd>
+        <dt class="sym">Tₜ · Mₜ</dt><dd>Trend value and measured scale mass on day <i>t</i> (C6)</dd>
+        <dt class="sym">M_low · M_high</dt><dd>The low and high edges of the maintenance band (C5)</dd>
+        <dt class="sym">⇔</dt><dd>If and only if</dd>
+        <dt class="sym">∧</dt><dd>Logical AND — every condition must hold</dd>
+        <dt class="sym">≪</dt><dd>Much less than</dd>
+        <dt class="sym">±</dt><dd>Plus or minus — denotes a band, not a tolerance</dd>
+      </dl>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px">
+    <h3>Terms used in a specific sense here</h3>
+    <dl class="gl">
+      <dt>Prior</dt><dd>The opening estimate before any of this person's own data exists — the profile-derived figure. Borrowed from Bayesian usage: a starting position that evidence is allowed to move</dd>
+      <dt>Band</dt><dd>A range carried all the way through, rather than a point. Collapsing one to its midpoint discards the method's own uncertainty — the app has already done that twice</dd>
+      <dt>Hard switchover</dt><dd>Replacing the prior with the observed estimate outright once the gate passes, rather than blending the two. Chosen because it needs no weighting function, which nobody is authorized to invent</dd>
+      <dt>Back-calculation</dt><dd>Inferring expenditure from what actually happened — intake plus observed weight change — instead of predicting it from a formula (C8)</dd>
+      <dt>Noise floor</dt><dd>The day-to-day scale variation from water, sodium, glycogen and gut content. A trend must clear it before it can be called real</dd>
+      <dt>Adaptive thermogenesis</dt><dd>The drop in expenditure after weight loss beyond what the smaller body alone explains. The reason a fixed target drifts out of calibration, and the argument for re-estimating rather than adding a correction term</dd>
+      <dt>Plausibility check</dt><dd>A one-question sanity test (C4) that can flag an estimate as reading high. It cannot correct one</dd>
+    </dl>
+  </div>
+
+  <footer>
+    Corpus authority is unchanged: readiness stays owned by <code>DEC_REGISTER.md</code>, decision content by
+    <code>APP_DECISION_INVENTORY.md</code>, drafted formulas by <code>DECISION_LOGIC_SPECIFICATION.md</code>, and
+    evidence by <code>ENERGY_INDIVIDUALIZATION_RESEARCH_SPEC.md</code>. This document creates no <code>DEC</code> ID,
+    changes no readiness word, defines no schema, and opens no <code>IMPLEMENTATION_HANDOFF.md</code> row.
+  </footer>
+
+</main>
+</body>
+</html>
