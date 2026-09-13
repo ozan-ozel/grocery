@@ -136,7 +136,7 @@ fatMax = 0.35 × safeTarget / 9
 
 - **Inputs:** `safeTarget` (from §2.3)
 - **Outputs:** `fatG.min` / `fatG.max` (g/day)
-- **Status:** Shipped — `DEC-034`
+- **Status:** Shipped — `DEC-036`
 
 ### 2.6 Carbohydrate target
 
@@ -153,7 +153,7 @@ carbsG = weightKg × { min, max }   // g/kg/day, by activity
 
 - **Inputs:** `weightKg`, `activity`
 - **Outputs:** `carbsG.min` / `carbsG.max` (g/day)
-- **Status:** Shipped — `DEC-036`
+- **Status:** Shipped — `DEC-034`
 - **Source:** Sport Nutrition (Jeukendrup & Gleeson, Ch. 4/6); code comment notes sedentary shares
   light's tier since the source has no sedentary-specific tier.
 
