@@ -14,9 +14,9 @@
 
 ## Body composition
 	
-	Create a single mvp scope feature for this.
+	Create a single mvp scope feature for this. - SCOPED, see docs/body-composition-mvp.md
 
-## Macros - MVP, done in individualization
+## Macros - MVP, done in individualization - SCOPED, see docs/macros-mvp.md
 
 	Determine how the protein requirement is distributed across the day’s eating occasions !IMPORTANT
 
@@ -30,19 +30,19 @@
 
 	Will be done in v2, backlog
 
-## Hydration
+## Hydration - SCOPED, see docs/hydration-mvp.md
 
 	Small and useful tips on when to drink (how long before or after meal, during which periods of day, etc.) - MISSING
 
 	How much to drink - MISSING
 
-## GI Tolerance
+## GI Tolerance - SCOPED, see docs/gi-tolerance-mvp.md
 
 	Create a restricted scope for this feature (only the most common ones) - MISSING
 
 	Exclude foods and meals functionality should be present - TO BE CHECKED
 
-## Meal Structure
+## Meal Structure - SCOPED, see docs/meal-structure-mvp.md
 
 	Determine how many eating occasions a plan structures around and what inputs drive that choice - MISSING
 
@@ -53,11 +53,11 @@
 	What is the best combination of macros in a meal that would be healty for digestion and gut? - MISSING
 
 
-## Food Selection
+## Food Selection - SCOPED, see docs/food-selection-mvp.md
 
 	For mvp, covered with exclude function. - MISSING
 
-## Meal Construction/Prep
+## Meal Construction/Prep - SCOPED, see docs/meal-construction-mvp.md
 
 	Determine how a set of selected foods and portions is translated into constructed meals - MISSING
 
@@ -65,11 +65,11 @@
 
 	Create different section like ingredients, preparation, cooking, serve, storing for later days (freezer, how to cool and heat in later days) 
 
-## Shopping
+## Shopping - SCOPED, see docs/shopping-mvp.md
 
 	Create a very simple mvp scope, check whether it is implemented already
 
-## Monitoring
+## Monitoring - SCOPED, see docs/monitoring-mvp.md
 
 	Create a very simple mvp scope
 
@@ -79,7 +79,7 @@
 
 	Move this to V2, Backlog
 
-## Sport/Training Data
+## Sport/Training Data - SCOPED, see docs/sport-training-mvp.md
 
 	We are planning to get activity a bit more detailed in the onboarding process during energy individualization. So we need a mvp scope (not very detailed) for this one. Include HIIT, Fitness, cross fit, walking, cycling, swimmming, running for now, if these are too much, propose an expandable structure to add these info (mapping activities to macro values) iteratively.
 
@@ -87,15 +87,15 @@
 
 	Skip for now, V3, backlog
 
-## Life Stage
+## Life Stage - SCOPED, see docs/life-stage-mvp.md
 
 	Create a very simple, limited scope for mvp (age only maybe?)
 
-## Access/Affordability
+## Access/Affordability - SCOPED, see docs/access-affordability-mvp.md
 	
 	Determine whether the application aligns its default guidance to a named external food-guide/standard
 
-## Governance/Confidence
+## Governance/Confidence - SCOPED, see docs/governance-confidence-mvp.md
 
 	Determine how data-quality/confidence levels are communicated consistently across all decisions - MISSING
 
