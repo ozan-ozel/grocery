@@ -6,24 +6,18 @@ this project is. This file is a router and behavior layer, not the architecture 
 
 ## Where things live
 
+- **[docs/knowledge-map.md](docs/knowledge-map.md) is the entry point** — a routing table of every
+  canonical doc in this repo, what it's for, and when to load it. Start there before searching `docs/`
+  yourself; only the two exceptions below are worth keeping inline here.
 - [docs/claude-interaction-model.md](docs/claude-interaction-model.md) — how Claude approaches every
   task: the doc-reading sequence, skill checks, and decision pipeline. Read this to understand how
   Claude Code makes decisions in this repository.
 - [docs/architecture.md](docs/architecture.md) — state & persistence, tenants, sync,
   categorization, the nutrition backend, env vars, daily rollover, design tokens, theming.
   Read the relevant section before touching that subsystem.
-- [docs/roadmap.md](docs/roadmap.md) — current status and prioritized next steps; a menu, not a
-  schedule. Check here before proposing a new direction so you're not duplicating one already
-  weighed.
-- [docs/nutrition-prompt.md](docs/nutrition-prompt.md) — copy-paste LLM prompt for turning
-  free-form nutrition text into rows for `data/nutrition.json` / the Besin-tab uploader.
-- [data/README.md](data/README.md) — row schema and seeding flow for `data/nutrition.json`.
 - [supabase/01-schema.sql](supabase/01-schema.sql) — canonical DB schema (`households`, `lists`,
   `items`, `item_category_memory`, `nutrition`). Treat this file, not prose descriptions of it,
   as authoritative for column names/types.
-- [docs/superpowers/specs/](docs/superpowers/specs/) — feature specs from past design passes
-  (e.g. the nutrition view). Historical rationale; check each spec's own status note before
-  trusting implementation details as current.
 
 ## UI patterns
 
@@ -58,15 +52,19 @@ this project is. This file is a router and behavior layer, not the architecture 
 - Cross-project durable knowledge belongs in `~/vault/permanent/`.
 - The Vault is outside the repository and must not be committed to Git. The repository remains the
   source of truth for source code and project files.
-- **When implementing something scoped by a `docs/*-mvp.md` file (a `roadmap_v2.md` domain doc) or a
-  `nutrition-curriculum` `DEC`, update all of these together, not just the code:** the `*-mvp.md`
-  file's own status note, the corresponding line in `docs/roadmap_v2.md`, the DEC's row note in
-  `nutrition-curriculum/DEC_REGISTER.md` (link back to the `*-mvp.md` file from that note, e.g. "see
-  docs/macros-mvp.md"), and the session-checkpoint record for the work. These currently drift apart
-  silently — this project has already hit a stale checkpoint describing a merged branch as still
+- **When implementing something scoped by a `docs/mvp-scope/*-mvp.md` file (a `roadmap_v2.md` domain
+  doc) or a `nutrition-curriculum` `DEC`, update all of these together, not just the code:** the
+  `*-mvp.md` file's own status note, the corresponding line in `docs/roadmap_v2.md`, the DEC's row note
+  in `nutrition-curriculum/DEC_REGISTER.md` (link back to the `*-mvp.md` file from that note, e.g. "see
+  docs/mvp-scope/macros-mvp.md"), and the session-checkpoint record for the work. These currently drift
+  apart silently — this project has already hit a stale checkpoint describing a merged branch as still
   active, and an `IMPLEMENTATION_HANDOFF.md` Closed table that sat empty for four decisions
   `DEC_REGISTER.md` already marked done. Treat a `*-mvp.md`/`DEC_REGISTER.md`/`roadmap_v2.md` update as
   one unit of work, not three optional follow-ups.
+- **When a `docs/superpowers/plans/*.md` file's feature ships, flip its row in
+  `docs/superpowers/plans/README.md` to `SHIPPED` in the same commit** — that index is the only thing
+  tracking these plans' status, and it stays accurate only if this happens at ship time, not as a
+  later cleanup pass. Same for `docs/mvp-scope/README.md`'s status column when an MVP-scope item ships.
 
 ## Git shorthand
 
@@ -121,8 +119,8 @@ it — do not leave a standing test behind.
 
 All backend logic lives under `api/*` (Vercel functions), with shared helpers in `lib/` (e.g.
 `lib/auth.ts`). A former `functions/api/*` Cloudflare Pages path and, later, a parallel
-`netlify/functions/*` deploy were both retired (see git history / `docs/roadmap.md`); Vercel is
-what's actually deployed now.
+`netlify/functions/*` deploy were both retired (see git history / `docs/archive/roadmap.md`); Vercel
+is what's actually deployed now.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 

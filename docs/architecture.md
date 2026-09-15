@@ -112,7 +112,7 @@ exists via `/api/households` but has never had a first `/api/state` PUT.
 A per-row Supabase CRUD path for `lists`/`items` (`supabase/01-schema.sql`) was scaffolded early on
 (client wrappers in `src/lib/sync/`, function counterparts) as groundwork for eventually replacing
 the single-blob-per-tenant sync with normalized per-row persistence, but nothing ever called it —
-it was removed as dead code (see `docs/roadmap.md` #1 for the still-open direction). `item_category_memory`
+it was removed as dead code (see `docs/archive/roadmap.md` #1 for the still-open direction). `item_category_memory`
 (also in `01-schema.sql`) is wired up — see the Categorization section below.
 
 ## Categorization
@@ -169,8 +169,9 @@ boundaries but do not turn the feature into medical advice.
 ## Deployment
 
 **Vercel is the sole deploy target** (project `grocery`, linked via `.vercel/project.json`). A
-parallel Netlify deploy existed during the `api/*.ts` migration (`docs/netlify-vercel-migration-plan.md`,
-NUT-29) and was retired once Vercel was verified end-to-end (NUT-52); there is no Netlify site, no
+parallel Netlify deploy existed during the `api/*.ts` migration
+(`docs/archive/netlify-vercel-migration-plan.md`, NUT-29) and was retired once Vercel was verified
+end-to-end (NUT-52); there is no Netlify site, no
 `netlify.toml`, and no `netlify/functions/` anymore.
 
 Vercel deploys are **not** wired to auto-deploy on push — there's no GitHub App access to this repo
