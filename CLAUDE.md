@@ -52,6 +52,12 @@ this project is. This file is a router and behavior layer, not the architecture 
 - Cross-project durable knowledge belongs in `~/vault/permanent/`.
 - The Vault is outside the repository and must not be committed to Git. The repository remains the
   source of truth for source code and project files.
+- **Before starting any task that touches nutrition guidance, macros, meal structure, or another
+  domain covered by `docs/roadmap_v2.md`, check whether it maps to a `docs/mvp-scope/*-mvp.md` file
+  or a `nutrition-curriculum` `DEC` — do not wait for the task to arrive already framed that way.**
+  The trio rule below only fires once that mapping is recognized, and a feature built without ever
+  opening `roadmap_v2.md` or the relevant `mvp-scope` file slips past it entirely. If in doubt, check
+  `docs/mvp-scope/README.md`'s domain table before writing code, not after.
 - **When implementing something scoped by a `docs/mvp-scope/*-mvp.md` file (a `roadmap_v2.md` domain
   doc) or a `nutrition-curriculum` `DEC`, update all of these together, not just the code:** the
   `*-mvp.md` file's own status note, the corresponding line in `docs/roadmap_v2.md`, the DEC's row note
@@ -65,6 +71,22 @@ this project is. This file is a router and behavior layer, not the architecture 
   `docs/superpowers/plans/README.md` to `SHIPPED` in the same commit** — that index is the only thing
   tracking these plans' status, and it stays accurate only if this happens at ship time, not as a
   later cleanup pass. Same for `docs/mvp-scope/README.md`'s status column when an MVP-scope item ships.
+
+### Close-out checklist
+
+Run this before reporting any coding session's work as done — don't skip it because the change felt
+small; small, unframed changes are exactly what slip past the rules above:
+
+1. Did this touch anything under a `docs/roadmap_v2.md` domain, an `mvp-scope/*-mvp.md` file, or a
+   `nutrition-curriculum` `DEC` — even if the task didn't start from one of those files? → update the
+   roadmap line, the `mvp-scope` file's status note, `docs/mvp-scope/README.md`'s status column, and
+   the `DEC_REGISTER.md` row note together, in the same commit.
+2. Did this ship a feature that has (or should have had) a `docs/superpowers/plans/*.md` entry? → flip
+   its `docs/superpowers/plans/README.md` row to `SHIPPED` in the same commit.
+3. Is this significant enough to need a `docs/session-checkpoints/` record? → create one and link it
+   from `docs/SESSION_FOLLOWUP.md`.
+
+If none apply, say so explicitly in the session wrap-up rather than silently skipping this section.
 
 ## Git shorthand
 
@@ -89,12 +111,31 @@ this project is. This file is a router and behavior layer, not the architecture 
   workspace details and branch-naming convention in memory (`linear-github-integration`); the
   `NUT-<n>` issue prefix only does anything once a GitHub PR exists, so plain CMP/BCMP pushes won't
   auto-link regardless.
+- **SYNC** = pre-commit doc-sync check. When the user says "SYNC", check the diff about to be
+  committed (`git status --short` / `git diff --name-only` against the merge-base with `master`, plus
+  `git diff --stat` for size) against the Close-out checklist above:
+  1. **Trio rule**: if any of `docs/roadmap_v2.md`, `docs/mvp-scope/*-mvp.md`, or
+     `nutrition-curriculum/DEC_REGISTER.md` is in the diff, all three must be — report which are
+     missing rather than proceeding silently.
+  2. **Plans index**: if anything under `docs/superpowers/plans/` is in the diff, remind the user to
+     check whether the corresponding `docs/superpowers/plans/README.md` row needs a `SHIPPED` flip —
+     this is a reminder, not a hard check, since intent can't be read from a filename.
+  3. **Session-checkpoint**: flag, from the diff's size/paths, whether this looks significant enough
+     to warrant a `docs/session-checkpoints/` record — a judgment call to surface, not to decide.
+  `SYNC` only reports; it never edits files or stages/commits anything itself. Run it standalone,
+  immediately before `CMP`/`BCMP`/`LCMP`/`LBCMP` — never as an automatic step inside them — since it's
+  checking the diff that's about to be committed, not something to run before the diff exists.
 - **COL** = collaboration checkpoint for the nutrition-curriculum plan/implementation handoff. When
   the user says "COL", follow the resume procedure defined in
-  `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` — it checks the tracker and resumes from there.
-  Planner/implementer are fluid roles in that system, not fixed people, so `COL` asks which applies
-  whenever the continuation point is ambiguous rather than assuming. It is not a git shorthand like
-  CMP/BCMP; it never commits/merges/pushes by itself.
+  `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md`. That procedure now reads every continuity
+  index before resuming — `IMPLEMENTATION_HANDOFF.md`'s own Active/Closed tables,
+  `nutrition-curriculum/DEC_REGISTER.md`, `docs/mvp-scope/README.md`'s status column,
+  `docs/superpowers/plans/README.md` for any plan touching a nutrition domain, and
+  `docs/SESSION_FOLLOWUP.md` for unresolved general-app continuity — not `IMPLEMENTATION_HANDOFF.md`
+  in isolation, so a stale row elsewhere doesn't get missed. Planner/implementer are fluid roles in
+  that system, not fixed people, so `COL` asks which applies whenever the continuation point is
+  ambiguous rather than assuming. It is not a git shorthand like CMP/BCMP; it never
+  commits/merges/pushes by itself.
 
 ## Commands
 

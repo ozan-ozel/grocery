@@ -97,30 +97,76 @@ operation and does not commit/merge/push anything by itself). Because **roles ar
 **Roles** above), `COL` does not assume who is asking or which role they're about to play — it reads
 the state and, whenever more than one continuation is plausible, **asks instead of guessing.**
 
-1. **Read the Active table first.**
-   - A `BLOCKED` row → stop and surface the Notes/Blockers content to whoever invoked `COL`. Don't
-     touch the spec or the row — this state needs a human answer, not an assumption about who that
-     human is.
-   - A `PUSHED` row → a spec is finished and waiting on an implementer. **Ask which is happening**:
-     is the invoker picking this up to implement (→ hand off to "If you are implementing" above), or
-     is something else going on? Do not silently assume either.
-   - An `IN_PROGRESS` row → similarly ask whether the invoker is continuing that same implementation,
-     before resuming it on their behalf. Either way, only one item may be active — do not start
-     drafting a new spec while one is still out.
-   - Nothing active → continue to step 2.
-2. **Find the last-covered DEC.** The most recent entry in the Closed table below.
-   - If exactly one plausible next DEC follows from it (e.g. the corpus/roadmap makes the sequence
-     obvious), say so and confirm before drafting.
-   - If Closed is empty, or more than one next DEC is plausible, or it's otherwise unclear — **ask
-     which DEC to start with** rather than guessing an order from `DEC_REGISTER.md`.
-3. **Resume planning from there**, once the invoker has confirmed they're acting as planner. Pick up
-   (or start) the next DEC's spec file in `09_HANDOFF_SPECS/`, following `_TEMPLATE.md`. Cross-check
-   it against `DEC_REGISTER.md` (only `READY`/`PROVISIONAL` decisions are workable — see that file's
-   vocabulary) and against `APP_DECISION_INVENTORY.md` for what the decision actually covers.
-4. **Do not flip a row to `PUSHED` as part of `COL` itself.** `COL` gets planning moving again; it
-   ends with a spec draft (finished or in progress) reported back. Pushing a row is a separate,
-   deliberate step once the spec is actually done — same as `PUSHED` already requires elsewhere in
-   this file.
+### 0. Read every continuity index first, not just this file's Active table
+
+A stale row anywhere in this list is exactly the kind of drift `COL` exists to catch — read all five
+before deciding what's actually active, even if you expect the answer to come from the Active table
+below:
+
+| Read | For |
+|---|---|
+| This file's **Active** table (below) | The one DEC currently `PUSHED`/`IN_PROGRESS`/`BLOCKED`, if any |
+| This file's **Closed** table (below) | The last-covered DEC, to find a plausible next one |
+| `nutrition-curriculum/DEC_REGISTER.md` | Whether the DEC in Active/Closed still matches its registered readiness word — a mismatch means one of the two has drifted and needs reconciling before anything resumes |
+| `docs/mvp-scope/README.md` status column | Whether a `PARTIAL`/`NOT_STARTED` domain overlaps the DEC in question — implementation work here should update that table per `CLAUDE.md`'s trio rule |
+| `docs/superpowers/plans/README.md` | Any app-feature plan touching the same nutrition domain (e.g. a UI plan for a macro feature) that should be sequenced with, not duplicated by, curriculum work |
+| `docs/SESSION_FOLLOWUP.md` | Unresolved general-app continuity that might block or depend on the DEC work — surface it, don't silently ignore it because it's outside `nutrition-curriculum/` |
+
+If any two of these disagree about a DEC's state (e.g. `DEC_REGISTER.md` says `SHIPPED` but this
+file's Active table still shows it `PUSHED`), stop and surface the mismatch before resuming — treat
+it the same as a `BLOCKED` row: a human answer is needed, not a guess about which source is right.
+
+### 1. Classify what's being resumed: planning or implementation
+
+Once the indexes above are read, name which kind of task this is — the two have different resume
+paths and different next steps:
+
+- **Planning tasks** (produce or revise a spec, not code): drafting a new DEC's spec in
+  `09_HANDOFF_SPECS/`; revising an existing spec in response to a `BLOCKED` row's Notes; updating
+  `docs/roadmap_v2.md` or an `mvp-scope/*-mvp.md` file with new scope information; reconciling a
+  `DEC_REGISTER.md` readiness word against a spec that has since changed.
+- **Implementation tasks** (produce code against an existing spec): picking up a `PUSHED` row and
+  building it; continuing an `IN_PROGRESS` row; unblocking a `BLOCKED` row once the planner has
+  answered its Notes; running a row's self-close checklist and moving it to Closed.
+
+State the classification explicitly when reporting back — "resuming as planner, drafting DEC-057" or
+"resuming as implementer, continuing DEC-034" — so the next `COL` invocation (by anyone) doesn't have
+to re-derive it.
+
+### 2. Resume from the Active table
+
+- A `BLOCKED` row → stop and surface the Notes/Blockers content to whoever invoked `COL`. Don't
+  touch the spec or the row — this state needs a human answer, not an assumption about who that
+  human is.
+- A `PUSHED` row → a spec is finished and waiting on an implementer. **Ask which is happening**:
+  is the invoker picking this up to implement (→ hand off to "If you are implementing" above), or
+  is something else going on? Do not silently assume either.
+- An `IN_PROGRESS` row → similarly ask whether the invoker is continuing that same implementation,
+  before resuming it on their behalf. Either way, only one item may be active — do not start
+  drafting a new spec while one is still out.
+- Nothing active → continue to step 3.
+
+### 3. Find the last-covered DEC
+
+The most recent entry in the Closed table below.
+
+- If exactly one plausible next DEC follows from it (e.g. the corpus/roadmap makes the sequence
+  obvious), say so and confirm before drafting.
+- If Closed is empty, or more than one next DEC is plausible, or it's otherwise unclear — **ask
+  which DEC to start with** rather than guessing an order from `DEC_REGISTER.md`.
+
+### 4. Resume planning from there
+
+Once the invoker has confirmed they're acting as planner, pick up (or start) the next DEC's spec file
+in `09_HANDOFF_SPECS/`, following `_TEMPLATE.md`. Cross-check it against `DEC_REGISTER.md` (only
+`READY`/`PROVISIONAL` decisions are workable — see that file's vocabulary) and against
+`APP_DECISION_INVENTORY.md` for what the decision actually covers.
+
+### 5. Do not flip a row to `PUSHED` as part of `COL` itself
+
+`COL` gets planning moving again; it ends with a spec draft (finished or in progress) reported back.
+Pushing a row is a separate, deliberate step once the spec is actually done — same as `PUSHED`
+already requires elsewhere in this file.
 
 ---
 
