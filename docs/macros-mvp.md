@@ -11,14 +11,14 @@ anything new is built.
 | Item | Owning DEC | Readiness | Reality |
 |---|---|---|---|
 | Protein across eating occasions | `DEC-033` | `PROVISIONAL` | Implemented, but flat and display-only |
-| Total daily carbohydrate | `DEC-034` | `SHIPPED` | Implemented, with one value that needs correcting |
+| Total daily carbohydrate | `DEC-034` | `SHIPPED` | Implemented; the value below was corrected 2026-09-15 |
 | Min/max macros per meal | `DEC-056` | `COVERED` | Per-slot totals exist, per-meal macro bounds do not |
 | Dietary pattern constraint | `DEC-038` | `BLOCKED` | Nothing in the code today |
 
-## Fix first: the very-active carbohydrate band
+## Fixed 2026-09-15: the very-active carbohydrate band
 
-`CARB_G_PER_KG` in `src/lib/mealPersonalization.ts` ships `very_high: 10-12 g/kg/day` as a routine
-daily band. Gate 6, applied 2026-09-07, corrected exactly this in
+`CARB_G_PER_KG` in `src/lib/mealPersonalization.ts` used to ship `very_high: 10-12 g/kg/day` as a
+routine daily band. Gate 6, applied 2026-09-07, had already corrected exactly this in
 `DECISION_LOGIC_SPECIFICATION.md` §3.3:
 
 - Routine daily fueling tops out at **6-10 g/kg/day**.
@@ -27,16 +27,16 @@ daily band. Gate 6, applied 2026-09-07, corrected exactly this in
 - The spec calls presenting the loading protocol as a daily target "a safety-relevant misstatement
   rather than a presentational one."
 
-The app is currently making that misstatement to any user who selects the highest activity level.
-Pre-event loading needs a disclosed event date, which is `DEC-094` and does not exist, so loading is
-simply out of MVP. Capping the routine band is the whole fix.
+The app was making that misstatement to any user who selected the highest activity level.
+Pre-event loading needs a disclosed event date, which is `DEC-094` and does not exist, so loading
+stays out of MVP. `very_high` now shares `high`'s 6-10 g/kg/day ceiling instead of exceeding it.
 
-Two smaller gaps in the same calculation, both worth folding in:
+Two smaller gaps in the same calculation, folded into the same fix:
 
-- The DRI floor of **130 g/day** is specified and not implemented.
-- Sedentary and light users get a sports-nutrition g/kg band. The spec gives the general population an
-  AMDR of **45-65% of total energy** instead. The code comment acknowledges the source has no
-  sedentary tier.
+- The DRI floor of **130 g/day** is now enforced (`Math.max` clamp on the computed range).
+- Sedentary and light users used to get the same sports-nutrition g/kg band as trained activity
+  levels. They now use the general-population AMDR of **45-65% of total energy** instead, per the
+  same spec section.
 
 ## Protein across eating occasions
 

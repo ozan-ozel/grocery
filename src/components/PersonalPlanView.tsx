@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { DropdownChevronButton } from "@/components/DropdownChevronButton";
 import {
   ACTIVITY_OPTIONS,
+  ACTIVITY_DESCRIPTIONS,
+  ACTIVITY_INFO_INTRO,
   activityLabel,
   bmiLabel,
   type PersonalGoal,
@@ -363,7 +365,8 @@ export function PersonalPlanView({ userId }: Props) {
             </Field>
             <Field
               label="Günlük aktivite"
-              sourceBadge={showSources ? "WHO" : undefined}>
+              sourceBadge={showSources ? "WHO" : undefined}
+              info={`${ACTIVITY_INFO_INTRO}\n\n${ACTIVITY_DESCRIPTIONS[profile.activity]}`}>
               <select
                 value={profile.activity}
                 onChange={event =>
@@ -814,17 +817,39 @@ export function Field({
   label,
   children,
   sourceBadge,
+  info,
 }: {
   label: string;
   children: React.ReactNode;
   sourceBadge?: string;
+  info?: string;
 }) {
+  const [showInfo, setShowInfo] = useState(false);
   return (
     <label className="block text-xs text-muted-foreground">
       <span className="mb-1 flex items-center gap-1">
         {label} {sourceBadge && <SourceBadge label={sourceBadge} />}
+        {info && (
+          <button
+            type="button"
+            onClick={event => {
+              event.preventDefault();
+              event.stopPropagation();
+              setShowInfo(value => !value);
+            }}
+            aria-label="Daha fazla bilgi"
+            aria-expanded={showInfo}
+            className="flex h-4 w-4 items-center justify-center rounded-full border border-muted-foreground/50 text-[10px] leading-none hover:bg-accent">
+            i
+          </button>
+        )}
       </span>
       {children}
+      {info && showInfo && (
+        <p className="mt-1 whitespace-pre-line rounded-md bg-accent/40 p-2 text-[11px] leading-snug text-foreground">
+          {info}
+        </p>
+      )}
     </label>
   );
 }

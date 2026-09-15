@@ -20,7 +20,7 @@
 
 	Determine how the protein requirement is distributed across the day’s eating occasions !IMPORTANT
 
-	Determine an appropriate total daily carbohydrate requirement given goal, energy prescription, and tra… - DONE, TO BE CHECKED
+	Determine an appropriate total daily carbohydrate requirement given goal, energy prescription, and tra… - DONE, CHECKED (2026-09-15: very_high band corrected from 10-12 to 6-10 g/kg/day, 130g DRI floor and sedentary/light AMDR added, see docs/macros-mvp.md)
 
 	Max - min macros in a meal guidance - MISSING
 
