@@ -220,6 +220,19 @@ ever touching a real Google account. It only works when unset in production and 
 `VERCEL_ENV !== "production"` (Vercel's own env var), so it's inert on the deployed site even if
 accidentally left set. **Never set it in the production Vercel project's env vars.**
 
+`AGENT_LOGIN_SECRET` / `AGENT_LOGIN_ENABLED` enable `api/agent-login.ts` — a separate, two-step
+mint/redeem flow (`?_action=mint` then `?_action=redeem`) that gives a QA/CI agent a real, working
+Supabase session for a bounded 10-minute, single-use window, without a permanently-valid shared
+secret sitting in the app's auth surface. `AGENT_LOGIN_SECRET` gates the mint call (sent as the
+`x-agent-login-secret` header on a server-to-server `POST`, never from a browser, and never sent to
+the client bundle) and is compared with `timingSafeEqual`, same as `TEST_LOGIN_SECRET`. Unlike
+`_auth-test-login.ts`, this endpoint is not hard-blocked in production — `AGENT_LOGIN_ENABLED` must
+be the literal string `"true"` for it to do anything at all when `VERCEL_ENV === "production"`, so
+production access to it is opt-in, not just inert-by-default. **Only set `AGENT_LOGIN_ENABLED=true`
+in the production Vercel project after an explicit go-ahead from the repo owner** (see Task 4 of
+`docs/superpowers/plans/2026-09-12-agent-test-login.md`) — it stays usable locally and in Preview
+deployments regardless, since Preview is not gated by this check at all.
+
 Two things outside this repo have to be set for the OAuth flow to work at all: Supabase's Auth →
 URL Configuration → Redirect URLs must include `<vercel-domain>/api/auth-callback` (and the local
 dev equivalent if testing against a real Supabase project) — without it, every login fails with an

@@ -10,7 +10,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "vercel:dev": "vercel dev"
+    "vercel:dev": "vercel dev",
+    "kill-ports": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/kill-ports.ps1"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.4",
