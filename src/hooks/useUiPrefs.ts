@@ -28,7 +28,8 @@ function initialSection(): Section {
   if (fromUrl === "yemek") return "yemek";
   if (fromUrl === "kisisel") return "kisisel";
   if (fromUrl === "ayarlar") return "ayarlar";
-  return "alisveris";
+  if (fromUrl === "alisveris") return "alisveris";
+  return "yemek";
 }
 
 function initialTab(): Tab {

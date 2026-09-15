@@ -152,7 +152,7 @@ responsive → hierarchy → design-system consistency → accessibility → per
 polish → decoration):
 
 1. **Fix checkbox touch target** (`src/components/ui/checkbox.tsx`) — one shared-primitive change,
-   benefits every checkbox in the app. (Mobile UX / accessibility)
+   benefits every checkbox in the app. (Mobile UX / accessibility) — **Done**, `5885f90`.
 2. **Decide and scope North Star's hierarchy shift** (Pass 2) — reorder default tab / add a "today"
    summary rather than rebuild visuals. (Hierarchy)
 3. **Animate the check/uncheck + progress-bar fill** on the shopping list (Pass 5, #1–2) — CSS-only,
