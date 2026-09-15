@@ -134,4 +134,7 @@ the state and, whenever more than one continuation is plausible, **asks instead 
 
 | DEC | Spec | Pushed | Closed | Notes |
 |---|---|---|---|---|
-| _none yet_ | | | | |
+| `DEC-046` | *(pre-dates this file's per-spec workflow — see `08_APP_TRANSLATION/PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md`)* | — | — | Baseline fluid needs. MVP-1 PROVISIONAL, tagged in code as `MVP-1 PROVISIONAL / REVISIT AFTER QA-1`. Backfilled into this table from `DEC_REGISTER.md`'s "IMPLEMENTED" note; exact push/close dates weren't recorded under the old process |
+| `DEC-009` | *(same — PSM Iteration 1)* | — | — | Profile-data (BMI) plausibility check. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded |
+| `DEC-033` | *(same — PSM Iteration 1)* | — | — | Protein distribution across eating occasions. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded |
+| `DEC-071` | *(same — PSM Iteration 1)* | — | — | Meal plan → consolidated shopping list. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded |
