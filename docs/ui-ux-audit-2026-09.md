@@ -137,10 +137,15 @@ Ranked by where motion would clarify a real state change (not decoration):
    the highest-value animation spots on mobile per general UX practice, but confirming current
    behavior needs a dedicated look at those two components before recommending specific timing.
 
-**Follow-up feature (tracked separately, not part of this animation pass):** add progress
-rings/bars to the macro grids in `PersonalPlanView` and the Yemek Planı daily macro strip, so
-current-vs-target reads at a glance instead of as two numbers to compare mentally. Scoped as its own
-branch after the entrance-animation work above, since it's new UI, not a fix to existing motion.
+**Follow-up feature (tracked separately, not part of this animation pass) — Done.**
+Added per-tile progress rings to `MacroSummaryCard.tsx` (the real "GÜNLÜK MAKROLAR" component
+rendered on Yemek Planı via `MealPlanView.tsx:188-192` — not `TodayView.tsx`'s `RemainingSummary`,
+which turned out to be dead code, unreferenced anywhere in `App.tsx`). `PersonalPlanView` still does
+not get rings — it remains a goal-setting screen with no "consumed" value to show progress against.
+Ring color matches each tile's existing (pre-token-system, hardcoded Tailwind) per-metric border
+color rather than the app's single `--color-signal` accent, since the tiles already establish
+per-metric color identity — a single-accent ring would have visually mismatched its own tile.
+Scoped via the `dataviz` skill (form: "a single ratio against a limit" → meter, same-ramp track).
 
 **Explicit library-adoption note (per this audit's scope instruction):** none of the above need a
 library. If a future task adds drag-to-reorder shopping items or a swipe-to-delete gesture, that's
