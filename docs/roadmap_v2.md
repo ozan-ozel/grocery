@@ -87,9 +87,10 @@
 
 	Skip for now, V3, backlog
 
-## Life Stage - SCOPED, see docs/life-stage-mvp.md
+## Life Stage - DONE, see docs/life-stage-mvp.md
 
-	Create a very simple, limited scope for mvp (age only maybe?)
+	Create a very simple, limited scope for mvp (age only maybe?) — shipped: 18-100 age gate plus
+	an explicit excluded-populations note on both the onboarding and Personal Plan profile screens.
 
 ## Access/Affordability - SCOPED, see docs/access-affordability-mvp.md
 	

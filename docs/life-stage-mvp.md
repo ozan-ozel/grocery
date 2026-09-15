@@ -32,3 +32,10 @@ Out:
 - Life-stage categories, `DEC-103`.
 - Any requirement or boundary that varies by life stage, `DEC-104`.
 - Transitions during use, such as pregnancy onset, `DEC-105`.
+
+## Status
+
+Implemented: the 18-100 age gate (`validateProfile()`) plus an explicit excluded-populations note
+next to the age field in both onboarding (`OnboardingQuickSetup.tsx` step 0) and the Personal Plan
+profile section (`PersonalPlanView.tsx`). `DEC-103`/`DEC-104`/`DEC-105` remain `BLOCKED` and out of
+scope, unchanged.

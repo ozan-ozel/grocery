@@ -58,6 +58,15 @@ this project is. This file is a router and behavior layer, not the architecture 
 - Cross-project durable knowledge belongs in `~/vault/permanent/`.
 - The Vault is outside the repository and must not be committed to Git. The repository remains the
   source of truth for source code and project files.
+- **When implementing something scoped by a `docs/*-mvp.md` file (a `roadmap_v2.md` domain doc) or a
+  `nutrition-curriculum` `DEC`, update all of these together, not just the code:** the `*-mvp.md`
+  file's own status note, the corresponding line in `docs/roadmap_v2.md`, the DEC's row note in
+  `nutrition-curriculum/DEC_REGISTER.md` (link back to the `*-mvp.md` file from that note, e.g. "see
+  docs/macros-mvp.md"), and the session-checkpoint record for the work. These currently drift apart
+  silently — this project has already hit a stale checkpoint describing a merged branch as still
+  active, and an `IMPLEMENTATION_HANDOFF.md` Closed table that sat empty for four decisions
+  `DEC_REGISTER.md` already marked done. Treat a `*-mvp.md`/`DEC_REGISTER.md`/`roadmap_v2.md` update as
+  one unit of work, not three optional follow-ups.
 
 ## Git shorthand
 

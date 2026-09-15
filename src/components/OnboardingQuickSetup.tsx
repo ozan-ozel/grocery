@@ -119,6 +119,10 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
                   ))}
                 </ul>
               )}
+              <p className="mt-3 text-xs text-muted-foreground">
+                Bu uygulama 18 yaş altı, hamilelik, emzirme dönemi ve yeme
+                bozukluğu tedavisi gören kullanıcılar için tasarlanmadı.
+              </p>
             </StepBody>
           )}
 

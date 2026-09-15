@@ -16,6 +16,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 9. [Active-work tracker removal and docs/ classification pass](session-checkpoints/2026-09-15-02-active-work-tracker-removal.md)
 10. [Carbohydrate-band MVP correction (DEC-034)](session-checkpoints/2026-09-15-03-carb-band-mvp-correction.md)
 11. [Activity-level info copy](session-checkpoints/2026-09-15-04-activity-level-info-copy.md)
+12. [Life Stage MVP — excluded-populations copy](session-checkpoints/2026-09-15-05-life-stage-mvp-excluded-populations-copy.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain

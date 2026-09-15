@@ -332,6 +332,10 @@ export function PersonalPlanView({ userId }: Props) {
             />
           </Field>
         </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          Bu uygulama 18 yaş altı, hamilelik, emzirme dönemi ve yeme bozukluğu
+          tedavisi gören kullanıcılar için tasarlanmadı.
+        </p>
         <details className="group mt-3" open>
           <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-medium text-muted-foreground">
             <span>Varsayılan olarak dolduruldu — istersen değiştir</span>
