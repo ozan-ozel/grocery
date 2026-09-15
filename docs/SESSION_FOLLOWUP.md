@@ -1,6 +1,6 @@
 # Session Follow-up
 
-_Last updated: 2026-09-15_
+_Last updated: 2026-09-16_
 
 This file remains the active project continuity index. Detailed records are split into date-ordered
 files under [`docs/session-checkpoints/`](session-checkpoints/):
@@ -18,6 +18,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 11. [Activity-level info copy](session-checkpoints/2026-09-15-04-activity-level-info-copy.md)
 12. [Life Stage MVP — excluded-populations copy](session-checkpoints/2026-09-15-05-life-stage-mvp-excluded-populations-copy.md)
 13. [docs/ folder reorganization](session-checkpoints/2026-09-15-06-docs-folder-reorganization.md)
+14. [UI/UX audit and North Star review](session-checkpoints/2026-09-16-01-ui-ux-audit-north-star-review.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain
