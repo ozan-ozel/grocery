@@ -2,9 +2,10 @@
 
 ## Current Objective
 
-Branch: `feature/mobile-bottom-nav-redesign`. Complete the comprehensive mobile-first UI refactor.
-Thirteen changes are complete; remaining work includes shopping integration with the basket button,
-moving JSON upload to NutritionView, and additional UI refinements.
+Branch: `feature/mobile-bottom-nav-redesign` (not merged; still active as a dedicated feature branch).
+Complete the comprehensive mobile-first UI refactor. Thirteen changes are complete; remaining work
+includes shopping integration with the basket button, moving JSON upload to NutritionView, and
+additional UI refinements.
 
 ## Current State
 
