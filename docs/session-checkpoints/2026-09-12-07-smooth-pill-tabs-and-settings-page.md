@@ -1,8 +1,12 @@
 # 2026-09-12-07: Smooth Pill tab system, dedicated Settings page, layout cleanup
 
 **Date:** 2026-09-12
-**Branch:** `refactor/smooth-pill-tabs-settings-layout` → `master` (merged)
+**Branch:** merged via the combined UI batch (`eace7f0`), including the related tab cleanup work
 **Status:** ✅ Complete
+
+## Merged UI branch context
+
+The repo history shows this work landed in the same merge commit as other UI refinements, rather than as a separate long-lived feature branch. The combined batch included the related visual cleanup and meal-plan work, with the concrete branch labels visible in the merge history including `design/grocery-ui-mockups` and `feature/meal-shopping-list-toggle`.
 
 ## Summary
 

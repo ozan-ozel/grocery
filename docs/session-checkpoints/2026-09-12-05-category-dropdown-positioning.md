@@ -4,6 +4,10 @@
 **Branch:** `refactor/category-dropdown-positioning` → `master` (merged)  
 **Status:** ✅ Complete
 
+## Merged UI branch context
+
+This was one of the smaller merged UI refactors in the 2026-09-12 batch. It landed alongside the other visual cleanup branches and was part of the same general UI polish pass.
+
 ## Summary
 
 Improved visual hierarchy in the Categories view by repositioning the visibility/delete action button to the far right and increasing its size for better prominence and accessibility.
@@ -13,6 +17,7 @@ Improved visual hierarchy in the Categories view by repositioning the visibility
 ### Modified Files
 
 #### [src/components/CategoriesView.tsx](../../src/components/CategoriesView.tsx)
+
 - **Line 165-190:** Added `flex-1` spacer div to push the Eye/EyeOff/X button to the far right edge
 - **Icon size:** Increased from `size-4` (16px) to `size-5` (20px) — approximately 1.3x larger
 - **Button padding:** Increased from `p-1` to `p-1.5` to maintain proportional spacing around larger icon
