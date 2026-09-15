@@ -1,6 +1,6 @@
 # Session Checkpoints
 
-The active checkpoint index is [`../SESSION_CHECKPOINT.md`](../SESSION_CHECKPOINT.md). Detailed
+The active checkpoint index is [`../SESSION_FOLLOWUP.md`](../SESSION_FOLLOWUP.md). Detailed
 continuity records are kept here and sorted by ISO creation date, followed by a sequence number for
 multiple records created on the same day.
 

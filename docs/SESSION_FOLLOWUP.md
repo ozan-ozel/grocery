@@ -1,4 +1,4 @@
-# Session Checkpoint
+# Session Follow-up
 
 _Last updated: 2026-09-15_
 
@@ -14,6 +14,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 7. [Version 2 North Star UI](session-checkpoints/2026-09-12-09-version-2-north-star-ui.md)
 8. [Mobile bottom-nav redesign — follow-up note](session-checkpoints/2026-09-15-01-mobile-bottom-nav-redesign-followup.md)
 9. [Active-work tracker removal and docs/ classification pass](session-checkpoints/2026-09-15-02-active-work-tracker-removal.md)
+10. [Carbohydrate-band MVP correction (DEC-034)](session-checkpoints/2026-09-15-03-carb-band-mvp-correction.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain

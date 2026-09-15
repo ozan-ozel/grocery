@@ -1,14 +1,14 @@
 ---
 name: session-checkpoint
-description: Use when the user runs /session-checkpoint or asks to record a dated session-checkpoint doc - creates a new file under docs/session-checkpoints/ for the current task and links it from docs/SESSION_CHECKPOINT.md's index.
+description: Use when the user runs /session-checkpoint or asks to record a dated session-checkpoint doc - creates a new file under docs/session-checkpoints/ for the current task and links it from docs/SESSION_FOLLOWUP.md's index.
 ---
 
-Create exactly one new file under `docs/session-checkpoints/` documenting the current task or session, then add it to the index in `docs/SESSION_CHECKPOINT.md`.
+Create exactly one new file under `docs/session-checkpoints/` documenting the current task or session, then add it to the index in `docs/SESSION_FOLLOWUP.md`.
 
-This is distinct from the `checkpoint-user` skill: `checkpoint-user` maintains the single active
-`docs/SESSION_CHECKPOINT.md` continuity summary and must never write under
+This is distinct from the `session-followup` skill: `session-followup` maintains the single active
+`docs/SESSION_FOLLOWUP.md` continuity summary and must never write under
 `docs/session-checkpoints/`. This skill does the opposite — it only ever adds a new dated record
-file, and makes the smallest possible index edit to `docs/SESSION_CHECKPOINT.md` to link it.
+file, and makes the smallest possible index edit to `docs/SESSION_FOLLOWUP.md` to link it.
 
 ## Filename
 
@@ -69,14 +69,14 @@ concise — it should let another agent resume the work without re-reading the c
 ## Updating the index
 
 After writing the file, add exactly one new entry to the end of the numbered list in
-`docs/SESSION_CHECKPOINT.md` (under "Detailed records are split into..."), linking to the new
+`docs/SESSION_FOLLOWUP.md` (under "Detailed records are split into..."), linking to the new
 file with a short descriptive title, and refresh the `_Last updated: YYYY-MM-DD_` line at the top
 if the date changed. Do not renumber or edit existing entries.
 
 ## Rules
 
 - Only create new files under `docs/session-checkpoints/`; never edit an existing dated record.
-- Never touch the "Current Objective/State/..." body of `docs/SESSION_CHECKPOINT.md` itself —
+- Never touch the "Current Objective/State/..." body of `docs/SESSION_FOLLOWUP.md` itself —
   only append the one new index line and the last-updated date.
 - Do not write to `~/vault/<project>/logs/` — that is the separate `session-log` skill's job.
 - Do not modify source code or unrelated files.

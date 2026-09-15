@@ -43,7 +43,7 @@ Depending on the task, Claude reads specialized documentation:
   - Prevents duplication of queued tasks
   - Clarifies prioritization & status
 
-- **[docs/SESSION_CHECKPOINT.md](./SESSION_CHECKPOINT.md)** — consulted if resuming from a prior session
+- **[docs/SESSION_FOLLOWUP.md](./SESSION_FOLLOWUP.md)** — consulted if resuming from a prior session
   - Where the last agent left off
   - What's blocking or ready next
 
