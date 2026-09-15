@@ -152,6 +152,7 @@ export function Row({
           data-swipe-row={swipeActive ? "" : undefined}
           className={cn(
             "flex items-center gap-3 bg-background py-3.5",
+            "starting:translate-y-1 starting:opacity-0",
             swipeActive && "touch-pan-y pr-3",
           )}
           onPointerDown={swipeActive ? (onPointerDown as never) : undefined}
@@ -160,7 +161,14 @@ export function Row({
           onPointerCancel={swipeActive ? (onPointerUp as never) : undefined}
           style={{
             transform: dragX ? `translateX(${dragX}px)` : undefined,
-            transition: draggingRef.current ? "none" : "transform 200ms ease-out",
+            // Opacity is included here (not just transform) so the row's
+            // starting-style entrance animation (translate-y + opacity, see
+            // className) actually animates — an inline `transition` shorthand
+            // overrides any Tailwind transition-* class on this element, so
+            // opacity has to be listed here too or it would just snap in.
+            transition: draggingRef.current
+              ? "none"
+              : "transform 200ms ease-out, opacity 200ms ease-out",
           }}>
           {selectMode && (
             <Checkbox

@@ -109,26 +109,38 @@ the standing instruction for this audit: **default to CSS-only recommendations b
 only worth considering if a specific item turns out to need orchestrated/interruptible sequences
 that plain CSS transitions can't express cleanly** — none of the candidates below reach that bar.
 
+**Correction (2026-09-16):** the two items below were re-checked against actual component code
+before implementation, not just screenshots, and revised accordingly — the original text claimed
+the shopping-list progress bar had no transition (wrong: it already does) and treated "macro
+progress bars/rings" as an existing-but-unanimated element (wrong: no such bar/ring element exists
+anywhere in the real app yet — `PersonalPlanView` and the Yemek Planı macro strip show plain numbers
+in cards, no bar). Corrected findings:
+
 Ranked by where motion would clarify a real state change (not decoration):
 
-1. **Shopping-list item check/uncheck** (`ActiveListRow.tsx`). Live-tested: checking an item
-   instantly snaps it into a new "SEPETTE" (in-cart) section, the header counter recolors, and the
-   progress bar underline fills — all with no transition. This is the app's single most-repeated
-   interaction (every shopping trip). A short (150–200ms) CSS transition on the row's position
-   (or a simple opacity/height collapse-and-reinsert) plus the progress-bar fill already having a
-   `width` transition would directly reinforce the "you're making progress" feedback the app's own
-   copy leans on ("Keep moving. You are nearly halfway there." in the North Star mockup echoes this
-   intent).
-2. **Macro progress bars / rings** (Kişisel Plan targets, Yemek Planı daily macro strip). Values
-   currently render at final state with no fill animation on load or on update after adding a meal.
-   A CSS `transition: width` (bar) is a same-file, near-zero-cost addition.
-3. **Add-item confirmation** (`AddItem.tsx`). New items currently appear in the list with no
-   entrance treatment. A brief fade/slide-in on insert would help users track *where* their new item
-   landed, especially once category grouping is active and the item may not appear at the top.
-4. **Modal/sheet open** (`FoodSearchModal.tsx`, `RecipeSearchModal.tsx`). Not checked for existing
+1. **Shopping-list item entrance** (`ActiveListRow.tsx`, `AddItem.tsx`). Confirmed no transition on
+   insert: a newly-added item and a checked item reappearing in the separate "SEPETTE" (in-cart)
+   list (`ActiveList.tsx:86-87` filters into two separate arrays, so this is an unmount/remount
+   across lists, not a reorder) both currently pop in with no treatment. Fix: apply this codebase's
+   existing entrance-animation convention (`starting:opacity-0 starting:scale-95` etc., already used
+   in the select-mode checkbox and the `AddItem` autocomplete dropdown) to the row itself. Animating
+   the *exit* from the old list (so a row visibly slides from "pending" into "sepette") would need
+   either manual FLIP position math or a library's layout animation — real added complexity for a
+   cosmetic gain, and the first candidate in this pass that would justify considering a library. Not
+   done as part of this pass; flagged if it's ever wanted.
+2. ~~Macro progress bars / rings~~ — **does not apply**; no bar/ring UI element exists in
+   `PersonalPlanView` or the Yemek Planı macro strip today (both are plain number grids). This is a
+   genuinely new feature (add rings), not an animation fix to something unanimated, and is tracked
+   separately below rather than folded into this pass's "add a transition" framing.
+3. **Modal/sheet open** (`FoodSearchModal.tsx`, `RecipeSearchModal.tsx`). Not checked for existing
    transition in this pass — flagged as a follow-up, since bottom-sheet-style entrances are one of
    the highest-value animation spots on mobile per general UX practice, but confirming current
    behavior needs a dedicated look at those two components before recommending specific timing.
+
+**Follow-up feature (tracked separately, not part of this animation pass):** add progress
+rings/bars to the macro grids in `PersonalPlanView` and the Yemek Planı daily macro strip, so
+current-vs-target reads at a glance instead of as two numbers to compare mentally. Scoped as its own
+branch after the entrance-animation work above, since it's new UI, not a fix to existing motion.
 
 **Explicit library-adoption note (per this audit's scope instruction):** none of the above need a
 library. If a future task adds drag-to-reorder shopping items or a swipe-to-delete gesture, that's
@@ -154,7 +166,8 @@ polish → decoration):
 1. **Fix checkbox touch target** (`src/components/ui/checkbox.tsx`) — one shared-primitive change,
    benefits every checkbox in the app. (Mobile UX / accessibility) — **Done**, `5885f90`.
 2. **Decide and scope North Star's hierarchy shift** (Pass 2) — reorder default tab / add a "today"
-   summary rather than rebuild visuals. (Hierarchy)
+   summary rather than rebuild visuals. (Hierarchy) — **Done** (default-tab reorder only, scoped
+   down from the full "today summary" via brainstorming), `db1a606`.
 3. **Animate the check/uncheck + progress-bar fill** on the shopping list (Pass 5, #1–2) — CSS-only,
    reinforces the app's own progress-focused copy. (Core interaction / motion)
 4. **Follow-up look at `FoodSearchModal`/`RecipeSearchModal` entrance behavior** before committing to
