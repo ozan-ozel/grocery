@@ -39,7 +39,7 @@ Depending on the task, Claude reads specialized documentation:
   - Sync, categorization, nutrition backends
   - Deployment & environment variable setup
 
-- **[docs/roadmap.md](./roadmap.md)** — consulted before proposing new work
+- **[docs/archive/roadmap.md](./archive/roadmap.md)** — consulted before proposing new work
   - Prevents duplication of queued tasks
   - Clarifies prioritization & status
 
@@ -92,7 +92,7 @@ If Claude discovered something that will be relevant in future sessions:
 | 2 | MEMORY.md | **User feedback is authoritative** | "don't use worktrees", "user commits manually after testing" |
 | 3 | git status | **Current state must be known** | Am I already on a branch? Uncommitted work? |
 | 4 | architecture.md | **Core system design before changes** | "State lives in App.tsx", "RLS is auth layer #2" |
-| 5 | roadmap.md | **Avoid work duplication** | "this refactor is queued, don't propose it again" |
+| 5 | archive/roadmap.md | **Avoid work duplication** | "this refactor is queued, don't propose it again" |
 | 6 | Spec docs | **Historical context when needed** | Why was this design chosen? What was the rationale? |
 | 7 | Source files | **Only after above context loaded** | Now safe to read actual code |
 
@@ -142,5 +142,5 @@ New collaborators reading this document understand why Claude behaves the way it
 
 - [CLAUDE.md](../CLAUDE.md) — project rules & ground rules (read first)
 - [docs/architecture.md](./architecture.md) — system design (read before subsystem changes)
-- [docs/roadmap.md](./roadmap.md) — current prioritized work (read before proposing new tasks)
+- [docs/archive/roadmap.md](./archive/roadmap.md) — current prioritized work (read before proposing new tasks)
 - [MEMORY.md](../MEMORY.md) — persistent session context (carries user feedback forward)

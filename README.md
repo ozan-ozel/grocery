@@ -55,5 +55,6 @@ Tokens are in `src/index.css` under `@theme`.
 
 ## What's next
 
-See [docs/roadmap.md](./docs/roadmap.md) for the current list of directions under
-consideration — it's a menu, not a commitment.
+See [docs/archive/roadmap.md](./docs/archive/roadmap.md) for the general app-engineering roadmap, and
+[docs/roadmap_v2.md](./docs/roadmap_v2.md) for the nutrition-curriculum MVP scope — both menus, not
+commitments.
