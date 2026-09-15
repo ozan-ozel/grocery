@@ -19,7 +19,7 @@ on the checkboxes.
 | [2026-09-04-sport-nutrition-integration-handoff.md](2026-09-04-sport-nutrition-integration-handoff.md) | 2026-09-04 | `UNCLEAR` | Not verified |
 | [2026-09-09-supabase-auth-migration.md](2026-09-09-supabase-auth-migration.md) | 2026-09-09 | `SHIPPED` | Supabase is the live auth/backend today |
 | [2026-09-10-backend-only-oauth.md](2026-09-10-backend-only-oauth.md) | 2026-09-10 | `SHIPPED` | Direct Google OAuth code exchange shipped (`5cf2350`) |
-| [2026-09-12-agent-test-login.md](2026-09-12-agent-test-login.md) | 2026-09-12 | `SHIPPED` | `api/_auth-test-login.ts` exists |
+| [2026-09-12-agent-test-login.md](2026-09-12-agent-test-login.md) | 2026-09-12 | `NOT_STARTED` | Plan describes a separate `api/agent-login.ts` mint/redeem token flow, which doesn't exist — `api/_auth-test-login.ts` (a different, earlier, fixed-shared-secret bypass) was wrongly cited as evidence for this row |
 | [2026-09-12-daily-macros-layout.md](2026-09-12-daily-macros-layout.md) | 2026-09-12 | `SHIPPED` | `MacroSummaryCard.tsx`'s tile layout matches |
 | [2026-09-12-editable-meal-item-grams.md](2026-09-12-editable-meal-item-grams.md) | 2026-09-12 | `SHIPPED` | "Gram miktarını düzenle" edit UI in `MealItemCard.tsx` |
 | [2026-09-12-gram-unit-conversion-ux.md](2026-09-12-gram-unit-conversion-ux.md) | 2026-09-12 | `NOT_STARTED` | No unit-conversion UI found anywhere in `src/` |
