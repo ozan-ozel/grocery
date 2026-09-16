@@ -14,7 +14,13 @@ export type Status = "idle" | "loading" | "ready" | "error";
 // so a growing catalog doesn't silently get truncated here.
 const CATALOG_LIMIT = 1000;
 
-export function useFoodCatalog() {
+// `enabled` lets a caller that only conditionally needs the catalog (e.g.
+// AppShell, which fetches it once at the top level for every section's
+// addItem to share) skip the fetch entirely for a section that never uses
+// it — see AppShell's own call in App.tsx. Every other call site fetches
+// implicitly "on demand" already, by virtue of only mounting when its own
+// section is active, and can ignore this option (defaults to true).
+export function useFoodCatalog(enabled = true) {
   const query = useQuery({
     queryKey: ["foodCatalog", CATALOG_LIMIT],
     queryFn: () => browseNutritionCached("", CATALOG_LIMIT),
@@ -23,6 +29,7 @@ export function useFoodCatalog() {
     // remount/refocus should re-run the fetcher, instead of TanStack
     // Query's default (treat data stale immediately) fighting it.
     staleTime: BROWSE_CACHE_TTL_MS,
+    enabled,
   });
 
   const foods = useMemo(() => query.data ?? [], [query.data]);

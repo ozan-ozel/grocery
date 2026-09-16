@@ -335,7 +335,11 @@ function AppShell({
   // here previously) — useFoodCatalog is a TanStack Query hook already
   // called from several other components against the same shared cache
   // key, so this instance and theirs stay coherent automatically.
-  const { foods: nutritionFoods } = useFoodCatalog();
+  // Skipped only for "ayarlar" (Settings) — the one section with no add-item
+  // flow and no food data of its own, so there's nothing here to resolve
+  // against; every other section already needs the catalog for its own
+  // rendering, so gating them too wouldn't save a real fetch.
+  const { foods: nutritionFoods } = useFoodCatalog(section !== "ayarlar");
   const foodIdentityIndex = useMemo(
     () => buildFoodIdentityIndex(nutritionFoods),
     [nutritionFoods],
