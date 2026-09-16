@@ -1021,7 +1021,13 @@ function TargetSummary({
     ["Protein", `${targets.proteinG.min}-${targets.proteinG.max} g`, "aralık"],
     ["Yağ", `${targets.fatG.min}-${targets.fatG.max} g`, "aralık"],
     ["Karbonhidrat", `${targets.carbsG.min}-${targets.carbsG.max} g`, "aralık"],
-    ["Lif", `${targets.fiberG.min}-${targets.fiberG.max} g`, "minimum"],
+    [
+      "Lif",
+      targets.fiberG.min === targets.fiberG.max
+        ? `${targets.fiberG.max} g`
+        : `${targets.fiberG.min}-${targets.fiberG.max} g`,
+      "minimum",
+    ],
     // MVP-1 PROVISIONAL (DEC-046) — baseline only, see mealPersonalization.ts.
     ["Su", `${(targets.waterMl / 1000).toFixed(1)} L`, "temel, taslak"],
   ];
