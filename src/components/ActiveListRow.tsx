@@ -2,7 +2,7 @@ import { useRef, useState, useMemo } from "react";
 import { Check, Pencil, Trash2, X } from "lucide-react";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { categorize } from "@/lib/categorization/categories";
+import { categorizeSync } from "@/lib/categorization/categorizeLazy";
 import { parseEntry, type AnyCategoryId, type Item } from "@/lib/store";
 import type { MergedCategory } from "@/lib/categorization/userCategories";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
@@ -285,7 +285,7 @@ function EditRow({
   // nothing's been stamped yet, so the shown value matches the grouped view.
   const initialCategory: AnyCategoryId =
     (item.category && item.category !== "diger" ? item.category : undefined) ??
-    categorize(item.name);
+    categorizeSync(item.name);
   const [category, setCategory] = useState<AnyCategoryId>(initialCategory);
 
   function commit() {

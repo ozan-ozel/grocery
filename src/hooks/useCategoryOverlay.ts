@@ -12,7 +12,7 @@ import {
   type AnyCategoryId,
   type CategoryOverlay,
 } from "@/lib/categorization/userCategories";
-import type { CategoryId } from "@/lib/categorization/categories";
+import type { CategoryId } from "@/lib/categorization/categoryTaxonomy";
 
 export function useCategoryOverlay() {
   const [overlay, setOverlay] = useState<CategoryOverlay>(() => loadOverlay());

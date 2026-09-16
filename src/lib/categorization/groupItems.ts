@@ -1,4 +1,4 @@
-import { categorize } from "@/lib/categorization/categories";
+import { categorizeSync } from "@/lib/categorization/categorizeLazy";
 import type { AnyCategoryId } from "@/lib/categorization/userCategories";
 import type { Item } from "@/lib/store";
 import type { MergedCategory } from "@/lib/categorization/userCategories";
@@ -15,12 +15,12 @@ export function groupItems(
     // (including custom "u:..." ids) are kept because the user set them.
     const stored =
       item.category && item.category !== "diger" ? item.category : undefined;
-    let id: AnyCategoryId = stored ?? categorize(item.name);
+    let id: AnyCategoryId = stored ?? categorizeSync(item.name);
     // If the stored id points at a category that no longer exists (deleted
     // custom, or came in from an older shape), fall back to a fresh guess so
     // the item never disappears from the grouped view.
     if (!known.has(id)) {
-      const guess = categorize(item.name);
+      const guess = categorizeSync(item.name);
       id = known.has(guess) ? guess : "diger";
     }
     if (!byId.has(id)) byId.set(id, []);

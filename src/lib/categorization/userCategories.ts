@@ -4,7 +4,7 @@ import {
   CATEGORY_BY_ID,
   type CategoryDef,
   type CategoryId,
-} from "./categories";
+} from "./categoryTaxonomy";
 
 export type AnyCategoryId = CategoryId | string;
 

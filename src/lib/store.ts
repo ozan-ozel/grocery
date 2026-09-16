@@ -1,4 +1,4 @@
-import { categorize } from "./categorization/categories";
+import { categorizeAsync } from "./categorization/categorizeLazy";
 import { isCustomId, type AnyCategoryId } from "./categorization/userCategories";
 import { isCloseMatch, levenshteinDistance } from "./fuzzyMatch";
 
@@ -292,15 +292,17 @@ export function relativeDay(at: number) {
  * Assigns a category to every item that doesn't already have one, using
  * the built-in Turkish grocery taxonomy.
  */
-export function categorizeItems(items: Item[]): Item[] {
+export async function categorizeItems(items: Item[]): Promise<Item[]> {
   // Re-classify anything without a category or stuck in "diger" so an improved
   // classifier gets a chance. Non-diger stamps (including custom "u:..." ids
   // the user picked manually) are preserved.
-  return items.map((item) => {
-    const c = item.category;
-    if (c && c !== "diger") return item;
-    return { ...item, category: categorize(item.name) };
-  });
+  return Promise.all(
+    items.map(async (item) => {
+      const c = item.category;
+      if (c && c !== "diger") return item;
+      return { ...item, category: await categorizeAsync(item.name) };
+    })
+  );
 }
 
 export function isSameCategory(a: AnyCategoryId | undefined, b: AnyCategoryId | undefined) {

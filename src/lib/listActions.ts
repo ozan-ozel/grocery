@@ -218,8 +218,14 @@ export function createListActions(params: {
     updateState((s) => ({ ...s, groupByCategory: !(s.groupByCategory ?? false) }));
   }
 
-  function categorizeActive() {
-    updateActive((items) => categorizeItems(items));
+  async function categorizeActive() {
+    const categorized = await categorizeItems(active.items);
+    const byId = new Map(categorized.map((item) => [item.id, item]));
+    // active.items may have changed while categorizeItems was resolving
+    // (e.g. an add/remove mid-flight) — only apply results to items still
+    // present, by id, rather than clobbering current state with a stale
+    // snapshot.
+    updateActive((current) => current.map((item) => byId.get(item.id) ?? item));
   }
 
   const isOnList = (name: string) =>
