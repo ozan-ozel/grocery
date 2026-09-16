@@ -93,7 +93,7 @@ export function CategoriesView({
                 handleDrop(c.id);
               }}
               className={cn(
-                "flex items-center gap-2 border-b border-t-2 border-border py-2.5",
+                "flex items-center gap-1 border-b border-t-2 border-border py-2.5",
                 dragOverId === c.id ? "border-t-foreground" : "border-t-transparent",
                 c.hidden && !isEditing && "opacity-60"
               )}
@@ -162,8 +162,6 @@ export function CategoriesView({
                   >
                     <Pencil className="size-4" />
                   </button>
-
-                  <div className="flex-1" />
 
                   {c.builtin ? (
                     <button
