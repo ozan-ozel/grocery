@@ -11,6 +11,19 @@ covered.
 | `DEC-058` | Hunger and satiety shaping structure | `BLOCKED` | No principled basis |
 | `DEC-059` | Schedule, access and cultural overrides | `BLOCKED` | No input surface |
 
+## Verified 2026-09-16
+
+Ran the "check, not a build" from the MVP scope below against the code:
+
+- **DEC-055**: `MealSlot` in [src/lib/mealPlan.ts](../../src/lib/mealPlan.ts) is a fixed
+  `"kahvalti" | "ogle" | "aksam" | "ara"` union, used throughout `useMealPlan.ts` and
+  `MealPlanView.tsx`. Confirmed.
+- **DEC-056**: [MealPlanView.tsx](../../src/components/MealPlanView.tsx) renders `MacroSummaryCard`
+  with daily `consumed`/`target`, and each `MealContainer` per slot renders its own summed consumed
+  macros via `calculateItemsNutrition`. Confirmed.
+
+No code changes were needed; both remain `COVERED`.
+
 ## Two items are not missing
 
 **How many eating occasions** is `DEC-055`, covered by the fixed four-slot structure. **Distributing
