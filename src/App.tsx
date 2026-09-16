@@ -303,7 +303,7 @@ function AppShell({
     <Tabs
       value={tab}
       onValueChange={v => setTab(v as Tab)}
-      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pt-3 pb-32">
+      className="mx-auto min-h-dvh w-full max-w-[30rem] px-5 pt-3">
       <AppHeader
         section={section}
         active={active}

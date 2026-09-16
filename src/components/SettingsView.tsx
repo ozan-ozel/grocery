@@ -52,12 +52,12 @@ export function SettingsView({
         </h1>
       </div>
 
-      <section className="space-y-2">
+      <section className="space-y-2 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">Tema</h2>
         <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
       </section>
 
-      <section className="space-y-2">
+      <section className="space-y-2 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">Grup</h2>
         <TenantSwitcher
           tenants={tenants}
@@ -72,7 +72,7 @@ export function SettingsView({
         />
       </section>
 
-      <div className="border-t border-border pt-4 space-y-2">
+      <div className="space-y-2 rounded-lg border border-border bg-card p-2">
         <button
           type="button"
           onClick={onSignOut}

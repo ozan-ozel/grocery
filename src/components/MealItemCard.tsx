@@ -86,7 +86,7 @@ export function MealItemCard({
                 <button
                   type="button"
                   onClick={commitEdit}
-                  className="rounded bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground hover:bg-primary/90">
+                  className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground hover:bg-primary/90">
                   Tamam
                 </button>
                 <button
@@ -95,7 +95,7 @@ export function MealItemCard({
                     setDraftQuantity(String(item.quantityG));
                     setIsEditing(false);
                   }}
-                  className="rounded border border-border px-2 py-1 text-[10px] text-muted-foreground hover:text-foreground">
+                  className="rounded-md border border-border px-3 py-1.5 text-xs text-muted-foreground hover:text-foreground">
                   İptal
                 </button>
               </div>
@@ -105,12 +105,12 @@ export function MealItemCard({
               </p>
             )}
           </div>
-          <div className="flex shrink-0 items-center gap-1">
+          <div className="flex shrink-0 items-center">
             {!isEditing && (
               <button
                 type="button"
                 onClick={() => setIsEditing(true)}
-                className="p-1 text-muted-foreground transition-colors hover:text-foreground"
+                className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
                 aria-label={`${nutrition.name_tr} gram miktarını düzenle`}
                 title="Gram miktarını düzenle">
                 <Pencil className="size-4" />
@@ -119,7 +119,7 @@ export function MealItemCard({
             <button
               type="button"
               onClick={onToggleShoppingList}
-              className={`p-1 transition-colors ${isOnShoppingList ? "text-signal" : "text-muted-foreground hover:text-foreground"}`}
+              className={`rounded-md p-2 transition-colors hover:bg-accent ${isOnShoppingList ? "text-signal" : "text-muted-foreground hover:text-foreground"}`}
               aria-label={
                 isOnShoppingList
                   ? "Alışveriş listesinden çıkar"
@@ -135,7 +135,7 @@ export function MealItemCard({
             <button
               type="button"
               onClick={onRemove}
-              className="p-1 text-muted-foreground transition-colors hover:text-foreground"
+              className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
               aria-label="Remove item">
               <X className="size-4" />
             </button>

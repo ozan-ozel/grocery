@@ -6,7 +6,9 @@ _Last updated: 2026-09-16_
 
 Ran a UI/UX audit of the app plus an animation review, then implemented the audit's full backlog
 across two rounds. Originated from a request to critique a ChatGPT-suggested "skill stack" before
-planning.
+planning. A third, smaller follow-up pass then targeted button size/touch-targets, spacing around
+the bottom nav, macro progress rings, and nav "feel" — see
+[`docs/ui-ux-audit-2026-09-16-polish.md`](ui-ux-audit-2026-09-16-polish.md).
 
 ## Current State
 
@@ -30,6 +32,12 @@ planning.
     animated toggle switch — both user-directed mid-session, not audit findings
 - A separate, unrelated `agent-login` feature (the user's own WIP) was committed/merged by the
   user themselves (`44ae095`, `feature/agent-login-mint-redeem`) — also now on `master`.
+- **Round 3** (UI polish pass), on `audit/ui-polish-pass-2`, build-verified but **not yet
+  committed** — implemented, not merged: fixed a real double-bottom-padding bug (dead space above
+  the nav), enlarged the macro progress rings, widened icon-button touch targets in
+  `MealItemCard`/`FoodSearchModal`/`RecipeSearchModal`, and gave the bottom nav's active tab a
+  Smooth-Pill-style background instead of a color-only change. Full detail in
+  [`docs/ui-ux-audit-2026-09-16-polish.md`](ui-ux-audit-2026-09-16-polish.md).
 
 ## Files Changed
 
@@ -122,6 +130,9 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 13. [docs/ folder reorganization](session-checkpoints/2026-09-15-06-docs-folder-reorganization.md)
 14. [UI/UX audit and North Star review](session-checkpoints/2026-09-16-01-ui-ux-audit-north-star-review.md)
 15. [UI/UX audit backlog implementation](session-checkpoints/2026-09-16-02-ui-ux-audit-backlog-implementation.md)
+16. UI polish pass (buttons, spacing, macro rings, nav feel) — see
+    [`docs/ui-ux-audit-2026-09-16-polish.md`](ui-ux-audit-2026-09-16-polish.md) directly; not
+    written as a separate checkpoint file since the polish doc already carries full detail.
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Search, X } from "lucide-react";
 import type { Nutrition } from "@/lib/nutrition";
+import { SheetDragHandle } from "@/components/ui/sheet-drag-handle";
+import { useSwipeToDismiss } from "@/hooks/useSwipeToDismiss";
 
 type Props = {
   title: string;
@@ -56,6 +58,8 @@ export function FoodSearchModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  const { dragY, isDragging, dragHandlers } = useSwipeToDismiss(resetModal);
+
   if (!isOpen) return null;
 
   return (
@@ -70,13 +74,16 @@ export function FoodSearchModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="food-search-modal-title"
-        className="relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 transition-transform duration-200 ease-out starting:translate-y-full">
+        style={dragY ? { transform: `translateY(${dragY}px)` } : undefined}
+        className={`relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 pt-2 ease-out starting:translate-y-full ${isDragging ? "" : "transition-transform duration-200"}`}>
+        <SheetDragHandle dragHandlers={dragHandlers} />
         <div className="flex items-center justify-between mb-4">
           <h2 id="food-search-modal-title" className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             type="button"
             onClick={resetModal}
-            className="p-1 text-muted-foreground hover:text-foreground">
+            aria-label="Kapat"
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
             <X className="size-5" />
           </button>
         </div>
