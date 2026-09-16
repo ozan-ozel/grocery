@@ -1,12 +1,18 @@
 import { useMemo, useState } from "react";
-import { ChefHat, ChevronRight, Undo2 } from "lucide-react";
+import { ChevronRight, Undo2 } from "lucide-react";
 import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
 import { useDetailsTransition } from "@/hooks/useDetailsTransition";
 import { LoadingBlock } from "@/components/LoadingBlock";
+import { SuggestionCard } from "@/components/ui/suggestion-card";
 import type { MacroTotals } from "@/lib/mealNutrition";
 import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 import { calculateItemsNutrition, type MealItem } from "@/lib/localMealPlan";
 import { ALL_COMBOS as COMBOS, COMBO_BY_ID } from "@/lib/combos";
+import {
+  matchEveningCombos,
+  EVENING_CANDIDATE_PATTERNS,
+  EVENING_PATTERN_BY_ID,
+} from "@/lib/eveningRecommend";
 
 // A combo eaten today, reconstructed from real meal_entries (grouped by the
 // comboId "Yedim" tags each ingredient with) rather than kept in component
@@ -55,6 +61,21 @@ export function TodayView({
     );
   }, [remaining]);
 
+  // Quantity-solved protein+carb patterns (DEC-060 extension, see
+  // src/lib/eveningRecommend.ts) — distinct from `suggestions` above, whose
+  // combos have fixed authored grams. Reuses the same remaining/exclusion
+  // inputs, no second remaining-macro calculation.
+  const eveningSuggestions = useMemo<ScoredCombo[]>(() => {
+    if (remaining.status !== "ready") return [];
+    return matchEveningCombos(
+      EVENING_CANDIDATE_PATTERNS,
+      remaining.remaining,
+      remaining.foodExclusions,
+      remaining.allergenExclusions,
+      remaining.catalogMap
+    );
+  }, [remaining]);
+
   // The full catalog, budget-unfiltered — backs "Diğer kombinasyonlar" so a
   // combo that doesn't fit today never just vanishes; it's still browsable.
   const allCombos = useMemo<ScoredCombo[]>(() => {
@@ -82,13 +103,15 @@ export function TodayView({
     }
     const groups: EatenGroup[] = [];
     for (const [comboId, bucket] of byCombo) {
-      const raw = COMBO_BY_ID.get(comboId);
+      // Evening suggestions log with a pattern id (see eveningRecommend.ts)
+      // rather than an authored combo id, so they need a second lookup here.
+      const raw = COMBO_BY_ID.get(comboId) ?? EVENING_PATTERN_BY_ID.get(comboId);
       if (!raw) continue; // combo removed from the catalog since it was logged
       groups.push({
         comboId,
         nameTr: raw.nameTr,
         prepMinutes: raw.prepMinutes,
-        prepNote: raw.prepNote,
+        prepNote: "prepNote" in raw ? raw.prepNote : undefined,
         totals: calculateItemsNutrition(bucket.items, remaining.catalogMap),
         entries: bucket.entries,
       });
@@ -104,6 +127,9 @@ export function TodayView({
   const visibleSuggestionIds = new Set(visibleSuggestions.map((combo) => combo.id));
   const otherCombos = allCombos.filter(
     (combo) => !eatenComboIds.has(combo.id) && !visibleSuggestionIds.has(combo.id)
+  );
+  const visibleEveningSuggestions = eveningSuggestions.filter(
+    (combo) => !eatenComboIds.has(combo.id)
   );
 
   if (remaining.status === "loading-catalog") {
@@ -247,6 +273,28 @@ export function TodayView({
         </details>
       )}
 
+      {visibleEveningSuggestions.length > 0 && (
+        <div className="space-y-2">
+          <h3 className="text-sm font-medium text-muted-foreground">
+            Akşam için öneriler
+          </h3>
+          <ul className="space-y-2">
+            {visibleEveningSuggestions.map((combo) => (
+              <SuggestionCard
+                key={combo.id}
+                combo={combo}
+                preparing={preparingIds.has(combo.id)}
+                added={isComboOnList(combo)}
+                onAdd={() => addComboToList(combo)}
+                onRemove={() => removeComboFromList(combo)}
+                onTogglePreparing={() => togglePreparing(combo.id)}
+                onEat={() => eatCombo(combo)}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+
       {eatenGroups.length > 0 && (
         <div className="space-y-2">
           <h3 className="text-sm font-medium text-muted-foreground">
@@ -287,97 +335,6 @@ export function TodayView({
         </div>
       )}
     </div>
-  );
-}
-
-function SuggestionCard({
-  combo,
-  preparing,
-  added,
-  overBudgetBy,
-  onAdd,
-  onRemove,
-  onTogglePreparing,
-  onEat,
-}: {
-  combo: ScoredCombo;
-  preparing: boolean;
-  added: boolean;
-  // Only set for "Diğer kombinasyonlar" entries that don't fit today's
-  // remaining kcal — how far over, so it reads as an honest heads-up
-  // rather than hiding why it wasn't in the top suggestions.
-  overBudgetBy?: number;
-  onAdd: () => void;
-  onRemove: () => void;
-  onTogglePreparing: () => void;
-  onEat: () => void;
-}) {
-  // Both states share the exact same box model (1px frame + p-3 content) so
-  // toggling "Hazırlanıyor" only swaps backgrounds, never the layout — a
-  // gradient border of a different thickness than the plain one would shift
-  // the card size on toggle. The background wash is signal-only (not the
-  // border's primary→signal blend) and low-opacity so it reads as a subtle
-  // tint rather than a loud color in every theme, light or dark, without
-  // touching text contrast.
-  const content = (
-    <div
-      className={`rounded-[calc(0.5rem-1px)] bg-background p-3 ${
-        preparing ? "bg-gradient-to-br from-signal/10 to-transparent" : ""
-      }`}>
-      <div className="flex items-center justify-between">
-        <span className="font-medium">{combo.nameTr}</span>
-        <span className="text-xs text-muted-foreground">
-          {combo.prepMinutes} dk
-        </span>
-      </div>
-      <p className="mt-1 text-xs text-muted-foreground">
-        {Math.round(combo.totals.kcal)} kcal ·{" "}
-        {Math.round(combo.totals.proteinG)}g protein
-      </p>
-      {combo.prepNote && (
-        <p className="mt-1 text-xs text-muted-foreground">{combo.prepNote}</p>
-      )}
-      {!!overBudgetBy && overBudgetBy > 0 && (
-        <p className="mt-1 text-xs text-signal">
-          Kalan makronun {Math.round(overBudgetBy)} kcal üzerinde
-        </p>
-      )}
-      <div className="mt-2 flex flex-wrap gap-2">
-        <button
-          type="button"
-          aria-pressed={added}
-          onClick={added ? onRemove : onAdd}
-          className={`rounded-md border px-2 py-1 text-xs ${
-            added ? "border-signal/70 bg-signal/10 text-signal" : "border-border"
-          }`}>
-          {added ? "Listeden çıkar" : "Listeye ekle"}
-        </button>
-        <button
-          type="button"
-          aria-pressed={preparing}
-          onClick={onTogglePreparing}
-          className={`flex items-center gap-1 rounded-md border px-2 py-1 text-xs ${
-            preparing ? "border-signal bg-signal/10" : "border-border"
-          }`}>
-          <ChefHat className="size-3.5" />
-          Hazırlanıyor
-        </button>
-        <button
-          type="button"
-          onClick={onEat}
-          className="rounded-md border border-border px-2 py-1 text-xs">
-          Yedim
-        </button>
-      </div>
-    </div>
-  );
-
-  return (
-    <li>
-      <div className={`rounded-lg p-px ${preparing ? "gradient-edge" : "bg-border"}`}>
-        {content}
-      </div>
-    </li>
   );
 }
 

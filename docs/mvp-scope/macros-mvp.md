@@ -55,6 +55,12 @@ a macro range per meal.
 For MVP, derive slot bounds from the existing daily targets and the existing slot split. Nothing
 timing-sensitive, for the same reason as above.
 
+**Evening slice shipped 2026-09-16**: `src/lib/eveningRecommend.ts`'s `matchEveningCombos` derives a
+practical per-meal quantity (not a formal min/max range) from the day's actual remaining macros at
+call time, scored against realistic gram bounds rather than a fixed slot split — see
+`food-selection-mvp.md`'s `DEC-060` note for the implementation. This covers the evening slot only; a
+general per-slot min/max range for all four slots is still open.
+
 ## Dietary pattern: vegan, vegetarian, pescatarian
 
 The useful split here is that a pattern constrains **food selection**, not macro numbers.
