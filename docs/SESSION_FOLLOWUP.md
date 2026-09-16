@@ -70,13 +70,12 @@ Round 2 (see the linked checkpoint for the full list): `src/components/ui/checkb
 
 ## Problems / Unresolved Issues
 
-- User asked to reverse the "sepette" (checked-items) list order so the most recently *checked*
-  item shows on top, then said to skip it for now. Real blocker: `Item` only has `addedAt`, no
-  `checkedAt` (`src/lib/store.ts`, `supabase/01-schema.sql`) — needs either a session-only
-  client-side order (no persistence) or a real schema + backend + sync change. Not started;
-  revisit when the user brings it back up.
 - `FoodSearchModal`/`RecipeSearchModal` still lack `role="dialog"`/`aria-modal` — noted during the
   Round 2 accessibility pass but not fixed; a smaller, separate follow-up if wanted.
+
+**Closed, not just deferred (2026-09-16):** the "sepette" (checked-items) reverse-order request —
+user confirmed the current list order is correct as-is and the `checkedAt` schema question is not
+relevant. No `Item.checkedAt` field needed; this is not on the backlog in any form.
 
 ## Failed Approaches
 

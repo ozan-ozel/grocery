@@ -197,6 +197,11 @@ keyboard-dismissal checks (real math and real code, not a skim):
   pattern `ConfirmModal` already used, so a click on the sheet itself can't bubble into the
   backdrop's close handler. Verified live via Playwright: Escape and a direct backdrop-button click
   both close `FoodSearchModal` (confirmed via before/after snapshot showing the modal unmounted).
+  **Follow-up (2026-09-16):** added `role="dialog"` + `aria-modal="true"` + `aria-labelledby`
+  (pointing at each modal's own `<h2>` title, given a stable `id`) to `FoodSearchModal` and
+  `RecipeSearchModal` — the two components flagged as still missing it. Verified live: the
+  Playwright accessibility-tree snapshot now reports a proper `dialog` node instead of a plain
+  `generic` container once the sheet opens.
 
 **Unrelated but adjacent decision, made alongside this pass (2026-09-16):** the theme system was
 retired from 9 themes down to 2 — "Nane" (light, the original default) and "Arduvaz" (dark) —

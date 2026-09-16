@@ -66,9 +66,13 @@ export function FoodSearchModal({
         onClick={resetModal}
         className="absolute inset-0 bg-black/50 transition-opacity duration-200 starting:opacity-0"
       />
-      <div className="relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 transition-transform duration-200 ease-out starting:translate-y-full">
+      <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="food-search-modal-title"
+        className="relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 transition-transform duration-200 ease-out starting:translate-y-full">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-foreground">{title}</h2>
+          <h2 id="food-search-modal-title" className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             type="button"
             onClick={resetModal}
