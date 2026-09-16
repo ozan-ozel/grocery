@@ -180,6 +180,41 @@ version exactly — confirmed via an identical build output hash for the resulti
 and after. The band-shape/fillet code (`ringSegmentPath`, `pointOnCircle`) was removed entirely,
 not just unused — no dead code left behind.
 
+## Follow-up 7: full-app pass (Meal Plan + every other screen + boot skeleton)
+
+Direct request to re-audit the Meal Plan page, then extend to every other screen and the boot
+skeleton. Reviewed live via `npm run vercel:dev` + Playwright at 390×844, in both themes.
+
+**Clean, no change needed:** Meal Plan (macro card, meal-slot cards, evening-suggestion cards in
+default/"Hazırlanıyor"/eaten states, the full Yedim → eaten-flip → Geri al round trip, day-nav
+gating), Alışveriş (Liste + Geçmiş), Besin Değerleri (Tümü + Kategoriler layout itself +
+Karşılaştır), Kişisel Plan, Ayarlar, and `AppBootSkeleton` (`App.tsx`) — its per-section shape
+(Alışveriş/Yemek/shared Besin-Kişisel-Ayarlar) matches the real layout correctly in both themes,
+confirmed by catching it live on cold navigation rather than just reading the source.
+
+Two real issues found and fixed:
+
+11. **Category names truncating on mobile** (`CategoriesView.tsx`, Besin Değerleri → Kategoriler).
+    Root cause: the row had *two* `flex-1` elements — the label span and a leftover spacer `<div
+    className="flex-1" />` meant to push the eye/hide button to the row's end. The label's own
+    `flex-1` already does that by itself once it's the last flexible element before fixed-width
+    siblings, so the spacer was redundant and was splitting the row's remaining width 50/50
+    between itself and the label instead of giving it all to the label. Removed the spacer and
+    tightened the row gap (`gap-2` → `gap-1`). Confirmed live: "Meyve & Sebze", "Balık & Deniz
+    Ürünleri", "Fırın & Pastane", "Baharat & Çeşni", "Hazır & Konserve", "Kuruyemiş & Tohum" all
+    render in full at 390px now, previously truncated to "Meyve & ...", etc.
+12. **Fiber target showing a fake range** (`PersonalPlanView.tsx`'s `TargetSummary`). The daily
+    fiber target is minimum-only (`fiberG.min`/`fiberG.max` in `mealPersonalization.ts` both derive
+    from the same kcal-based value once it clears both floors), so at common calorie targets it
+    rendered as "35-35 g" next to a "minimum" label instead of a real range like the other macro
+    cards. Fixed at the display layer only (the underlying min/max calculation is untouched): show
+    a single value when `min === max`, the range otherwise.
+
+Also found, not a UI bug: a leftover eaten "Dana kıyma ve pirinç" entry sitting in the real
+household's Son Öğün from an earlier live-verification session that was never undone — test
+pollution in real data, not a code issue. Cleaned up via the card's own "Geri al" and confirmed
+Son Öğün reverted to its actual state.
+
 ## Deferred / worth a follow-up look
 
 - **`UndoToast`** (`fixed bottom-0 mb-5`) is positioned independent of the bottom nav's height and
@@ -198,3 +233,7 @@ not just unused — no dead code left behind.
 
 Build verified (`npm run build`, clean). Not yet committed — on branch `audit/ui-polish-pass-2`,
 left for manual review/testing before commit per standing instruction.
+
+Follow-up 7 additionally touched `src/components/CategoriesView.tsx` and
+`src/components/PersonalPlanView.tsx` — committed and merged to `master` directly (BCMP), `tsc -b`
+clean.
