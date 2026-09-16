@@ -74,6 +74,12 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
     setValue("");
     setActive(-1);
     setExpanded(false);
+    // Close the suggestion panel instead of leaving it re-populated with
+    // "en çok alınan" right after an add — on a short list that panel ate
+    // most of the remaining screen. Focus stays on the input (not blurred)
+    // so a fast multi-item add can keep typing the next name; onInput below
+    // reopens the panel the moment a character lands.
+    setOpen(false);
     inputRef.current?.focus();
   }
 
@@ -119,6 +125,7 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
           onInput={(e: Event) => {
             setValue((e.target as HTMLInputElement).value);
             setActive(-1);
+            setOpen(true);
           }}
           onKeyDown={onKeyDown as never}
         />

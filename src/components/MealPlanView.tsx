@@ -186,7 +186,7 @@ export function MealPlanView({
         <>
           {/* Daily Macro Summary */}
           <MacroSummaryCard
-            remaining={totals}
+            consumed={totals}
             target={targetMacros}
             isEstimated={false}
           />

@@ -2,6 +2,8 @@ import { useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { format } from "@/components/NutritionTableCell";
+import { SheetDragHandle } from "@/components/ui/sheet-drag-handle";
+import { useSwipeToDismiss } from "@/hooks/useSwipeToDismiss";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { MealItem } from "@/lib/localMealPlan";
 import { scaleNutrition, type MacroTotals } from "@/lib/mealNutrition";
@@ -38,6 +40,8 @@ export function MealNutritionDetailSheet({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
+  const { dragY, isDragging, dragHandlers } = useSwipeToDismiss(onClose);
+
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center">
       <button
@@ -46,7 +50,10 @@ export function MealNutritionDetailSheet({
         onClick={onClose}
         className="absolute inset-0 bg-foreground/20"
       />
-      <div className="relative z-10 max-h-[80vh] w-full max-w-[30rem] overflow-y-auto rounded-t-xl border-t border-border bg-card p-4 shadow-lg">
+      <div
+        style={dragY ? { transform: `translateY(${dragY}px)` } : undefined}
+        className={`relative z-10 max-h-[80vh] w-full max-w-[30rem] overflow-y-auto rounded-t-xl border-t border-border bg-card p-4 pt-2 shadow-lg ${isDragging ? "" : "transition-transform duration-200 ease-out"}`}>
+        <SheetDragHandle dragHandlers={dragHandlers} />
         <div className="flex items-center justify-between pb-3">
           <h2 className="text-sm font-semibold">{title} · Besin değerleri</h2>
           <Button

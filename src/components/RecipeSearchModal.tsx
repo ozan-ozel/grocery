@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { Clock, Search, X } from "lucide-react";
 import type { ScoredCombo } from "@/lib/comboMatch";
+import { SheetDragHandle } from "@/components/ui/sheet-drag-handle";
+import { useSwipeToDismiss } from "@/hooks/useSwipeToDismiss";
 
 type Props = {
   title: string;
@@ -40,6 +42,8 @@ export function RecipeSearchModal({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
+  const { dragY, isDragging, dragHandlers } = useSwipeToDismiss(resetModal);
+
   if (!isOpen) return null;
 
   return (
@@ -54,13 +58,15 @@ export function RecipeSearchModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="recipe-search-modal-title"
-        className="relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 transition-transform duration-200 ease-out starting:translate-y-full">
+        style={dragY ? { transform: `translateY(${dragY}px)` } : undefined}
+        className={`relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 pt-2 ease-out starting:translate-y-full ${isDragging ? "" : "transition-transform duration-200"}`}>
+        <SheetDragHandle dragHandlers={dragHandlers} />
         <div className="mb-4 flex items-center justify-between">
           <h2 id="recipe-search-modal-title" className="text-lg font-semibold text-foreground">{title}</h2>
           <button
             type="button"
             onClick={resetModal}
-            className="p-1 text-muted-foreground hover:text-foreground"
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             aria-label="Kapat">
             <X className="size-5" />
           </button>

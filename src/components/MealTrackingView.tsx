@@ -69,7 +69,7 @@ export function MealTrackingView({
     <div className="space-y-4">
       {/* Daily Macro Summary */}
       <MacroSummaryCard
-        remaining={currentMacros}
+        consumed={currentMacros}
         target={targetMacros}
         isEstimated={isEstimated}
       />
