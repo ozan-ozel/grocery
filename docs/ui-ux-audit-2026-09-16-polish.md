@@ -144,6 +144,42 @@ gesture itself could not be verified in this environment — synthetic `TouchEve
 headless browser doesn't reliably reach Preact's touch listeners the way a real touchscreen does,
 so this needs a check on a real device before being treated as fully confirmed.
 
+## Follow-up 5: tap feedback on mobile (active: alongside hover:)
+
+Direct request: every `hover:` color/opacity/decoration class across the app is invisible on a
+touch device (no hover state exists), so buttons and clickable rows gave zero visual feedback on
+tap. Added a matching `active:` variant next to every existing `hover:` utility — same value, so
+tapping now flashes the identical color/opacity change a mouse user gets on hover, without
+touching any `hover:` class itself. Mechanical, codebase-wide: 25 files, 89 insertions via a
+one-off script (not left behind — see `CLAUDE.md`'s no-standing-scripts rule), spot-checked and
+one class of bug fixed: a handful of buttons already had a manually-added `active:` for the same
+value from earlier session work, and the blind insertion duplicated those — found and fixed 4
+exact-duplicate spots (`ActiveListRow.tsx`, `CategoriesView.tsx`, `NutritionView.tsx`,
+`TenantSwitcher.tsx`) before verifying zero duplicates remained across all 25 files. Deliberately
+left `group-hover:`/`peer-hover:` and the existing `[@media(pointer:fine)]:`-gated hover reveals
+(`TenantSwitcher`'s row-action icons) untouched — those are already scoped to fine-pointer devices
+on purpose and don't need a touch equivalent.
+
+## Follow-up 6: macro ring visual polish ("more elegant"), a structural rebuild, then reverted
+
+First pass refined `MacroRing` in `MacroSummaryCard.tsx` for finish rather than size/status: a
+two-stop SVG gradient on the arc, a soft color-tinted `box-shadow` glow replacing the hard outer
+border, and the status icon moved into its own small `bg-card` plate.
+
+The user then asked for a structural change: the progress indicator redrawn as a literal "strip
+bent into a ring" — an SVG `<path>` computing both an outer and inner arc, stroked in the metric's
+full-strength color around its entire perimeter and filled with a pale tint of that color, on top
+of a plain thin track circle. Built and verified at multiple fill levels (a small sliver, ~50%,
+full/over-target) in both themes. A follow-up ask to further "make it more elegant" led to adding
+small rounded-corner fillets to that band shape (quadratic-curve corner trims, since the band's
+four corners are all local right angles).
+
+After testing live, the user preferred the original gradient-stroke version over the whole
+band/fillet direction and asked to revert. Reverted `MacroRing` to the first-pass gradient-stroke
+version exactly — confirmed via an identical build output hash for the resulting CSS bundle before
+and after. The band-shape/fillet code (`ringSegmentPath`, `pointOnCircle`) was removed entirely,
+not just unused — no dead code left behind.
+
 ## Deferred / worth a follow-up look
 
 - **`UndoToast`** (`fixed bottom-0 mb-5`) is positioned independent of the bottom nav's height and

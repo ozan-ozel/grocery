@@ -113,22 +113,25 @@ function MacroRing({
   status: MacroStatus | null;
 }) {
   const size = 40;
-  const stroke = 4.5;
+  const stroke = 4;
   const r = (size - stroke) / 2;
   const circumference = 2 * Math.PI * r;
   const offset = circumference * (1 - percent);
   const StatusIcon = status?.icon;
+  // Stable per-color id (colors are fixed per metric, never generated), so
+  // a <linearGradient> can be referenced without React's useId — simpler
+  // than threading an id prop through for something this static.
+  const gradientId = `macro-ring-${color.replace("#", "")}`;
   return (
-    // Crisp solid border frames the badge; the fade lives only in the inlet
-    // fill behind it, not on the ring/arc itself — the progress arc stays
-    // fully solid so the actual progress reading is never softened. Once
-    // the target is reached, a status icon takes over the ring's hollow
-    // center instead of leaving it empty.
+    // A soft color-tinted glow instead of a hard outer border — the ring
+    // itself (gradient arc + faint track) already reads as a bounded shape,
+    // so a second drawn edge on top of it just added visual noise. The arc
+    // uses a two-stop gradient of the same hue (a lighter tint into the
+    // true color) for a bit of sheen instead of a single flat fill.
     <div
-      className="relative flex shrink-0 items-center justify-center rounded-full border"
+      className="relative flex shrink-0 items-center justify-center rounded-full"
       style={{
-        background: `color-mix(in oklab, ${color} 12%, transparent)`,
-        borderColor: `color-mix(in oklab, ${color} 45%, transparent)`,
+        boxShadow: `0 1px 6px -2px color-mix(in oklab, ${color} 45%, transparent)`,
       }}>
       <svg
         width={size}
@@ -136,12 +139,18 @@ function MacroRing({
         viewBox={`0 0 ${size} ${size}`}
         aria-hidden="true"
         className="-rotate-90">
+        <defs>
+          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={`color-mix(in oklab, ${color} 55%, white)`} />
+            <stop offset="100%" stopColor={color} />
+          </linearGradient>
+        </defs>
         <circle
           cx={size / 2}
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={`color-mix(in oklab, ${color} 15%, transparent)`}
+          stroke={`color-mix(in oklab, ${color} 16%, transparent)`}
           strokeWidth={stroke}
         />
         <circle
@@ -149,7 +158,7 @@ function MacroRing({
           cy={size / 2}
           r={r}
           fill="none"
-          stroke={color}
+          stroke={`url(#${gradientId})`}
           strokeWidth={stroke}
           strokeLinecap="round"
           strokeDasharray={circumference}
@@ -158,12 +167,16 @@ function MacroRing({
         />
       </svg>
       {StatusIcon && (
-        <StatusIcon
-          aria-hidden="true"
-          className="absolute size-3.5"
-          style={{ color: status.color }}
-          strokeWidth={3}
-        />
+        <span
+          className="absolute flex size-[18px] items-center justify-center rounded-full bg-card shadow-sm"
+          style={{ boxShadow: `0 0 0 1px color-mix(in oklab, ${status.color} 30%, transparent)` }}>
+          <StatusIcon
+            aria-hidden="true"
+            className="size-3"
+            style={{ color: status.color }}
+            strokeWidth={3}
+          />
+        </span>
       )}
     </div>
   );

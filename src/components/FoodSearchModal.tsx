@@ -83,7 +83,7 @@ export function FoodSearchModal({
             type="button"
             onClick={resetModal}
             aria-label="Kapat"
-            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent active:bg-accent hover:text-foreground active:text-foreground">
             <X className="size-5" />
           </button>
         </div>
@@ -116,7 +116,7 @@ export function FoodSearchModal({
                     onSelectTag?.(tag.label);
                     resetModal();
                   }}
-                  className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground hover:border-primary hover:text-primary transition-colors">
+                  className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground hover:border-primary active:border-primary hover:text-primary active:text-primary transition-colors">
                   {tag.label}
                   {tag.badge && (
                     <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.65rem] font-semibold text-primary">
@@ -159,13 +159,13 @@ export function FoodSearchModal({
               <button
                 type="button"
                 onClick={() => handleSelect(selected)}
-                className="flex-1 rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground hover:bg-primary/90">
+                className="flex-1 rounded-lg bg-primary px-3 py-2 font-medium text-primary-foreground hover:bg-primary/90 active:bg-primary/90">
                 Ekle
               </button>
               <button
                 type="button"
                 onClick={() => setSelected(null)}
-                className="flex-1 rounded-lg border border-border px-3 py-2 font-medium text-foreground hover:bg-accent">
+                className="flex-1 rounded-lg border border-border px-3 py-2 font-medium text-foreground hover:bg-accent active:bg-accent">
                 Geri
               </button>
             </div>
@@ -184,7 +184,7 @@ export function FoodSearchModal({
                     key={food.name_tr}
                     type="button"
                     onClick={() => setSelected(food)}
-                    className="w-full text-left rounded-lg border border-border bg-background p-3 hover:bg-accent transition-colors">
+                    className="w-full text-left rounded-lg border border-border bg-background p-3 hover:bg-accent active:bg-accent transition-colors">
                     <div className="flex items-start justify-between">
                       <div className="flex-1">
                         <h4 className="font-medium text-foreground text-sm">

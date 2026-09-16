@@ -182,7 +182,7 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
               type="button"
               onMouseDown={(e: Event) => e.preventDefault()}
               onClick={() => setExpanded(true)}
-              className="w-full border-t border-border px-3 py-2 text-center text-xs text-muted-foreground hover:text-foreground">
+              className="w-full border-t border-border px-3 py-2 text-center text-xs text-muted-foreground hover:text-foreground active:text-foreground">
               Tümünü göster
             </button>
           )}

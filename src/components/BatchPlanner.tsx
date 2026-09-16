@@ -246,7 +246,7 @@ function BatchCreateForm({
                   <button
                     type="button"
                     onClick={() => removeManualItem(index)}
-                    className="text-xs text-muted-foreground hover:text-foreground">
+                    className="text-xs text-muted-foreground hover:text-foreground active:text-foreground">
                     Kaldır
                   </button>
                 </li>

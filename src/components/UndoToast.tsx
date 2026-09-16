@@ -31,7 +31,7 @@ export function UndoToast({ undo, onRestore, onDismiss }: Props) {
           type="button"
           onClick={onDismiss}
           aria-label="Kapat"
-          className="rounded p-0.5 text-background/70 hover:text-background"
+          className="rounded p-0.5 text-background/70 hover:text-background active:text-background"
         >
           <X className="size-4" />
         </button>

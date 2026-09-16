@@ -230,7 +230,7 @@ export function Row({
                 onClick={() => onStartEdit(item.id)}
                 className={cn(
                   "rounded p-1 text-muted-foreground transition",
-                  "hover:text-foreground",
+                  "hover:text-foreground active:text-foreground",
                   "[@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
                 )}>
                 <Pencil className="size-4" />
@@ -242,7 +242,7 @@ export function Row({
                 onClick={() => onRemove(item.id)}
                 className={cn(
                   "-mr-1 rounded p-1 text-muted-foreground transition",
-                  "hover:text-signal",
+                  "hover:text-signal active:text-signal",
                   "[@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
                 )}>
                 <X className="size-4" />
@@ -259,7 +259,7 @@ export function Row({
             type="button"
             aria-label={`${item.name} düzenle`}
             onClick={() => onStartEdit(item.id)}
-            className="flex shrink-0 items-center px-3 text-muted-foreground transition hover:text-foreground">
+            className="flex shrink-0 items-center px-3 text-muted-foreground transition hover:text-foreground active:text-foreground">
             <Pencil className="size-4" />
           </button>
         </>
@@ -348,7 +348,7 @@ function EditRow({
           type="button"
           aria-label="İptal"
           onClick={onCancel}
-          className="rounded p-1 text-muted-foreground hover:text-foreground">
+          className="rounded p-1 text-muted-foreground hover:text-foreground active:text-foreground">
           <X className="size-4" />
         </button>
       </div>

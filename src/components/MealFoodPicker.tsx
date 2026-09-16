@@ -139,7 +139,7 @@ export function MealFoodPicker({
                 <button
                   type="button"
                   onClick={() => setSelected(food)}
-                  className="flex w-full items-center justify-between px-2 py-2 text-left text-sm hover:bg-accent">
+                  className="flex w-full items-center justify-between px-2 py-2 text-left text-sm hover:bg-accent active:bg-accent">
                   <span>
                     {food.name_tr}
                     {(hasSoftConstraint(exclusions, food) ||

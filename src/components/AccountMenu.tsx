@@ -50,7 +50,7 @@ export function AccountMenu({ onSignOut, onDeleteAccount }: Props) {
               setOpen(false);
               onSignOut();
             }}
-            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground">
+            className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent active:bg-accent hover:text-foreground active:text-foreground">
             <LogOut className="size-3.5" />
             Çıkış yap
           </button>
@@ -61,7 +61,7 @@ export function AccountMenu({ onSignOut, onDeleteAccount }: Props) {
               setConfirmingDelete(true);
             }}
             className={cn(
-              "flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-signal hover:bg-accent",
+              "flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-signal hover:bg-accent active:bg-accent",
             )}>
             <Trash2 className="size-3.5" />
             Hesabı sil

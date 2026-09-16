@@ -140,7 +140,7 @@ export function CategoriesView({
                     aria-label={`${c.label} yukarı taşı`}
                     disabled={isFirst}
                     onClick={() => onMove(c.id, "up")}
-                    className="rounded p-1 text-muted-foreground transition hover:text-foreground disabled:opacity-30"
+                    className="rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground disabled:opacity-30"
                   >
                     <ArrowUp className="size-4" />
                   </button>
@@ -149,7 +149,7 @@ export function CategoriesView({
                     aria-label={`${c.label} aşağı taşı`}
                     disabled={isLast}
                     onClick={() => onMove(c.id, "down")}
-                    className="rounded p-1 text-muted-foreground transition hover:text-foreground disabled:opacity-30"
+                    className="rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground disabled:opacity-30"
                   >
                     <ArrowDown className="size-4" />
                   </button>
@@ -158,7 +158,7 @@ export function CategoriesView({
                     type="button"
                     aria-label={`${c.label} yeniden adlandır`}
                     onClick={() => setEditingId(c.id)}
-                    className="rounded p-1 text-muted-foreground transition hover:text-foreground"
+                    className="rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground"
                   >
                     <Pencil className="size-4" />
                   </button>
@@ -170,7 +170,7 @@ export function CategoriesView({
                       type="button"
                       aria-label={c.hidden ? `${c.label} göster` : `${c.label} gizle`}
                       onClick={() => onToggleHidden(c.id as string, !c.hidden)}
-                      className="rounded p-1.5 text-muted-foreground transition hover:text-foreground"
+                      className="rounded p-1.5 text-muted-foreground transition hover:text-foreground active:text-foreground"
                     >
                       {c.hidden ? (
                         <EyeOff className="size-5" />
@@ -185,7 +185,7 @@ export function CategoriesView({
                       onClick={() => {
                         if (isCustomId(c.id)) onRemoveCustom(c.id as string);
                       }}
-                      className="rounded p-1.5 text-muted-foreground transition hover:text-signal"
+                      className="rounded p-1.5 text-muted-foreground transition hover:text-signal active:text-signal"
                     >
                       <X className="size-5" />
                     </button>
@@ -280,7 +280,7 @@ function RenameRow({
         type="button"
         aria-label="İptal"
         onClick={onCancel}
-        className="rounded p-1 text-muted-foreground hover:text-foreground"
+        className="rounded p-1 text-muted-foreground hover:text-foreground active:text-foreground"
       >
         <X className="size-4" />
       </button>

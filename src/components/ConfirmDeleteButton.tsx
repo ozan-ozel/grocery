@@ -31,14 +31,14 @@ export function ConfirmDeleteButton({
             setArmed(false);
             onConfirm();
           }}
-          className="rounded p-1.5 text-signal transition hover:text-signal/80">
+          className="rounded p-1.5 text-signal transition hover:text-signal/80 active:text-signal/80">
           <Trash2 className={iconClassName} />
         </button>
         <button
           type="button"
           aria-label="Vazgeç"
           onClick={() => setArmed(false)}
-          className="rounded p-1.5 text-muted-foreground transition hover:text-foreground">
+          className="rounded p-1.5 text-muted-foreground transition hover:text-foreground active:text-foreground">
           <X className={iconClassName} />
         </button>
       </span>
@@ -51,7 +51,7 @@ export function ConfirmDeleteButton({
       aria-label={label}
       onClick={() => setArmed(true)}
       className={cn(
-        "shrink-0 rounded p-1.5 text-muted-foreground transition hover:text-signal",
+        "shrink-0 rounded p-1.5 text-muted-foreground transition hover:text-signal active:text-signal",
         className
       )}>
       <TriggerIcon className={iconClassName} />

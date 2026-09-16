@@ -1,7 +1,8 @@
 import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DropdownChevronButton } from "@/components/DropdownChevronButton";
+import { InfoModal } from "@/components/InfoModal";
 import {
   ACTIVITY_OPTIONS,
   ACTIVITY_DESCRIPTIONS,
@@ -143,6 +144,39 @@ export function PersonalPlanView({ userId }: Props) {
   const [howOpen, setHowOpen] = useState(false);
   const howDetails = useDetailsTransition<HTMLElement>();
   const sourcesDetails = useDetailsTransition<HTMLElement>();
+
+  // Lets a "Nasıl hesaplanıyor?" formula line jump straight to the matching
+  // entry in "Kaynakları göster" instead of leaving the two sections
+  // disconnected — opens the sources panel if closed, scrolls the specific
+  // source group into view, and flashes it briefly so the connection reads
+  // as obvious rather than just "the panel scrolled somewhere."
+  const [highlightedGroup, setHighlightedGroup] = useState<string | null>(
+    null,
+  );
+  const sourceGroupRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const highlightTimeoutRef = useRef<number | undefined>(undefined);
+
+  function jumpToSource(feature: string) {
+    const wasOpen = showSources;
+    if (!wasOpen) {
+      setShowSources(true);
+      sourcesDetails.onToggle(true);
+    }
+    const settleDelay = wasOpen ? 0 : 340;
+    window.setTimeout(() => {
+      sourceGroupRefs.current[feature]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, settleDelay);
+    setHighlightedGroup(feature);
+    if (highlightTimeoutRef.current)
+      window.clearTimeout(highlightTimeoutRef.current);
+    highlightTimeoutRef.current = window.setTimeout(
+      () => setHighlightedGroup(null),
+      settleDelay + 1600,
+    );
+  }
 
   const { foods } = useFoodCatalog();
   // Display-only resolver for an exclusion chip's foodId: an entry created
@@ -449,7 +483,7 @@ export function PersonalPlanView({ userId }: Props) {
                     <li key={f.name_tr}>
                       <button
                         type="button"
-                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted active:bg-muted"
                         onClick={() => setPendingFood(f)}>
                         {f.name_tr}
                       </button>
@@ -469,7 +503,7 @@ export function PersonalPlanView({ userId }: Props) {
                           <li key={f.name_tr}>
                             <button
                               type="button"
-                              className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                              className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted active:bg-muted"
                               onClick={() => setPendingFood(f)}>
                               {f.name_tr}
                             </button>
@@ -534,7 +568,7 @@ export function PersonalPlanView({ userId }: Props) {
                         type="button"
                         onClick={() => removeExclusion(e.foodId)}
                         aria-label={`${displayNameForFoodId(e.foodId)} hariç tutmayı kaldır`}
-                        className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-accent">
+                        className="rounded-md border border-border px-2 py-1 text-xs text-muted-foreground hover:bg-accent active:bg-accent">
                         Kaldır
                       </button>
                     </div>
@@ -608,7 +642,7 @@ export function PersonalPlanView({ userId }: Props) {
                     <li key={id}>
                       <button
                         type="button"
-                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted"
+                        className="w-full px-2 py-1.5 text-left text-sm hover:bg-muted active:bg-muted"
                         onClick={() => setPendingAllergenClass(id)}>
                         {ALLERGEN_CLASS_LABEL_TR[id]}
                       </button>
@@ -706,7 +740,7 @@ export function PersonalPlanView({ userId }: Props) {
             Nasıl hesaplanıyor?
           </summary>
           <div className="space-y-2 rounded-b-[calc(0.5rem-1px)] bg-background px-3 pb-3 text-xs text-muted-foreground">
-            <ul className="space-y-1.5">
+            <ul className="space-y-2.5">
               <li>
                 <span className="font-medium text-foreground">
                   Bazal metabolizma (BMR):
@@ -714,6 +748,13 @@ export function PersonalPlanView({ userId }: Props) {
                 Mifflin-St Jeor formülü — 9.99×Kilo + 6.25×Boy − 4.92×Yaş, artı
                 denklem seçimine göre erkek katsayısı (+5) ya da kadın katsayısı
                 (−161).
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <SourceBadgeLink
+                    label="Endotext"
+                    feature="Bazal metabolizma, koruma ve hedef kalorisi"
+                    onJump={jumpToSource}
+                  />
+                </div>
               </li>
               <li>
                 <span className="font-medium text-foreground">
@@ -722,6 +763,18 @@ export function PersonalPlanView({ userId }: Props) {
                 BMR × aktivite katsayısı — Hareketsiz için 1.4, Az aktif 1.55,
                 Orta aktif 1.7, Aktif 1.9, Çok aktif 2.1 ("Günlük aktivite"
                 seçimine göre).
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <SourceBadgeLink
+                    label="Endotext"
+                    feature="Bazal metabolizma, koruma ve hedef kalorisi"
+                    onJump={jumpToSource}
+                  />
+                  <SourceBadgeLink
+                    label="WHO"
+                    feature="Günlük aktivite seviyesi"
+                    onJump={jumpToSource}
+                  />
+                </div>
               </li>
               <li>
                 <span className="font-medium text-foreground">
@@ -735,12 +788,28 @@ export function PersonalPlanView({ userId }: Props) {
                 <span className="font-medium text-foreground">
                   Protein / Yağ / Karbonhidrat / Lif aralıkları:
                 </span>{" "}
-                yağ hedef kalorinin %20-35'i (DRI); karbonhidrat, aktivite
-                seviyesine göre kilo başına 3-12g (spor beslenmesi literatürü,
-                kalori hedefinden bağımsız); protein kilo başına 1.2g (temel),
-                1.6g (aktif/çok aktif ya da kilo alma hedefinde) veya 2.0g (kilo
-                verme hedefinde, kas kütlesini korumak için); lif her 1000 kcal
-                için ~14g (DRI).
+                yağ hedef kalorinin %20-35'i; karbonhidrat, aktivite seviyesine
+                göre kilo başına 3-12g (kalori hedefinden bağımsız); protein
+                kilo başına 1.2g (temel), 1.6g (aktif/çok aktif ya da kilo
+                alma hedefinde) veya 2.0g (kilo verme hedefinde, kas kütlesini
+                korumak için); lif her 1000 kcal için ~14g.
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <SourceBadgeLink
+                    label="DRI"
+                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                    onJump={jumpToSource}
+                  />
+                  <SourceBadgeLink
+                    label="Hector 2018"
+                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                    onJump={jumpToSource}
+                  />
+                  <SourceBadgeLink
+                    label="ACSM 2016"
+                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                    onJump={jumpToSource}
+                  />
+                </div>
               </li>
             </ul>
             <p>
@@ -787,7 +856,12 @@ export function PersonalPlanView({ userId }: Props) {
             </span>
           </summary>
           <div className="rounded-b-[calc(0.5rem-1px)] bg-background px-3 pb-3">
-            <SourceMap />
+            <SourceMap
+              highlightedGroup={highlightedGroup}
+              registerRef={(feature, el) => {
+                sourceGroupRefs.current[feature] = el;
+              }}
+            />
           </div>
         </details>
       </div>
@@ -809,7 +883,7 @@ function ReasonButton({
       type="button"
       onClick={onClick}
       className={cn(
-        "rounded-md border border-border text-left transition-colors hover:bg-accent",
+        "rounded-md border border-border text-left transition-colors hover:bg-accent active:bg-accent",
         small ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm",
       )}>
       {label}
@@ -839,20 +913,21 @@ export function Field({
             onClick={event => {
               event.preventDefault();
               event.stopPropagation();
-              setShowInfo(value => !value);
+              setShowInfo(true);
             }}
             aria-label="Daha fazla bilgi"
-            aria-expanded={showInfo}
-            className="flex h-4 w-4 items-center justify-center rounded-full border border-muted-foreground/50 text-[10px] leading-none hover:bg-accent">
+            className="flex h-4 w-4 items-center justify-center rounded-full border border-muted-foreground/50 text-[10px] leading-none hover:bg-accent active:bg-accent">
             i
           </button>
         )}
       </span>
       {children}
       {info && showInfo && (
-        <p className="mt-1 whitespace-pre-line rounded-md bg-accent/40 p-2 text-[11px] leading-snug text-foreground">
-          {info}
-        </p>
+        <InfoModal
+          title={label}
+          description={info}
+          onClose={() => setShowInfo(false)}
+        />
       )}
     </label>
   );
@@ -904,9 +979,13 @@ function TargetSummary({
       <div className="flex items-end justify-between">
         <div>
           <h2 className="text-sm font-semibold">Günlük hedeflerin</h2>
-          <p className="text-xs text-muted-foreground">
-            {activity} {showSources && <SourceBadge label="WHO" />} · BMI{" "}
-            {targets.bmi} ({bmiLabel(targets.bmi)}){" "}
+          <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
+            <span>{activity}</span>
+            {showSources && <SourceBadge label="WHO" />}
+            <span aria-hidden="true">·</span>
+            <span>
+              BMI {targets.bmi} ({bmiLabel(targets.bmi)})
+            </span>
             {showSources && <SourceBadge label="Endotext" />}
           </p>
         </div>
@@ -940,20 +1019,33 @@ function TargetSummary({
   );
 }
 
-function SourceMap() {
+function SourceMap({
+  highlightedGroup,
+  registerRef,
+}: {
+  highlightedGroup: string | null;
+  registerRef: (feature: string, el: HTMLDivElement | null) => void;
+}) {
   return (
-    <div className="space-y-2 border-t border-border pt-3 text-xs">
+    <div className="space-y-4 border-t border-border pt-3 text-xs">
       <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
         <BookOpen className="size-4" /> Özellik kaynakları
       </div>
       {SOURCE_GROUPS.map(group => (
-        <div key={group.feature} className="border-t border-border pt-2">
+        <div
+          key={group.feature}
+          ref={el => registerRef(group.feature, el)}
+          className={cn(
+            "rounded-md border-t border-border pt-2 transition-colors duration-700",
+            highlightedGroup === group.feature &&
+              "border-t-transparent bg-signal/10 ring-1 ring-signal/40",
+          )}>
           <p className="font-medium text-foreground">{group.feature}</p>
-          <div className="mt-1.5 space-y-1">
+          <div className="mt-2 space-y-1.5">
             {group.sources.map(source => (
               <a
                 key={`${group.feature}-${source.href}-${source.label}`}
-                className="flex items-center gap-1.5 rounded-md px-1.5 py-1 text-foreground/80 underline decoration-dotted underline-offset-2 transition-colors hover:bg-accent hover:text-signal hover:decoration-solid"
+                className="flex items-center gap-1.5 rounded-md px-1.5 py-1.5 text-foreground/80 underline decoration-dotted underline-offset-2 transition-colors hover:bg-accent active:bg-accent hover:text-signal active:text-signal hover:decoration-solid active:decoration-solid"
                 href={source.href}
                 target="_blank"
                 rel="noreferrer">
@@ -974,5 +1066,28 @@ function SourceBadge({ label }: { label: string }) {
     <span className="inline-flex shrink-0 items-center rounded border border-signal/70 bg-signal/10 px-1.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-signal shadow-sm">
       {label}
     </span>
+  );
+}
+
+// Same look as SourceBadge, but a clickable jump to that citation's entry in
+// "Kaynakları göster" — used inline in "Nasıl hesaplanıyor?" so a formula
+// claim visibly traces back to a real source instead of a bare parenthetical
+// like "(DRI)".
+function SourceBadgeLink({
+  label,
+  feature,
+  onJump,
+}: {
+  label: string;
+  feature: string;
+  onJump: (feature: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onJump(feature)}
+      className="inline-flex shrink-0 items-center rounded border border-signal/70 bg-signal/10 px-1.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-signal shadow-sm transition-colors hover:bg-signal/20 active:bg-signal/20">
+      {label}
+    </button>
   );
 }
