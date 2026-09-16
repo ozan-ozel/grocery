@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Eye, EyeOff, Plus, Pencil, Trash2, UserPlus, X } from "lucide-react";
+import { Check, ChevronDown, Plus, Pencil, Trash2, UserPlus, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import type { Tenant } from "@/lib/store";
@@ -8,25 +8,21 @@ import { inviteToHousehold, listHouseholdShares, revokeHouseholdShare } from "@/
 type Props = {
   tenants: Tenant[];
   activeId: string;
-  hiddenIds: string[];
   currentUserId: string | null;
   onSelect: (id: string) => void;
   onAdd: (name: string) => void;
   onRename: (id: string, name: string) => void;
   onDelete: (id: string) => void;
-  onToggleHidden: (id: string) => void;
 };
 
 export function TenantSwitcher({
   tenants,
   activeId,
-  hiddenIds,
   currentUserId,
   onSelect,
   onAdd,
   onRename,
   onDelete,
-  onToggleHidden,
 }: Props) {
   const [open, setOpen] = useState(false);
   const [adding, setAdding] = useState(false);
@@ -154,10 +150,10 @@ export function TenantSwitcher({
         aria-label="Ev seç"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="ledger flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
+        className="ledger flex h-9 items-center gap-1.5 rounded-md border border-input px-3 text-sm text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
       >
         <span className="max-w-[10ch] truncate">{active?.name ?? "Ev"}</span>
-        <ChevronDown className={cn("size-3 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("size-4 transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
@@ -166,10 +162,6 @@ export function TenantSwitcher({
             {tenants.map((t) => {
               const isActive = t.id === activeId;
               const isEditing = editingId === t.id;
-              const isHidden = hiddenIds.includes(t.id);
-              const visibleCount = tenants.length - hiddenIds.length;
-              // Refuse to let the user hide the last visible household.
-              const canHide = isHidden || visibleCount > 1;
               return (
                 <li key={t.id}>
                   {isEditing ? (
@@ -209,16 +201,7 @@ export function TenantSwitcher({
                             isActive ? "text-foreground" : "text-transparent"
                           )}
                         />
-                        <span className={cn("truncate", isHidden && "text-muted-foreground")}>{t.name}</span>
-                      </button>
-                      <button
-                        type="button"
-                        aria-label={isHidden ? `${t.name} göster` : `${t.name} gizle`}
-                        disabled={!canHide}
-                        onClick={() => onToggleHidden(t.id)}
-                        className="rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground disabled:cursor-not-allowed disabled:opacity-40 [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
-                      >
-                        {isHidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
+                        <span className="truncate">{t.name}</span>
                       </button>
                       <button
                         type="button"

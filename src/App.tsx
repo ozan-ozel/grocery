@@ -12,7 +12,7 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 import { BottomNavigation, type NavTab } from "@/components/BottomNavigation";
 import { buildCatalog } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
-import { useUiPrefs, type Tab, type Section } from "@/hooks/useUiPrefs";
+import { useUiPrefs, initialSection, type Tab, type Section } from "@/hooks/useUiPrefs";
 import { useTenants } from "@/hooks/useTenants";
 import { useListSync } from "@/hooks/useListSync";
 import { useRollover } from "@/hooks/useRollover";
@@ -30,9 +30,13 @@ import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
 export function App() {
   const { session, checked, signInWithGoogle, signOut, deleteAccount } =
     useAuth();
+  // Read once per mount (not via useUiPrefs, which isn't mounted yet at this
+  // gate) so the very first paint already mimics whichever section the URL
+  // says we're landing on, instead of always guessing Alışveriş.
+  const bootSection = useMemo(() => initialSection(), []);
 
   if (!checked) {
-    return <AppBootSkeleton />;
+    return <AppBootSkeleton section={bootSection} />;
   }
 
   if (!session) {
@@ -48,50 +52,149 @@ export function App() {
   );
 }
 
-// Mimics AppHeader + AppShoppingTabs' actual layout (tenant chip, section
-// tabs, date title with count, tally line, secondary tab row, list rows)
-// instead of a generic block stack, so the very first paint already reads as
-// "this exact screen, still loading" rather than an unrelated placeholder —
-// and instead of a bare spinner, in the app's own loading-flow language. That
-// spinning icon is reserved for AppHeader's background sync status, a
-// different concern from "content hasn't arrived yet".
-function AppBootSkeleton() {
+// Mimics each section's actual layout instead of a generic block stack, so
+// the very first paint already reads as "this exact screen, still loading"
+// rather than an unrelated placeholder — and instead of a bare spinner, in
+// the app's own loading-flow language. That spinning icon is reserved for
+// AppHeader's background sync status, a different concern from "content
+// hasn't arrived yet". Section-specific because "yemek" (meal plan) is the
+// actual default landing section (see initialSection() in useUiPrefs), not
+// Alışveriş — a one-size skeleton would mispredict the common case.
+function AppBootSkeleton({ section }: { section: Section }) {
   return (
     <div
       className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col px-5 pt-6"
       role="status"
       aria-label="Yükleniyor">
-      <div className="flex items-center justify-between gap-2 pb-2">
-        <LoadingBlock className="h-7 w-20 rounded-md" />
-        <div className="flex items-center gap-1">
-          <LoadingBlock className="size-8 rounded-md" />
-          <LoadingBlock className="size-8 rounded-md" />
+      {/* Living gradient edge — the softened .gradient-edge-flow-soft variant
+          (same mechanism PersonalPlanView/TodayView use at full strength for
+          a small toggle, blended down here since it wraps the entire boot
+          screen and full saturation read as too loud over a page of plain
+          gray placeholders). Transform-only animation — no extra paint cost
+          over the plain border it replaces. */}
+      <div className="gradient-edge-flow-soft rounded-lg p-px">
+        <div className="rounded-[calc(0.5rem-1px)] bg-background p-4">
+          <BootSkeletonHeader section={section} />
+          <BootSkeletonBody section={section} />
         </div>
-      </div>
-
-      <LoadingBlock className="h-10 rounded-lg" />
-
-      <div className="mt-4 flex items-end justify-between gap-2">
-        <LoadingBlock className="h-8 w-40" />
-        <LoadingBlock className="h-6 w-14" />
-      </div>
-      <LoadingBlock className="mt-3 h-1 w-full rounded-full" />
-
-      <div className="mt-3 flex items-center gap-4">
-        <LoadingBlock className="h-5 w-12" />
-        <LoadingBlock className="h-5 w-10" />
-        <LoadingBlock className="h-5 w-14" />
-        <LoadingBlock className="h-5 w-8" />
-      </div>
-
-      <div className="mt-4 space-y-2">
-        <LoadingBlock className="h-16" />
-        <LoadingBlock className="h-16" />
-        <LoadingBlock className="h-16" />
-        <LoadingBlock className="h-16" />
       </div>
     </div>
   );
+}
+
+// AppHeader's icon buttons and MealPlanView's day-nav chevrons are all
+// variant="quiet" — no visible button surface, just an icon glyph — so a
+// filled size-9 square placeholder reads as the wrong shape entirely (a
+// button box that doesn't exist). This mimics the actual glyph instead: a
+// small round shimmer, centered in a same-footprint size-9 box so row
+// spacing still matches the real header/nav once content arrives.
+function QuietIconPlaceholder() {
+  return (
+    <div className="flex size-9 shrink-0 items-center justify-center">
+      <LoadingBlock className="size-4 rounded-full" />
+    </div>
+  );
+}
+
+// Mirrors each section's actual header shape: Alışveriş and Yemek Planı
+// both now render a single-line title (no eyebrow+h1 pair — see
+// AppHeader.tsx / MealPlanView.tsx), Besin/Kişisel/Ayarlar still use the
+// two-line eyebrow+h1 pattern.
+function BootSkeletonHeader({ section }: { section: Section }) {
+  if (section === "alisveris") {
+    return (
+      <div className="pb-2">
+        <LoadingBlock className="h-3 w-20 rounded" />
+        <div className="mt-2 flex items-center justify-between gap-2">
+          <LoadingBlock className="h-7 w-20 rounded-md" />
+          <div className="flex items-center gap-1">
+            <QuietIconPlaceholder />
+            <QuietIconPlaceholder />
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (section === "yemek") {
+    return (
+      <div className="pb-3">
+        <LoadingBlock className="h-3 w-24 rounded" />
+      </div>
+    );
+  }
+  return (
+    <div className="pb-3">
+      <LoadingBlock className="h-3 w-24 rounded" />
+      <LoadingBlock className="mt-2 h-6 w-48 rounded-md" />
+    </div>
+  );
+}
+
+function BootSkeletonBody({ section }: { section: Section }) {
+  switch (section) {
+    case "yemek":
+      return (
+        <>
+          <div className="flex items-center justify-between gap-2">
+            <QuietIconPlaceholder />
+            <LoadingBlock className="h-6 w-32 rounded-md" />
+            <QuietIconPlaceholder />
+          </div>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <LoadingBlock className="h-16 rounded-lg" />
+            <LoadingBlock className="h-16 rounded-lg" />
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2">
+            <LoadingBlock className="h-16 rounded-lg" />
+            <LoadingBlock className="h-16 rounded-lg" />
+            <LoadingBlock className="h-16 rounded-lg" />
+          </div>
+          <div className="mt-4 space-y-2">
+            <LoadingBlock className="h-24" />
+            <LoadingBlock className="h-24" />
+            <LoadingBlock className="h-24" />
+          </div>
+        </>
+      );
+    case "besin":
+    case "kisisel":
+    case "ayarlar":
+      // These three all resolve to the same shape once loaded: an eyebrow+h1
+      // header (already covered by BootSkeletonHeader) followed by a plain
+      // stack of card-sized blocks — close enough across all three that a
+      // dedicated layout per section wasn't worth the upkeep.
+      return (
+        <div className="mt-2 space-y-2">
+          <LoadingBlock className="h-16" />
+          <LoadingBlock className="h-16" />
+          <LoadingBlock className="h-16" />
+        </div>
+      );
+    case "alisveris":
+    default:
+      return (
+        <>
+          <LoadingBlock className="h-10 rounded-lg" />
+          <div className="mt-4 flex items-end justify-between gap-2">
+            <LoadingBlock className="h-8 w-40" />
+            <LoadingBlock className="h-6 w-14" />
+          </div>
+          <LoadingBlock className="mt-3 h-1 w-full rounded-full" />
+          <div className="mt-3 flex items-center gap-4">
+            <LoadingBlock className="h-5 w-12" />
+            <LoadingBlock className="h-5 w-10" />
+            <LoadingBlock className="h-5 w-14" />
+            <LoadingBlock className="h-5 w-8" />
+          </div>
+          <div className="mt-4 space-y-2">
+            <LoadingBlock className="h-16" />
+            <LoadingBlock className="h-16" />
+            <LoadingBlock className="h-16" />
+            <LoadingBlock className="h-16" />
+          </div>
+        </>
+      );
+  }
 }
 
 // Liste → Geçmiş, matching AppHeader's TabsTrigger order, so a left/right
@@ -171,13 +274,11 @@ function AppShell({
 
   const {
     tenants,
-    hiddenIds,
     activeTenantId,
     selectTenant,
     addTenant,
     renameTenant,
     deleteTenant,
-    toggleHiddenTenant,
     consumeFreshTenantId,
   } = useTenants();
 
@@ -240,7 +341,7 @@ function AppShell({
   }
 
   if (!tenants || !activeTenantId || !state) {
-    return <AppBootSkeleton />;
+    return <AppBootSkeleton section={section} />;
   }
 
   // Everything past the guard runs only with a hydrated state, so
@@ -357,13 +458,11 @@ function AppShell({
             onDeleteAccount={onDeleteAccount}
             tenants={tenants}
             activeTenantId={activeTenantId}
-            hiddenTenantIds={hiddenIds}
             currentUserId={currentUserId}
             onSelectTenant={selectTenant}
             onAddTenant={addTenant}
             onRenameTenant={renameTenant}
             onDeleteTenant={deleteTenant}
-            onToggleHiddenTenant={toggleHiddenTenant}
             theme={theme}
             onSelectTheme={setTheme}
           />

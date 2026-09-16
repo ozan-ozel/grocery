@@ -59,7 +59,7 @@ push from tenant A can never land on tenant B.
 migration design) authenticates to PostgREST as **the caller's own Supabase session**
 (`lib/auth.ts`'s `userRestHeaders`), not `anon`/`service_role`, so Postgres row-level security policies
 on `households`/`lists`/`items`/`item_category_memory`/`meal_entries`/`preparation_batches`/
-`sync_state`/`personal_plan`/`hidden_households`/`household_shares` (`supabase/19-auth-user-map-and-
+`sync_state`/`personal_plan`/`household_shares` (`supabase/19-auth-user-map-and-
 rls.sql`) are a real, independent second authorization layer behind the existing function-layer checks
 (`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Three
 `security definer` helper functions do the real work so policies don't have to re-implement the same

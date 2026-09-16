@@ -154,6 +154,10 @@ export function MealPlanView({
 
   return (
     <div className="space-y-4">
+      <p className="text-xs uppercase tracking-widest text-muted-foreground">
+        Yemek Planı
+      </p>
+
       <div className="flex items-center justify-between">
         <Button
           type="button"

@@ -9,13 +9,11 @@ type Props = {
   onDeleteAccount: () => void;
   tenants: Tenant[];
   activeTenantId: string;
-  hiddenTenantIds: string[];
   currentUserId: string | null;
   onSelectTenant: (id: string) => void;
   onAddTenant: (name: string) => void;
   onRenameTenant: (id: string, name: string) => void;
   onDeleteTenant: (id: string) => void;
-  onToggleHiddenTenant: (id: string) => void;
   theme: Theme;
   onSelectTheme: (theme: Theme) => void;
 };
@@ -25,13 +23,11 @@ export function SettingsView({
   onDeleteAccount,
   tenants,
   activeTenantId,
-  hiddenTenantIds,
   currentUserId,
   onSelectTenant,
   onAddTenant,
   onRenameTenant,
   onDeleteTenant,
-  onToggleHiddenTenant,
   theme,
   onSelectTheme,
 }: Props) {
@@ -62,13 +58,11 @@ export function SettingsView({
         <TenantSwitcher
           tenants={tenants}
           activeId={activeTenantId}
-          hiddenIds={hiddenTenantIds}
           currentUserId={currentUserId}
           onSelect={onSelectTenant}
           onAdd={onAddTenant}
           onRename={onRenameTenant}
           onDelete={onDeleteTenant}
-          onToggleHidden={onToggleHiddenTenant}
         />
       </section>
 

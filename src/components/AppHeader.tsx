@@ -61,6 +61,16 @@ export function AppHeader({
 
   return (
     <>
+      {/* Single-line title, no eyebrow+h1 pair like the other sections —
+          the list's own editable name right below already serves as this
+          page's real "heading", so a second big title would be redundant.
+          mt-3 matches the top gap every other section's title gets from
+          <main>'s own pt-3 — this renders before <main> (inside AppHeader,
+          which the other sections don't use), so without it this title
+          would sit 12px higher than theirs. */}
+      <p className="mt-3 text-xs uppercase tracking-widest text-muted-foreground">
+        Alışveriş
+      </p>
       <header className="sticky top-0 z-10 -mx-5 bg-background/95 px-5 pt-2 backdrop-blur">
         <div className="flex items-baseline gap-3">
           <input

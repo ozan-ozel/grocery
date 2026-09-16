@@ -22,7 +22,7 @@ export type Section = "alisveris" | "besin" | "yemek" | "kisisel" | "ayarlar";
 export type Tab = "today" | "list" | "history";
 const TABS: Tab[] = ["today", "list", "history"];
 
-function initialSection(): Section {
+export function initialSection(): Section {
   const fromUrl = readSectionFromUrl();
   if (fromUrl === "besin") return "besin";
   if (fromUrl === "yemek") return "yemek";

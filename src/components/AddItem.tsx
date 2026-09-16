@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from "react";
-import { Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { parseEntry, type CatalogEntry } from "@/lib/store";
@@ -25,6 +25,13 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  // Distinguishes "the click that just focused the input" (onFocus already
+  // opened the panel; a same-click toggle would instantly re-close it) from
+  // a genuine second click on an already-focused input — the only way to
+  // close the panel used to be clicking outside it, which felt like it
+  // fought the page. Reset on a 0ms timeout so it's back to false by the
+  // time any later, real click comes in.
+  const justFocusedRef = useRef(false);
 
   // Once the user's actually searching, widen the pool beyond "stuff this
   // household has bought before" to the whole nutrition catalog — otherwise
@@ -114,8 +121,18 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
           placeholder="Ürün ekle"
           aria-label="Ürün ekle"
           autoComplete="off"
-          className="pl-9"
-          onFocus={() => setOpen(true)}
+          className="pl-9 pr-9"
+          onFocus={() => {
+            setOpen(true);
+            justFocusedRef.current = true;
+            window.setTimeout(() => {
+              justFocusedRef.current = false;
+            }, 0);
+          }}
+          onClick={() => {
+            if (justFocusedRef.current) return;
+            setOpen((o) => !o);
+          }}
           onBlur={() => {
             // Deferred so a suggestion's onMouseDown (which already
             // prevented default) still lands as a click before this closes
@@ -129,6 +146,21 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
           }}
           onKeyDown={onKeyDown as never}
         />
+        {value && (
+          <button
+            type="button"
+            aria-label="Aramayı temizle"
+            onMouseDown={(e: Event) => e.preventDefault()}
+            onClick={() => {
+              setValue("");
+              setActive(-1);
+              setOpen(false);
+              inputRef.current?.focus();
+            }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground active:text-foreground">
+            <X className="size-4" />
+          </button>
+        )}
       </div>
 
       {open && suggestions.length > 0 && (

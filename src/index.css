@@ -196,6 +196,26 @@
         border-box;
   }
 
+  /* Mechanical-odometer-style digit change for macro numbers: a brief
+     rotateX flip + fade, replayed by remounting via a `key={value}` change
+     (not per-frame JS) — pure transform/opacity, compositor-only. Same
+     prefers-reduced-motion global cap applies below. */
+  .flip-number {
+    display: inline-block;
+    animation: flip-number 220ms ease-out;
+    transform-origin: 50% 100%;
+  }
+  @keyframes flip-number {
+    0% {
+      transform: rotateX(70deg);
+      opacity: 0.3;
+    }
+    100% {
+      transform: rotateX(0deg);
+      opacity: 1;
+    }
+  }
+
   /* Loading placeholder: a low-opacity signal-tinted band sweeps across a
      plain bg-muted block — same visual family as .gradient-edge and the
      Hazırlanıyor wash, just animated, so "loading" reads as part of the same
@@ -278,6 +298,34 @@
     to {
       transform: translateX(-60%);
     }
+  }
+
+  /* Softer, lower-contrast variant of .gradient-edge-flow for large, mostly
+     empty surfaces (the app-boot skeleton) where the full-saturation edge
+     reads as too loud/sharp against a page that's otherwise just gray
+     placeholder blocks. Same mechanism and keyframes, colors blended down
+     with transparent instead of used at full strength. */
+  .gradient-edge-flow-soft {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .gradient-edge-flow-soft::before {
+    content: "";
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    width: 250%;
+    background-image: linear-gradient(
+      135deg,
+      color-mix(in oklab, var(--color-signal) 40%, transparent) 0%,
+      color-mix(in oklab, var(--color-signal) 40%, transparent) 38%,
+      color-mix(in oklab, var(--color-secondary) 40%, transparent) 48%,
+      color-mix(in oklab, var(--color-secondary) 40%, transparent) 62%,
+      color-mix(in oklab, var(--color-signal) 40%, transparent) 72%,
+      color-mix(in oklab, var(--color-signal) 40%, transparent) 100%
+    );
+    animation: gradient-edge-flow 3s linear infinite alternate;
   }
 }
 

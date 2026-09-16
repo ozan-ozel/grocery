@@ -32,11 +32,18 @@ const STATUS_AMBER = "#d97706";
 
 function getMacroStatus(ratio: number) {
   if (ratio < 1) return null;
-  if (ratio < OVER_MILD_RATIO) return { icon: Check, color: STATUS_GREEN, textClassName: "" };
-  if (ratio < OVER_WARNING_RATIO) return { icon: Check, color: STATUS_YELLOW, textClassName: "" };
+  if (ratio < OVER_MILD_RATIO)
+    return { icon: Check, color: STATUS_GREEN, textClassName: "", frame: true };
+  if (ratio < OVER_WARNING_RATIO)
+    return { icon: AlertTriangle, color: STATUS_YELLOW, textClassName: "text-[#eab308]", frame: false };
   if (ratio < OVER_SEVERE_RATIO)
-    return { icon: AlertTriangle, color: STATUS_AMBER, textClassName: "text-[#d97706]" };
-  return { icon: AlertTriangle, color: "var(--color-destructive)", textClassName: "text-destructive" };
+    return { icon: AlertTriangle, color: STATUS_AMBER, textClassName: "text-[#d97706]", frame: false };
+  return {
+    icon: AlertTriangle,
+    color: "var(--color-destructive)",
+    textClassName: "text-destructive",
+    frame: false,
+  };
 }
 
 export function MacroSummaryCard({ consumed, target, isEstimated }: Props) {
@@ -64,10 +71,17 @@ export function MacroSummaryCard({ consumed, target, isEstimated }: Props) {
         <div className="mt-1.5 flex items-center gap-2">
           <MacroRing percent={percent} color={ringColor} status={status} />
           <div>
-            <p className="ledger text-lg font-bold leading-none text-foreground">{totalValue}</p>
+            <p className="ledger text-lg font-bold leading-none text-foreground">
+              <span key={totalValue} className="flip-number">
+                {totalValue}
+              </span>
+            </p>
             <p
               className={`ledger mt-1 text-xs font-light ${status?.textClassName || "text-muted-foreground"}`}>
-              +{consumedValue}
+              +
+              <span key={consumedValue} className="flip-number">
+                {consumedValue}
+              </span>
             </p>
           </div>
         </div>
@@ -101,6 +115,11 @@ type MacroStatus = {
   icon: typeof Check;
   color: string;
   textClassName: string;
+  // Green's on-target Check keeps the circular card-colored badge (reads as
+  // a "done" seal); yellow/amber/red AlertTriangle warnings render bare —
+  // a badge frame around a warning triangle read as a checkmark-style seal,
+  // which is the wrong signal for "over target."
+  frame: boolean;
 };
 
 function MacroRing({
@@ -166,18 +185,28 @@ function MacroRing({
           className="transition-[stroke-dashoffset] duration-300 ease-out"
         />
       </svg>
-      {StatusIcon && (
-        <span
-          className="absolute flex size-[18px] items-center justify-center rounded-full bg-card shadow-sm"
-          style={{ boxShadow: `0 0 0 1px color-mix(in oklab, ${status.color} 30%, transparent)` }}>
-          <StatusIcon
-            aria-hidden="true"
-            className="size-3"
-            style={{ color: status.color }}
-            strokeWidth={3}
-          />
-        </span>
-      )}
+      {StatusIcon &&
+        (status.frame ? (
+          <span
+            className="absolute flex size-[18px] items-center justify-center rounded-full bg-card shadow-sm"
+            style={{ boxShadow: `0 0 0 1px color-mix(in oklab, ${status.color} 30%, transparent)` }}>
+            <StatusIcon
+              aria-hidden="true"
+              className="size-3"
+              style={{ color: status.color }}
+              strokeWidth={3}
+            />
+          </span>
+        ) : (
+          <span className="absolute flex size-[18px] items-center justify-center rounded-full">
+            <StatusIcon
+              aria-hidden="true"
+              className="size-3.5"
+              style={{ color: status.color }}
+              strokeWidth={1.75}
+            />
+          </span>
+        ))}
     </div>
   );
 }

@@ -178,6 +178,33 @@ export function PersonalPlanView({ userId }: Props) {
     );
   }
 
+  // Mirror of jumpToSource, but pointing the other way: a "Nasıl
+  // hesaplanıyor?" formula line jumping *up* to the actual target value it
+  // produces, in "Günlük hedeflerin" above — that section never referenced
+  // the numbers it explains at all before this. Always visible (not behind
+  // its own <details>), so no open/settle delay is needed, just scroll +
+  // flash. Same signal color as the source highlight (see TargetBadgeLink's
+  // comment for why), distinguished by a thicker ring-2 instead of ring-1.
+  const [highlightedTarget, setHighlightedTarget] = useState<string | null>(
+    null,
+  );
+  const targetCardRefs = useRef<Record<string, HTMLElement | null>>({});
+  const targetHighlightTimeoutRef = useRef<number | undefined>(undefined);
+
+  function jumpToTarget(label: string) {
+    targetCardRefs.current[label]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
+    setHighlightedTarget(label);
+    if (targetHighlightTimeoutRef.current)
+      window.clearTimeout(targetHighlightTimeoutRef.current);
+    targetHighlightTimeoutRef.current = window.setTimeout(
+      () => setHighlightedTarget(null),
+      1600,
+    );
+  }
+
   const { foods } = useFoodCatalog();
   // Display-only resolver for an exclusion chip's foodId: an entry created
   // before Canonical Food Identity holds a bare name_tr string (never a key
@@ -708,6 +735,10 @@ export function PersonalPlanView({ userId }: Props) {
           targets={targets}
           activity={activityLabel(profile.activity)}
           showSources={showSources}
+          highlightedTarget={highlightedTarget}
+          registerRef={(label, el) => {
+            targetCardRefs.current[label] = el;
+          }}
         />
       )}
 
@@ -774,6 +805,7 @@ export function PersonalPlanView({ userId }: Props) {
                     feature="Günlük aktivite seviyesi"
                     onJump={jumpToSource}
                   />
+                  <TargetBadgeLink label="Koruma" onJump={jumpToTarget} />
                 </div>
               </li>
               <li>
@@ -783,6 +815,12 @@ export function PersonalPlanView({ userId }: Props) {
                 Kademeli kilo kaybında koruma −400 kcal, kilo alma/performansta
                 +250 kcal; kilomu korumak seçiliyse değişmez. Hedef hiçbir zaman
                 1200 kcal'in altına inmez.
+                <div className="mt-1 flex flex-wrap gap-1">
+                  <TargetBadgeLink
+                    label="Günlük enerji"
+                    onJump={jumpToTarget}
+                  />
+                </div>
               </li>
               <li>
                 <span className="font-medium text-foreground">
@@ -809,6 +847,13 @@ export function PersonalPlanView({ userId }: Props) {
                     feature="Protein, yağ, karbonhidrat ve lif aralıkları"
                     onJump={jumpToSource}
                   />
+                  <TargetBadgeLink label="Protein" onJump={jumpToTarget} />
+                  <TargetBadgeLink label="Yağ" onJump={jumpToTarget} />
+                  <TargetBadgeLink
+                    label="Karbonhidrat"
+                    onJump={jumpToTarget}
+                  />
+                  <TargetBadgeLink label="Lif" onJump={jumpToTarget} />
                 </div>
               </li>
             </ul>
@@ -831,7 +876,9 @@ export function PersonalPlanView({ userId }: Props) {
           }}
           className={cn(
             "group rounded-lg",
-            showSources ? "border-gradient-edge" : "border-signal-solid",
+            showSources && sourcesDetails.settled
+              ? "gradient-edge-flow p-px"
+              : "border-signal-solid",
           )}>
           <summary
             ref={sourcesDetails.ref}
@@ -958,12 +1005,16 @@ function TargetSummary({
   targets,
   activity,
   showSources,
+  highlightedTarget,
+  registerRef,
 }: {
   targets: NonNullable<
     ReturnType<typeof import("@/lib/mealPersonalization").calculateTargets>
   >;
   activity: string;
   showSources: boolean;
+  highlightedTarget: string | null;
+  registerRef: (label: string, el: HTMLElement | null) => void;
 }) {
   const cards = [
     ["Günlük enerji", `${targets.targetKcal} kcal`, "hedef"],
@@ -989,13 +1040,27 @@ function TargetSummary({
             {showSources && <SourceBadge label="Endotext" />}
           </p>
         </div>
-        <span className="ledger text-xs text-muted-foreground">
+        <span
+          ref={el => registerRef("Koruma", el)}
+          className={cn(
+            "ledger rounded px-1 text-xs text-muted-foreground transition-colors duration-700",
+            highlightedTarget === "Koruma" &&
+              "bg-signal/10 ring-2 ring-signal/50",
+          )}>
           Koruma {targets.maintenanceKcal} kcal
         </span>
       </div>
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {cards.map(([label, value, suffix]) => (
-          <div key={label} className="rounded-lg border border-border p-3">
+          <div
+            key={label}
+            ref={el => registerRef(label, el)}
+            className={cn(
+              "rounded-lg border p-3 transition-colors duration-700",
+              highlightedTarget === label
+                ? "border-signal/70 bg-signal/10 ring-2 ring-signal/50"
+                : "border-border",
+            )}>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
               {label} {showSources && <SourceBadge label="DRI" />}
             </p>
@@ -1088,6 +1153,33 @@ function SourceBadgeLink({
       onClick={() => onJump(feature)}
       className="inline-flex shrink-0 items-center rounded border border-signal/70 bg-signal/10 px-1.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-signal shadow-sm transition-colors hover:bg-signal/20 active:bg-signal/20">
       {label}
+    </button>
+  );
+}
+
+// Same jump-badge idea as SourceBadgeLink, but pointing the other way: up to
+// the actual value in "Günlük hedeflerin" that this formula line produces,
+// instead of down to a citation. The app's palette has exactly one accent
+// (--color-signal) — introducing a second hue for "the other kind of link"
+// would break that, and the one spare token that looks like a second color
+// (--color-secondary) is actually a near-background neutral, illegible here.
+// So this stays signal-colored but *filled* (solid bg, white text) instead
+// of SourceBadgeLink's outlined/tinted style — a different weight, not a
+// different hue, so it's still visually distinct if a source highlight is
+// fading at the same time.
+function TargetBadgeLink({
+  label,
+  onJump,
+}: {
+  label: string;
+  onJump: (label: string) => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => onJump(label)}
+      className="inline-flex shrink-0 items-center rounded border border-signal bg-signal px-1.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-white shadow-sm transition-colors hover:bg-signal/90 active:bg-signal/90">
+      ↑ {label}
     </button>
   );
 }

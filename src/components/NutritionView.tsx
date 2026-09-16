@@ -152,6 +152,14 @@ export function NutritionView({
 
   const scopeToggle = (
     <div className="mb-3">
+      <div className="mb-3">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">
+          Besin Değerleri
+        </p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">
+          Ürün ve öğün besin değerleri
+        </h1>
+      </div>
       <SmoothPillTabs
         value={scope}
         onChange={setScope}

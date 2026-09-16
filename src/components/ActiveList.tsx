@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Check, Eye, EyeOff, LayoutList, MoreHorizontal, ShoppingBasket, Tags, Trash2 } from "lucide-react";
+import { Apple, Check, LayoutList, MoreHorizontal, ShoppingBasket, Tags, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
@@ -124,6 +124,29 @@ export function ActiveList({
             type="button"
             variant="quiet"
             size="sm"
+            onClick={onToggleShowNutritionValues}
+            aria-pressed={showNutritionValues}
+            title={
+              showNutritionValues
+                ? "Besin değerlerini gizle"
+                : "Besin değerlerini göster"
+            }
+            className={cn(
+              // Border is always 1px, just transparent when off — a border
+              // that only appears on activation shifts every button after it
+              // sideways by its own width, since an auto-width element with
+              // no border renders 2px narrower than one with a 1px border.
+              "border",
+              showNutritionValues
+                ? "border-signal bg-signal/10 text-signal"
+                : "border-transparent"
+            )}>
+            <Apple className="size-3.5" />
+          </Button>
+          <Button
+            type="button"
+            variant="quiet"
+            size="sm"
             onClick={onToggleGrouping}
             title={
               groupByCategory
@@ -139,26 +162,6 @@ export function ActiveList({
               <>
                 <Tags className="size-3.5" />
                 Kategorilere göre grupla
-              </>
-            )}
-          </Button>
-          <Button
-            type="button"
-            variant="quiet"
-            size="sm"
-            onClick={onToggleShowNutritionValues}
-            title={
-              showNutritionValues
-                ? "Besin değerlerini gizle"
-                : "Besin değerlerini göster"
-            }>
-            {showNutritionValues ? (
-              <>
-                <Eye className="size-3.5" />
-              </>
-            ) : (
-              <>
-                <EyeOff className="size-3.5" />
               </>
             )}
           </Button>

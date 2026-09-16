@@ -24,7 +24,7 @@ export function ThemeSwitcher({ theme, onSelect }: Props) {
       aria-label="Koyu tema"
       onClick={() => onSelect(isDark ? "light" : "arduvaz")}
       className={cn(
-        "relative inline-flex h-9 w-16 shrink-0 items-center rounded-full border border-border transition-colors duration-300",
+        "relative inline-flex h-9 w-16 shrink-0 items-center rounded-full border border-border transition-colors duration-800",
         // Dark-on state used --color-foreground before, which is a light
         // near-white in Arduvaz — the track rendered as a bright bar on an
         // otherwise dark page. Signal is theme-aware in both directions
@@ -38,19 +38,19 @@ export function ThemeSwitcher({ theme, onSelect }: Props) {
           never overshooting or falling short. */}
       <span
         className={cn(
-          "absolute left-1 flex size-7 items-center justify-center rounded-full bg-card shadow-sm transition-transform duration-300 ease-out",
+          "absolute left-1 flex size-7 items-center justify-center rounded-full bg-card shadow-sm transition-transform duration-800 ease-out",
           isDark && "translate-x-7"
         )}>
         <Sun
           className={cn(
-            "absolute size-4 transition-all duration-300",
+            "absolute size-4 transition-all duration-800",
             isDark ? "scale-0 rotate-90 opacity-0" : "scale-100 rotate-0 opacity-100"
           )}
           style={{ color: THEME_SIGNAL_COLOR.light }}
         />
         <Moon
           className={cn(
-            "absolute size-4 transition-all duration-300",
+            "absolute size-4 transition-all duration-800",
             isDark ? "scale-100 rotate-0 opacity-100" : "scale-0 -rotate-90 opacity-0"
           )}
           style={{ color: THEME_SIGNAL_COLOR.arduvaz }}

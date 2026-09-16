@@ -1,15 +1,10 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   createHousehold,
   deleteHousehold,
   listHouseholds,
   renameHousehold,
 } from "@/lib/households";
-import {
-  hideHousehold,
-  listHiddenHouseholds,
-  unhideHousehold,
-} from "@/lib/hiddenHouseholds";
 import { removeItemCategories } from "@/lib/categorization/itemCategories";
 import {
   readTenantFromUrl,
@@ -24,7 +19,6 @@ import {
 export function useTenants() {
   const [tenants, setTenants] = useState<Tenant[] | null>(null);
   const [activeTenantId, setActiveTenantId] = useState<string | null>(null);
-  const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   // Set by addTenant right before switching into a brand-new (definitely
   // empty) household. useListSync consumes this once, on the switch it was
   // set for, to skip its normal clear-and-repull cycle — see its comment.
@@ -36,16 +30,12 @@ export function useTenants() {
     return true;
   }
 
-  // First mount: load tenants + per-user hidden list from server, resolve
-  // active from URL or first, then let the sync effect (see useListSync) pull
-  // state. Runs once.
+  // First mount: load tenants from server, resolve active from URL or first,
+  // then let the sync effect (see useListSync) pull state. Runs once.
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const [list, hidden] = await Promise.all([
-        listHouseholds(),
-        listHiddenHouseholds(),
-      ]);
+      const list = await listHouseholds();
       if (cancelled) return;
       let effective: Tenant[] = list.map((h) => ({
         id: h.id,
@@ -80,16 +70,11 @@ export function useTenants() {
           }));
         }
       }
-      // The URL takes precedence even if it points to a hidden tenant — a
-      // shared link should still open the household. Otherwise pick the first
-      // visible one; fall back to first-overall if every tenant is hidden
-      // (shouldn't happen thanks to toggleHiddenTenant's guard, but defensive).
+      // The URL takes precedence — a shared link should still open the
+      // household. Otherwise fall back to the first one.
       const fromUrl = readTenantFromUrl();
-      const visible = effective.filter((t) => !hidden.includes(t.id));
-      const active =
-        effective.find((t) => t.id === fromUrl) ?? visible[0] ?? effective[0];
+      const active = effective.find((t) => t.id === fromUrl) ?? effective[0];
       setTenants(effective);
-      setHiddenIds(hidden);
       setActiveTenantId(active?.id ?? null);
     })();
     return () => {
@@ -100,11 +85,6 @@ export function useTenants() {
   useEffect(() => {
     if (activeTenantId) writeTenantToUrl(activeTenantId);
   }, [activeTenantId]);
-
-  const visibleTenants = useMemo(
-    () => (tenants ?? []).filter((t) => !hiddenIds.includes(t.id)),
-    [tenants, hiddenIds]
-  );
 
   function selectTenant(id: string) {
     if (id === activeTenantId) return;
@@ -150,48 +130,20 @@ export function useTenants() {
     removeItemCategories(id);
     const next = current.filter((t) => t.id !== id);
     setTenants(next);
-    // Drop from hidden ids too — the row is gone.
-    setHiddenIds((prev) => prev.filter((h) => h !== id));
     if (id === activeTenantId) {
       // Same path as selectTenant: switching tears down the sync channel
       // and clears state until the new tenant's pull lands.
-      const nextVisible = next.filter((t) => !hiddenIds.includes(t.id));
-      setActiveTenantId(nextVisible[0]?.id ?? next[0]?.id ?? null);
-    }
-  }
-
-  async function toggleHiddenTenant(id: string) {
-    const isHidden = hiddenIds.includes(id);
-    if (isHidden) {
-      const ok = await unhideHousehold(id);
-      if (!ok) return;
-      setHiddenIds((prev) => prev.filter((h) => h !== id));
-      return;
-    }
-    // Guard: hiding this would leave zero visible households — refuse.
-    const wouldBeVisible = (tenants ?? []).filter(
-      (t) => t.id !== id && !hiddenIds.includes(t.id)
-    );
-    if (wouldBeVisible.length === 0) return;
-    const ok = await hideHousehold(id);
-    if (!ok) return;
-    setHiddenIds((prev) => [...prev, id]);
-    // If the user hid the active tenant, switch to a still-visible one.
-    if (id === activeTenantId) {
-      setActiveTenantId(wouldBeVisible[0].id);
+      setActiveTenantId(next[0]?.id ?? null);
     }
   }
 
   return {
     tenants,
-    visibleTenants,
-    hiddenIds,
     activeTenantId,
     selectTenant,
     addTenant,
     renameTenant,
     deleteTenant,
-    toggleHiddenTenant,
     consumeFreshTenantId,
   };
 }
