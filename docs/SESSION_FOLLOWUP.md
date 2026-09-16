@@ -133,6 +133,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 16. UI polish pass (buttons, spacing, macro rings, nav feel) — see
     [`docs/ui-ux-audit-2026-09-16-polish.md`](ui-ux-audit-2026-09-16-polish.md) directly; not
     written as a separate checkpoint file since the polish doc already carries full detail.
+17. [Evening meal recommendation MVP (DEC-060 extension)](session-checkpoints/2026-09-16-03-evening-meal-recommendation-mvp.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain
