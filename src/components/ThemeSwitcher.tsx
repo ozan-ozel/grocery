@@ -1,122 +1,56 @@
-import { useEffect, useRef, useState } from "react";
-import { Check, Palette } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { THEME_OPTIONS, THEME_SIGNAL_COLOR, type Theme } from "@/lib/preferences";
+import { THEME_SIGNAL_COLOR, type Theme } from "@/lib/preferences";
 
 type Props = {
   theme: Theme;
   onSelect: (theme: Theme) => void;
 };
 
-const LIGHT_OPTIONS = THEME_OPTIONS.filter((t) => t.group === "light");
-const DARK_OPTIONS = THEME_OPTIONS.filter((t) => t.group === "dark");
-
+// Binary switch, not a dropdown: with only two themes (Nane/Arduvaz) left
+// after retiring the other seven, a sliding on/off toggle is a more direct
+// match for the choice than a picker menu. The knob's travel distance is
+// sized by hand to land exactly on the track's inner edges (see the
+// left-1/w-14/size-6/translate-x-6 comment below) rather than relying on a
+// toggle-switch library for a single reusable control.
 export function ThemeSwitcher({ theme, onSelect }: Props) {
-  const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function onClick(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") setOpen(false);
-    }
-    document.addEventListener("mousedown", onClick);
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.removeEventListener("mousedown", onClick);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [open]);
+  const isDark = theme === "arduvaz";
 
   return (
-    <div ref={rootRef} className="relative">
-      <button
-        type="button"
-        aria-label="Tema seç"
-        aria-haspopup="menu"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-        className="flex size-9 items-center justify-center rounded-md transition-colors hover:bg-accent"
-      >
-        <Palette className="size-4" style={{ color: THEME_SIGNAL_COLOR[theme] }} />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 top-full z-30 mt-1 w-44 origin-top-right overflow-hidden rounded-md border border-border bg-card shadow-lg transition-[opacity,transform] duration-150 starting:scale-95 starting:opacity-0">
-          <ThemeGroup
-            label="Açık"
-            options={LIGHT_OPTIONS}
-            active={theme}
-            onSelect={(t) => {
-              onSelect(t);
-              setOpen(false);
-            }}
-          />
-          <div className="h-px bg-border" />
-          <ThemeGroup
-            label="Koyu"
-            options={DARK_OPTIONS}
-            active={theme}
-            onSelect={(t) => {
-              onSelect(t);
-              setOpen(false);
-            }}
-          />
-        </div>
-      )}
-    </div>
-  );
-}
-
-function ThemeGroup({
-  label,
-  options,
-  active,
-  onSelect,
-}: {
-  label: string;
-  options: typeof THEME_OPTIONS;
-  active: Theme;
-  onSelect: (theme: Theme) => void;
-}) {
-  return (
-    <div className="py-1">
-      <div className="px-3 pb-1 pt-1.5 text-[0.65rem] uppercase tracking-widest text-muted-foreground">
-        {label}
-      </div>
-      <ul>
-        {options.map((opt) => {
-          const isActive = opt.id === active;
-          return (
-            <li key={opt.id}>
-              <button
-                type="button"
-                onClick={() => onSelect(opt.id)}
-                className={cn(
-                  "flex w-full items-center gap-2 px-3 py-1.5 text-left text-sm",
-                  isActive ? "bg-accent" : "hover:bg-accent"
-                )}
-              >
-                <Check
-                  className={cn(
-                    "size-3.5 shrink-0",
-                    isActive ? "text-foreground" : "text-transparent"
-                  )}
-                />
-                <span
-                  aria-hidden="true"
-                  className="size-2.5 shrink-0 rounded-full border border-border/60"
-                  style={{ backgroundColor: THEME_SIGNAL_COLOR[opt.id] }}
-                />
-                <span className="truncate">{opt.label}</span>
-              </button>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+    <button
+      type="button"
+      role="switch"
+      aria-checked={isDark}
+      aria-label="Koyu tema"
+      onClick={() => onSelect(isDark ? "light" : "arduvaz")}
+      className={cn(
+        "relative inline-flex h-8 w-14 shrink-0 items-center rounded-full border border-border transition-colors duration-300",
+        isDark ? "bg-foreground/85" : "bg-accent"
+      )}>
+      {/* Track width 56px (w-14), 4px inset (left-1) on both sides, 24px
+          knob (size-6) -> 24px of travel exactly matches translate-x-6, so
+          the knob's far edge always lands flush against the track's inset,
+          never overshooting or falling short. */}
+      <span
+        className={cn(
+          "absolute left-1 flex size-6 items-center justify-center rounded-full bg-card shadow-sm transition-transform duration-300 ease-out",
+          isDark && "translate-x-6"
+        )}>
+        <Sun
+          className={cn(
+            "absolute size-3.5 transition-all duration-300",
+            isDark ? "scale-0 rotate-90 opacity-0" : "scale-100 rotate-0 opacity-100"
+          )}
+          style={{ color: THEME_SIGNAL_COLOR.light }}
+        />
+        <Moon
+          className={cn(
+            "absolute size-3.5 transition-all duration-300",
+            isDark ? "scale-100 rotate-0 opacity-100" : "scale-0 -rotate-90 opacity-0"
+          )}
+          style={{ color: THEME_SIGNAL_COLOR.arduvaz }}
+        />
+      </span>
+    </button>
   );
 }

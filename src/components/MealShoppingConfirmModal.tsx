@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 
 type Props = {
@@ -18,6 +19,14 @@ export function MealShoppingConfirmModal({
       ? "Alışveriş listesine eklensin mi?"
       : "Alışveriş listesinden çıkarılsın mı?";
   const confirmLabel = mode === "add" ? "Listeye ekle" : "Listeden çıkar";
+
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") onCancel();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [onCancel]);
 
   return (
     <div className="fixed inset-0 z-40 flex items-center justify-center px-5">

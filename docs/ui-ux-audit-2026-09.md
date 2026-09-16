@@ -94,11 +94,19 @@ Tested at 390×844 (iPhone-class width).
 - No hardcoded color values found outside `src/index.css` (Pass 1).
 - Smooth Pill pattern followed correctly in both real consumers (Pass 1).
 - No duplicate tab/pill implementations found elsewhere in `src/components/`.
-- Card/spacing rhythm (bordered white card, uppercase muted eyebrow label, bold value) repeats
-  consistently across `PersonalPlanView`, `TodayView`/meal plan, and `NutritionView` — this is a
-  candidate for extracting a shared `StatCard`-style primitive if it isn't one already, since three
-  screens currently hand-roll the same visual pattern (worth a follow-up code-level check, not
-  confirmed as duplicated *code*, only as duplicated *visual pattern*, during this pass).
+- Card/spacing rhythm (bordered white card, uppercase muted eyebrow label, bold value) was flagged
+  as repeating across `PersonalPlanView`, `TodayView`/meal plan, and `NutritionView`.
+
+**Correction (2026-09-16, follow-up code-level check):** this claim was wrong on two counts.
+`NutritionView.tsx` has zero matches for the `rounded-lg border` stat-card pattern — it doesn't use
+it at all. And of the two components that do, `TodayView.tsx:400` is dead code (unreferenced in
+`App.tsx`), so it doesn't count as live duplication. That leaves exactly **two** live call sites:
+`PersonalPlanView.tsx:919` (full-border card, 3 text rows: label / bold value / uppercase suffix)
+and `MacroSummaryCard.tsx` (`border-l-4` colored card, 2 text rows plus a ring). They share a loose
+rhythm but not a shape — extracting a shared `StatCard` would mean a prop-heavy component (border
+style, ring on/off, row count) serving only two call sites. **Verdict: not worth extracting.**
+Premature abstraction for two non-identical consumers, per this repo's own anti-abstraction
+guidance. No code change made.
 
 ## Pass 5 — Animation opportunities (where, not how)
 
@@ -132,10 +140,14 @@ Ranked by where motion would clarify a real state change (not decoration):
    `PersonalPlanView` or the Yemek Planı macro strip today (both are plain number grids). This is a
    genuinely new feature (add rings), not an animation fix to something unanimated, and is tracked
    separately below rather than folded into this pass's "add a transition" framing.
-3. **Modal/sheet open** (`FoodSearchModal.tsx`, `RecipeSearchModal.tsx`). Not checked for existing
-   transition in this pass — flagged as a follow-up, since bottom-sheet-style entrances are one of
-   the highest-value animation spots on mobile per general UX practice, but confirming current
-   behavior needs a dedicated look at those two components before recommending specific timing.
+3. **Modal/sheet open** (`FoodSearchModal.tsx`, `RecipeSearchModal.tsx`) — **Done.** Confirmed both
+   used a hard `if (!isOpen) return null` mount with zero transition — backdrop and sheet both
+   snapped in instantly. Fixed identically in both: backdrop gets
+   `transition-opacity duration-200 starting:opacity-0` (fade in), sheet gets
+   `transition-transform duration-200 ease-out starting:translate-y-full` (slides up from
+   off-screen). Entrance only — exit animation would need delayed unmount, real added complexity
+   for a cosmetic gain, not done. Verified live via Playwright on both modals; `getComputedStyle`
+   confirmed the transition settles cleanly (`transform: none`, `opacity: 1`).
 
 **Follow-up feature (tracked separately, not part of this animation pass) — Done.**
 Added per-tile progress rings to `MacroSummaryCard.tsx` (the real "GÜNLÜK MAKROLAR" component
@@ -159,8 +171,42 @@ evaluated — not before.
   proper `tablist`/`tab`/`tabpanel` structure on the Liste/Geçmiş tabs.
 - Checkbox touch-target finding (Pass 3) is also an accessibility issue, not just a UX one — WCAG
   2.5.5/2.5.8 target-size guidance.
-- Did not do a full contrast/keyboard-trap audit in this pass — flagged as a follow-up, not
-  attempted here given this pass was scoped as lightweight per the audit plan.
+
+**Follow-up full pass (2026-09-16) — Done, backlog item 6.** Ran the deferred contrast and
+keyboard-dismissal checks (real math and real code, not a skim):
+
+- **Contrast — `--color-muted-foreground` failed WCAG AA on light themes.** Computed actual
+  contrast ratios (relative-luminance formula, not eyeballed): default "Nane" theme's
+  `#6b7b74` measured **4.06:1** on the app background and **4.46:1** on white cards, both under the
+  4.5:1 minimum for normal-size text (passes the 3:1 large-text/UI-component threshold, but this
+  token drives regular-size captions everywhere — card labels, remaining-macro values,
+  timestamps). The now-retired "Nova" theme measured worse still (**3.09:1**, failing even the 3:1
+  floor) — this was a structural pattern across the light themes, not an isolated typo. Dark themes
+  checked fine (default dark measured 6.17:1; Arduvaz's own muted-foreground measured 5.02:1).
+  **Fixed**: darkened light-theme `--color-muted-foreground` from `#6b7b74` to `#5f6e68`
+  (`src/index.css`), landing at ~4.9:1 / ~5.4:1 — comfortably clears AA on both surfaces, same hue
+  family, barely perceptible shift.
+- **Keyboard dismissal was inconsistent across modal-style components.** `AccountMenu`/
+  `ThemeSwitcher`/`TenantSwitcher` (dropdowns) already correctly implement Escape-to-close +
+  outside-click-to-close via a shared idiom. Five full-screen modal components never picked that up:
+  `FoodSearchModal`, `RecipeSearchModal`, `MealNutritionDetailSheet` had neither Escape nor backdrop
+  click; `ConfirmModal`/`MealShoppingConfirmModal` had backdrop click but not Escape. None had
+  `role="dialog"`/`aria-modal`. **Fixed**: Escape-to-close added to all 5 (a `useEffect` +
+  `keydown` listener, matching the dropdowns' existing idiom); backdrop-click-to-close added to
+  `FoodSearchModal`/`RecipeSearchModal` by restructuring them onto the same absolute-button-backdrop
+  pattern `ConfirmModal` already used, so a click on the sheet itself can't bubble into the
+  backdrop's close handler. Verified live via Playwright: Escape and a direct backdrop-button click
+  both close `FoodSearchModal` (confirmed via before/after snapshot showing the modal unmounted).
+
+**Unrelated but adjacent decision, made alongside this pass (2026-09-16):** the theme system was
+retired from 9 themes down to 2 — "Nane" (light, the original default) and "Arduvaz" (dark) —
+per explicit product direction, not an audit finding. `THEME_IDS`-based fallback in
+`loadTheme()` (`src/lib/preferences.ts`) means a device with an old retired theme selected just
+resets to Nane on next load, no migration code needed. With only two themes left, the theme
+picker (`ThemeSwitcher.tsx`) was also rebuilt from a dropdown-menu button into a single animated
+sliding switch (Sun/Moon crossfade, CSS-only) — a more direct match for a binary choice than a
+menu. The muted-foreground contrast fix above was scoped to just these two remaining themes as a
+result (Arduvaz already passed; only Nane needed darkening).
 
 ## Prioritized backlog
 
@@ -174,13 +220,23 @@ polish → decoration):
    summary rather than rebuild visuals. (Hierarchy) — **Done** (default-tab reorder only, scoped
    down from the full "today summary" via brainstorming), `db1a606`.
 3. **Animate the check/uncheck + progress-bar fill** on the shopping list (Pass 5, #1–2) — CSS-only,
-   reinforces the app's own progress-focused copy. (Core interaction / motion)
+   reinforces the app's own progress-focused copy. (Core interaction / motion) — **Done.** The
+   progress bar (`AppHeader.tsx:92`) and the checkbox's border/background color (`checkbox.tsx`)
+   already had transitions. The one real gap was the check/minus glyph itself: Radix only mounts
+   `CheckboxPrimitive.Indicator` when checked, so it previously popped in with no transition. Fixed
+   once in the shared `Checkbox` primitive (`src/components/ui/checkbox.tsx`) with
+   `transition-[transform,opacity] duration-150 starting:scale-50 starting:opacity-0`, matching this
+   codebase's existing entrance-animation convention — benefits every checkbox in the app. Verified
+   live via `getComputedStyle` on the mounted indicator (`transitionProperty: "transform, opacity"`)
+   and a screenshot of a checked item.
 4. **Follow-up look at `FoodSearchModal`/`RecipeSearchModal` entrance behavior** before committing to
    a specific animation treatment there. (Motion — needs more investigation first)
-5. **Confirm whether the repeated stat-card visual pattern should become a shared component**
-   (Pass 4) — a code-level check, not yet confirmed as actual duplication.
-6. **Full accessibility pass** (contrast, keyboard traps) if the app is heading toward a wider
-   release — not urgent today given Pass 6's spot checks found no red flags.
+5. ~~Confirm whether the repeated stat-card visual pattern should become a shared component~~ —
+   **Done, no extraction.** Only 2 live call sites (not 3 — `NutritionView` doesn't use the pattern,
+   `TodayView` is dead code), and they aren't structurally identical. See Pass 4 correction.
+6. **Full accessibility pass** (contrast, keyboard traps) — **Done**, see Pass 6 follow-up above.
+   Contrast fix shipped (`--color-muted-foreground` darkened). Keyboard-dismissal fix shipped too
+   (Escape on all 5 modals, backdrop-click added where missing).
 
 ## What this audit did not cover
 

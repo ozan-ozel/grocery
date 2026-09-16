@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Clock, Search, X } from "lucide-react";
 import type { ScoredCombo } from "@/lib/comboMatch";
 
@@ -30,11 +30,27 @@ export function RecipeSearchModal({
     onClose();
   }
 
+  useEffect(() => {
+    if (!isOpen) return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") resetModal();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/50">
-      <div className="w-full rounded-t-2xl border border-border bg-card p-5">
+    <div className="fixed inset-0 z-50 flex items-end">
+      <button
+        type="button"
+        aria-label="Kapat"
+        onClick={resetModal}
+        className="absolute inset-0 bg-black/50 transition-opacity duration-200 starting:opacity-0"
+      />
+      <div className="relative z-10 w-full rounded-t-2xl border border-border bg-card p-5 transition-transform duration-200 ease-out starting:translate-y-full">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-foreground">{title}</h2>
           <button
