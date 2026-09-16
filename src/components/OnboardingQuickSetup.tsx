@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Field, NumberInput } from "@/components/PersonalPlanView";
+import { Field, NumberInput } from "@/components/PersonalPlanFields";
 import {
   ACTIVITY_OPTIONS,
   validateProfile,

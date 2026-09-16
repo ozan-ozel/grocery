@@ -2,7 +2,7 @@ import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DropdownChevronButton } from "@/components/DropdownChevronButton";
-import { InfoModal } from "@/components/InfoModal";
+import { Field, NumberInput, SourceBadge } from "@/components/PersonalPlanFields";
 import {
   ACTIVITY_OPTIONS,
   ACTIVITY_DESCRIPTIONS,
@@ -938,69 +938,6 @@ function ReasonButton({
   );
 }
 
-export function Field({
-  label,
-  children,
-  sourceBadge,
-  info,
-}: {
-  label: string;
-  children: React.ReactNode;
-  sourceBadge?: string;
-  info?: string;
-}) {
-  const [showInfo, setShowInfo] = useState(false);
-  return (
-    <label className="block text-xs text-muted-foreground">
-      <span className="mb-1 flex items-center gap-1">
-        {label} {sourceBadge && <SourceBadge label={sourceBadge} />}
-        {info && (
-          <button
-            type="button"
-            onClick={event => {
-              event.preventDefault();
-              event.stopPropagation();
-              setShowInfo(true);
-            }}
-            aria-label="Daha fazla bilgi"
-            className="flex h-4 w-4 items-center justify-center rounded-full border border-muted-foreground/50 text-[10px] leading-none hover:bg-accent active:bg-accent">
-            i
-          </button>
-        )}
-      </span>
-      {children}
-      {info && showInfo && (
-        <InfoModal
-          title={label}
-          description={info}
-          onClose={() => setShowInfo(false)}
-        />
-      )}
-    </label>
-  );
-}
-
-export function NumberInput({
-  value,
-  onChange,
-}: {
-  value: number | string;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <Input
-      type="number"
-      inputMode="decimal"
-      min="0"
-      step="any"
-      value={value}
-      onInput={(event: Event) =>
-        onChange(Number((event.target as HTMLInputElement).value))
-      }
-    />
-  );
-}
-
 function TargetSummary({
   targets,
   activity,
@@ -1129,14 +1066,6 @@ function SourceMap({
         </div>
       ))}
     </div>
-  );
-}
-
-function SourceBadge({ label }: { label: string }) {
-  return (
-    <span className="inline-flex shrink-0 items-center rounded border border-signal/70 bg-signal/10 px-1.5 py-0.5 text-[0.62rem] font-semibold uppercase tracking-wide text-signal shadow-sm">
-      {label}
-    </span>
   );
 }
 

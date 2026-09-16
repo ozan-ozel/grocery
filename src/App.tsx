@@ -1,11 +1,7 @@
-import { useMemo, useRef } from "react";
+import { lazy, Suspense, useMemo, useRef } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { AppHeader } from "@/components/AppHeader";
 import { AppShoppingTabs } from "@/components/AppShoppingTabs";
-import { NutritionView } from "@/components/NutritionView";
-import { MealPlanView } from "@/components/MealPlanView";
-import { PersonalPlanView } from "@/components/PersonalPlanView";
-import { SettingsView } from "@/components/SettingsView";
 import { UndoToast } from "@/components/UndoToast";
 import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
@@ -26,6 +22,23 @@ import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
+
+// Split out of the main bundle — each is a full section, mutually exclusive
+// with the others at any given time (see the section-routing branch in
+// AppShell), so there's no reason to pay their combined ~500 kB upfront just
+// to show the shopping list, which is what most sessions land on.
+const NutritionView = lazy(() =>
+  import("@/components/NutritionView").then(m => ({ default: m.NutritionView }))
+);
+const MealPlanView = lazy(() =>
+  import("@/components/MealPlanView").then(m => ({ default: m.MealPlanView }))
+);
+const PersonalPlanView = lazy(() =>
+  import("@/components/PersonalPlanView").then(m => ({ default: m.PersonalPlanView }))
+);
+const SettingsView = lazy(() =>
+  import("@/components/SettingsView").then(m => ({ default: m.SettingsView }))
+);
 
 export function App() {
   const { session, checked, signInWithGoogle, signOut, deleteAccount } =
@@ -430,42 +443,50 @@ function AppShell({
             onSkip={onboarding.skip}
           />
         ) : section === "besin" ? (
-          <NutritionView
-            items={active.items}
-            showNutritionValues={showNutritionValues}
-            mergedCategories={mergedCategories}
-            overlay={overlay}
-            onRenameCategory={renameCat}
-            onToggleHiddenCategory={toggleHidden}
-            onMoveCategory={moveCat}
-            onReorderCategories={reorderCats}
-            onAddCategory={addCategory}
-            onRemoveCategory={removeCategory}
-          />
+          <Suspense fallback={<BootSkeletonBody section="besin" />}>
+            <NutritionView
+              items={active.items}
+              showNutritionValues={showNutritionValues}
+              mergedCategories={mergedCategories}
+              overlay={overlay}
+              onRenameCategory={renameCat}
+              onToggleHiddenCategory={toggleHidden}
+              onMoveCategory={moveCat}
+              onReorderCategories={reorderCats}
+              onAddCategory={addCategory}
+              onRemoveCategory={removeCategory}
+            />
+          </Suspense>
         ) : section === "yemek" ? (
-          <MealPlanView
-            userId={currentUserId}
-            householdId={activeTenantId}
-            onAddShoppingItem={addItem}
-            isOnShoppingList={isOnList}
-            onRemoveShoppingItem={removeItemByName}
-          />
+          <Suspense fallback={<BootSkeletonBody section="yemek" />}>
+            <MealPlanView
+              userId={currentUserId}
+              householdId={activeTenantId}
+              onAddShoppingItem={addItem}
+              isOnShoppingList={isOnList}
+              onRemoveShoppingItem={removeItemByName}
+            />
+          </Suspense>
         ) : section === "kisisel" ? (
-          <PersonalPlanView userId={currentUserId} />
+          <Suspense fallback={<BootSkeletonBody section="kisisel" />}>
+            <PersonalPlanView userId={currentUserId} />
+          </Suspense>
         ) : section === "ayarlar" ? (
-          <SettingsView
-            onSignOut={onSignOut}
-            onDeleteAccount={onDeleteAccount}
-            tenants={tenants}
-            activeTenantId={activeTenantId}
-            currentUserId={currentUserId}
-            onSelectTenant={selectTenant}
-            onAddTenant={addTenant}
-            onRenameTenant={renameTenant}
-            onDeleteTenant={deleteTenant}
-            theme={theme}
-            onSelectTheme={setTheme}
-          />
+          <Suspense fallback={<BootSkeletonBody section="ayarlar" />}>
+            <SettingsView
+              onSignOut={onSignOut}
+              onDeleteAccount={onDeleteAccount}
+              tenants={tenants}
+              activeTenantId={activeTenantId}
+              currentUserId={currentUserId}
+              onSelectTenant={selectTenant}
+              onAddTenant={addTenant}
+              onRenameTenant={renameTenant}
+              onDeleteTenant={deleteTenant}
+              theme={theme}
+              onSelectTheme={setTheme}
+            />
+          </Suspense>
         ) : (
           <AppShoppingTabs
             catalog={catalog}
