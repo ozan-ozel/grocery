@@ -21,7 +21,7 @@ export const SP_BASE_CLASS =
 
 export const SP_ACTIVE_CLASS = "bg-background text-foreground";
 
-export const SP_INACTIVE_CLASS = "text-muted-foreground hover:text-foreground";
+export const SP_INACTIVE_CLASS = "text-muted-foreground hover:text-foreground active:text-foreground";
 
 // For Radix TabsTrigger: cancels the base component's default
 // border-b-2/data-[state=active]:border-foreground underline, which would

@@ -82,7 +82,7 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
           <button
             type="button"
             onClick={onSkip}
-            className="text-xs text-muted-foreground hover:text-foreground">
+            className="text-xs text-muted-foreground hover:text-foreground active:text-foreground">
             Atla
           </button>
         </div>
@@ -243,7 +243,7 @@ function ChoiceButton({
       } ${
         selected
           ? "border-signal/70 bg-signal/10 text-signal"
-          : "border-border hover:bg-accent"
+          : "border-border hover:bg-accent active:bg-accent"
       }`}>
       {label}
     </button>

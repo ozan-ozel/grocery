@@ -76,14 +76,14 @@ export function SettingsView({
         <button
           type="button"
           onClick={onSignOut}
-          className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent">
+          className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent active:bg-accent">
           <LogOut className="size-4" />
           Çıkış Yap
         </button>
         <button
           type="button"
           onClick={handleDeleteAccount}
-          className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10">
+          className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/10">
           <Trash2 className="size-4" />
           Hesabı Sil
         </button>

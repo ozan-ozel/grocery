@@ -198,7 +198,7 @@ export function ActiveList({
                     onSelectAll();
                     setMenuOpen(false);
                   }}
-                  className="block w-full px-3 py-1.5 text-left text-sm hover:bg-accent">
+                  className="block w-full px-3 py-1.5 text-left text-sm hover:bg-accent active:bg-accent">
                   Hepsini Seç
                 </button>
                 <div className="my-1 h-px bg-border" />
@@ -210,7 +210,7 @@ export function ActiveList({
                     onToggleSwipeMode();
                     setMenuOpen(false);
                   }}
-                  className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-accent">
+                  className="flex w-full items-center justify-between gap-2 px-3 py-1.5 text-left text-sm hover:bg-accent active:bg-accent">
                   Kaydırma hareketleri
                   {swipeMode && <Check className="size-3.5" />}
                 </button>

@@ -111,7 +111,7 @@ export function NutritionCompareView() {
               "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               chartType === "radar"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground active:text-foreground"
             )}
           >
             Radar
@@ -123,7 +123,7 @@ export function NutritionCompareView() {
               "rounded-md px-3 py-1.5 text-sm font-medium transition-colors",
               chartType === "bar"
                 ? "bg-background text-foreground shadow-sm"
-                : "text-muted-foreground hover:text-foreground"
+                : "text-muted-foreground hover:text-foreground active:text-foreground"
             )}
           >
             Sütun
@@ -179,7 +179,7 @@ function FoodSlot({
           type="button"
           aria-label={`${selected.name_tr} seçimini kaldır`}
           onClick={onClear}
-          className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-signal"
+          className="shrink-0 rounded p-0.5 text-muted-foreground hover:text-signal active:text-signal"
         >
           <X className="size-3.5" />
         </button>
@@ -199,7 +199,7 @@ function FoodSlot({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-md border border-dashed border-border px-2 py-2 text-left text-sm text-muted-foreground hover:text-foreground"
+        className="rounded-md border border-dashed border-border px-2 py-2 text-left text-sm text-muted-foreground hover:text-foreground active:text-foreground"
       >
         {label} seç
       </button>
@@ -243,7 +243,7 @@ function FoodSlot({
                 setQuery("");
                 setOpen(false);
               }}
-              className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-accent"
+              className="w-full rounded px-2 py-1.5 text-left text-sm hover:bg-accent active:bg-accent"
             >
               {food.name_tr}
             </button>

@@ -154,7 +154,7 @@ export function TenantSwitcher({
         aria-label="Ev seç"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
-        className="ledger flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground"
+        className="ledger flex items-center gap-1 rounded-md border border-input px-2 py-1 text-xs text-muted-foreground transition-colors hover:text-foreground active:text-foreground"
       >
         <span className="max-w-[10ch] truncate">{active?.name ?? "Ev"}</span>
         <ChevronDown className={cn("size-3 transition-transform", open && "rotate-180")} />
@@ -192,7 +192,7 @@ export function TenantSwitcher({
                     <div
                       className={cn(
                         "group flex items-center gap-2 px-3 py-2 text-sm",
-                        isActive ? "bg-accent" : "hover:bg-accent"
+                        isActive ? "bg-accent" : "hover:bg-accent active:bg-accent"
                       )}
                     >
                       <button
@@ -216,7 +216,7 @@ export function TenantSwitcher({
                         aria-label={isHidden ? `${t.name} göster` : `${t.name} gizle`}
                         disabled={!canHide}
                         onClick={() => onToggleHidden(t.id)}
-                        className="rounded p-1 text-muted-foreground transition hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40 [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
+                        className="rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground disabled:cursor-not-allowed disabled:opacity-40 [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
                       >
                         {isHidden ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
                       </button>
@@ -227,7 +227,7 @@ export function TenantSwitcher({
                           setEditingId(t.id);
                           setEditDraft(t.name);
                         }}
-                        className="rounded p-1 text-muted-foreground transition hover:text-foreground [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
+                        className="rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
                       >
                         <Pencil className="size-3.5" />
                       </button>
@@ -237,7 +237,7 @@ export function TenantSwitcher({
                           aria-label={`${t.name} paylaşımını yönet`}
                           onClick={() => openShares(t.id)}
                           className={cn(
-                            "rounded p-1 text-muted-foreground transition hover:text-foreground [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
+                            "rounded p-1 text-muted-foreground transition hover:text-foreground active:text-foreground [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100",
                             managingSharesId === t.id
                               ? "text-foreground"
                               : "[@media(pointer:fine)]:opacity-0"
@@ -251,7 +251,7 @@ export function TenantSwitcher({
                           type="button"
                           aria-label={`${t.name} sil`}
                           onClick={() => setConfirmingDeleteId(t.id)}
-                          className="rounded p-1 text-muted-foreground transition hover:text-signal [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
+                          className="rounded p-1 text-muted-foreground transition hover:text-signal active:text-signal [@media(pointer:fine)]:opacity-0 [@media(pointer:fine)]:focus-visible:opacity-100 [@media(pointer:fine)]:group-hover:opacity-100"
                         >
                           <Trash2 className="size-3.5" />
                         </button>
@@ -283,7 +283,7 @@ export function TenantSwitcher({
                                   type="button"
                                   aria-label={`${email} daveti kaldırmayı onayla`}
                                   onClick={() => removeShare(t.id, email)}
-                                  className="rounded-full text-signal transition hover:text-signal/80"
+                                  className="rounded-full text-signal transition hover:text-signal/80 active:text-signal/80"
                                 >
                                   <Check className="size-3" />
                                 </button>
@@ -291,7 +291,7 @@ export function TenantSwitcher({
                                   type="button"
                                   aria-label="Vazgeç"
                                   onClick={() => setConfirmingRevokeEmail(null)}
-                                  className="rounded-full text-muted-foreground transition hover:text-foreground"
+                                  className="rounded-full text-muted-foreground transition hover:text-foreground active:text-foreground"
                                 >
                                   <X className="size-3" />
                                 </button>
@@ -306,7 +306,7 @@ export function TenantSwitcher({
                                   type="button"
                                   aria-label={`${email} daveti kaldır`}
                                   onClick={() => setConfirmingRevokeEmail(email)}
-                                  className="rounded-full text-muted-foreground transition hover:text-signal"
+                                  className="rounded-full text-muted-foreground transition hover:text-signal active:text-signal"
                                 >
                                   <X className="size-3" />
                                 </button>
@@ -358,7 +358,7 @@ export function TenantSwitcher({
               <button
                 type="button"
                 onClick={() => setAdding(true)}
-                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent hover:text-foreground active:bg-accent active:text-foreground"
+                className="flex w-full items-center gap-2 px-3 py-2 text-left text-sm text-muted-foreground hover:bg-accent active:bg-accent hover:text-foreground active:text-foreground"
               >
                 <Plus className="size-3.5" />
                 Yeni ev ekle

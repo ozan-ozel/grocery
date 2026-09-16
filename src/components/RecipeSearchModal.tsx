@@ -66,7 +66,7 @@ export function RecipeSearchModal({
           <button
             type="button"
             onClick={resetModal}
-            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+            className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent active:bg-accent hover:text-foreground active:text-foreground"
             aria-label="Kapat">
             <X className="size-5" />
           </button>
@@ -100,7 +100,7 @@ export function RecipeSearchModal({
                   onSelect(combo);
                   resetModal();
                 }}
-                className="w-full rounded-lg border border-border bg-background p-3 text-left transition-colors hover:bg-accent">
+                className="w-full rounded-lg border border-border bg-background p-3 text-left transition-colors hover:bg-accent active:bg-accent">
                 <div className="flex items-start justify-between gap-2">
                   <h4 className="text-sm font-medium text-foreground">
                     {combo.nameTr}
