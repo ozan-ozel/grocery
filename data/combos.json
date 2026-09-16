@@ -91,6 +91,51 @@
     "tags": ["yuksek-protein"]
   },
   {
+    "id": "biftek-pirinc-pilavi",
+    "name_tr": "Biftek (antrikot) ve pirinç pilavı",
+    "items": [
+      { "food_id": "biftek (antrikot)", "grams": 150 },
+      { "food_id": "pirinç", "grams": 150 }
+    ],
+    "prep_minutes": 20,
+    "tags": ["yuksek-protein"],
+    "prep_note": "Bifteği ızgara veya tavada pişirin, pirinci pilav olarak hazırlayın."
+  },
+  {
+    "id": "dana-sote-kontrfile-bulgur",
+    "name_tr": "Et sote (kontrfile) ve bulgur pilavı",
+    "items": [
+      { "food_id": "kontrfile", "grams": 150 },
+      { "food_id": "bulgur", "grams": 150 }
+    ],
+    "prep_minutes": 25,
+    "tags": ["yuksek-protein"],
+    "prep_note": "Dana sote (kuşbaşı) veya kontrfileyi tavada sote edin, bulguru pilav olarak hazırlayın."
+  },
+  {
+    "id": "izgara-tavuk-tava",
+    "name_tr": "Tavuk ızgara tava",
+    "items": [
+      { "food_id": "tavuk göğsü", "grams": 150 },
+      { "food_id": "patates", "grams": 150 },
+      { "food_id": "zeytinyağı", "grams": 10 }
+    ],
+    "prep_minutes": 20,
+    "tags": ["hizli", "yuksek-protein"],
+    "prep_note": "Tavuk göğsünü ve dilimlenmiş patatesi zeytinyağıyla tavada ızgara gibi pişirin."
+  },
+  {
+    "id": "firinda-tavuk-but-kemikli",
+    "name_tr": "Fırında tavuk but (kemikli)",
+    "items": [
+      { "food_id": "tavuk but (kemikli)", "grams": 200 },
+      { "food_id": "patates", "grams": 150 }
+    ],
+    "prep_minutes": 40,
+    "tags": ["yuksek-protein"],
+    "prep_note": "Kemikli tavuk butunu patatesle birlikte fırında pişirin."
+  },
+  {
     "id": "beyaz-peynir-tabagi",
     "name_tr": "Beyaz peynirli kahvaltı tabağı",
     "items": [

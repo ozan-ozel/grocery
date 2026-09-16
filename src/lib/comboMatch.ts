@@ -100,10 +100,34 @@ export function scoreAllCombos(
     scored.push({ ...combo, totals, hasSoftConflict });
   }
   scored.sort((a, b) => {
+    // Household preference overrides, checked before the nutritional
+    // ranking: hindi (turkey) meals sink to the very bottom (nobody here
+    // eats turkey regularly), and bone-in chicken thigh sinks low too, just
+    // not as low as turkey.
+    const tierDiff = preferenceTier(a) - preferenceTier(b);
+    if (tierDiff !== 0) return tierDiff;
     if (a.hasSoftConflict !== b.hasSoftConflict) return a.hasSoftConflict ? 1 : -1;
     return b.totals.proteinG - a.totals.proteinG;
   });
   return scored;
+}
+
+// Higher tier sorts later. 0 = normal ranking, 1 = deprioritized (bone-in
+// chicken thigh), 2 = sunk to the bottom (turkey).
+function preferenceTier(combo: Combo): number {
+  if (hasTurkey(combo)) return 2;
+  if (hasBoneInChickenThigh(combo)) return 1;
+  return 0;
+}
+
+function hasTurkey(combo: Combo): boolean {
+  return combo.items.some((i) => i.foodId.toLocaleLowerCase("tr-TR").startsWith("hindi"));
+}
+
+function hasBoneInChickenThigh(combo: Combo): boolean {
+  return combo.items.some(
+    (i) => i.foodId.toLocaleLowerCase("tr-TR") === "tavuk but (kemikli)"
+  );
 }
 
 // Deterministic, no AI: filters out anything hard-excluded or over the

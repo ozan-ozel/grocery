@@ -66,6 +66,19 @@
     "source": "USDA fdc_id 173420"
   },
   {
+    "name_tr": "biftek (antrikot)",
+    "aliases": [
+      "biftek",
+      "antrikot"
+    ],
+    "kcal_per_100": 158,
+    "protein_g": 21.6,
+    "fat_g": 7.4,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA (typical, raw beef steak)"
+  },
+  {
     "name_tr": "bitter çikolata",
     "aliases": [],
     "kcal_per_100": 598,
@@ -314,6 +327,18 @@
     "carbs_g": 11.1,
     "fiber_g": 2,
     "source": "USDA fdc_id 171697"
+  },
+  {
+    "name_tr": "kontrfile",
+    "aliases": [
+      "dana kontrfile"
+    ],
+    "kcal_per_100": 291,
+    "protein_g": 19.3,
+    "fat_g": 23.7,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA (typical, raw beef ribeye/kontrfile)"
   },
   {
     "name_tr": "kırmızı mercimek",
@@ -598,6 +623,19 @@
     "carbs_g": 0,
     "fiber_g": 0,
     "source": "USDA fdc_id 171077"
+  },
+  {
+    "name_tr": "tavuk but (kemikli)",
+    "aliases": [
+      "tavuk but",
+      "kemikli but"
+    ],
+    "kcal_per_100": 216,
+    "protein_g": 16.8,
+    "fat_g": 15.7,
+    "carbs_g": 0,
+    "fiber_g": 0,
+    "source": "USDA (typical, raw bone-in chicken thigh/leg)"
   },
   {
     "name_tr": "tereyağı",

@@ -24,9 +24,22 @@ export function AllFoodsBrowser() {
     );
   }, [foods, query]);
 
+  // Hindi (turkey) products are deliberately sunk to the bottom of their
+  // aisle — an explicit household preference, not an alphabetical one.
+  const sorted = useMemo(() => {
+    const isTurkey = (f: Nutrition) =>
+      f.name_tr.toLocaleLowerCase("tr-TR").startsWith("hindi");
+    return [...filtered].sort((a, b) => {
+      const aTurkey = isTurkey(a);
+      const bTurkey = isTurkey(b);
+      if (aTurkey !== bTurkey) return aTurkey ? 1 : -1;
+      return 0;
+    });
+  }, [filtered]);
+
   const groups = useMemo(
-    () => groupByCategory(filtered, (f) => f.name_tr),
-    [filtered]
+    () => groupByCategory(sorted, (f) => f.name_tr),
+    [sorted]
   );
 
   return (

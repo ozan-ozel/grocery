@@ -137,6 +137,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 18. [Lazy-load App sections (perf: first-load bundle size)](session-checkpoints/2026-09-16-04-lazy-load-app-sections.md)
 19. [Defer unconditional food-catalog fetch (perf follow-up)](session-checkpoints/2026-09-16-05-defer-food-catalog-fetch.md)
 20. [Lazy-load the Turkish categorization engine (perf follow-up)](session-checkpoints/2026-09-16-06-lazy-load-categorizer.md)
+21. [Meat meals + hindi göğsü sort-to-bottom](session-checkpoints/2026-09-16-07-meat-meals-and-hindi-sort.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain

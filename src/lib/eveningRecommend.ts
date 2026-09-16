@@ -29,12 +29,9 @@ export type CandidatePattern = {
   prepMinutes: number;
 };
 
-// Every foodId below is confirmed present in data/nutrition.json (the seed
-// for the live Supabase `nutrition` table this app actually reads through
-// /api/nutrition). Live-catalog access needs an authenticated session this
-// environment doesn't have credentials for, so antrikot/bonfile/kontrfile/
-// chicken thigh are deliberately left out rather than guessed — add them
-// only once their exact live name_tr is confirmed (e.g. via the Besin tab).
+// Every foodId below is confirmed present in the live Supabase `nutrition`
+// table this app actually reads through /api/nutrition (checked via the
+// Besin tab, not guessed).
 export const EVENING_CANDIDATE_PATTERNS: CandidatePattern[] = [
   {
     id: "aksam-tavuk-pirinc",
@@ -85,6 +82,34 @@ export const EVENING_CANDIDATE_PATTERNS: CandidatePattern[] = [
     carbFoodId: "bulgur",
     prepMinutes: 20,
   },
+  {
+    id: "aksam-biftek-pirinc",
+    nameTr: "Biftek (antrikot) ve pirinç pilavı",
+    proteinFoodId: "biftek (antrikot)",
+    carbFoodId: "pirinç",
+    prepMinutes: 20,
+  },
+  {
+    id: "aksam-kontrfile-bulgur",
+    nameTr: "Et sote (kontrfile) ve bulgur pilavı",
+    proteinFoodId: "kontrfile",
+    carbFoodId: "bulgur",
+    prepMinutes: 25,
+  },
+  {
+    id: "aksam-tavuk-izgara-tava",
+    nameTr: "Tavuk ızgara tava",
+    proteinFoodId: "tavuk göğsü",
+    carbFoodId: "patates",
+    prepMinutes: 20,
+  },
+  {
+    id: "aksam-tavuk-but-patates",
+    nameTr: "Fırında tavuk but (kemikli)",
+    proteinFoodId: "tavuk but (kemikli)",
+    carbFoodId: "patates",
+    prepMinutes: 40,
+  },
 ];
 
 // Lookup for TodayView's "Bugün yediklerin" reconstruction — an evening
@@ -108,7 +133,7 @@ type GramBounds = { minG: number; maxG: number; stepG: number };
 // below are calibrated on that basis: a dry-grain ceiling of 150g is
 // already a generous single portion (cooks up to roughly 400-450g), not
 // the 300g the initial planning draft proposed before this was checked.
-const HIGHER_FAT_PROTEIN_IDS = new Set(["dana kıyma"]);
+const HIGHER_FAT_PROTEIN_IDS = new Set(["dana kıyma", "kontrfile", "tavuk but (kemikli)"]);
 
 const LEAN_PROTEIN_BOUNDS: GramBounds = { minG: 100, maxG: 250, stepG: 25 };
 const HIGHER_FAT_PROTEIN_BOUNDS: GramBounds = { minG: 100, maxG: 200, stepG: 25 };
@@ -281,9 +306,32 @@ export function matchEveningCombos(
   }
 
   scored.sort((a, b) => {
+    // Household preference overrides, checked before fit score — matching
+    // comboMatch.ts's scoreAllCombos: hindi (turkey) sinks to the very
+    // bottom, bone-in chicken thigh sinks low too, just not as low.
+    const tierDiff = preferenceTier(a) - preferenceTier(b);
+    if (tierDiff !== 0) return tierDiff;
     if (a.hasSoftConflict !== b.hasSoftConflict) return a.hasSoftConflict ? 1 : -1;
     return scoreInstance(a.totals, remaining) - scoreInstance(b.totals, remaining);
   });
 
   return scored.slice(0, maxResults);
+}
+
+// Higher tier sorts later. 0 = normal ranking, 1 = deprioritized (bone-in
+// chicken thigh), 2 = sunk to the bottom (turkey).
+function preferenceTier(combo: ScoredCombo): number {
+  if (hasTurkey(combo)) return 2;
+  if (hasBoneInChickenThigh(combo)) return 1;
+  return 0;
+}
+
+function hasTurkey(combo: ScoredCombo): boolean {
+  return combo.items.some((i) => i.foodId.toLocaleLowerCase("tr-TR").startsWith("hindi"));
+}
+
+function hasBoneInChickenThigh(combo: ScoredCombo): boolean {
+  return combo.items.some(
+    (i) => i.foodId.toLocaleLowerCase("tr-TR") === "tavuk but (kemikli)"
+  );
 }
