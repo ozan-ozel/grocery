@@ -2,7 +2,7 @@ import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DropdownChevronButton } from "@/components/DropdownChevronButton";
-import { Field, NumberInput, Select, SourceBadge } from "@/components/PersonalPlanFields";
+import { Field, NumberInput, Select } from "@/components/PersonalPlanFields";
 import {
   ACTIVITY_OPTIONS,
   ACTIVITY_DESCRIPTIONS,
@@ -48,84 +48,96 @@ const REASON_LABEL_SHORT: Record<ExclusionReason, string> = {
 
 type Source = { label: string; href: string; badge: string };
 
+// Canonical, deduplicated sources — defined once and reused by every
+// SOURCE_GROUPS entry that cites them. The same NCBI Endotext chapter
+// (NBK278991) used to appear four times across groups with four different,
+// independently-typed labels ("dietary treatment", "Mifflin-St Jeor ve
+// aktivite katsayıları", "BMI ve bel çevresi", ...) for the exact same link —
+// which reads as four different sources until you check the href, and one
+// group's label could drift from another's on a future edit. One name, one
+// object, referenced everywhere it's actually cited.
+const NIDDK_SOURCE: Source = {
+  label: "NIDDK Body Weight Planner",
+  href: "https://www.niddk.nih.gov/bwp",
+  badge: "NIDDK",
+};
+const ENDOTEXT_SOURCE: Source = {
+  label: "NCBI Endotext: dietary treatment",
+  href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
+  badge: "Endotext",
+};
+const WHO_SOURCE: Source = {
+  label: "WHO physical activity guidance",
+  href: "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
+  badge: "WHO",
+};
+const DRI_SOURCE: Source = {
+  label: "National Academies DRI tables",
+  href: "https://www.ncbi.nlm.nih.gov/books/NBK545442/",
+  badge: "DRI",
+};
+const HECTOR_2018_SOURCE: Source = {
+  label: "Hector & Phillips (2018): protein during energy restriction",
+  href: "https://pubmed.ncbi.nlm.nih.gov/29182451/",
+  badge: "Hector 2018",
+};
+const ACSM_2016_SOURCE: Source = {
+  label: "ACSM/AND/DC joint position stand: carbohydrate by training load",
+  href: "https://pubmed.ncbi.nlm.nih.gov/26891166/",
+  badge: "ACSM 2016",
+};
+
 const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
   {
     feature: "Profil girdileri ve enerji planlama çerçevesi",
-    sources: [
-      {
-        label: "NIDDK Body Weight Planner",
-        href: "https://www.niddk.nih.gov/bwp",
-        badge: "NIDDK",
-      },
-      {
-        label: "NCBI Endotext: dietary treatment",
-        href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
-        badge: "Endotext",
-      },
-    ],
+    sources: [NIDDK_SOURCE, ENDOTEXT_SOURCE],
   },
   {
     feature: "Bazal metabolizma, koruma ve hedef kalorisi",
-    sources: [
-      {
-        label: "NCBI Endotext: Mifflin-St Jeor ve aktivite katsayıları",
-        href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
-        badge: "Endotext",
-      },
-      {
-        label: "NIDDK Body Weight Planner",
-        href: "https://www.niddk.nih.gov/bwp",
-        badge: "NIDDK",
-      },
-    ],
+    sources: [ENDOTEXT_SOURCE, NIDDK_SOURCE],
   },
   {
     feature: "Günlük aktivite seviyesi",
-    sources: [
-      {
-        label: "WHO physical activity guidance",
-        href: "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
-        badge: "WHO",
-      },
-    ],
+    sources: [WHO_SOURCE],
   },
   {
     feature: "Protein, yağ, karbonhidrat ve lif aralıkları",
-    sources: [
-      {
-        label: "National Academies DRI tables",
-        href: "https://www.ncbi.nlm.nih.gov/books/NBK545442/",
-        badge: "DRI",
-      },
-      {
-        label: "NCBI Endotext: dietary treatment",
-        href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
-        badge: "Endotext",
-      },
-      {
-        label: "Hector & Phillips (2018): protein during energy restriction",
-        href: "https://pubmed.ncbi.nlm.nih.gov/29182451/",
-        badge: "Hector 2018",
-      },
-      {
-        label:
-          "ACSM/AND/DC joint position stand: carbohydrate by training load",
-        href: "https://pubmed.ncbi.nlm.nih.gov/26891166/",
-        badge: "ACSM 2016",
-      },
-    ],
+    sources: [DRI_SOURCE, ENDOTEXT_SOURCE, HECTOR_2018_SOURCE, ACSM_2016_SOURCE],
   },
   {
     feature: "BMI ve bel çevresi bağlamı",
-    sources: [
-      {
-        label: "NCBI Endotext: BMI ve bel çevresi",
-        href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
-        badge: "Endotext",
-      },
-    ],
+    sources: [ENDOTEXT_SOURCE],
+  },
+  {
+    // Own group rather than folded into "Protein, yağ, karbonhidrat ve lif
+    // aralıkları" — the "Su" card used to show that macro-range group's DRI
+    // badge, which pointed at the wrong feature entirely: the 30-35 mL/kg
+    // baseline-fluid figure is DRI's own Adequate Intake for total water,
+    // not the AMDR macro ranges. Same DRI_SOURCE object (it's genuinely the
+    // same National Academies DRI reference), separate citation context.
+    feature: "Su ihtiyacı (temel sıvı)",
+    sources: [DRI_SOURCE],
   },
 ];
+
+// Which (feature, badge) pairs in SOURCE_GROUPS have a real, already-visible
+// anchor elsewhere on the page — gates "Kaynakları göster"'s left-hand
+// jump-back button. A feature can cite more sources than are actually shown
+// at its one referrer spot (e.g. "Profil girdileri..." cites both NIDDK and
+// Endotext, but only the NIDDK badge is shown next to "Profil"), so jumping
+// there for every citation under that feature would land on a location that
+// doesn't actually display the badge just clicked. Deliberately eliminative,
+// not inclusive: rather than sprinkling more badges around the page to
+// manufacture a match for every citation, a citation with no genuine anchor
+// just gets its jump-back disabled.
+const REFERRER_EXACT_BADGES: Record<string, Set<string>> = {
+  "Profil girdileri ve enerji planlama çerçevesi": new Set(["NIDDK"]),
+  "Bazal metabolizma, koruma ve hedef kalorisi": new Set(["Endotext"]),
+  "Günlük aktivite seviyesi": new Set(["WHO"]),
+  "Protein, yağ, karbonhidrat ve lif aralıkları": new Set(["DRI"]),
+  "BMI ve bel çevresi bağlamı": new Set(["Endotext"]),
+  "Su ihtiyacı (temel sıvı)": new Set(["DRI"]),
+};
 
 type Props = { userId: string | null };
 
@@ -208,9 +220,8 @@ export function PersonalPlanView({ userId }: Props) {
   // A citation row's left-hand badge (in "Kaynakları göster") jumping back up
   // to wherever that source is actually cited on the page — the reverse of
   // jumpToSource. Every SOURCE_GROUPS feature has exactly one canonical
-  // referrer registered below except "Bazal metabolizma, koruma ve hedef
-  // kalorisi", whose only citing spot is inside "Nasıl hesaplanıyor" itself
-  // (opened here if needed, same settle-delay pattern as jumpToSource).
+  // referrer registered below; none of them are behind a collapsible, so —
+  // unlike jumpToSource — there's never anything to force-open first.
   const [highlightedReferrer, setHighlightedReferrer] = useState<
     string | null
   >(null);
@@ -218,25 +229,16 @@ export function PersonalPlanView({ userId }: Props) {
   const referrerHighlightTimeoutRef = useRef<number | undefined>(undefined);
 
   function jumpToSourceReferrer(feature: string) {
-    const needsHowOpen =
-      feature === "Bazal metabolizma, koruma ve hedef kalorisi" && !howOpen;
-    if (needsHowOpen) {
-      setHowOpen(true);
-      howDetails.onToggle(true);
-    }
-    const settleDelay = needsHowOpen ? 340 : 0;
-    window.setTimeout(() => {
-      sourceReferrerRefs.current[feature]?.scrollIntoView({
-        behavior: "smooth",
-        block: "center",
-      });
-    }, settleDelay);
+    sourceReferrerRefs.current[feature]?.scrollIntoView({
+      behavior: "smooth",
+      block: "center",
+    });
     setHighlightedReferrer(feature);
     if (referrerHighlightTimeoutRef.current)
       window.clearTimeout(referrerHighlightTimeoutRef.current);
     referrerHighlightTimeoutRef.current = window.setTimeout(
       () => setHighlightedReferrer(null),
-      settleDelay + 1600,
+      1600,
     );
   }
 
@@ -489,7 +491,9 @@ export function PersonalPlanView({ userId }: Props) {
                     ? "opacity-100 delay-100"
                     : "pointer-events-none opacity-0",
                 )}>
-                <Field label="Denklem seçimi">
+                <Field
+                  label="Denklem seçimi"
+                  labelClassName="font-semibold italic text-foreground">
                   <Select
                     value={profile.equationSex}
                     onChange={event =>
@@ -555,7 +559,10 @@ export function PersonalPlanView({ userId }: Props) {
                   </Select>
                 </Field>
                 <p className="col-span-2 text-xs text-muted-foreground">
-                  Denklem seçimi yalnızca enerji tahminindeki biyolojik
+                  <span className="font-semibold italic text-foreground">
+                    Denklem seçimi
+                  </span>{" "}
+                  yalnızca enerji tahminindeki biyolojik
                   katsayıyı belirtir; cinsiyet kimliğinden otomatik olarak
                   çıkarılmaz.
                 </p>
@@ -840,18 +847,7 @@ export function PersonalPlanView({ userId }: Props) {
         />
       )}
 
-      <div
-        ref={el => {
-          sourceReferrerRefs.current[
-            "Bazal metabolizma, koruma ve hedef kalorisi"
-          ] = el;
-        }}
-        className={cn(
-          "glow-signal rounded-lg transition-shadow duration-700",
-          highlightedReferrer ===
-            "Bazal metabolizma, koruma ve hedef kalorisi" &&
-            "ring-2 ring-signal/50",
-        )}>
+      <div className="glow-signal rounded-lg">
         <details
           open={howOpen}
           onToggle={event => {
@@ -897,7 +893,11 @@ export function PersonalPlanView({ userId }: Props) {
                 denklem seçimine göre erkek katsayısı (+5) ya da kadın katsayısı
                 (−161).
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <SourceBadge label="Endotext" />
+                  <SourceBadgeLink
+                    label="Endotext"
+                    feature="Bazal metabolizma, koruma ve hedef kalorisi"
+                    onJump={jumpToSource}
+                  />
                 </div>
               </li>
               <li>
@@ -908,8 +908,16 @@ export function PersonalPlanView({ userId }: Props) {
                 Orta aktif 1.7, Aktif 1.9, Çok aktif 2.1 ("Günlük aktivite"
                 seçimine göre).
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <SourceBadge label="Endotext" />
-                  <SourceBadge label="WHO" />
+                  <SourceBadgeLink
+                    label="Endotext"
+                    feature="Bazal metabolizma, koruma ve hedef kalorisi"
+                    onJump={jumpToSource}
+                  />
+                  <SourceBadgeLink
+                    label="WHO"
+                    feature="Günlük aktivite seviyesi"
+                    onJump={jumpToSource}
+                  />
                   <TargetBadgeLink label="Koruma" onJump={jumpToTarget} />
                 </div>
               </li>
@@ -937,9 +945,21 @@ export function PersonalPlanView({ userId }: Props) {
                 alma hedefinde) veya 2.0g (kilo verme hedefinde, kas kütlesini
                 korumak için); lif her 1000 kcal için ~14g.
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <SourceBadge label="DRI" />
-                  <SourceBadge label="Hector 2018" />
-                  <SourceBadge label="ACSM 2016" />
+                  <SourceBadgeLink
+                    label="DRI"
+                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                    onJump={jumpToSource}
+                  />
+                  <SourceBadgeLink
+                    label="Hector 2018"
+                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                    onJump={jumpToSource}
+                  />
+                  <SourceBadgeLink
+                    label="ACSM 2016"
+                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                    onJump={jumpToSource}
+                  />
                   <TargetBadgeLink label="Protein" onJump={jumpToTarget} />
                   <TargetBadgeLink label="Yağ" onJump={jumpToTarget} />
                   <TargetBadgeLink
@@ -1065,8 +1085,14 @@ function TargetSummary({
         : `${targets.fiberG.min}-${targets.fiberG.max} g`,
       "minimum",
     ],
-    // MVP-1 PROVISIONAL (DEC-046) — baseline only, see mealPersonalization.ts.
-    ["Su", `${(targets.waterMl / 1000).toFixed(1)} L`, "temel, taslak"],
+    // MVP-1 PROVISIONAL (DEC-046) — baseline fluid range only, see
+    // mealPersonalization.ts. Shown as a range (not a collapsed midpoint)
+    // per hydration-mvp.md's own outstanding-work note.
+    [
+      "Su",
+      `${(targets.waterMl.min / 1000).toFixed(1)}-${(targets.waterMl.max / 1000).toFixed(1)} L`,
+      "aralık, taslak",
+    ],
   ];
   return (
     <section className="space-y-3">
@@ -1074,41 +1100,70 @@ function TargetSummary({
         <div>
           <h2 className="text-sm font-semibold">Günlük hedeflerin</h2>
           <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
-            <span>{activity}</span>
-            {showSources && (
-              <SourceBadgeLink
-                label="WHO"
-                feature="Günlük aktivite seviyesi"
-                onJump={onJumpToSource}
-              />
-            )}
-            <span aria-hidden="true">·</span>
-            <span
-              ref={el => registerReferrerRef("BMI ve bel çevresi bağlamı", el)}
-              className={cn(
-                "rounded px-1 transition-colors duration-700",
-                highlightedReferrer === "BMI ve bel çevresi bağlamı" &&
-                  "bg-signal/10 ring-2 ring-signal/50",
-              )}>
-              BMI {targets.bmi} ({bmiLabel(targets.bmi)})
+            <span className="inline-flex items-center gap-1.5">
+              <span>{activity}</span>
+              {showSources && (
+                <SourceBadgeLink
+                  label="WHO"
+                  feature="Günlük aktivite seviyesi"
+                  onJump={onJumpToSource}
+                />
+              )}
             </span>
-            {showSources && (
-              <SourceBadgeLink
-                label="Endotext"
-                feature="BMI ve bel çevresi bağlamı"
-                onJump={onJumpToSource}
-              />
-            )}
+            <span className="inline-flex items-center gap-1.5">
+              {/* Dropped once sources show — the extra WHO/Endotext badges
+                  already push this onto its own line, where a leading
+                  separator has nothing to separate from anymore. */}
+              {!showSources && <span aria-hidden="true">·</span>}
+              <span
+                ref={el => registerReferrerRef("BMI ve bel çevresi bağlamı", el)}
+                className={cn(
+                  "rounded transition-colors duration-700",
+                  // No left padding once sources show and the "·" is gone —
+                  // this becomes the first thing on its own line, so a left
+                  // inset here would just read as a stray gap from the
+                  // margin. Kept with the dot otherwise for even spacing.
+                  showSources ? "pr-1" : "px-1",
+                  highlightedReferrer === "BMI ve bel çevresi bağlamı" &&
+                    "bg-signal/10 ring-2 ring-signal/50",
+                )}>
+                BMI {targets.bmi} ({bmiLabel(targets.bmi)})
+              </span>
+              {showSources && (
+                <SourceBadgeLink
+                  label="Endotext"
+                  feature="BMI ve bel çevresi bağlamı"
+                  onJump={onJumpToSource}
+                />
+              )}
+            </span>
           </p>
         </div>
-        <span
-          ref={el => registerRef("Koruma", el)}
-          className={cn(
-            "ledger rounded px-1 text-xs text-muted-foreground transition-colors duration-700",
-            highlightedTarget === "Koruma" &&
-              "bg-signal/10 ring-2 ring-signal/50",
-          )}>
-          Koruma {targets.maintenanceKcal} kcal
+        <span className="flex flex-col items-end gap-1">
+          <span
+            ref={el => {
+              registerRef("Koruma", el);
+              registerReferrerRef(
+                "Bazal metabolizma, koruma ve hedef kalorisi",
+                el,
+              );
+            }}
+            className={cn(
+              "ledger rounded px-1 text-xs text-muted-foreground transition-colors duration-700",
+              (highlightedTarget === "Koruma" ||
+                highlightedReferrer ===
+                  "Bazal metabolizma, koruma ve hedef kalorisi") &&
+                "bg-signal/10 ring-2 ring-signal/50",
+            )}>
+            Koruma {targets.maintenanceKcal} kcal
+          </span>
+          {showSources && (
+            <SourceBadgeLink
+              label="Endotext"
+              feature="Bazal metabolizma, koruma ve hedef kalorisi"
+              onJump={onJumpToSource}
+            />
+          )}
         </span>
       </div>
       <div
@@ -1120,32 +1175,59 @@ function TargetSummary({
           highlightedReferrer === "Protein, yağ, karbonhidrat ve lif aralıkları" &&
             "bg-signal/10 ring-2 ring-signal/50",
         )}>
-        {cards.map(([label, value, suffix]) => (
-          <div
-            key={label}
-            ref={el => registerRef(label, el)}
-            className={cn(
-              "rounded-lg border p-3 transition-colors duration-700",
-              highlightedTarget === label
-                ? "border-signal/70 bg-signal/10 ring-2 ring-signal/50"
-                : "border-border",
-            )}>
-            <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              {label}{" "}
-              {showSources && (
-                <SourceBadgeLink
-                  label="DRI"
-                  feature="Protein, yağ, karbonhidrat ve lif aralıkları"
-                  onJump={onJumpToSource}
-                />
-              )}
-            </p>
-            <p className="ledger mt-1 text-lg font-semibold">{value}</p>
-            <p className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">
-              {suffix}
-            </p>
-          </div>
-        ))}
+        {cards.map(([label, value, suffix]) => {
+          // Most cards cite the AMDR macro-range group (DRI). Two don't:
+          // "Günlük enerji" is the BMR+activity+goal formula explained in
+          // "Nasıl hesaplanıyor" 's "Bazal metabolizma, koruma ve hedef
+          // kalorisi" block (same citation as "Koruma" right above this
+          // grid — Endotext, not DRI, and no separate referrer anchor
+          // needed since Koruma's is right there), and "Su" cites DRI's own
+          // Adequate Intake for total water, a different DRI category than
+          // the macro ranges, with its own dedicated citation group.
+          const citation =
+            label === "Günlük enerji"
+              ? {
+                  feature: "Bazal metabolizma, koruma ve hedef kalorisi",
+                  badge: "Endotext",
+                }
+              : label === "Su"
+                ? { feature: "Su ihtiyacı (temel sıvı)", badge: "DRI" }
+                : {
+                    feature: "Protein, yağ, karbonhidrat ve lif aralıkları",
+                    badge: "DRI",
+                  };
+          const isWater = label === "Su";
+          return (
+            <div
+              key={label}
+              ref={el => {
+                registerRef(label, el);
+                if (isWater) registerReferrerRef(citation.feature, el);
+              }}
+              className={cn(
+                "rounded-lg border p-3 transition-colors duration-700",
+                highlightedTarget === label ||
+                  (isWater && highlightedReferrer === citation.feature)
+                  ? "border-signal/70 bg-signal/10 ring-2 ring-signal/50"
+                  : "border-border",
+              )}>
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
+                {label}{" "}
+                {showSources && (
+                  <SourceBadgeLink
+                    label={citation.badge}
+                    feature={citation.feature}
+                    onJump={onJumpToSource}
+                  />
+                )}
+              </p>
+              <p className="ledger mt-1 text-lg font-semibold">{value}</p>
+              <p className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">
+                {suffix}
+              </p>
+            </div>
+          );
+        })}
       </div>
       {targets.warnings.map(warning => (
         <p key={warning} className="text-xs text-signal">
@@ -1185,33 +1267,51 @@ function SourceMap({
           )}>
           <p className="font-medium text-foreground">{group.feature}</p>
           <div className="mt-2 space-y-1.5">
-            {group.sources.map(source => (
-              <div
-                key={`${group.feature}-${source.href}-${source.label}`}
-                className="flex overflow-hidden rounded-md border border-signal shadow-sm">
-                {/* Left: jumps back up the page to where this source is
-                    cited — solid-filled, same weight as TargetBadgeLink,
-                    so it reads as a distinct "navigate" action. */}
-                <button
-                  type="button"
-                  onClick={() => onJumpToReferrer(group.feature)}
-                  title="Sayfada nerede kullanıldığını göster"
-                  className="flex shrink-0 items-center bg-signal px-1.5 py-1.5 text-[0.62rem] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-signal/90 active:bg-signal/90">
-                  {source.badge}
-                </button>
-                {/* Right: opens the actual citation — outlined/tinted,
-                    same weight as SourceBadgeLink, so it reads as a
-                    distinct "leave the app" action. */}
-                <a
-                  className="flex flex-1 items-center gap-1.5 bg-signal/10 px-1.5 py-1.5 text-foreground/80 transition-colors hover:bg-signal/20 hover:text-signal active:bg-signal/20 active:text-signal"
-                  href={source.href}
-                  target="_blank"
-                  rel="noreferrer">
-                  <span className="flex-1">{source.label}</span>
-                  <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
-                </a>
-              </div>
-            ))}
+            {group.sources.map(source => {
+              const hasExactReferrer =
+                REFERRER_EXACT_BADGES[group.feature]?.has(source.badge) ??
+                false;
+              return (
+                <div
+                  key={`${group.feature}-${source.href}-${source.label}`}
+                  className="flex overflow-hidden rounded-md border border-signal/70 shadow-sm">
+                  {/* Left: jumps back up the page to where this source is
+                      cited — same outlined/tinted weight as the citation
+                      badges everywhere else (this is still a citation badge,
+                      not a target-value one), separated from the right side
+                      by a divider since both segments now share a
+                      background. Disabled (not just hidden) when this exact
+                      badge has no genuine anchor elsewhere on the page — see
+                      REFERRER_EXACT_BADGES — so a click never lands somewhere
+                      that doesn't actually show it. */}
+                  {hasExactReferrer ? (
+                    <button
+                      type="button"
+                      onClick={() => onJumpToReferrer(group.feature)}
+                      title="Sayfada nerede kullanıldığını göster"
+                      className="flex shrink-0 items-center border-r border-signal/70 bg-signal/10 px-1.5 py-1.5 text-[0.62rem] font-semibold uppercase tracking-wide text-signal transition-colors hover:bg-signal/20 active:bg-signal/20">
+                      {source.badge}
+                    </button>
+                  ) : (
+                    <span className="flex shrink-0 items-center border-r border-border bg-muted px-1.5 py-1.5 text-[0.62rem] font-semibold uppercase tracking-wide text-muted-foreground">
+                      {source.badge}
+                    </span>
+                  )}
+                  {/* Right: opens the actual citation — lighter background
+                      than the left's page-nav segment (bg-signal/10) so the
+                      two actions read as visually distinct at a glance, not
+                      just via the divider and font weight. */}
+                  <a
+                    className="flex flex-1 items-center gap-1.5 bg-background px-1.5 py-1.5 text-foreground/80 transition-colors hover:bg-signal/10 hover:text-signal active:bg-signal/10 active:text-signal"
+                    href={source.href}
+                    target="_blank"
+                    rel="noreferrer">
+                    <span className="flex-1">{source.label}</span>
+                    <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+                  </a>
+                </div>
+              );
+            })}
           </div>
         </div>
       ))}

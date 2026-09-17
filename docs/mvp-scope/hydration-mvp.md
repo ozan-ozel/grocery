@@ -18,11 +18,13 @@ The roadmap marks it MISSING. It ships today: `waterMl = weightKg * 33` in
 
 Two things about it are worth fixing, neither of which is new work on the number itself:
 
-- **It is a collapsed range.** 33 is the midpoint of the drafted 30-35 mL/kg/day band, and the code
-  comment says so. Showing the band instead of the midpoint is the cheap fix, and it is the same
-  pattern flagged in the energy work, where collapsing a range to a point hides the method's own
-  uncertainty.
-- **One question needs settling first.** The DRI Adequate Intake the spec cites, roughly 2.7 L/day for
+- **It is a collapsed range. — FIXED (2026-09-17).** `waterMl` in `mealPersonalization.ts` now returns
+  the 30-35 mL/kg/day band itself (`{ min, max }`), and `PersonalPlanView.tsx`'s "Su" card shows it as a
+  range (e.g. "2.1-2.5 L"), the same pattern as the Protein/Yağ/Karbonhidrat/Lif cards. Its citation badge
+  was also corrected to its own group ("Su ihtiyacı (temel sıvı)") rather than the AMDR macro-range
+  group it was previously (incorrectly) folded into — both cite DRI, but they're different DRI
+  categories.
+- **One question needs settling first — still open, not resolved here.** The DRI Adequate Intake the spec cites, roughly 2.7 L/day for
   women and 3.7 L/day for men, explicitly **includes water from food**. The app presents its figure as
   a drinking target. Whether the 30-35 mL/kg approximation means total water or beverages only is not
   stated in the spec, and the number should not be labelled "drink this much" until it is.
@@ -56,8 +58,8 @@ the corpus.
 
 In:
 
-- Show the baseline as a 30-35 mL/kg range rather than a single midpoint.
-- Settle and then state what the figure covers, total water or beverages.
+- Show the baseline as a 30-35 mL/kg range rather than a single midpoint. — DONE (2026-09-17).
+- Settle and then state what the figure covers, total water or beverages. — still open.
 - Keep it a context figure, consistent with how BMI and waist are treated.
 
 Out:

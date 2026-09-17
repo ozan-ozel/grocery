@@ -40,8 +40,11 @@ export type PersonalTargets = {
   fiberG: { min: number; max: number };
   // MVP-1 PROVISIONAL (PSM Iteration 1, DEC-046): baseline fluid need only —
   // no exercise/heat adjustment (DEC-047/048), no per-occasion timing.
-  // REVISIT AFTER QA-1. See PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md.
-  waterMl: number;
+  // REVISIT AFTER QA-1. See PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md. Shown
+  // as the drafted 30-35 mL/kg/day range itself (not a collapsed midpoint —
+  // hydration-mvp.md's own outstanding-work note), same shape as the other
+  // macro ranges below.
+  waterMl: { min: number; max: number };
   warnings: string[];
   assumptions: string[];
 };
@@ -189,10 +192,10 @@ export function calculateTargets(
     ? profile.weightKg * trainingCarbRange.max
     : (safeTarget * CARB_AMDR_ENERGY_SHARE.max) / 4;
   const bmi = profile.weightKg / Math.pow(profile.heightCm / 100, 2);
-  // MVP-1 PROVISIONAL (DEC-046): midpoint of the drafted 30-35 mL/kg/day DRI
-  // baseline-fluid range — no exercise (DEC-047) or heat/altitude (DEC-048)
-  // adjustment. REVISIT AFTER QA-1.
-  const waterMl = round(profile.weightKg * 33);
+  // MVP-1 PROVISIONAL (DEC-046): the drafted 30-35 mL/kg/day DRI
+  // baseline-fluid range itself — no exercise (DEC-047) or heat/altitude
+  // (DEC-048) adjustment. REVISIT AFTER QA-1.
+  const waterMl = range(profile.weightKg * 30, profile.weightKg * 35);
   const warnings: string[] = [];
   if (target < MIN_CALORIES)
     warnings.push(

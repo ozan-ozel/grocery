@@ -23,17 +23,23 @@ export function Field({
   children,
   sourceBadge,
   info,
+  labelClassName,
 }: {
   label: string;
   children: React.ReactNode;
   sourceBadge?: string;
   info?: string;
+  // Styles just the label text (e.g. italic/bold to visually tie it to an
+  // explanatory sentence elsewhere that opens with the same words) without
+  // affecting the InfoModal title, which still reads the plain `label`.
+  labelClassName?: string;
 }) {
   const [showInfo, setShowInfo] = useState(false);
   return (
     <label className="block text-xs text-muted-foreground">
       <span className="mb-1 flex items-center gap-1">
-        {label} {sourceBadge && <SourceBadge label={sourceBadge} />}
+        <span className={labelClassName}>{label}</span>{" "}
+        {sourceBadge && <SourceBadge label={sourceBadge} />}
         {info && (
           <button
             type="button"
