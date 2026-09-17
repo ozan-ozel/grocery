@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { InfoModal } from "@/components/InfoModal";
+import { cn } from "@/lib/utils";
 
 // Shared with OnboardingQuickSetup (the profile-setup wizard) — kept in its
 // own module, separate from PersonalPlanView, so that a static import of
@@ -61,9 +63,11 @@ export function Field({
 export function NumberInput({
   value,
   onChange,
+  className,
 }: {
   value: number | string;
   onChange: (value: number) => void;
+  className?: string;
 }) {
   return (
     <Input
@@ -75,6 +79,44 @@ export function NumberInput({
       onInput={(event: Event) =>
         onChange(Number((event.target as HTMLInputElement).value))
       }
+      className={className}
     />
+  );
+}
+
+// Native <select>, styled to match NumberInput/Field's h-9 text-sm sizing
+// (the default Input/select browser chrome runs bigger — h-11/text-base —
+// which looked visibly mismatched sitting in the same grid as the compact
+// fields it's paired with). appearance-none strips the native dropdown
+// arrow so the small ChevronDown adornment below is the only one shown,
+// consistent with the rest of the app's icon sizing instead of each
+// platform's own (differently sized) native arrow glyph.
+export function Select({
+  value,
+  onChange,
+  children,
+  className,
+}: {
+  value: string;
+  onChange: (event: Event) => void;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <div className="relative">
+      <select
+        value={value}
+        onChange={onChange}
+        className={cn(
+          "h-9 w-full appearance-none rounded-md border border-input bg-background px-2 pr-7 text-sm",
+          className,
+        )}>
+        {children}
+      </select>
+      <ChevronDown
+        aria-hidden="true"
+        className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+      />
+    </div>
   );
 }

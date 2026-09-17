@@ -79,17 +79,9 @@ function AppBootSkeleton({ section }: { section: Section }) {
       className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col px-5 pt-6"
       role="status"
       aria-label="Yükleniyor">
-      {/* Living gradient edge — the softened .gradient-edge-flow-soft variant
-          (same mechanism PersonalPlanView/TodayView use at full strength for
-          a small toggle, blended down here since it wraps the entire boot
-          screen and full saturation read as too loud over a page of plain
-          gray placeholders). Transform-only animation — no extra paint cost
-          over the plain border it replaces. */}
-      <div className="gradient-edge-flow-soft rounded-lg p-px">
-        <div className="rounded-[calc(0.5rem-1px)] bg-background p-4">
-          <BootSkeletonHeader section={section} />
-          <BootSkeletonBody section={section} />
-        </div>
+      <div className="rounded-lg bg-background p-4">
+        <BootSkeletonHeader section={section} />
+        <BootSkeletonBody section={section} />
       </div>
     </div>
   );

@@ -2,7 +2,7 @@ import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { DropdownChevronButton } from "@/components/DropdownChevronButton";
-import { Field, NumberInput, SourceBadge } from "@/components/PersonalPlanFields";
+import { Field, NumberInput, Select, SourceBadge } from "@/components/PersonalPlanFields";
 import {
   ACTIVITY_OPTIONS,
   ACTIVITY_DESCRIPTIONS,
@@ -205,6 +205,41 @@ export function PersonalPlanView({ userId }: Props) {
     );
   }
 
+  // A citation row's left-hand badge (in "Kaynakları göster") jumping back up
+  // to wherever that source is actually cited on the page — the reverse of
+  // jumpToSource. Every SOURCE_GROUPS feature has exactly one canonical
+  // referrer registered below except "Bazal metabolizma, koruma ve hedef
+  // kalorisi", whose only citing spot is inside "Nasıl hesaplanıyor" itself
+  // (opened here if needed, same settle-delay pattern as jumpToSource).
+  const [highlightedReferrer, setHighlightedReferrer] = useState<
+    string | null
+  >(null);
+  const sourceReferrerRefs = useRef<Record<string, HTMLElement | null>>({});
+  const referrerHighlightTimeoutRef = useRef<number | undefined>(undefined);
+
+  function jumpToSourceReferrer(feature: string) {
+    const needsHowOpen =
+      feature === "Bazal metabolizma, koruma ve hedef kalorisi" && !howOpen;
+    if (needsHowOpen) {
+      setHowOpen(true);
+      howDetails.onToggle(true);
+    }
+    const settleDelay = needsHowOpen ? 340 : 0;
+    window.setTimeout(() => {
+      sourceReferrerRefs.current[feature]?.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }, settleDelay);
+    setHighlightedReferrer(feature);
+    if (referrerHighlightTimeoutRef.current)
+      window.clearTimeout(referrerHighlightTimeoutRef.current);
+    referrerHighlightTimeoutRef.current = window.setTimeout(
+      () => setHighlightedReferrer(null),
+      settleDelay + 1600,
+    );
+  }
+
   const { foods } = useFoodCatalog();
   // Display-only resolver for an exclusion chip's foodId: an entry created
   // before Canonical Food Identity holds a bare name_tr string (never a key
@@ -229,6 +264,11 @@ export function PersonalPlanView({ userId }: Props) {
   const [pendingFood, setPendingFood] = useState<Nutrition | null>(null);
   const [excludeExpanded, setExcludeExpanded] = useState(false);
   const [allergenExpanded, setAllergenExpanded] = useState(false);
+  // Open by default (unlike excludeExpanded/allergenExpanded above) since
+  // these are the profile fields most likely to need correcting right away
+  // — the onboarding wizard never asks for equation/waist/activity/goal, so
+  // they start out as guesses, not something to tuck away by default.
+  const [defaultsExpanded, setDefaultsExpanded] = useState(true);
 
   const excludedIds = new Set(profile.foodExclusions.map(e => e.foodId));
   const excludeMatches = excludeQuery.trim()
@@ -362,12 +402,31 @@ export function PersonalPlanView({ userId }: Props) {
       )}
 
       <section className="rounded-lg border border-border p-3">
-        <h2 className="flex items-center gap-2 text-sm font-semibold">
-          Profil {showSources && <SourceBadge label="NIDDK" />}
+        <h2
+          ref={el => {
+            sourceReferrerRefs.current[
+              "Profil girdileri ve enerji planlama çerçevesi"
+            ] = el;
+          }}
+          className={cn(
+            "flex items-center gap-2 rounded px-1 text-sm font-semibold transition-colors duration-700",
+            highlightedReferrer ===
+              "Profil girdileri ve enerji planlama çerçevesi" &&
+              "bg-signal/10 ring-2 ring-signal/50",
+          )}>
+          Profil{" "}
+          {showSources && (
+            <SourceBadgeLink
+              label="NIDDK"
+              feature="Profil girdileri ve enerji planlama çerçevesi"
+              onJump={jumpToSource}
+            />
+          )}
         </h2>
         <div className="mt-3 grid grid-cols-2 gap-3">
           <Field label="Profil adı">
             <Input
+              className="h-9 text-sm"
               value={profile.name}
               onInput={(event: Event) =>
                 update("name", (event.target as HTMLInputElement).value)
@@ -376,18 +435,21 @@ export function PersonalPlanView({ userId }: Props) {
           </Field>
           <Field label="Yaş (yıl)">
             <NumberInput
+              className="h-9 text-sm"
               value={profile.ageYears}
               onChange={value => update("ageYears", value)}
             />
           </Field>
           <Field label="Boy (cm)">
             <NumberInput
+              className="h-9 text-sm"
               value={profile.heightCm}
               onChange={value => update("heightCm", value)}
             />
           </Field>
           <Field label="Kilo (kg)">
             <NumberInput
+              className="h-9 text-sm"
               value={profile.weightKg}
               onChange={value => update("weightKg", value)}
             />
@@ -397,79 +459,110 @@ export function PersonalPlanView({ userId }: Props) {
           Bu uygulama 18 yaş altı, hamilelik, emzirme dönemi ve yeme bozukluğu
           tedavisi gören kullanıcılar için tasarlanmadı.
         </p>
-        <details className="group mt-3" open>
-          <summary className="flex cursor-pointer list-none items-center justify-between text-xs font-medium text-muted-foreground">
+        <div className="mt-3 rounded-lg border border-border">
+          <button
+            type="button"
+            onClick={() => setDefaultsExpanded(!defaultsExpanded)}
+            className="flex w-full cursor-pointer items-center justify-between rounded-lg p-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent active:bg-accent">
             <span>Varsayılan olarak dolduruldu — istersen değiştir</span>
             <span
               aria-hidden="true"
               className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 text-signal shadow-sm">
-              <ChevronRight className="size-3 transition-transform group-open:rotate-90" />
-            </span>
-          </summary>
-          <div className="mt-2 grid grid-cols-2 gap-3">
-            <Field label="Denklem seçimi">
-              <select
-                value={profile.equationSex}
-                onChange={event =>
-                  setEquationSex(
-                    (event.target as HTMLSelectElement).value as
-                      | "female"
-                      | "male",
-                  )
-                }
-                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
-                <option value="female">Kadın katsayısı</option>
-                <option value="male">Erkek katsayısı</option>
-              </select>
-            </Field>
-            <Field label="Bel (cm), isteğe bağlı">
-              <NumberInput
-                value={profile.waistCm ?? ""}
-                onChange={value => update("waistCm", value || undefined)}
+              <ChevronRight
+                className={cn(
+                  "size-3 transition-transform",
+                  defaultsExpanded && "rotate-90",
+                )}
               />
-            </Field>
-            <Field
-              label="Günlük aktivite"
-              sourceBadge={showSources ? "WHO" : undefined}
-              info={`${ACTIVITY_INFO_INTRO}\n\n${ACTIVITY_DESCRIPTIONS[profile.activity]}`}>
-              <select
-                value={profile.activity}
-                onChange={event =>
-                  setActivity(
-                    (event.target as HTMLSelectElement)
-                      .value as typeof profile.activity,
-                  )
-                }
-                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
-                {ACTIVITY_OPTIONS.map(option => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-            </Field>
-            <Field
-              label="Hedef"
-              sourceBadge={showSources ? "NIDDK" : undefined}>
-              <select
-                value={profile.goal}
-                onChange={event =>
-                  setGoal(
-                    (event.target as HTMLSelectElement).value as PersonalGoal,
-                  )
-                }
-                className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm">
-                <option value="maintain">Kilomu korumak</option>
-                <option value="loss">Kademeli kilo kaybı</option>
-                <option value="gain">Kilo almak / performans</option>
-              </select>
-            </Field>
+            </span>
+          </button>
+          <div
+            className={cn(
+              "grid transition-[grid-template-rows] duration-300 ease-out",
+              defaultsExpanded ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
+            )}>
+            <div className="overflow-hidden">
+              <div
+                className={cn(
+                  "grid grid-cols-2 gap-3 p-2 pt-0 transition-opacity duration-200",
+                  defaultsExpanded
+                    ? "opacity-100 delay-100"
+                    : "pointer-events-none opacity-0",
+                )}>
+                <Field label="Denklem seçimi">
+                  <Select
+                    value={profile.equationSex}
+                    onChange={event =>
+                      setEquationSex(
+                        (event.target as HTMLSelectElement).value as
+                          | "female"
+                          | "male",
+                      )
+                    }>
+                    <option value="female">Kadın katsayısı</option>
+                    <option value="male">Erkek katsayısı</option>
+                  </Select>
+                </Field>
+                <Field label="Bel (cm), isteğe bağlı">
+                  <NumberInput
+                    className="h-9 text-sm"
+                    value={profile.waistCm ?? ""}
+                    onChange={value => update("waistCm", value || undefined)}
+                  />
+                </Field>
+                <div
+                  ref={el => {
+                    sourceReferrerRefs.current["Günlük aktivite seviyesi"] = el;
+                  }}
+                  className={cn(
+                    "rounded transition-colors duration-700",
+                    highlightedReferrer === "Günlük aktivite seviyesi" &&
+                      "bg-signal/10 ring-2 ring-signal/50",
+                  )}>
+                  <Field
+                    label="Günlük aktivite"
+                    sourceBadge={showSources ? "WHO" : undefined}
+                    info={`${ACTIVITY_INFO_INTRO}\n\n${ACTIVITY_DESCRIPTIONS[profile.activity]}`}>
+                    <Select
+                      value={profile.activity}
+                      onChange={event =>
+                        setActivity(
+                          (event.target as HTMLSelectElement)
+                            .value as typeof profile.activity,
+                        )
+                      }>
+                      {ACTIVITY_OPTIONS.map(option => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </Field>
+                </div>
+                <Field
+                  label="Hedef"
+                  sourceBadge={showSources ? "NIDDK" : undefined}>
+                  <Select
+                    value={profile.goal}
+                    onChange={event =>
+                      setGoal(
+                        (event.target as HTMLSelectElement).value as PersonalGoal,
+                      )
+                    }>
+                    <option value="maintain">Kilomu korumak</option>
+                    <option value="loss">Kademeli kilo kaybı</option>
+                    <option value="gain">Kilo almak / performans</option>
+                  </Select>
+                </Field>
+                <p className="col-span-2 text-xs text-muted-foreground">
+                  Denklem seçimi yalnızca enerji tahminindeki biyolojik
+                  katsayıyı belirtir; cinsiyet kimliğinden otomatik olarak
+                  çıkarılmaz.
+                </p>
+              </div>
+            </div>
           </div>
-        </details>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Denklem seçimi yalnızca enerji tahminindeki biyolojik katsayıyı
-          belirtir; cinsiyet kimliğinden otomatik olarak çıkarılmaz.
-        </p>
+        </div>
       </section>
 
       <section className="rounded-lg border border-border p-3">
@@ -736,13 +829,29 @@ export function PersonalPlanView({ userId }: Props) {
           activity={activityLabel(profile.activity)}
           showSources={showSources}
           highlightedTarget={highlightedTarget}
+          onJumpToSource={jumpToSource}
+          highlightedReferrer={highlightedReferrer}
           registerRef={(label, el) => {
             targetCardRefs.current[label] = el;
+          }}
+          registerReferrerRef={(feature, el) => {
+            sourceReferrerRefs.current[feature] = el;
           }}
         />
       )}
 
-      <div className="glow-signal rounded-lg">
+      <div
+        ref={el => {
+          sourceReferrerRefs.current[
+            "Bazal metabolizma, koruma ve hedef kalorisi"
+          ] = el;
+        }}
+        className={cn(
+          "glow-signal rounded-lg transition-shadow duration-700",
+          highlightedReferrer ===
+            "Bazal metabolizma, koruma ve hedef kalorisi" &&
+            "ring-2 ring-signal/50",
+        )}>
         <details
           open={howOpen}
           onToggle={event => {
@@ -751,24 +860,32 @@ export function PersonalPlanView({ userId }: Props) {
             howDetails.onToggle(opened);
           }}
           className={cn(
-            "rounded-lg",
+            "group rounded-lg",
             howOpen && howDetails.settled
               ? "gradient-edge-flow p-px"
               : "border-signal-solid",
           )}>
           <summary
             ref={howDetails.ref}
-            className={`flex cursor-pointer list-none items-center gap-2 bg-background p-3 text-sm font-semibold ${
+            className={`flex cursor-pointer list-none items-center justify-between bg-background p-3 text-sm font-semibold ${
               howOpen
                 ? "rounded-t-[calc(0.5rem-1px)]"
                 : "rounded-[calc(0.5rem-1px)]"
             }`}>
+            <span className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 font-serif text-xs font-bold italic leading-none text-signal shadow-sm">
+                i
+              </span>
+              Nasıl hesaplanıyor?
+            </span>
             <span
               aria-hidden="true"
-              className="flex size-5 shrink-0 items-center justify-center rounded-full border border-signal/70 bg-signal/10 font-serif text-xs font-bold italic leading-none text-signal shadow-sm">
-              i
+              className="relative inline-flex items-center">
+              <span className="h-5 w-9 rounded-full bg-signal/10 transition-colors group-open:bg-signal" />
+              <span className="pointer-events-none absolute left-0.5 size-4 rounded-full bg-background shadow transition-transform group-open:translate-x-4" />
             </span>
-            Nasıl hesaplanıyor?
           </summary>
           <div className="space-y-2 rounded-b-[calc(0.5rem-1px)] bg-background px-3 pb-3 text-xs text-muted-foreground">
             <ul className="space-y-2.5">
@@ -780,11 +897,7 @@ export function PersonalPlanView({ userId }: Props) {
                 denklem seçimine göre erkek katsayısı (+5) ya da kadın katsayısı
                 (−161).
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <SourceBadgeLink
-                    label="Endotext"
-                    feature="Bazal metabolizma, koruma ve hedef kalorisi"
-                    onJump={jumpToSource}
-                  />
+                  <SourceBadge label="Endotext" />
                 </div>
               </li>
               <li>
@@ -795,16 +908,8 @@ export function PersonalPlanView({ userId }: Props) {
                 Orta aktif 1.7, Aktif 1.9, Çok aktif 2.1 ("Günlük aktivite"
                 seçimine göre).
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <SourceBadgeLink
-                    label="Endotext"
-                    feature="Bazal metabolizma, koruma ve hedef kalorisi"
-                    onJump={jumpToSource}
-                  />
-                  <SourceBadgeLink
-                    label="WHO"
-                    feature="Günlük aktivite seviyesi"
-                    onJump={jumpToSource}
-                  />
+                  <SourceBadge label="Endotext" />
+                  <SourceBadge label="WHO" />
                   <TargetBadgeLink label="Koruma" onJump={jumpToTarget} />
                 </div>
               </li>
@@ -832,21 +937,9 @@ export function PersonalPlanView({ userId }: Props) {
                 alma hedefinde) veya 2.0g (kilo verme hedefinde, kas kütlesini
                 korumak için); lif her 1000 kcal için ~14g.
                 <div className="mt-1 flex flex-wrap gap-1">
-                  <SourceBadgeLink
-                    label="DRI"
-                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
-                    onJump={jumpToSource}
-                  />
-                  <SourceBadgeLink
-                    label="Hector 2018"
-                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
-                    onJump={jumpToSource}
-                  />
-                  <SourceBadgeLink
-                    label="ACSM 2016"
-                    feature="Protein, yağ, karbonhidrat ve lif aralıkları"
-                    onJump={jumpToSource}
-                  />
+                  <SourceBadge label="DRI" />
+                  <SourceBadge label="Hector 2018" />
+                  <SourceBadge label="ACSM 2016" />
                   <TargetBadgeLink label="Protein" onJump={jumpToTarget} />
                   <TargetBadgeLink label="Yağ" onJump={jumpToTarget} />
                   <TargetBadgeLink
@@ -908,6 +1001,7 @@ export function PersonalPlanView({ userId }: Props) {
               registerRef={(feature, el) => {
                 sourceGroupRefs.current[feature] = el;
               }}
+              onJumpToReferrer={jumpToSourceReferrer}
             />
           </div>
         </details>
@@ -943,7 +1037,10 @@ function TargetSummary({
   activity,
   showSources,
   highlightedTarget,
+  onJumpToSource,
+  highlightedReferrer,
   registerRef,
+  registerReferrerRef,
 }: {
   targets: NonNullable<
     ReturnType<typeof import("@/lib/mealPersonalization").calculateTargets>
@@ -951,7 +1048,10 @@ function TargetSummary({
   activity: string;
   showSources: boolean;
   highlightedTarget: string | null;
+  onJumpToSource: (feature: string) => void;
+  highlightedReferrer: string | null;
   registerRef: (label: string, el: HTMLElement | null) => void;
+  registerReferrerRef: (feature: string, el: HTMLElement | null) => void;
 }) {
   const cards = [
     ["Günlük enerji", `${targets.targetKcal} kcal`, "hedef"],
@@ -975,12 +1075,30 @@ function TargetSummary({
           <h2 className="text-sm font-semibold">Günlük hedeflerin</h2>
           <p className="mt-1 flex flex-wrap items-center gap-x-1.5 gap-y-1 text-xs text-muted-foreground">
             <span>{activity}</span>
-            {showSources && <SourceBadge label="WHO" />}
+            {showSources && (
+              <SourceBadgeLink
+                label="WHO"
+                feature="Günlük aktivite seviyesi"
+                onJump={onJumpToSource}
+              />
+            )}
             <span aria-hidden="true">·</span>
-            <span>
+            <span
+              ref={el => registerReferrerRef("BMI ve bel çevresi bağlamı", el)}
+              className={cn(
+                "rounded px-1 transition-colors duration-700",
+                highlightedReferrer === "BMI ve bel çevresi bağlamı" &&
+                  "bg-signal/10 ring-2 ring-signal/50",
+              )}>
               BMI {targets.bmi} ({bmiLabel(targets.bmi)})
             </span>
-            {showSources && <SourceBadge label="Endotext" />}
+            {showSources && (
+              <SourceBadgeLink
+                label="Endotext"
+                feature="BMI ve bel çevresi bağlamı"
+                onJump={onJumpToSource}
+              />
+            )}
           </p>
         </div>
         <span
@@ -993,7 +1111,15 @@ function TargetSummary({
           Koruma {targets.maintenanceKcal} kcal
         </span>
       </div>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+      <div
+        ref={el =>
+          registerReferrerRef("Protein, yağ, karbonhidrat ve lif aralıkları", el)
+        }
+        className={cn(
+          "grid grid-cols-2 gap-2 rounded-lg transition-colors duration-700 sm:grid-cols-3",
+          highlightedReferrer === "Protein, yağ, karbonhidrat ve lif aralıkları" &&
+            "bg-signal/10 ring-2 ring-signal/50",
+        )}>
         {cards.map(([label, value, suffix]) => (
           <div
             key={label}
@@ -1005,7 +1131,14 @@ function TargetSummary({
                 : "border-border",
             )}>
             <p className="flex items-center gap-1 text-xs text-muted-foreground">
-              {label} {showSources && <SourceBadge label="DRI" />}
+              {label}{" "}
+              {showSources && (
+                <SourceBadgeLink
+                  label="DRI"
+                  feature="Protein, yağ, karbonhidrat ve lif aralıkları"
+                  onJump={onJumpToSource}
+                />
+              )}
             </p>
             <p className="ledger mt-1 text-lg font-semibold">{value}</p>
             <p className="text-[0.68rem] uppercase tracking-widest text-muted-foreground">
@@ -1030,9 +1163,11 @@ function TargetSummary({
 function SourceMap({
   highlightedGroup,
   registerRef,
+  onJumpToReferrer,
 }: {
   highlightedGroup: string | null;
   registerRef: (feature: string, el: HTMLDivElement | null) => void;
+  onJumpToReferrer: (feature: string) => void;
 }) {
   return (
     <div className="space-y-4 border-t border-border pt-3 text-xs">
@@ -1051,16 +1186,31 @@ function SourceMap({
           <p className="font-medium text-foreground">{group.feature}</p>
           <div className="mt-2 space-y-1.5">
             {group.sources.map(source => (
-              <a
+              <div
                 key={`${group.feature}-${source.href}-${source.label}`}
-                className="flex items-center gap-1.5 rounded-md px-1.5 py-1.5 text-foreground/80 underline decoration-dotted underline-offset-2 transition-colors hover:bg-accent active:bg-accent hover:text-signal active:text-signal hover:decoration-solid active:decoration-solid"
-                href={source.href}
-                target="_blank"
-                rel="noreferrer">
-                <SourceBadge label={source.badge} />
-                <span className="flex-1">{source.label}</span>
-                <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
-              </a>
+                className="flex overflow-hidden rounded-md border border-signal shadow-sm">
+                {/* Left: jumps back up the page to where this source is
+                    cited — solid-filled, same weight as TargetBadgeLink,
+                    so it reads as a distinct "navigate" action. */}
+                <button
+                  type="button"
+                  onClick={() => onJumpToReferrer(group.feature)}
+                  title="Sayfada nerede kullanıldığını göster"
+                  className="flex shrink-0 items-center bg-signal px-1.5 py-1.5 text-[0.62rem] font-semibold uppercase tracking-wide text-white transition-colors hover:bg-signal/90 active:bg-signal/90">
+                  {source.badge}
+                </button>
+                {/* Right: opens the actual citation — outlined/tinted,
+                    same weight as SourceBadgeLink, so it reads as a
+                    distinct "leave the app" action. */}
+                <a
+                  className="flex flex-1 items-center gap-1.5 bg-signal/10 px-1.5 py-1.5 text-foreground/80 transition-colors hover:bg-signal/20 hover:text-signal active:bg-signal/20 active:text-signal"
+                  href={source.href}
+                  target="_blank"
+                  rel="noreferrer">
+                  <span className="flex-1">{source.label}</span>
+                  <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+                </a>
+              </div>
             ))}
           </div>
         </div>
