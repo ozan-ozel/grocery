@@ -6,7 +6,7 @@ import { UndoToast } from "@/components/UndoToast";
 import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { BottomNavigation, type NavTab } from "@/components/BottomNavigation";
-import { buildCatalog } from "@/lib/store";
+import { buildCatalog, readNutritionScopeFromUrl } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
 import { useUiPrefs, initialSection, type Tab, type Section } from "@/hooks/useUiPrefs";
 import { useTenants } from "@/hooks/useTenants";
@@ -65,24 +65,67 @@ export function App() {
   );
 }
 
-// Mimics each section's actual layout instead of a generic block stack, so
-// the very first paint already reads as "this exact screen, still loading"
-// rather than an unrelated placeholder — and instead of a bare spinner, in
-// the app's own loading-flow language. That spinning icon is reserved for
-// AppHeader's background sync status, a different concern from "content
-// hasn't arrived yet". Section-specific because "yemek" (meal plan) is the
-// actual default landing section (see initialSection() in useUiPrefs), not
-// Alışveriş — a one-size skeleton would mispredict the common case.
+// Shared by both AppBootSkeleton (below) and AppShell's real currentNavTab,
+// so the two never drift into disagreeing about which nav tab a Section maps
+// to.
+function sectionToNavTab(section: Section): NavTab {
+  switch (section) {
+    case "alisveris":
+      return "shopping";
+    case "besin":
+      return "nutrition";
+    case "yemek":
+      return "meals";
+    case "kisisel":
+      return "personal";
+    case "ayarlar":
+      return "settings";
+  }
+}
+
+// One generic frame for every section, not a per-section guess — at this
+// point (!checked, App.tsx) we don't yet know if there's even a session, so
+// pretending to know the exact target layout is a losing game. Modeled on
+// "yemek" (meal plan) since that's the actual default landing section (see
+// initialSection() in useUiPrefs) and thus the common case. Once the session
+// resolves, AppShell's per-section Suspense fallback (SectionSuspenseFallback
+// below) takes over with an exact match for whichever section it actually is.
+//
+// BottomNavigation is real, not skeletonized — its labels/icons are static,
+// never "loading", and it's fixed-positioned (ignores this wrapper's padding
+// entirely), so it lands pixel-identical here, in the Suspense phase, and in
+// the final page with zero extra work. onTabChange is a no-op: AppShell's
+// setSection doesn't exist yet at this point, and this gate is normally a
+// sub-second auth check, not worth wiring real pre-login navigation for.
 function AppBootSkeleton({ section }: { section: Section }) {
   return (
     <div
       className="mx-auto flex min-h-dvh w-full max-w-[30rem] flex-col px-5 pt-6"
       role="status"
       aria-label="Yükleniyor">
-      <div className="rounded-lg bg-background p-4">
-        <BootSkeletonHeader section={section} />
-        <BootSkeletonBody section={section} />
+      <div className="space-y-4">
+        <LoadingBlock className="h-3 w-24 rounded" />
+        <div className="flex items-center justify-between">
+          <QuietIconPlaceholder />
+          <LoadingBlock className="h-6 w-32 rounded-md" />
+          <QuietIconPlaceholder />
+        </div>
+        <div className="grid grid-cols-2 gap-2">
+          <LoadingBlock className="h-16 rounded-lg" />
+          <LoadingBlock className="h-16 rounded-lg" />
+        </div>
+        <div className="grid grid-cols-3 gap-2">
+          <LoadingBlock className="h-16 rounded-lg" />
+          <LoadingBlock className="h-16 rounded-lg" />
+          <LoadingBlock className="h-16 rounded-lg" />
+        </div>
+        <div className="space-y-2">
+          <LoadingBlock className="h-24" />
+          <LoadingBlock className="h-24" />
+          <LoadingBlock className="h-24" />
+        </div>
       </div>
+      <BottomNavigation activeTab={sectionToNavTab(section)} onTabChange={() => {}} />
     </div>
   );
 }
@@ -101,103 +144,347 @@ function QuietIconPlaceholder() {
   );
 }
 
-// Mirrors each section's actual header shape: Alışveriş and Yemek Planı
-// both now render a single-line title (no eyebrow+h1 pair — see
-// AppHeader.tsx / MealPlanView.tsx), Besin/Kişisel/Ayarlar still use the
-// two-line eyebrow+h1 pattern.
-function BootSkeletonHeader({ section }: { section: Section }) {
-  if (section === "alisveris") {
-    return (
-      <div className="pb-2">
-        <LoadingBlock className="h-3 w-20 rounded" />
-        <div className="mt-2 flex items-center justify-between gap-2">
-          <LoadingBlock className="h-7 w-20 rounded-md" />
-          <div className="flex items-center gap-1">
-            <QuietIconPlaceholder />
-            <QuietIconPlaceholder />
-          </div>
-        </div>
-      </div>
-    );
-  }
-  if (section === "yemek") {
-    return (
-      <div className="pb-3">
-        <LoadingBlock className="h-3 w-24 rounded" />
-      </div>
-    );
-  }
-  return (
-    <div className="pb-3">
-      <LoadingBlock className="h-3 w-24 rounded" />
-      <LoadingBlock className="mt-2 h-6 w-48 rounded-md" />
-    </div>
-  );
-}
-
-function BootSkeletonBody({ section }: { section: Section }) {
+// Per-section fallback for the lazy-view Suspense boundaries in AppShell
+// (below) — distinct from AppBootSkeleton above, which only covers the
+// pre-login/pre-AppShell paint. By the time these run,
+// AppHeader and BottomNavigation are already real (AppHeader itself renders
+// nothing for any section but "alisveris" — see the early return in
+// AppHeader.tsx), so the title/subtitle these sections show is owned by the
+// lazy view component's own JSX, not the shared header. Each fallback below
+// reproduces that view's real top-of-page markup (wrapper element, spacing
+// classes, and which of eyebrow/h1/description line actually exist for that
+// section) so nothing shifts position once the chunk finishes loading and
+// swaps in — only the section's data-dependent body content is approximated.
+function SectionSuspenseFallback({ section }: { section: Section }) {
   switch (section) {
-    case "yemek":
-      return (
-        <>
-          <div className="flex items-center justify-between gap-2">
-            <QuietIconPlaceholder />
-            <LoadingBlock className="h-6 w-32 rounded-md" />
-            <QuietIconPlaceholder />
+    case "besin": {
+      // Mirrors NutritionView.tsx's scopeToggle block (mb-3 wrapper, nested
+      // mb-3 eyebrow+h1, then the Tümü/Kategoriler/Karşılaştır SmoothPillTabs
+      // row) — shared by every scope below it.
+      const header = (
+        <div className="mb-3">
+          <div className="mb-3">
+            <LoadingBlock className="h-4 w-28 rounded" />
+            <LoadingBlock className="mt-1 h-8 w-60 rounded-md" />
           </div>
-          <div className="mt-4 grid grid-cols-2 gap-2">
-            <LoadingBlock className="h-16 rounded-lg" />
-            <LoadingBlock className="h-16 rounded-lg" />
-          </div>
-          <div className="mt-2 grid grid-cols-3 gap-2">
-            <LoadingBlock className="h-16 rounded-lg" />
-            <LoadingBlock className="h-16 rounded-lg" />
-            <LoadingBlock className="h-16 rounded-lg" />
-          </div>
-          <div className="mt-4 space-y-2">
-            <LoadingBlock className="h-24" />
-            <LoadingBlock className="h-24" />
-            <LoadingBlock className="h-24" />
-          </div>
-        </>
-      );
-    case "besin":
-    case "kisisel":
-    case "ayarlar":
-      // These three all resolve to the same shape once loaded: an eyebrow+h1
-      // header (already covered by BootSkeletonHeader) followed by a plain
-      // stack of card-sized blocks — close enough across all three that a
-      // dedicated layout per section wasn't worth the upkeep.
-      return (
-        <div className="mt-2 space-y-2">
-          <LoadingBlock className="h-16" />
-          <LoadingBlock className="h-16" />
-          <LoadingBlock className="h-16" />
+          <LoadingBlock className="h-10 w-full rounded-lg" />
         </div>
       );
-    case "alisveris":
-    default:
+      // NutritionView.tsx picks one of several different bodies depending on
+      // scope (readNutritionScopeFromUrl — same URL-before-mount trick as
+      // AppBootSkeleton's bootSection above), not just the one this used to
+      // assume. "all" (Tümü) is AllFoodsBrowser: a real h-11 search input
+      // (Input's own class, see ui/input.tsx) + a "N besin" count label, both
+      // measured live. Anything else falls back to the items-in-list shape:
+      // the "Değerler 100 g / 100 ml içindir." + "JSON yükle" row (also
+      // measured live — missing before, which left every list row 56px too
+      // high once the chunk mounted) — the closest single approximation for
+      // "cats"/"compare"/empty-list, none of which are knowable pre-mount.
+      if (readNutritionScopeFromUrl() === "all") {
+        return (
+          <div>
+            {header}
+            <LoadingBlock className="h-11 w-full rounded-md" />
+            <div className="px-1 pb-1 pt-4">
+              <LoadingBlock className="h-4 w-20 rounded" />
+            </div>
+            <div className="space-y-2">
+              <LoadingBlock className="h-16" />
+              <LoadingBlock className="h-16" />
+              <LoadingBlock className="h-16" />
+            </div>
+          </div>
+        );
+      }
       return (
-        <>
-          <LoadingBlock className="h-10 rounded-lg" />
-          <div className="mt-4 flex items-end justify-between gap-2">
-            <LoadingBlock className="h-8 w-40" />
-            <LoadingBlock className="h-6 w-14" />
+        <div>
+          {header}
+          <div className="flex items-center justify-between px-1 pb-3">
+            <LoadingBlock className="h-3 w-40 rounded" />
+            <div className="flex items-center gap-1.5">
+              <LoadingBlock className="size-3.5 rounded-full" />
+              <LoadingBlock className="h-3 w-16 rounded" />
+            </div>
           </div>
-          <LoadingBlock className="mt-3 h-1 w-full rounded-full" />
-          <div className="mt-3 flex items-center gap-4">
-            <LoadingBlock className="h-5 w-12" />
-            <LoadingBlock className="h-5 w-10" />
-            <LoadingBlock className="h-5 w-14" />
-            <LoadingBlock className="h-5 w-8" />
-          </div>
-          <div className="mt-4 space-y-2">
-            <LoadingBlock className="h-16" />
+          <div className="space-y-2">
             <LoadingBlock className="h-16" />
             <LoadingBlock className="h-16" />
             <LoadingBlock className="h-16" />
           </div>
-        </>
+        </div>
+      );
+    }
+    case "yemek": {
+      // Mirrors MealPlanView.tsx's outer space-y-4 wrapper — no h1 here, its
+      // real "title" is the day-nav row — PLUS the two card types that
+      // actually fill the page below it, neither of which the old version
+      // had: MacroSummaryCard.tsx's "GÜNLÜK MAKROLAR" card (rounded-lg
+      // border p-3, h2, then a 2-col then 3-col grid of border-l-4 tiles,
+      // each with a 40px ring + two-line value) and MealContainer.tsx's 4
+      // fixed meal-slot cards (space-y-3 rounded-lg border p-4, h3 + a 2-col
+      // grid of dashed-border add buttons). Both card shapes and all 7
+      // labels (macro names, meal names) are static strings from those
+      // components, never data — rendered as real text here, not shimmer,
+      // since matching them exactly costs nothing and reads better than a
+      // guessed-width bar. Only true per-user numbers (kcal, day label,
+      // "+0") are shimmered. The optional "Akşam için öneriler" list below
+      // the 4th card is skipped — it's conditional and its length varies
+      // 0-8+, so there's no fixed shape to fake here.
+      const macroTile = (label: string, ringW: string, valW: string) => (
+        <div key={label} className="rounded-lg border-l-4 border-l-border bg-background p-2.5">
+          <p className="text-[0.7rem] font-medium text-muted-foreground">{label}</p>
+          <div className="mt-1.5 flex items-center gap-2">
+            <LoadingBlock className="size-10 shrink-0 rounded-full" />
+            <div>
+              <LoadingBlock className={`h-[18px] rounded ${valW}`} />
+              <LoadingBlock className={`mt-1 h-4 rounded ${ringW}`} />
+            </div>
+          </div>
+        </div>
+      );
+      return (
+        <div className="space-y-4">
+          <p className="text-xs uppercase tracking-widest text-muted-foreground">Yemek Planı</p>
+          <div className="flex items-center justify-between">
+            <QuietIconPlaceholder />
+            <LoadingBlock className="h-7 w-32 rounded-md" />
+            <QuietIconPlaceholder />
+          </div>
+
+          <div className="rounded-lg border border-border bg-card p-3">
+            <h2 className="mb-2 text-xs font-semibold text-muted-foreground">GÜNLÜK MAKROLAR</h2>
+            <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-2">
+                {macroTile("Kalori", "w-6", "w-10")}
+                {macroTile("Protein", "w-5", "w-6")}
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {macroTile("Karbonhidrat", "w-5", "w-8")}
+                {macroTile("Yağ", "w-5", "w-6")}
+                {macroTile("Lif", "w-5", "w-6")}
+              </div>
+            </div>
+          </div>
+
+          {/* The 4 cards are wrapped in their own space-y-3 (12px) in
+              MealPlanView.tsx:350 — nested as a single item inside this
+              outer space-y-4, not direct siblings of it. Rendering them
+              as direct children here gave them 16px gaps instead of the
+              real 12px. */}
+          <div className="space-y-3">
+            {(["İlk Öğün", "Ara Öğün", "Son Öğün", "Ara Öğün"] as const).map((label, i) => (
+              <div key={i} className="space-y-3 rounded-lg border border-border bg-card p-4">
+                <h3 className="font-semibold text-foreground">{label}</h3>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground">
+                    <span aria-hidden="true">+</span> Ürünler
+                  </div>
+                  <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground">
+                    <span aria-hidden="true">+</span> Yemekler
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+    case "kisisel": {
+      // PersonalPlanView.tsx is a long form-heavy page — matched at the
+      // card/heading level (every section boundary, every fixed heading
+      // text, every card's real padding/gap) rather than replicating each
+      // input field's border pixel-for-pixel, which would be a lot of code
+      // for a placeholder seen for a fraction of a second. Card-by-card,
+      // measured live against the real page:
+      //  - header: eyebrow+h1 (as elsewhere) + a 2-line wrapped description
+      //    paragraph, unique to this section.
+      //  - "Profil" card (rounded-lg border p-3 — NOT p-4, this one's
+      //    narrower than the others): collapsed to a single block rather
+      //    than mimicking its 2x2 field grid + warning line + default-open
+      //    sub-panel individually — see the height comment further down for
+      //    why that block's exact px height still keeps the card's own
+      //    top/bottom edges pinned to their real, measured position.
+      //  - "Önerilmesin" / "Alerjen grubu hariç tut": both
+      //    DropdownChevronButton disclosures, both collapsed by default —
+      //    each is just its own rounded-lg border p-3 header bar.
+      //  - "Günlük hedeflerin": always-visible results, real heading text,
+      //    a 2-col grid of 6 metric tiles (label/value/suffix).
+      //  - "Nasıl hesaplanıyor?" / "Kaynakları göster": native
+      //    <details>/<summary> disclosures, also collapsed by default,
+      //    each its own bordered p-3 bar.
+      return (
+        <div className="space-y-5">
+          <div>
+            <LoadingBlock className="h-4 w-24 rounded" />
+            <LoadingBlock className="mt-1 h-8 w-56 rounded-md" />
+            {/* Two wrapped lines of one text-sm paragraph, not two separate
+                blocks with a gap between them — real line-height is 20px
+                and wrapped lines sit flush against each other, no space-y.
+                Each row below is a 20px (h-5) slot so the total still lands
+                on the real 40px, but the visible bar inside is only 14px
+                (h-3.5), vertically centered — a real text line's ink only
+                fills part of its line-height, so a bar that fills the full
+                20px edge-to-edge reads as heavier/closer to the h1 above
+                than the actual text ever does. */}
+            <div className="mt-2">
+              <div className="flex h-5 items-center">
+                <LoadingBlock className="h-3.5 w-full rounded" />
+              </div>
+              <div className="flex h-5 items-center">
+                <LoadingBlock className="h-3.5 w-2/3 rounded" />
+              </div>
+            </div>
+          </div>
+
+          <section className="rounded-lg border border-border p-3">
+            {/* px-1 matches the real h2's own class (PersonalPlanView.tsx) —
+                it carries a citation-badge feature there, but even with the
+                badge hidden its px-1 still applies, shifting the text 4px
+                right of a plain text-sm heading. Without it here, "Profil"
+                visibly jumps left when the real component mounts. */}
+            <h2 className="px-1 text-sm font-semibold">Profil</h2>
+            {/* Simplified to one block instead of mimicking every field/
+                sub-panel row individually — but its height (411px) is not a
+                guess: card top-to-bottom measured live at 467px, minus p-3
+                padding (12 top + 12 bottom) and the "Profil" heading's own
+                20px + mt-3 (12px) gap, so the card's total footprint still
+                lands exactly where the real one does, only the inside is
+                coarser. */}
+            <LoadingBlock className="mt-3 h-[411px] w-full rounded-lg" />
+          </section>
+
+          <section className="rounded-lg border border-border p-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold">Önerilmesin</h2>
+              <LoadingBlock className="size-5 shrink-0 rounded-full" />
+            </div>
+          </section>
+
+          <section className="rounded-lg border border-border p-3">
+            <div className="flex items-center justify-between">
+              <h2 className="text-sm font-semibold">Alerjen grubu hariç tut</h2>
+              <LoadingBlock className="size-5 shrink-0 rounded-full" />
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex items-end justify-between">
+              <div>
+                <h2 className="text-sm font-semibold">Günlük hedeflerin</h2>
+                <LoadingBlock className="mt-1 h-3 w-32 rounded" />
+              </div>
+              <LoadingBlock className="h-3 w-24 rounded" />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {(["Günlük enerji", "Protein", "Yağ", "Karbonhidrat", "Lif", "Su"] as const).map(
+                label => (
+                  <div key={label} className="rounded-lg border border-border p-3">
+                    <p className="text-xs text-muted-foreground">{label}</p>
+                    <LoadingBlock className="mt-1 h-6 w-16 rounded" />
+                    <LoadingBlock className="mt-1 h-2.5 w-12 rounded" />
+                  </div>
+                )
+              )}
+            </div>
+            {/* "Hedefler tahminidir; düzenli ağırlık ve besin kaydıyla
+                zaman içinde kişiselleştirilmelidir." wraps to 2 lines here
+                (measured 32px, text-xs's 16px line-height twice), not the
+                single 12px bar this used to be — same slotted-line pattern
+                as the header description above: a 16px (h-4) row per line,
+                with a shorter h-2.5 bar centered inside it. */}
+            <div>
+              <div className="flex h-4 items-center">
+                <LoadingBlock className="h-2.5 w-full rounded" />
+              </div>
+              <div className="flex h-4 items-center">
+                <LoadingBlock className="h-2.5 w-3/5 rounded" />
+              </div>
+            </div>
+          </section>
+
+          {/* Real element uses border-signal-solid (a signal-colored border)
+              by default — accurate, but a single colored border standing out
+              against an otherwise neutral stack of loading blocks draws the
+              eye where there's nothing to look at yet. Plain border-border
+              here instead, same as every other card (including Kaynakları
+              göster right below it). */}
+          <div className="rounded-lg border border-border p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <LoadingBlock className="size-5 shrink-0 rounded-full" />
+                Nasıl hesaplanıyor?
+              </div>
+              <div className="h-5 w-9 rounded-full bg-signal/10" />
+            </div>
+          </div>
+
+          <div className="rounded-lg border border-border p-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                <LoadingBlock className="size-5 shrink-0 rounded-full" />
+                Kaynakları göster
+              </div>
+              <div className="h-5 w-9 rounded-full bg-signal/10" />
+            </div>
+          </div>
+        </div>
+      );
+    }
+    case "ayarlar":
+    default:
+      // Unlike the other three sections, SettingsView.tsx's body isn't
+      // data-shaped at all — no list whose length varies, just three fixed
+      // cards (Tema, Grup, sign-out/delete) — so this reproduces the real
+      // card chrome (border, rounded-lg, bg-card, padding) directly instead
+      // of guessing with generic h-16 blocks, and only shimmers the parts
+      // that actually come from the lazy chunk: heading text, the
+      // ThemeSwitcher pill (h-9 w-16, see ThemeSwitcher.tsx), the
+      // TenantSwitcher trigger button (measured ~79px wide, w-20 here — see
+      // TenantSwitcher.tsx), and the two account-action rows. All three
+      // cards are min-h-[114px] in SettingsView.tsx itself (Tema/Grup
+      // content is flex-centered within it) so they're a uniform height —
+      // matched here with the same class instead of per-card padding
+      // fudge-factors that drifted every time either real card's content
+      // changed.
+      return (
+        <div className="space-y-5">
+          <div>
+            {/* Both sized to their real line-height, not just glyph height —
+                text-xs is a 16px line box (h-4) and text-2xl is 32px (h-8);
+                the previous h-3/h-7 pair was 4px short on each, which pushed
+                every card below 8px higher than the real page lands. */}
+            <LoadingBlock className="h-4 w-20 rounded" />
+            {/* "Hesap ve tercihler" renders bold at text-2xl and runs to
+                ~60% of the 440px content column (30rem container minus the
+                px-5 gutters) — w-44 read as a stub next to the real heading;
+                w-64 actually spans close to it. */}
+            <LoadingBlock className="mt-1 h-8 w-64 rounded-md" />
+          </div>
+
+          <section className="flex min-h-[114px] flex-col justify-center space-y-2 rounded-lg border border-border bg-card p-4">
+            <LoadingBlock className="h-5 w-12 rounded" />
+            <LoadingBlock className="h-9 w-16 rounded-full" />
+          </section>
+
+          <section className="flex min-h-[114px] flex-col justify-center space-y-2 rounded-lg border border-border bg-card p-4">
+            <LoadingBlock className="h-5 w-12 rounded" />
+            <LoadingBlock className="h-9 w-20 rounded-md" />
+          </section>
+
+          {/* text-sm's real line-height is 20px (h-5), not the icon's own
+              16px (size-4) — using h-4 for the label undersized both rows
+              by 4px each, 8px total short on the card. */}
+          <div className="space-y-2 rounded-lg border border-border bg-card p-2">
+            <div className="flex items-center gap-3 rounded-lg px-4 py-3">
+              <LoadingBlock className="size-4 shrink-0 rounded-full" />
+              <LoadingBlock className="h-5 w-24 rounded" />
+            </div>
+            <div className="flex items-center gap-3 rounded-lg px-4 py-3">
+              <LoadingBlock className="size-4 shrink-0 rounded-full" />
+              <LoadingBlock className="h-5 w-28 rounded" />
+            </div>
+          </div>
+        </div>
       );
   }
 }
@@ -387,16 +674,7 @@ function AppShell({
     foodIdentityIndex,
   });
 
-  const currentNavTab: NavTab =
-    section === "alisveris"
-      ? "shopping"
-      : section === "besin"
-        ? "nutrition"
-        : section === "yemek"
-          ? "meals"
-          : section === "kisisel"
-            ? "personal"
-            : "settings";
+  const currentNavTab: NavTab = sectionToNavTab(section);
 
   function handleNavTabChange(navTab: NavTab) {
     const sectionMap: Record<NavTab, Section> = {
@@ -439,7 +717,7 @@ function AppShell({
             onSkip={onboarding.skip}
           />
         ) : section === "besin" ? (
-          <Suspense fallback={<BootSkeletonBody section="besin" />}>
+          <Suspense fallback={<SectionSuspenseFallback section={section} />}>
             <NutritionView
               items={active.items}
               showNutritionValues={showNutritionValues}
@@ -454,7 +732,7 @@ function AppShell({
             />
           </Suspense>
         ) : section === "yemek" ? (
-          <Suspense fallback={<BootSkeletonBody section="yemek" />}>
+          <Suspense fallback={<SectionSuspenseFallback section={section} />}>
             <MealPlanView
               userId={currentUserId}
               householdId={activeTenantId}
@@ -464,11 +742,11 @@ function AppShell({
             />
           </Suspense>
         ) : section === "kisisel" ? (
-          <Suspense fallback={<BootSkeletonBody section="kisisel" />}>
+          <Suspense fallback={<SectionSuspenseFallback section={section} />}>
             <PersonalPlanView userId={currentUserId} />
           </Suspense>
         ) : section === "ayarlar" ? (
-          <Suspense fallback={<BootSkeletonBody section="ayarlar" />}>
+          <Suspense fallback={<SectionSuspenseFallback section={section} />}>
             <SettingsView
               onSignOut={onSignOut}
               onDeleteAccount={onDeleteAccount}
