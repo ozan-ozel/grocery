@@ -559,9 +559,12 @@ export function PersonalPlanView({ userId }: Props) {
                   </Select>
                 </Field>
                 <p className="col-span-2 text-xs text-muted-foreground">
-                  <span className="font-semibold italic text-foreground">
+                  {/* mr-1 (not just the trailing space) — italic's rightward
+                      slant otherwise reads as running into "yalnızca" with
+                      no visible gap, even though a real space is there. */}
+                  <span className="mr-1 font-semibold italic text-foreground">
                     Denklem seçimi
-                  </span>{" "}
+                  </span>
                   yalnızca enerji tahminindeki biyolojik
                   katsayıyı belirtir; cinsiyet kimliğinden otomatik olarak
                   çıkarılmaz.

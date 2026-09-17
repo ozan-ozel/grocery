@@ -48,12 +48,18 @@ export function SettingsView({
         </h1>
       </div>
 
-      <section className="space-y-2 rounded-lg border border-border bg-card p-4">
+      {/* min-h-[114px] matches the Çıkış Yap/Hesabı Sil card below exactly
+          (measured live) — the three cards on this page previously landed
+          at three different heights (105/98/114px) purely from each one's
+          own content, which made the loading skeleton impossible to match
+          without hardcoding per-card fudge factors. Uniform height first,
+          content centered within it, so the skeleton just needs one number. */}
+      <section className="flex min-h-[114px] flex-col justify-center space-y-2 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">Tema</h2>
         <ThemeSwitcher theme={theme} onSelect={onSelectTheme} />
       </section>
 
-      <section className="space-y-2 rounded-lg border border-border bg-card p-4">
+      <section className="flex min-h-[114px] flex-col justify-center space-y-2 rounded-lg border border-border bg-card p-4">
         <h2 className="text-sm font-semibold">Grup</h2>
         <TenantSwitcher
           tenants={tenants}
