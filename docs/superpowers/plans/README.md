@@ -30,6 +30,7 @@ on the checkboxes.
 | [2026-09-12-recent-favorites-quick-add.md](2026-09-12-recent-favorites-quick-add.md) | 2026-09-12 | `NOT_STARTED` | No "favorite"/"quick add" trace anywhere in `src/` |
 | [2026-09-12-recipe-picker.md](2026-09-12-recipe-picker.md) | 2026-09-12 | `SHIPPED` | `RecipeSearchModal.tsx` exists |
 | [2026-09-12-saved-meal-templates.md](2026-09-12-saved-meal-templates.md) | 2026-09-12 | `NOT_STARTED` | No "template" trace beyond unrelated CSS `grid-template-rows` |
+| [2026-09-17-boot-performance-waterfall.md](2026-09-17-boot-performance-waterfall.md) | 2026-09-17 | `NOT_STARTED` | Plan only; branch `perf/boot-waterfall` exists with no implementation commits |
 
 ## Status vocabulary
 
