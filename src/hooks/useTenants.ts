@@ -4,7 +4,9 @@ import {
   deleteHousehold,
   listHouseholds,
   renameHousehold,
+  type Household,
 } from "@/lib/households";
+import { loadLastTenant, saveLastTenant } from "@/lib/bootCache";
 import { removeItemCategories } from "@/lib/categorization/itemCategories";
 import {
   readTenantFromUrl,
@@ -13,12 +15,25 @@ import {
   type Tenant,
 } from "@/lib/store";
 
-// Both tenants and activeTenantId start as null so the app can render a
-// spinner until the first /api/tenants response lands. After that they stay
-// populated.
+function toTenant(h: Household): Tenant {
+  return {
+    id: h.id,
+    name: h.name,
+    createdAt: Date.parse(h.created_at),
+    ownerId: h.owner_id,
+  };
+}
+
+// `tenants` starts null and stays null until /api/households answers, but
+// `activeTenantId` resolves *synchronously* at mount from the URL or the
+// remembered last tenant. That's the whole point: /api/state used to sit
+// behind /api/households purely to learn an id that was already sitting in
+// the query string. The fetch below reconciles rather than resolves.
 export function useTenants() {
   const [tenants, setTenants] = useState<Tenant[] | null>(null);
-  const [activeTenantId, setActiveTenantId] = useState<string | null>(null);
+  const [activeTenantId, setActiveTenantId] = useState<string | null>(
+    () => readTenantFromUrl() ?? loadLastTenant()
+  );
   // Set by addTenant right before switching into a brand-new (definitely
   // empty) household. useListSync consumes this once, on the switch it was
   // set for, to skip its normal clear-and-repull cycle — see its comment.
@@ -30,52 +45,50 @@ export function useTenants() {
     return true;
   }
 
-  // First mount: load tenants from server, resolve active from URL or first,
-  // then let the sync effect (see useListSync) pull state. Runs once.
+  // First mount: load the real tenant list and reconcile it against whatever
+  // id we already optimistically adopted. Runs once.
   useEffect(() => {
     let cancelled = false;
     (async () => {
       const list = await listHouseholds();
       if (cancelled) return;
-      let effective: Tenant[] = list.map((h) => ({
-        id: h.id,
-        name: h.name,
-        createdAt: Date.parse(h.created_at),
-        ownerId: h.owner_id,
-      }));
-      // If the server has no households at all, seed the default one so the
-      // app still boots. This should only happen on a fresh Supabase; if two
+      // null means the *request* failed — an expired cookie, a 502, offline —
+      // not "this account has no households". Bail out entirely: keep the
+      // optimistic tenant and try again on the next load. Seeding here is how
+      // an expired session would silently mint a duplicate "Evim".
+      if (!list) return;
+
+      let effective: Tenant[] = list.map(toTenant);
+      // A real, successful, empty response is the only thing that may seed the
+      // default household. This should only happen on a fresh Supabase; if two
       // devices race and one 409s, re-fetch so the loser adopts the winner's
       // row instead of showing a blank tenant list.
       if (effective.length === 0) {
         const created = await createHousehold(uid(), "Evim");
         if (cancelled) return;
         if (created) {
-          effective = [
-            {
-              id: created.id,
-              name: created.name,
-              createdAt: Date.parse(created.created_at),
-              ownerId: created.owner_id,
-            },
-          ];
+          effective = [toTenant(created)];
         } else {
           const refetched = await listHouseholds();
           if (cancelled) return;
-          effective = refetched.map((h) => ({
-            id: h.id,
-            name: h.name,
-            createdAt: Date.parse(h.created_at),
-            ownerId: h.owner_id,
-          }));
+          if (!refetched) return;
+          effective = refetched.map(toTenant);
         }
       }
-      // The URL takes precedence — a shared link should still open the
-      // household. Otherwise fall back to the first one.
-      const fromUrl = readTenantFromUrl();
-      const active = effective.find((t) => t.id === fromUrl) ?? effective[0];
+
       setTenants(effective);
-      setActiveTenantId(active?.id ?? null);
+      // Reconcile, don't resolve. If the optimistic id is real, hand back the
+      // *identical string* so React bails out of the state update — load-bearing,
+      // because useListSync keys its effect on [activeTenantId] and any new
+      // value tears down the in-flight sync channel and re-pulls from scratch.
+      // Otherwise fall back: URL first (a shared link should still open its
+      // household), then the first household.
+      setActiveTenantId((current) => {
+        if (current && effective.some((t) => t.id === current)) return current;
+        const fromUrl = readTenantFromUrl();
+        const active = effective.find((t) => t.id === fromUrl) ?? effective[0];
+        return active?.id ?? null;
+      });
     })();
     return () => {
       cancelled = true;
@@ -83,7 +96,11 @@ export function useTenants() {
   }, []);
 
   useEffect(() => {
-    if (activeTenantId) writeTenantToUrl(activeTenantId);
+    if (!activeTenantId) return;
+    writeTenantToUrl(activeTenantId);
+    // Remembered so a plain "open the app" (no ?tenant= in the URL) can still
+    // start /api/state at t=0 instead of waiting for /api/households.
+    saveLastTenant(activeTenantId);
   }, [activeTenantId]);
 
   function selectTenant(id: string) {

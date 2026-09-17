@@ -56,21 +56,37 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
     return json({ error: "expected ?household_id=<id>" }, 400);
   }
 
+  let headers: Record<string, string>;
   try {
-    await requireHouseholdAccess(householdId, user);
+    headers = userRestHeaders(user);
   } catch (err) {
     return authErrorResponse(err);
   }
 
-  const headers = userRestHeaders(user);
-
-  try {
-    const res = await fetch(
+  // Same shape as api/state.ts's handleGet: the access check races the read
+  // rather than queueing ahead of it. The read is speculative — its result is
+  // never touched before `access` resolves successfully — and it runs under
+  // the caller's own token, so RLS's item_category_memory_all policy already
+  // returns nothing for a household they can't reach. Reads only; the PUT path
+  // below still checks access strictly before writing.
+  const [access, read] = await Promise.allSettled([
+    requireHouseholdAccess(householdId, user),
+    fetch(
       `${restBase(supabaseUrl)}/item_category_memory?select=${SELECT_COLS}&household_id=eq.${encodeURIComponent(
         householdId
       )}`,
       { headers }
-    );
+    ),
+  ]);
+  if (access.status === "rejected") {
+    return authErrorResponse(access.reason);
+  }
+  if (read.status === "rejected") {
+    return json({ error: String(read.reason) }, 502);
+  }
+
+  try {
+    const res = read.value;
     if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
     const rows = ((await res.json()) as unknown[]) ?? [];
     const coerced = rows.map(coerce).filter((r): r is Row => r !== null);

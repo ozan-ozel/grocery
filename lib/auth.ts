@@ -158,6 +158,38 @@ export function isSafeReturnTo(value: string | null): value is string {
   return true;
 }
 
+// Resolves app_users.id for a Supabase uid. Never throws — it hands back an
+// AuthError instead, so a caller running it concurrently with session
+// verification can keep the 401-before-502 error precedence rather than
+// letting a Promise.all reject out from under the auth check.
+type MapLookup =
+  | { rows: { app_user_id: string }[] }
+  | { error: AuthError };
+
+async function fetchAuthUserMap(
+  supabaseUrl: string,
+  serviceKey: string,
+  supabaseUid: string
+): Promise<MapLookup> {
+  const mapHeaders = {
+    apikey: serviceKey,
+    authorization: `Bearer ${serviceKey}`,
+    accept: "application/json",
+  };
+  try {
+    const mapRes = await fetch(
+      `${restBase(supabaseUrl)}/auth_user_map?supabase_uid=eq.${encodeURIComponent(
+        supabaseUid
+      )}&select=app_user_id`,
+      { headers: mapHeaders }
+    );
+    if (!mapRes.ok) return { error: new AuthError(502, "identity lookup failed") };
+    return { rows: (await mapRes.json()) as { app_user_id: string }[] };
+  } catch {
+    return { error: new AuthError(502, "identity lookup failed") };
+  }
+}
+
 export async function requireUser(request: Request): Promise<AuthUser> {
   const supabaseUrl = process.env.SUPABASE_URL;
   const anonKey = process.env.SUPABASE_ANON_KEY;
@@ -172,39 +204,43 @@ export async function requireUser(request: Request): Promise<AuthUser> {
   const accessToken = sessionData.session?.access_token;
   if (!accessToken) throw new AuthError(401, "missing session");
 
+  // The `sub` as decoded from the cookie locally. NOT TRUSTED, and not an
+  // authorization decision: it is used only as a speculative cache key so the
+  // auth_user_map lookup can run concurrently with the getUser() round trip
+  // below instead of waiting a full RTT behind it. Its result is discarded
+  // unless getUser() independently succeeds AND returns this exact same uuid
+  // — see the guard after the await.
+  const claimedUid = sessionData.session?.user?.id;
+  if (!claimedUid) throw new AuthError(401, "missing session");
+
+  const [userResult, mapLookup] = await Promise.all([
+    supabase.auth.getUser(),
+    fetchAuthUserMap(supabaseUrl, serviceKey, claimedUid),
+  ]);
+
   // getUser() re-verifies against Supabase's own server. getSession() alone
   // just decodes the cookie locally and must never be trusted by itself for
-  // an authorization decision.
-  const { data: userData, error } = await supabase.auth.getUser();
+  // an authorization decision — which is exactly why nothing below reads
+  // mapLookup until getUser() has both succeeded and confirmed the identity
+  // the cookie claimed.
+  const { data: userData, error } = userResult;
   if (error || !userData.user || !userData.user.email) {
     throw new AuthError(401, "invalid or expired session");
   }
-
-  const mapHeaders = {
-    apikey: serviceKey,
-    authorization: `Bearer ${serviceKey}`,
-    accept: "application/json",
-  };
-  let mapRows: { app_user_id: string }[];
-  try {
-    const mapRes = await fetch(
-      `${restBase(supabaseUrl)}/auth_user_map?supabase_uid=eq.${encodeURIComponent(
-        userData.user.id
-      )}&select=app_user_id`,
-      { headers: mapHeaders }
-    );
-    if (!mapRes.ok) throw new AuthError(502, "identity lookup failed");
-    mapRows = (await mapRes.json()) as { app_user_id: string }[];
-  } catch (err) {
-    if (err instanceof AuthError) throw err;
-    throw new AuthError(502, "identity lookup failed");
+  if (userData.user.id !== claimedUid) {
+    // The verified session is for a different account than the cookie decoded
+    // to, so the speculative lookup was keyed on the wrong identity. Refuse
+    // rather than re-issue it: this should be unreachable.
+    throw new AuthError(401, "invalid or expired session");
   }
-  if (mapRows.length === 0) {
+
+  if ("error" in mapLookup) throw mapLookup.error;
+  if (mapLookup.rows.length === 0) {
     throw new AuthError(409, "account not linked — sign in again");
   }
 
   return {
-    userId: mapRows[0].app_user_id,
+    userId: mapLookup.rows[0].app_user_id,
     email: userData.user.email.toLowerCase(),
     accessToken,
   };

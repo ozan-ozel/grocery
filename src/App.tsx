@@ -41,26 +41,41 @@ const SettingsView = lazy(() =>
 );
 
 export function App() {
-  const { session, checked, signInWithGoogle, signOut, deleteAccount } =
-    useAuth();
+  const {
+    session,
+    cachedSession,
+    checked,
+    signInWithGoogle,
+    signOut,
+    deleteAccount,
+  } = useAuth();
   // Read once per mount (not via useUiPrefs, which isn't mounted yet at this
   // gate) so the very first paint already mimics whichever section the URL
   // says we're landing on, instead of always guessing Alışveriş.
   const bootSection = useMemo(() => initialSection(), []);
 
-  if (!checked) {
-    return <AppBootSkeleton section={bootSection} />;
-  }
+  // Mount the app on a remembered identity instead of blocking the whole tree
+  // on /api/auth-session, which used to make every other request wait a full
+  // round trip behind it. `checked ? null : cachedSession` is the load-bearing
+  // half: the moment the real answer lands, the hint stops counting, so a
+  // stale cache can never outlive a confirmed 401. Nothing here grants access —
+  // every /api/* handler still authenticates the httpOnly cookie itself, so an
+  // expired session gets a brief skeleton and then LoginGate, never data.
+  const effective = session ?? (checked ? null : cachedSession);
 
-  if (!session) {
-    return <LoginGate onSignIn={signInWithGoogle} />;
+  if (!effective) {
+    return checked ? (
+      <LoginGate onSignIn={signInWithGoogle} />
+    ) : (
+      <AppBootSkeleton section={bootSection} />
+    );
   }
 
   return (
     <AppShell
       onSignOut={signOut}
       onDeleteAccount={deleteAccount}
-      currentUserId={session.userId}
+      currentUserId={effective.userId}
     />
   );
 }
@@ -574,13 +589,13 @@ function AppShell({
     consumeFreshTenantId,
   } = useTenants();
 
-  const { state, setState, updateState, stateRef } = useListSync(
+  const { state, setState, updateState, stateRef, hydrated } = useListSync(
     activeTenantId,
     consumeFreshTenantId,
   );
 
   const { undo, showUndo, restore, dismiss } = useUndo(updateState, setState);
-  useRollover(activeTenantId, stateRef, setState, showUndo);
+  useRollover(activeTenantId, stateRef, setState, showUndo, hydrated);
 
   const {
     overlay,
@@ -636,7 +651,12 @@ function AppShell({
     setSection(next);
   }
 
-  if (!tenants || !activeTenantId || !state) {
+  // `tenants` is deliberately absent from this guard. activeTenantId resolves
+  // synchronously from the URL / last-used cache (see useTenants), so the app
+  // can render a whole session without /api/households ever having answered —
+  // the full list is only needed by SettingsView, which falls back to its own
+  // suspense skeleton below while it's still null.
+  if (!activeTenantId || !state) {
     return <AppBootSkeleton section={section} />;
   }
 
@@ -747,19 +767,26 @@ function AppShell({
           </Suspense>
         ) : section === "ayarlar" ? (
           <Suspense fallback={<SectionSuspenseFallback section={section} />}>
-            <SettingsView
-              onSignOut={onSignOut}
-              onDeleteAccount={onDeleteAccount}
-              tenants={tenants}
-              activeTenantId={activeTenantId}
-              currentUserId={currentUserId}
-              onSelectTenant={selectTenant}
-              onAddTenant={addTenant}
-              onRenameTenant={renameTenant}
-              onDeleteTenant={deleteTenant}
-              theme={theme}
-              onSelectTheme={setTheme}
-            />
+            {tenants ? (
+              <SettingsView
+                onSignOut={onSignOut}
+                onDeleteAccount={onDeleteAccount}
+                tenants={tenants}
+                activeTenantId={activeTenantId}
+                currentUserId={currentUserId}
+                onSelectTenant={selectTenant}
+                onAddTenant={addTenant}
+                onRenameTenant={renameTenant}
+                onDeleteTenant={deleteTenant}
+                theme={theme}
+                onSelectTheme={setTheme}
+              />
+            ) : (
+              // The one consumer of the full household list. Keeps showing the
+              // section's own skeleton until /api/households lands, rather than
+              // holding the entire app back for it.
+              <SectionSuspenseFallback section={section} />
+            )}
           </Suspense>
         ) : (
           <AppShoppingTabs

@@ -1,8 +1,31 @@
 # Session Follow-up
 
-_Last updated: 2026-09-16_
+_Last updated: 2026-09-17_
 
 ## Current Objective
+
+Boot performance — collapsing the three-tier `/api/*` waterfall that made reloads take ~7.9s of
+serial API time. Plan:
+[`docs/superpowers/plans/2026-09-17-boot-performance-waterfall.md`](superpowers/plans/2026-09-17-boot-performance-waterfall.md).
+
+## Current State
+
+- Plan doc is on `master` (`d9d2644`), and pre-optimization `master` was deployed to Vercel
+  production as a measurement baseline (`grocery-five-ecru.vercel.app`).
+- **Phases 0-3 and 4a/4b/4c are implemented, build-verified and live-verified**, merged to `master`
+  and deployed. Full detail — including the full ms measurement tables and the security reasoning
+  that must survive future edits — in
+  [2026-09-17-02](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md).
+- Measured result: the five boot calls now start within 2ms of each other instead of at
+  1700 / 3470 / 5680 ms, and the boot skeleton no longer renders at all for a returning user
+  (list content in the DOM at 1208 ms vs 7880 ms).
+- Phase 4d (`getClaims()` / custom JWT claims) and the asset work (self-hosted fonts, idle-loading
+  the categorizer chunk) were out of scope by the plan's own decision and remain undone.
+- Phase 4's server-side gain is **structural, not measured in ms** — 12 sequential round trips down
+  to 2. Deploy a preview and re-run the resource-timing capture there to get real numbers.
+- Unrelated and untouched: `MealPlanView` fires three duplicate `/api/personal-plan` calls on boot.
+
+## Previous Objective (2026-09-16 — complete)
 
 Ran a UI/UX audit of the app plus an animation review, then implemented the audit's full backlog
 across two rounds. Originated from a request to critique a ChatGPT-suggested "skill stack" before

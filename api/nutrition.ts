@@ -53,6 +53,23 @@ const JSON_HEADERS = {
   "cache-control": "no-store",
 };
 
+// GET/browse success responses only — deliberately a separate object rather
+// than an edit to JSON_HEADERS, which every error and write response also
+// uses and which must stay no-store.
+//
+// `private` is load-bearing, not decoration: this endpoint sits behind
+// requireUser(), so the response is only ever served to an authenticated
+// caller and must never be stored by a shared CDN, proxy, or Vercel's edge —
+// only by the requesting browser itself. The 5-minute window matches
+// browseNutritionCached's existing localStorage TTL over the same data
+// (src/lib/nutrition.ts), so a macro edit's visible staleness is unchanged;
+// this just also covers TTL misses and the offset > 0 pagination path, which
+// bypass that cache entirely.
+const BROWSE_CACHE_HEADERS = {
+  "content-type": "application/json",
+  "cache-control": "private, max-age=300, stale-while-revalidate=3600",
+};
+
 const MAX_NAMES = 200;
 const BROWSE_LIMIT_DEFAULT = 60;
 // High enough to pull the whole catalog in one request for the grouped
@@ -126,7 +143,10 @@ async function handleBrowse(request: Request): Promise<Response> {
     if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
     const rows = ((await res.json()) as unknown[]) ?? [];
     const coerced = rows.map(coerce).filter((n): n is Nutrition => n !== null);
-    return json(coerced, 200);
+    return new Response(JSON.stringify(coerced), {
+      status: 200,
+      headers: BROWSE_CACHE_HEADERS,
+    });
   } catch (err) {
     return json({ error: String(err) }, 502);
   }

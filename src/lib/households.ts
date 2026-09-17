@@ -10,7 +10,14 @@ function apiUrl(path: string): string {
   return `${baseUrl}${path}`;
 }
 
-export async function listHouseholds(): Promise<Household[]> {
+// Returns null when the request itself failed (401, 502, network throw) —
+// deliberately NOT []. useTenants reads a genuinely empty list as "fresh
+// account, seed the default household", so conflating the two mints a
+// spurious household every time a call fails. That matters more than it
+// looks: there is deliberately no session refresh (see lib/auth.ts's header),
+// so cookies die on Supabase's 1h default and a 401 here is routine, not
+// exotic.
+export async function listHouseholds(): Promise<Household[] | null> {
   try {
     const res = await fetch(apiUrl("/api/households"), {
       method: "GET",
@@ -18,12 +25,12 @@ export async function listHouseholds(): Promise<Household[]> {
     });
     if (!res.ok) {
       console.warn("[households] list failed:", res.status);
-      return [];
+      return null;
     }
     return (await res.json()) as Household[];
   } catch (err) {
     console.warn("[households] list threw:", err);
-    return [];
+    return null;
   }
 }
 

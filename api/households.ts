@@ -61,14 +61,25 @@ async function handleGet(request: Request, user: AuthUser): Promise<Response> {
   const headers = userRestHeaders(user);
 
   if (id) {
-    try {
-      await requireHouseholdAccess(id, user);
-    } catch (err) {
-      return authErrorResponse(err);
+    // Access check and read race each other instead of queueing (same pattern
+    // as api/state.ts's handleGet). The read is speculative: its result is
+    // never touched before `access` resolves successfully, and it runs under
+    // the caller's own token, so households_select RLS already returns nothing
+    // for a household they can't see. The write paths below keep the check
+    // strictly ahead of the mutation.
+    const target = `${restBase(supabaseUrl)}/households?id=eq.${encodeURIComponent(id)}&select=*`;
+    const [access, read] = await Promise.allSettled([
+      requireHouseholdAccess(id, user),
+      fetch(target, { headers }),
+    ]);
+    if (access.status === "rejected") {
+      return authErrorResponse(access.reason);
+    }
+    if (read.status === "rejected") {
+      return json({ error: `failed to fetch household: ${read.reason}` }, 500);
     }
     try {
-      const target = `${restBase(supabaseUrl)}/households?id=eq.${encodeURIComponent(id)}&select=*`;
-      const response = await fetch(target, { headers });
+      const response = read.value;
       if (!response.ok) return json({ error: `supabase ${response.status}` }, 502);
       const data = (await response.json()) as Household[];
       if (data.length === 0) return json({ error: "household not found" }, 404);

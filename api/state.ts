@@ -71,15 +71,24 @@ export default {
     return authErrorResponse(err);
   }
   const tenantId = tenantIdFrom(request);
-  try {
-    await requireHouseholdAccess(tenantId, user);
-  } catch (err) {
-    return authErrorResponse(err);
-  }
   const method = request.method.toUpperCase();
 
+  // GET runs its own access check concurrently with the read (see handleGet).
+  // PUT keeps it strictly ahead of the write — a speculative mutation would
+  // be a real vulnerability, unlike a speculative read.
   if (method === "GET") return handleGet(tenantId, user);
-  if (method === "PUT") return handlePut(request, tenantId, user);
+  if (method === "PUT") {
+    try {
+      await requireHouseholdAccess(tenantId, user);
+    } catch (err) {
+      return authErrorResponse(err);
+    }
+    return handlePut(request, tenantId, user);
+  }
+  // Unsupported method: answer 405 without looking the household up at all.
+  // Identical for every tenant, so it says nothing about which households
+  // exist or are reachable — strictly less than the old ordering, which
+  // returned 404 here for an inaccessible tenant and 405 for an accessible one.
   return json({ error: "method not allowed" }, 405);
   },
 };
@@ -104,13 +113,33 @@ async function handleGet(tenantId: string, user: AuthUser): Promise<Response> {
     return json({ error: "supabase not configured" }, 500);
   }
 
-  let row: { version: number; state: unknown } | null;
+  let headers: Record<string, string>;
   try {
-    row = await fetchRow(supabaseUrl, userRestHeaders(user), tenantId);
+    headers = userRestHeaders(user);
   } catch (err) {
-    console.error(`[state] Supabase read failed tenant=${tenantId}:`, err);
+    return authErrorResponse(err);
+  }
+
+  // The access check and the row read race each other instead of queueing —
+  // roughly halving this endpoint's latency. The read is speculative and safe
+  // on two independent counts: (1) nothing derived from it is touched, let
+  // alone returned, until `access` has resolved successfully, and (2) it runs
+  // under the caller's own Supabase token (userRestHeaders), so RLS's
+  // sync_state_all policy already returns zero rows for a household they
+  // can't see. requireHouseholdAccess stays as the documented first layer —
+  // parallelized, it now costs nothing to keep.
+  const [access, read] = await Promise.allSettled([
+    requireHouseholdAccess(tenantId, user),
+    fetchRow(supabaseUrl, headers, tenantId),
+  ]);
+  if (access.status === "rejected") {
+    return authErrorResponse(access.reason);
+  }
+  if (read.status === "rejected") {
+    console.error(`[state] Supabase read failed tenant=${tenantId}:`, read.reason);
     return json({ error: "storage read failed" }, 500);
   }
+  const row = read.value;
   if (row) {
     return json({ version: row.version, state: row.state }, 200);
   }

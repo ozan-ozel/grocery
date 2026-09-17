@@ -14,6 +14,17 @@ type Options = {
   // Lets the caller seed an empty state so the UI can render; the next push
   // will populate the server.
   onEmpty?: () => State;
+  // State the caller already rendered before this channel opened — the
+  // localStorage cache useListSync seeds from. Presets lastSentSerialized so
+  // the restored cache isn't immediately PUT straight back to the server as
+  // if it were a fresh local edit.
+  initialState?: State | null;
+  // Fired once, when the first pull *settles* — success, non-ok response, or
+  // network failure alike. Signals "the server has had its say (or has
+  // demonstrably failed to)", which is what useRollover needs to know before
+  // acting on state that may have come from cache. Settling on failure too is
+  // deliberate: offline must not mean rollover never runs.
+  onFirstPullSettled?: () => void;
 };
 
 const POLL_MS = 30_000;
@@ -28,16 +39,19 @@ export function createSync({
   baseUrl = "",
   onStatusChange,
   onEmpty,
+  initialState,
+  onFirstPullSettled,
 }: Options) {
   const url = `${baseUrl}/api/state?tenant=${encodeURIComponent(tenantId)}`;
 
   let started = false;
-  let lastSentSerialized = "";
+  let lastSentSerialized = initialState ? serialize(initialState) : "";
   let pushTimer: number | undefined;
   let pollTimer: number | undefined;
   let backoff = BACKOFF_START_MS;
   let inflight: Promise<void> | null = null;
   let activeRequests = 0;
+  let firstPullSettled = false;
 
   function reportStatus() {
     if (!navigator.onLine) return onStatusChange?.("offline");
@@ -66,9 +80,21 @@ export function createSync({
       }
       const hydrated = normalizeHydratedState(state);
       const local = getState();
+      const serverSerialized = serialize(state);
       if (local.version !== version) {
         setState({ ...hydrated, version });
-        lastSentSerialized = serialize(state);
+        lastSentSerialized = serverSerialized;
+      } else if (serialize(local) !== serverSerialized) {
+        // Same version, different content: nobody else advanced the row, so
+        // the local copy is the newer one. This is how an edit made offline
+        // and restored from the localStorage cache on the next boot finds its
+        // way to the server — initialState deliberately suppresses the mount
+        // push (a clean restored cache must not be re-sent), which would
+        // otherwise strand those edits locally until the user happened to
+        // make another one. Rebaselining on the server's copy first is what
+        // makes the queued push actually fire.
+        lastSentSerialized = serverSerialized;
+        requestPush();
       }
       backoff = BACKOFF_START_MS;
     } catch {
@@ -76,6 +102,10 @@ export function createSync({
     } finally {
       activeRequests--;
       reportStatus();
+      if (!firstPullSettled) {
+        firstPullSettled = true;
+        onFirstPullSettled?.();
+      }
     }
   }
 

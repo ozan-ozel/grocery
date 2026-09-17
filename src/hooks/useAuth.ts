@@ -1,11 +1,30 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  clearBootCaches,
+  loadSessionHint,
+  saveSessionHint,
+} from "@/lib/bootCache";
 
 type Session = { email: string | null; userId: string | null };
 
 // null = still checking; undefined = signed out; Session = signed in.
+//
+// `cachedSession` is a purely *rendering* optimism: the { email, userId } pair
+// a previous visit saw, remembered so App() can mount AppShell immediately
+// instead of blocking the entire tree on /api/auth-session. It is an identity
+// hint and never a token — it authorizes nothing, and every /api/* handler
+// still validates the real httpOnly cookie via requireUser(). The worst case
+// for an expired cookie is a second of skeleton while the requests 401, then
+// LoginGate. See src/lib/bootCache.ts.
 export function useAuth() {
   const [session, setSession] = useState<Session | null | undefined>(null);
   const [checked, setChecked] = useState(false);
+  const cachedRef = useRef<ReturnType<typeof loadSessionHint>>(null);
+  // Read once, at mount, before the first paint.
+  const [cachedSession] = useState(() => {
+    cachedRef.current = loadSessionHint();
+    return cachedRef.current;
+  });
 
   useEffect(() => {
     fetchAppSession();
@@ -20,11 +39,30 @@ export function useAuth() {
       const res = await fetch("/api/auth-session", { credentials: "include" });
       if (res.ok) {
         const data = (await res.json()) as { email: string | null; userId: string | null };
+        // A different user on this browser than the hint claimed (someone
+        // signed in after someone else's cookie expired without a sign-out):
+        // drop every boot cache before recording the new one, so the previous
+        // account's cached lists can't be painted on the next visit.
+        const previous = cachedRef.current;
+        if (previous && previous.userId !== data.userId) clearBootCaches();
+        if (data.userId) {
+          saveSessionHint({ email: data.email, userId: data.userId });
+          cachedRef.current = { email: data.email, userId: data.userId };
+        } else {
+          clearBootCaches();
+          cachedRef.current = null;
+        }
         setSession({ email: data.email, userId: data.userId });
       } else {
+        // Confirmed no session. Wipe the caches now rather than leaving them
+        // for whoever opens this browser next.
+        clearBootCaches();
+        cachedRef.current = null;
         setSession(undefined);
       }
     } catch {
+      // Network failure, not a rejection — the cookie may well still be good,
+      // so leave the caches alone and let the next load re-check.
       setSession(undefined);
     } finally {
       setChecked(true);
@@ -44,13 +82,24 @@ export function useAuth() {
 
   async function signOut() {
     await fetch("/api/auth-logout", { method: "POST", credentials: "include" });
+    clearBootCaches();
+    cachedRef.current = null;
     setSession(undefined);
   }
 
   async function deleteAccount() {
     await fetch("/api/auth-delete-account", { method: "DELETE", credentials: "include" });
+    clearBootCaches();
+    cachedRef.current = null;
     setSession(undefined);
   }
 
-  return { session, checked, signInWithGoogle, signOut, deleteAccount };
+  return {
+    session,
+    cachedSession,
+    checked,
+    signInWithGoogle,
+    signOut,
+    deleteAccount,
+  };
 }
