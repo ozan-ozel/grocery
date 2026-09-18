@@ -1,7 +1,8 @@
 # Grocery
 
-A grocery list app for Turkish households. Preact + shadcn/ui + Tailwind v4 on the client,
-synced per household across devices via Supabase + Vercel Functions.
+A grocery list and nutrition-tracking app for Turkish households — shopping lists, meal
+planning, and macro/nutrition guidance in one place. Preact + shadcn/ui + Tailwind v4 on the
+client, synced per household across devices via Supabase + Vercel Functions.
 
 ```bash
 npm install
@@ -9,9 +10,10 @@ npm run vercel:dev   # real local stack — Vite + every api/*.ts, proxied on :3
 ```
 
 `npm run dev` also works for client-only UI work, but `/api/*` calls 404 without `vercel:dev`.
-See [CLAUDE.md](./CLAUDE.md) for the full command reference and
-[docs/architecture.md](./docs/architecture.md) for the architecture — persistence layers,
-tenants, sync, categorization, nutrition, theming.
+See [CLAUDE.md](./CLAUDE.md) for the full command reference,
+[docs/knowledge-map.md](./docs/knowledge-map.md) for a routing table of every doc in this repo,
+and [docs/architecture.md](./docs/architecture.md) for the architecture — persistence layers,
+tenants, sync, categorization, the nutrition backend, theming.
 
 ## How shadcn/ui runs on Preact
 
@@ -31,12 +33,15 @@ Two things to know when adding more components:
 
 ```
 src/
-  lib/            store.ts, utils.ts, households.ts, nutrition.ts, preferences.ts (single-file
-                  domains, flat) + sync/, categorization/ (multi-file domains, folders)
+  lib/            store.ts, utils.ts, households.ts, nutrition.ts, preferences.ts, mealPlan.ts,
+                  personalPlan.ts, ... (single-file domains, flat) + sync/, categorization/
+                  (multi-file domains, folders)
   components/ui/  shadcn primitives — button, input, checkbox, tabs
-  components/     AddItem, ActiveList, HistoryView, SearchView, NutritionView, ...
+  components/     AddItem, ActiveList, HistoryView, NutritionView, MealPlanView,
+                  PersonalPlanView, SettingsView, ...
   App.tsx         all state lives here
-api/             backend — households, lists, items, nutrition, state
+api/             backend — households, lists/items (via state.ts), nutrition, meal-entries,
+                  personal-plan, preparation-batches, household-shares, auth-*
 ```
 
 Lists are never deleted; starting a new list stamps the old one with `closedAt` and files it
