@@ -181,6 +181,16 @@ server on the project or kill a process by port; leave the test account as found
 account (`agent-login` mint accepts `{"email": ...}`) for anything destructive such as
 `/api/auth-delete-account`; keep screenshots out of the repo root.
 
+**`agent-login` and `.vercelignore` (standing procedure, SYNC-checked).** `.vercelignore` lists
+`api/agent-login.ts` to keep production within the 12-function Hobby limit, but `vercel dev` honors that
+file too — while the line is active, `/api/agent-login` 404s locally. Whenever Playwright needs a login,
+do this every time (never merge `agent-login` into a deployed function instead): (1) comment out the
+`api/agent-login.ts` line in `.vercelignore`; (2) ask the developer to restart their own `vercel:dev` with
+`$env:AGENT_LOGIN_SECRET='<value>'; npm run vercel:dev` (Claude never restarts it); (3) run the testing;
+(4) **restore the line** before finishing. **SYNC** must flag a diff that still has the line commented
+out — deploying with it commented pushes 13+ functions and fails the Hobby limit (or ships the login
+endpoint).
+
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 
 ```bash
