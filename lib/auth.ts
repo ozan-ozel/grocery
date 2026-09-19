@@ -158,6 +158,25 @@ export function isSafeReturnTo(value: string | null): value is string {
   return true;
 }
 
+// The `sub` claim of a JWT, decoded locally with NO signature check — same
+// trust level as the old `session.user.id`, which auth-js also just read from
+// the cookie. Used instead of `session.user` because auth-js wraps that object
+// in a proxy that logs "Using the user object as returned from
+// supabase.auth.getSession() ... could be insecure!" on every read, i.e. on
+// nearly every authenticated request. Returns undefined for anything malformed.
+function unverifiedJwtSubject(token: string): string | undefined {
+  try {
+    const payload = token.split(".")[1];
+    if (!payload) return undefined;
+    const claims = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as {
+      sub?: unknown;
+    };
+    return typeof claims.sub === "string" && claims.sub ? claims.sub : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 // Resolves app_users.id for a Supabase uid. Never throws — it hands back an
 // AuthError instead, so a caller running it concurrently with session
 // verification can keep the 401-before-502 error precedence rather than
@@ -210,7 +229,7 @@ export async function requireUser(request: Request): Promise<AuthUser> {
   // below instead of waiting a full RTT behind it. Its result is discarded
   // unless getUser() independently succeeds AND returns this exact same uuid
   // — see the guard after the await.
-  const claimedUid = sessionData.session?.user?.id;
+  const claimedUid = unverifiedJwtSubject(accessToken);
   if (!claimedUid) throw new AuthError(401, "missing session");
 
   const [userResult, mapLookup] = await Promise.all([

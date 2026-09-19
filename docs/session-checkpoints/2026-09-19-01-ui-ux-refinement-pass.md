@@ -109,7 +109,10 @@ phone. The logout *confirm* path was not clicked (would end the test session).
   `sessionData.session?.user?.id`; on the server auth-js wraps `.user` in a warning proxy. It is **not** once
   per process (a fresh client is built per request), it prints on nearly every authenticated request. Not a
   vulnerability (the id is only a speculative cache key, discarded unless `getUser()` confirms it), but noisy;
-  decoding `sub` from the access-token JWT instead would silence it with identical semantics. Not changed.
+  decoding `sub` from the access-token JWT instead would silence it with identical semantics. **Fixed
+  later the same day** (branch `fix/supabase-getsession-user-warning`): `requireUser` now reads `sub` via
+  `unverifiedJwtSubject(accessToken)`. Verified against a running `vercel dev` — 11 warnings per page load
+  with the old code, 0 with the new, and all authenticated calls still 200.
 - **Incident, and the new ground rule.** A second `vercel dev` started here did *not* get :3000 (the
   developer's own server already held it; mine went to :3001) and I kept driving :3000 for a stretch, so
   curl/Playwright traffic — including minting login tokens and the throwaway-account deletion test — hit the
