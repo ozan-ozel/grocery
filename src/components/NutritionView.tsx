@@ -163,7 +163,11 @@ export function NutritionView({
       <SmoothPillTabs
         value={scope}
         onChange={setScope}
+        // px-2 (not the default px-3): four pills at px-3 are 326px wide,
+        // wider than the 320px content column of a 360px phone.
+        itemClassName="px-2"
         items={[
+          { value: "list", label: "Listem" },
           { value: "all", label: "Tümü" },
           { value: "cats", label: "Kategoriler" },
           { value: "compare", label: "Karşılaştır" },

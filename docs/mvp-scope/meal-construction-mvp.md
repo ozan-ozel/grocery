@@ -15,6 +15,18 @@ Domain L is `DEC-066` through `DEC-070`. Four of the five are already done.
 Translating selected foods and portions into constructed meals is `DEC-066`, covered by the curated
 `combos.json` and `combos.ts`. Nothing to build.
 
+**Update 2026-09-19 — portion tiers shipped.** The Meal Plan's "Yemekler" picker no longer adds a
+combo at one fixed portion. Each meal offers Küçük / Normal / Büyük (×⅔ / ×1 / ×1⅓ of the authored
+grams) plus a custom multiplier, and a plain tap adds at the last-used tier (remembered per device).
+Every ingredient is scaled by the same factor, so protein and carb stay proportional — the
+On Cooking ch. 4 recipe/portion conversion factor, the same mechanism the DEC-069 batch planner's
+"Kat sayısı" already uses (`scaleComboItems` in `combos.ts`). The gram anchors are **not** from On
+Cooking, whose execution record supplies no portion tables; they come from this app's own data (the
+authored combo is Normal; 100/150/200 g protein matches the evening solver's 25 g grid). Large takes
+rice/bulgur/pasta carb to 200 g raw, above `eveningRecommend.ts`'s 150 g solver ceiling — accepted,
+because that ceiling bounds the solver's recommendations, not what a person may choose. Still open:
+per-role scaling (leave oil/vegetables fixed) if uniform scaling proves too blunt.
+
 ## Item 2: editable recipes are unowned, and there is a catch
 
 Combos are read-only. `ALL_COMBOS` is derived from the JSON at module load, and no add, update or

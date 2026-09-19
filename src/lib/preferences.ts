@@ -41,6 +41,7 @@ const THEME_KEY = "grocery.theme.v1";
 const SWIPE_KEY = "grocery.swipeMode.v1";
 const NUTRITION_VALUES_KEY = "grocery.showNutritionValues.v1";
 const SHOPPING_TAB_KEY = "grocery.shoppingTab.v1";
+const MEAL_PORTION_KEY = "grocery.mealPortion.v1";
 
 export function loadTheme(): Theme {
   try {
@@ -107,6 +108,27 @@ export function loadShoppingTab(): "list" | "history" {
 export function saveShoppingTab(tab: "list" | "history") {
   try {
     localStorage.setItem(SHOPPING_TAB_KEY, tab);
+  } catch {
+    // Ignored — preference just won't persist across sessions.
+  }
+}
+
+// The last portion tier picked in the Meal Plan's "Yemekler" sheet — what a
+// plain tap on a meal row adds, so one-tap adding stays one tap. Per device,
+// like the other UI preferences here. Custom amounts are one-offs and never
+// stored.
+export function loadMealPortion(): "small" | "normal" | "large" {
+  try {
+    const stored = localStorage.getItem(MEAL_PORTION_KEY);
+    return stored === "small" || stored === "large" ? stored : "normal";
+  } catch {
+    return "normal";
+  }
+}
+
+export function saveMealPortion(portion: "small" | "normal" | "large") {
+  try {
+    localStorage.setItem(MEAL_PORTION_KEY, portion);
   } catch {
     // Ignored — preference just won't persist across sessions.
   }

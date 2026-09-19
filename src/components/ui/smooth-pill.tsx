@@ -39,13 +39,16 @@ export const SP_TRIGGER_CLASS = cn(
 
 type SmoothPillTabsProps<T extends string> = {
   // Widened to `string` (not `T`) on purpose: callers whose state can hold a
-  // value outside `items` (e.g. a "list" scope with no corresponding tab)
-  // can pass it straight through and simply get no tab highlighted, instead
+  // value outside `items` (e.g. a scope with no corresponding tab) can pass
+  // it straight through and simply get no tab highlighted, instead
   // of being forced to coerce it into a false match.
   value: string;
   onChange: (value: T) => void;
   items: { value: T; label: string }[];
   className?: string;
+  // Extra classes for every pill button — e.g. `px-2` to fit a fourth tab on a
+  // narrow phone without changing the padding of tab rows that have room.
+  itemClassName?: string;
 };
 
 export function SmoothPillTabs<T extends string>({
@@ -53,6 +56,7 @@ export function SmoothPillTabs<T extends string>({
   onChange,
   items,
   className,
+  itemClassName,
 }: SmoothPillTabsProps<T>) {
   return (
     <div className={cn(SP_CONTAINER_CLASS, className)}>
@@ -64,7 +68,11 @@ export function SmoothPillTabs<T extends string>({
             type="button"
             onClick={() => onChange(item.value)}
             data-active={active ? "true" : undefined}
-            className={cn(SP_BASE_CLASS, active ? SP_ACTIVE_CLASS : SP_INACTIVE_CLASS)}
+            className={cn(
+              SP_BASE_CLASS,
+              active ? SP_ACTIVE_CLASS : SP_INACTIVE_CLASS,
+              itemClassName
+            )}
           >
             {item.label}
           </button>

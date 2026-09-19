@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Plus, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useRevealAboveKeyboard } from "@/hooks/useVisualViewport";
 import type { Nutrition } from "@/lib/nutrition";
 import {
   hasHardExclusion,
@@ -32,6 +33,8 @@ export function MealFoodPicker({
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Nutrition | null>(null);
   const [quantity, setQuantity] = useState("100");
+  const inputRef = useRef<HTMLInputElement>(null);
+  const resultsRef = useRef<HTMLUListElement>(null);
 
   const queryLower = query.trim().toLocaleLowerCase("tr-TR");
   // Hard-tier (allergy/unclear/unclassified/preference) foods are removed
@@ -54,6 +57,15 @@ export function MealFoodPicker({
         food.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower),
       )
     : visibleFoods.slice(0, 30);
+
+  // The result list opens under the field; keep it above the soft keyboard as
+  // it opens and as typing narrows it.
+  useRevealAboveKeyboard(
+    open && !selected,
+    resultsRef,
+    inputRef,
+    results.length,
+  );
 
   function reset() {
     setOpen(false);
@@ -118,6 +130,7 @@ export function MealFoodPicker({
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
+              ref={inputRef}
               value={query}
               autoFocus
               placeholder="Besin ara"
@@ -128,7 +141,7 @@ export function MealFoodPicker({
               }
             />
           </div>
-          <ul className="mt-1 max-h-56 overflow-y-auto">
+          <ul ref={resultsRef} className="mt-1 max-h-56 overflow-y-auto">
             {results.length === 0 && (
               <li className="px-2 py-3 text-sm text-muted-foreground">
                 "{query.trim()}" ile eşleşen besin yok.

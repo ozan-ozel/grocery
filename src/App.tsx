@@ -5,6 +5,7 @@ import { AppShoppingTabs } from "@/components/AppShoppingTabs";
 import { UndoToast } from "@/components/UndoToast";
 import { LoginGate } from "@/components/LoginGate";
 import { LoadingBlock } from "@/components/LoadingBlock";
+import { MealPlanSkeleton } from "@/components/MealPlanSkeleton";
 import { BottomNavigation, type NavTab } from "@/components/BottomNavigation";
 import { buildCatalog, readNutritionScopeFromUrl } from "@/lib/store";
 import { createListActions } from "@/lib/listActions";
@@ -18,8 +19,10 @@ import { useItemCategories } from "@/hooks/useItemCategories";
 import { useSelection } from "@/hooks/useSelection";
 import { useAuth } from "@/hooks/useAuth";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
+import { useVisualViewportVars } from "@/hooks/useVisualViewport";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
+import type { DeleteFeedback } from "@/components/DeleteAccountFlow";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
 
@@ -229,34 +232,11 @@ function SectionSuspenseFallback({ section }: { section: Section }) {
         </div>
       );
     }
-    case "yemek": {
+    case "yemek":
       // Mirrors MealPlanView.tsx's outer space-y-4 wrapper — no h1 here, its
-      // real "title" is the day-nav row — PLUS the two card types that
-      // actually fill the page below it, neither of which the old version
-      // had: MacroSummaryCard.tsx's "GÜNLÜK MAKROLAR" card (rounded-lg
-      // border p-3, h2, then a 2-col then 3-col grid of border-l-4 tiles,
-      // each with a 40px ring + two-line value) and MealContainer.tsx's 4
-      // fixed meal-slot cards (space-y-3 rounded-lg border p-4, h3 + a 2-col
-      // grid of dashed-border add buttons). Both card shapes and all 7
-      // labels (macro names, meal names) are static strings from those
-      // components, never data — rendered as real text here, not shimmer,
-      // since matching them exactly costs nothing and reads better than a
-      // guessed-width bar. Only true per-user numbers (kcal, day label,
-      // "+0") are shimmered. The optional "Akşam için öneriler" list below
-      // the 4th card is skipped — it's conditional and its length varies
-      // 0-8+, so there's no fixed shape to fake here.
-      const macroTile = (label: string, ringW: string, valW: string) => (
-        <div key={label} className="rounded-lg border-l-4 border-l-border bg-background p-2.5">
-          <p className="text-[0.7rem] font-medium text-muted-foreground">{label}</p>
-          <div className="mt-1.5 flex items-center gap-2">
-            <LoadingBlock className="size-10 shrink-0 rounded-full" />
-            <div>
-              <LoadingBlock className={`h-[18px] rounded ${valW}`} />
-              <LoadingBlock className={`mt-1 h-4 rounded ${ringW}`} />
-            </div>
-          </div>
-        </div>
-      );
+      // real "title" is the day-nav row. The body (macro card + meal-slot
+      // cards) is MealPlanSkeleton, shared with MealPlanView's own
+      // data-loading state so the two phases never disagree about its shape.
       return (
         <div className="space-y-4">
           <p className="text-xs uppercase tracking-widest text-muted-foreground">Yemek Planı</p>
@@ -265,45 +245,9 @@ function SectionSuspenseFallback({ section }: { section: Section }) {
             <LoadingBlock className="h-7 w-32 rounded-md" />
             <QuietIconPlaceholder />
           </div>
-
-          <div className="rounded-lg border border-border bg-card p-3">
-            <h2 className="mb-2 text-xs font-semibold text-muted-foreground">GÜNLÜK MAKROLAR</h2>
-            <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2">
-                {macroTile("Kalori", "w-6", "w-10")}
-                {macroTile("Protein", "w-5", "w-6")}
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                {macroTile("Karbonhidrat", "w-5", "w-8")}
-                {macroTile("Yağ", "w-5", "w-6")}
-                {macroTile("Lif", "w-5", "w-6")}
-              </div>
-            </div>
-          </div>
-
-          {/* The 4 cards are wrapped in their own space-y-3 (12px) in
-              MealPlanView.tsx:350 — nested as a single item inside this
-              outer space-y-4, not direct siblings of it. Rendering them
-              as direct children here gave them 16px gaps instead of the
-              real 12px. */}
-          <div className="space-y-3">
-            {(["İlk Öğün", "Ara Öğün", "Son Öğün", "Ara Öğün"] as const).map((label, i) => (
-              <div key={i} className="space-y-3 rounded-lg border border-border bg-card p-4">
-                <h3 className="font-semibold text-foreground">{label}</h3>
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground">
-                    <span aria-hidden="true">+</span> Ürünler
-                  </div>
-                  <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground">
-                    <span aria-hidden="true">+</span> Yemekler
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <MealPlanSkeleton />
         </div>
       );
-    }
     case "kisisel": {
       // PersonalPlanView.tsx is a long form-heavy page — matched at the
       // card/heading level (every section boundary, every fixed heading
@@ -561,7 +505,7 @@ function AppShell({
   currentUserId,
 }: {
   onSignOut: () => void;
-  onDeleteAccount: () => void;
+  onDeleteAccount: (feedback: DeleteFeedback) => Promise<void>;
   currentUserId: string | null;
 }) {
   const {
@@ -578,6 +522,9 @@ function AppShell({
   } = useUiPrefs();
 
   const swipeTabs = useSwipeTabs(section, tab, setTab);
+  // Publishes the visible-viewport/keyboard geometry as CSS variables — read by
+  // the bottom sheets and by <main>'s keyboard padding below.
+  useVisualViewportVars();
 
   const {
     tenants,
@@ -719,8 +666,11 @@ function AppShell({
         onStartNewList={startNewList}
       />
 
+      {/* pb-[var(--kb-inset)]: while the soft keyboard is open the page gets
+          that much extra scroll room, so a search's last results can be
+          scrolled above the keyboard instead of ending underneath it. */}
       <main
-        className="pt-3"
+        className="pt-3 pb-[var(--kb-inset,0px)]"
         onTouchStart={swipeTabs.onTouchStart as never}
         onTouchEnd={swipeTabs.onTouchEnd as never}>
         {onboarding.status === "unseen" && personalization.remoteChecked ? (

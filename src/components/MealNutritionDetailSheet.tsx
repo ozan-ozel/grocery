@@ -40,7 +40,7 @@ export function MealNutritionDetailSheet({
     return () => document.removeEventListener("keydown", onKey);
   }, [onClose]);
 
-  const { dragY, isDragging, dragHandlers } = useSwipeToDismiss(onClose);
+  const { sheetRef, dragY, isDragging } = useSwipeToDismiss(onClose);
 
   return (
     <div className="fixed inset-0 z-40 flex items-end justify-center">
@@ -51,10 +51,11 @@ export function MealNutritionDetailSheet({
         className="absolute inset-0 bg-foreground/20"
       />
       <div
+        ref={sheetRef as never}
         style={dragY ? { transform: `translateY(${dragY}px)` } : undefined}
         className={`relative z-10 max-h-[80vh] w-full max-w-[30rem] overflow-y-auto rounded-t-xl border-t border-border bg-card p-4 pt-2 shadow-lg ${isDragging ? "" : "transition-transform duration-200 ease-out"}`}>
-        <SheetDragHandle dragHandlers={dragHandlers} />
-        <div className="flex items-center justify-between pb-3">
+        <SheetDragHandle />
+        <div data-sheet-no-drag className="flex items-center justify-between pb-3">
           <h2 className="text-sm font-semibold">{title} · Besin değerleri</h2>
           <Button
             type="button"

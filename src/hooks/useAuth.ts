@@ -87,8 +87,18 @@ export function useAuth() {
     setSession(undefined);
   }
 
-  async function deleteAccount() {
-    await fetch("/api/auth-delete-account", { method: "DELETE", credentials: "include" });
+  // Resolves only once the server confirms the account is gone. It used to
+  // ignore the response — which hid that the endpoint didn't exist on Vercel,
+  // so "Hesabı Sil" looked like a sign-out while deleting nothing. Throws on
+  // any failure so the caller (DeleteAccountFlow) can say so.
+  async function deleteAccount(feedback?: { reason: string; otherText?: string }) {
+    const res = await fetch("/api/auth-delete-account", {
+      method: "DELETE",
+      credentials: "include",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify(feedback ?? {}),
+    });
+    if (!res.ok) throw new Error(`account deletion failed (${res.status})`);
     clearBootCaches();
     cachedRef.current = null;
     setSession(undefined);

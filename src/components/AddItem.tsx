@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { parseEntry, type CatalogEntry } from "@/lib/store";
 import { isCloseMatch } from "@/lib/fuzzyMatch";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import { useRevealAboveKeyboard } from "@/hooks/useVisualViewport";
 
 type Props = {
   catalog: CatalogEntry[];
@@ -25,6 +26,7 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
   const [open, setOpen] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
   // Distinguishes "the click that just focused the input" (onFocus already
   // opened the panel; a same-click toggle would instantly re-close it) from
   // a genuine second click on an already-focused input — the only way to
@@ -73,6 +75,20 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
 
   const visibleCount = query || expanded ? EXPANDED_SUGGESTIONS : DEFAULT_SUGGESTIONS;
   const suggestions = matches.slice(0, visibleCount);
+
+  // The suggestion panel drops below the input; on a phone the soft keyboard
+  // can cover its lower half. Scrolls it above the keyboard as it opens and as
+  // typing narrows it — never past the sticky list header, which the input
+  // would otherwise be scrolled up underneath.
+  useRevealAboveKeyboard(
+    open && suggestions.length > 0,
+    panelRef,
+    inputRef,
+    suggestions.length,
+    () =>
+      document.querySelector("[data-sticky-header]")?.getBoundingClientRect()
+        .bottom ?? 0,
+  );
 
   function commit(raw: string, qtyHint?: string) {
     const { name, qty } = parseEntry(raw);
@@ -164,13 +180,18 @@ export function AddItem({ catalog, onAdd, isOnList }: Props) {
       </div>
 
       {open && suggestions.length > 0 && (
-        <div className="absolute z-20 mt-1 w-full origin-top overflow-hidden rounded-md border border-border bg-card shadow-sm transition-[opacity,transform] duration-150 starting:scale-95 starting:opacity-0">
+        <div
+          ref={panelRef}
+          className="absolute z-20 mt-1 w-full origin-top overflow-hidden rounded-md border border-border bg-card shadow-sm transition-[opacity,transform] duration-150 starting:scale-95 starting:opacity-0">
           {!query && (
             <p className="px-3 pb-1 pt-2 text-xs uppercase tracking-widest text-muted-foreground">
               En çok alınan
             </p>
           )}
-          <ul className="max-h-72 overflow-y-auto">
+          {/* Capped to the visible viewport too (15rem ≈ sticky header + input +
+              this panel's own label/footer rows): with the keyboard up, a
+              fixed 18rem list can be taller than the space above it. */}
+          <ul className="max-h-[min(18rem,calc(var(--visual-vh,100dvh)-15rem))] overflow-y-auto overscroll-contain">
             {suggestions.map((entry, i) => {
               const already = isOnList(entry.name);
               return (

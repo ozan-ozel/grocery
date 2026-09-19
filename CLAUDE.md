@@ -39,6 +39,15 @@ this project is. This file is a router and behavior layer, not the architecture 
   bottom border through the pill background — if you ever build a new Radix-based SP trigger by
   hand instead of using the constant, remember to cancel that underline yourself.
 
+- **Bottom sheets** — build new ones on
+  [src/components/ui/bottom-sheet.tsx](src/components/ui/bottom-sheet.tsx) (backdrop, dialog, grabber,
+  title + close header), not a hand-rolled overlay. It gives you swipe-down-to-dismiss from anywhere on
+  the sheet (`useSwipeToDismiss`; mark a region `data-sheet-no-drag` to opt it out) and keyboard-aware
+  sizing (the container tracks the visual viewport via the `--visual-vh`/`--visual-top`/`--kb-inset`
+  vars that `useVisualViewportVars` publishes from `AppShell`). Give the sheet's scrolling list
+  `min-h-0 overflow-y-auto overscroll-contain` so it — not the search field — shrinks under the
+  keyboard. For a search whose results render inline below a field, call `useRevealAboveKeyboard`.
+
 ## Session continuity
 
 - `docs/SESSION_FOLLOWUP.md` is the single active project checkpoint. It records the current
@@ -162,6 +171,15 @@ All backend logic lives under `api/*` (Vercel functions), with shared helpers in
 `lib/auth.ts`). A former `functions/api/*` Cloudflare Pages path and, later, a parallel
 `netlify/functions/*` deploy were both retired (see git history / `docs/archive/roadmap.md`); Vercel
 is what's actually deployed now.
+
+**Driving the app with Playwright** (ground rule — the full version is in Claude's memory): plain tools
+first (`navigate`/`click`/`snapshot`/`screenshot`/read-only `evaluate`), `browser_run_code_unsafe` only
+when nothing else fits; sign in only via the `agent-login` mint/redeem flow against the local
+`npm run vercel:dev` (`AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` in `.env.local`); if `:3000` already
+answers, it's the developer's own server (possibly behind ngrok) — reuse it, never start a second dev
+server on the project or kill a process by port; leave the test account as found; use a throwaway
+account (`agent-login` mint accepts `{"email": ...}`) for anything destructive such as
+`/api/auth-delete-account`; keep screenshots out of the repo root.
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 
