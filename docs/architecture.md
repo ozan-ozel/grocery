@@ -181,11 +181,20 @@ git ref):
 
 - `npx vercel link` — one-time, links this directory to the Vercel project
 - `npx vercel dev` (`npm run vercel:dev`) — local dev server running Vite + `api/*.ts` together
-- `npx vercel` — preview deploy to a throwaway `*.vercel.app` URL, doesn't touch production
-- `npx vercel --prod` — deploys to `https://grocery-five-ecru.vercel.app`
+- `npm run deploy` (= `vercel`) — preview deploy to a throwaway `*.vercel.app` URL, doesn't touch production
+- `npm run deploy:prod` (= `vercel --prod`) — deploys to `https://grocery-five-ecru.vercel.app`
 
-Treat `npx vercel --prod` with the same weight as any other "deploy to prod" action — it's a manual
+These two package.json scripts are the normal way to deploy; `npx vercel [--prod]` is the same thing.
+**Pushing or merging to `master` never deploys** — a merged change is not live until someone runs
+`npm run deploy:prod`, and a deploy can go out with nothing committed at all.
+
+Treat `npm run deploy:prod` with the same weight as any other "deploy to prod" action — it's a manual
 step, but a production-effecting one, with no confirmation prompt of its own.
+
+Before any deploy, check that `.vercelignore` still lists `api/agent-login.ts` and
+`api/_auth-test-login.ts`: they are excluded to stay within the 12-function Hobby limit (see "Function
+count limit" below), and `vercel dev` honors the same file, so the `agent-login` line is only ever
+commented out temporarily for local Playwright testing (see `CLAUDE.md`).
 
 ## Environment variables
 
@@ -214,11 +223,13 @@ a test session, etc.) — see each file's own comments for which. `.env.local.ex
 `scripts/upload-nutrition.ts` seeding script — it does not cover `SUPABASE_ANON_KEY`, which the
 functions also need.
 
-`TEST_LOGIN_SECRET` (local-only, optional) enables `api/_auth-test-login.ts` — a Google-OAuth bypass
-that mints a real Supabase session cookie for a synthetic test user, for browser-driven QA without
-ever touching a real Google account. It only works when unset in production and when
-`VERCEL_ENV !== "production"` (Vercel's own env var), so it's inert on the deployed site even if
-accidentally left set. **Never set it in the production Vercel project's env vars.**
+`TEST_LOGIN_SECRET` (optional) was meant to enable `api/_auth-test-login.ts` — a Google-OAuth bypass
+that mints a real Supabase session cookie for a synthetic test user. **In practice it is dead code
+today:** the underscore prefix makes Vercel treat the file as a private helper, so it is never routed
+(`/api/auth-test-login` always 404s, locally and deployed), and `.vercelignore` excludes it anyway.
+`api/agent-login.ts` below is the working replacement. If it were ever routed, it only works when
+`VERCEL_ENV !== "production"`, and **`TEST_LOGIN_SECRET` must never be set in the production Vercel
+project's env vars.**
 
 `AGENT_LOGIN_SECRET` / `AGENT_LOGIN_ENABLED` enable `api/agent-login.ts` — a separate, two-step
 mint/redeem flow (`?_action=mint` then `?_action=redeem`) that gives a QA/CI agent a real, working
@@ -226,12 +237,21 @@ Supabase session for a bounded 10-minute, single-use window, without a permanent
 secret sitting in the app's auth surface. `AGENT_LOGIN_SECRET` gates the mint call (sent as the
 `x-agent-login-secret` header on a server-to-server `POST`, never from a browser, and never sent to
 the client bundle) and is compared with `timingSafeEqual`, same as `TEST_LOGIN_SECRET`. Unlike
-`_auth-test-login.ts`, this endpoint is not hard-blocked in production — `AGENT_LOGIN_ENABLED` must
-be the literal string `"true"` for it to do anything at all when `VERCEL_ENV === "production"`, so
-production access to it is opt-in, not just inert-by-default. **Only set `AGENT_LOGIN_ENABLED=true`
-in the production Vercel project after an explicit go-ahead from the repo owner** (see Task 4 of
-`docs/superpowers/plans/2026-09-12-agent-test-login.md`) — it stays usable locally and in Preview
-deployments regardless, since Preview is not gated by this check at all.
+`_auth-test-login.ts`, this endpoint is not hard-blocked in production by its own code —
+`AGENT_LOGIN_ENABLED` must be the literal string `"true"` for it to do anything at all when
+`VERCEL_ENV === "production"`. **Only set `AGENT_LOGIN_ENABLED=true` in the production Vercel project
+after an explicit go-ahead from the repo owner** (see Task 4 of
+`docs/superpowers/plans/2026-09-12-agent-test-login.md`).
+
+**It is currently local-only by deployment, not by code.** `.vercelignore` lists `api/agent-login.ts`
+(commit `48078cb`, to stay within the 12-function Hobby limit), so it is in **no** deployment — Preview
+included — and the env-var gate above never even comes into play. `vercel dev` builds its function list
+through the same `.vercelignore`, so **while that line is active the endpoint 404s locally too**
+(`/api/agent-login?_debug=1` returns Vercel's own `NOT_FOUND` page, not the function's). To use it for
+local Playwright QA, comment the line out, restart the developer's `npm run vercel:dev`, and put the
+line back before any deploy — the standing procedure is in `CLAUDE.md`. Merging it into a deployed
+function instead would put a mint-a-session-for-any-email endpoint on production behind a single env
+flag, which is why this procedure was chosen over that.
 
 Two things outside this repo have to be set for the OAuth flow to work at all: Supabase's Auth →
 URL Configuration → Redirect URLs must include `<vercel-domain>/api/auth-callback` (and the local
