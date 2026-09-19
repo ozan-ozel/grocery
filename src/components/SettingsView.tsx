@@ -1,4 +1,7 @@
+import { useState } from "react";
 import { LogOut, Trash2 } from "lucide-react";
+import { ConfirmModal } from "./ConfirmModal";
+import { DeleteAccountFlow, type DeleteFeedback } from "./DeleteAccountFlow";
 import { TenantSwitcher } from "./TenantSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
 import type { Tenant } from "@/lib/store";
@@ -6,7 +9,7 @@ import type { Theme } from "@/lib/preferences";
 
 type Props = {
   onSignOut: () => void;
-  onDeleteAccount: () => void;
+  onDeleteAccount: (feedback: DeleteFeedback) => Promise<void>;
   tenants: Tenant[];
   activeTenantId: string;
   currentUserId: string | null;
@@ -31,11 +34,8 @@ export function SettingsView({
   theme,
   onSelectTheme,
 }: Props) {
-  function handleDeleteAccount() {
-    if (confirm("Hesabı silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.")) {
-      onDeleteAccount();
-    }
-  }
+  const [confirmingSignOut, setConfirmingSignOut] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   return (
     <div className="space-y-5">
@@ -75,19 +75,40 @@ export function SettingsView({
       <div className="space-y-2 rounded-lg border border-border bg-card p-2">
         <button
           type="button"
-          onClick={onSignOut}
+          onClick={() => setConfirmingSignOut(true)}
           className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent active:bg-accent">
           <LogOut className="size-4" />
           Çıkış Yap
         </button>
         <button
           type="button"
-          onClick={handleDeleteAccount}
+          onClick={() => setDeletingAccount(true)}
           className="w-full flex items-center gap-3 rounded-lg px-4 py-3 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 active:bg-destructive/10">
           <Trash2 className="size-4" />
           Hesabı Sil
         </button>
       </div>
+
+      {deletingAccount && (
+        <DeleteAccountFlow
+          onDelete={onDeleteAccount}
+          onClose={() => setDeletingAccount(false)}
+        />
+      )}
+
+      {confirmingSignOut && (
+        <ConfirmModal
+          title="Emin misin?"
+          description="Hesabından çıkış yapacaksın."
+          confirmLabel="Çıkış Yap"
+          cancelLabel="Vazgeç"
+          onConfirm={() => {
+            setConfirmingSignOut(false);
+            onSignOut();
+          }}
+          onCancel={() => setConfirmingSignOut(false)}
+        />
+      )}
     </div>
   );
 }

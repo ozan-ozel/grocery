@@ -59,7 +59,7 @@
 
 ## Meal Construction/Prep - SCOPED, see docs/mvp-scope/meal-construction-mvp.md
 
-	Determine how a set of selected foods and portions is translated into constructed meals - MISSING
+	Determine how a set of selected foods and portions is translated into constructed meals - MISSING (curated combos cover the meals; portion tiers Küçük/Normal/Büyük + custom multiplier shipped 2026-09-19, see docs/mvp-scope/meal-construction-mvp.md)
 
 	We also want to be able to interfere (add, update, delete) these recipes. - MISSING
 

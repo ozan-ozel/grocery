@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { LoadingBlock } from "@/components/LoadingBlock";
+import { MealPlanSkeleton } from "@/components/MealPlanSkeleton";
 import { SuggestionCard } from "@/components/ui/suggestion-card";
 import { useMealPlan, todayDateStr } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
@@ -22,7 +22,7 @@ import { MealContainer } from "@/components/MealContainer";
 import { FoodSearchModal } from "@/components/FoodSearchModal";
 import { MealShoppingConfirmModal } from "@/components/MealShoppingConfirmModal";
 import { RecipeSearchModal } from "@/components/RecipeSearchModal";
-import { ALL_COMBOS } from "@/lib/combos";
+import { ALL_COMBOS, scaleComboItems } from "@/lib/combos";
 import { scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 import {
   matchEveningCombos,
@@ -196,9 +196,13 @@ export function MealPlanView({
     }
   }
 
-  function handleComboSelect(combo: ScoredCombo) {
+  // `factor` is the chosen portion multiplier (see COMBO_PORTIONS in
+  // combos.ts) — every ingredient is scaled together, so the meal's protein
+  // and carb portions stay proportional. The logged comboId is unchanged:
+  // it's provenance, the grams are what actually count.
+  function handleComboSelect(combo: ScoredCombo, factor: number) {
     if (!activeSlot) return;
-    for (const item of combo.items) {
+    for (const item of scaleComboItems(combo.items, factor)) {
       const nutrition = lookupNutrition(catalogMap, item.foodId);
       if (nutrition) {
         addItem(activeSlot, nutrition.name_tr, item.grams, combo.id);
@@ -304,7 +308,10 @@ export function MealPlanView({
   }
 
   return (
-    <div className="space-y-4">
+    // pb-6: the fixed bottom nav is ~76px tall (its "Besin Değerleri" label
+    // wraps to two lines) against a 80px spacer, which left the last card only
+    // ~4px clear of it — this adds the breathing room (~28px total).
+    <div className="space-y-4 pb-6">
       <p className="text-xs uppercase tracking-widest text-muted-foreground">
         Yemek Planı
       </p>
@@ -408,13 +415,9 @@ export function MealPlanView({
         </>
       )}
 
-      {isLoading && (
-        <div className="space-y-2">
-          {MEAL_SLOTS.map(({ slot }) => (
-            <LoadingBlock key={slot} className="h-28" />
-          ))}
-        </div>
-      )}
+      {/* Same skeleton as the lazy-chunk Suspense fallback in App.tsx, so
+          the chunk-loading -> data-loading handoff doesn't change shape. */}
+      {isLoading && <MealPlanSkeleton />}
 
       {/* Food Search Modal */}
       <FoodSearchModal
@@ -432,6 +435,7 @@ export function MealPlanView({
       <RecipeSearchModal
         title="Yemekler"
         combos={scoredCombos}
+        catalog={catalogMap}
         isOpen={comboModalOpen}
         onClose={() => {
           setComboModalOpen(false);

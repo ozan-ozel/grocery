@@ -27,6 +27,7 @@ import { groupByCategory } from "@/lib/categorization/categories";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useDetailsTransition } from "@/hooks/useDetailsTransition";
+import { useRevealAboveKeyboard } from "@/hooks/useVisualViewport";
 import { cn } from "@/lib/utils";
 
 // A user only ever picks one of these four — "unclassified" is a migration
@@ -256,6 +257,8 @@ export function PersonalPlanView({ userId }: Props) {
     return foodIdentityIndex.byId.get(foodId)?.name_tr ?? foodId;
   }
   const [excludeQuery, setExcludeQuery] = useState("");
+  const excludeInputRef = useRef<HTMLInputElement>(null);
+  const excludeResultsRef = useRef<HTMLUListElement>(null);
   // A food picked from search but not yet given a reason — nothing is
   // written to foodExclusions until one of the four reasons is chosen
   // (Phase 9 §20 Milestone 1: an exclusion must carry why it exists). Holds
@@ -288,6 +291,14 @@ export function PersonalPlanView({ userId }: Props) {
         })
         .slice(0, 5)
     : [];
+  // The match list renders below the field; keep it above the soft keyboard
+  // as it appears and as typing narrows it.
+  useRevealAboveKeyboard(
+    !pendingFood && excludeMatches.length > 0,
+    excludeResultsRef,
+    excludeInputRef,
+    excludeMatches.length,
+  );
   // Empty search box: browse the whole catalog by aisle instead of showing
   // nothing — the old behaviour only let you find a food by typing its exact
   // name. Same categorize() taxonomy as the "Tümü" nutrition tab.
@@ -380,7 +391,10 @@ export function PersonalPlanView({ userId }: Props) {
     );
 
   return (
-    <div className="space-y-5">
+    // pb-6: the fixed bottom nav is ~76px tall (its "Besin Değerleri" label
+    // wraps to two lines) against a 80px spacer, which left the last card only
+    // ~4px clear of it — this adds the breathing room (~28px total).
+    <div className="space-y-5 pb-6">
       <div>
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
           Kişisel Plan
@@ -414,7 +428,7 @@ export function PersonalPlanView({ userId }: Props) {
             "flex items-center gap-2 rounded px-1 text-sm font-semibold transition-colors duration-700",
             highlightedReferrer ===
               "Profil girdileri ve enerji planlama çerçevesi" &&
-              "bg-signal/10 ring-2 ring-signal/50",
+              "jump-star bg-signal/10 ring-2 ring-signal/50",
           )}>
           Profil{" "}
           {showSources && (
@@ -521,7 +535,7 @@ export function PersonalPlanView({ userId }: Props) {
                   className={cn(
                     "rounded transition-colors duration-700",
                     highlightedReferrer === "Günlük aktivite seviyesi" &&
-                      "bg-signal/10 ring-2 ring-signal/50",
+                      "jump-star bg-signal/10 ring-2 ring-signal/50",
                   )}>
                   <Field
                     label="Günlük aktivite"
@@ -599,6 +613,7 @@ export function PersonalPlanView({ userId }: Props) {
               </p>
               {!pendingFood && (
                 <Input
+                  ref={excludeInputRef}
                   className="mt-2"
                   placeholder="Besin ara..."
                   value={excludeQuery}
@@ -608,7 +623,9 @@ export function PersonalPlanView({ userId }: Props) {
                 />
               )}
               {!pendingFood && excludeQuery.trim() && excludeMatches.length > 0 && (
-                <ul className="mt-1 divide-y divide-border rounded-md border border-border">
+                <ul
+                  ref={excludeResultsRef}
+                  className="mt-1 divide-y divide-border rounded-md border border-border">
                   {excludeMatches.map(f => (
                     <li key={f.name_tr}>
                       <button
@@ -1128,7 +1145,7 @@ function TargetSummary({
                   // margin. Kept with the dot otherwise for even spacing.
                   showSources ? "pr-1" : "px-1",
                   highlightedReferrer === "BMI ve bel çevresi bağlamı" &&
-                    "bg-signal/10 ring-2 ring-signal/50",
+                    "jump-star bg-signal/10 ring-2 ring-signal/50",
                 )}>
                 BMI {targets.bmi} ({bmiLabel(targets.bmi)})
               </span>
@@ -1156,7 +1173,7 @@ function TargetSummary({
               (highlightedTarget === "Koruma" ||
                 highlightedReferrer ===
                   "Bazal metabolizma, koruma ve hedef kalorisi") &&
-                "bg-signal/10 ring-2 ring-signal/50",
+                "jump-star bg-signal/10 ring-2 ring-signal/50",
             )}>
             Koruma {targets.maintenanceKcal} kcal
           </span>
@@ -1176,7 +1193,7 @@ function TargetSummary({
         className={cn(
           "grid grid-cols-2 gap-2 rounded-lg transition-colors duration-700 sm:grid-cols-3",
           highlightedReferrer === "Protein, yağ, karbonhidrat ve lif aralıkları" &&
-            "bg-signal/10 ring-2 ring-signal/50",
+            "jump-star bg-signal/10 ring-2 ring-signal/50",
         )}>
         {cards.map(([label, value, suffix]) => {
           // Most cards cite the AMDR macro-range group (DRI). Two don't:
@@ -1211,7 +1228,7 @@ function TargetSummary({
                 "rounded-lg border p-3 transition-colors duration-700",
                 highlightedTarget === label ||
                   (isWater && highlightedReferrer === citation.feature)
-                  ? "border-signal/70 bg-signal/10 ring-2 ring-signal/50"
+                  ? "jump-star border-signal/70 bg-signal/10 ring-2 ring-signal/50"
                   : "border-border",
               )}>
               <p className="flex items-center gap-1 text-xs text-muted-foreground">
@@ -1266,7 +1283,7 @@ function SourceMap({
           className={cn(
             "rounded-md border-t border-border pt-2 transition-colors duration-700",
             highlightedGroup === group.feature &&
-              "border-t-transparent bg-signal/10 ring-1 ring-signal/40",
+              "jump-star border-t-transparent bg-signal/10 ring-1 ring-signal/40",
           )}>
           <p className="font-medium text-foreground">{group.feature}</p>
           <div className="mt-2 space-y-1.5">

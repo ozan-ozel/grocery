@@ -1,6 +1,6 @@
 import { lookupNutrition, type NutritionMap, type Nutrition } from "./nutrition";
 import { scaleNutrition, sumMacros, type MacroTotals } from "./mealNutrition";
-import type { Combo } from "./combos";
+import { scaleComboItems, type Combo } from "./combos";
 import {
   hasHardExclusion,
   hasSoftConstraint,
@@ -34,6 +34,23 @@ function resolveItems(combo: Combo, catalog: NutritionMap): Nutrition[] | null {
 
 function comboTotals(items: Nutrition[], grams: number[]): MacroTotals {
   return sumMacros(items.map((n, i) => scaleNutrition(n, grams[i])));
+}
+
+// Macro totals for a combo at a portion `factor` (see COMBO_PORTIONS in
+// combos.ts) — computed from the same rounded gram values that get logged, not
+// by multiplying the authored totals, so what the picker shows is exactly what
+// gets added. null if any item is missing from the catalog, like resolveItems.
+export function scaledComboTotals(
+  combo: Combo,
+  factor: number,
+  catalog: NutritionMap
+): MacroTotals | null {
+  const items = resolveItems(combo, catalog);
+  if (!items) return null;
+  return comboTotals(
+    items,
+    scaleComboItems(combo.items, factor).map((i) => i.grams)
+  );
 }
 
 // True when ANY item in the combo is hard-excluded — food-level or

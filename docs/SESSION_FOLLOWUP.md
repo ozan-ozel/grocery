@@ -1,6 +1,19 @@
 # Session Follow-up
 
-_Last updated: 2026-09-17_
+_Last updated: 2026-09-19_
+
+## Latest Session (2026-09-19)
+
+10-item UI/UX refinement pass (Shopping header/tab alignment and editable-title affordance, visible
+Nutrition "Listem" pill, bottom spacing, logout confirmation, shared Meal Plan skeleton, jump-target
+star, meal portion tiers, whole-sheet swipe-to-dismiss, keyboard-aware sheets/search), plus a real
+**delete-account** flow: "Hesabı Sil" had never worked on Vercel (its endpoint was never ported from
+Netlify), so `api/auth-delete-account.ts` was written and a 3-step confirmation with an anonymous
+deletion-reason survey (`supabase/27-account-deletion-feedback.sql`, applied 2026-09-19 together with
+25 and 26) was added. Verified with `tsc -b` + live Playwright; still needs a real-phone check of the
+keyboard behavior, and a look at Supabase Auth users to confirm a deleted account's login row is gone.
+Full detail:
+[2026-09-19-01](session-checkpoints/2026-09-19-01-ui-ux-refinement-pass.md).
 
 ## Current Objective
 

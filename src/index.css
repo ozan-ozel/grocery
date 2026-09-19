@@ -100,6 +100,9 @@
     /* Lets height/block-size transition to and from "auto" below —
        otherwise a details panel could only ever snap open instantly. */
     interpolate-size: allow-keywords;
+    /* Keeps focus/scrollIntoView from parking a field or result under the
+       soft keyboard: --kb-inset is published by useVisualViewportVars. */
+    scroll-padding-bottom: calc(var(--kb-inset, 0px) + 1rem);
   }
 
   /* Every <details> in the app opens/closes with a smooth height transition
@@ -140,6 +143,54 @@
 }
 
 @layer utilities {
+  /* "You just landed here" marker for a jump-to-reference highlight (Kişisel
+     Plan's Nasıl hesaplanıyor? <-> Kaynaklar links): a tiny signal-colored star
+     straddling the highlighted element's top-left corner, half on the tint and
+     half off it. The element already carries its own ring/tint classes; this
+     only adds the star, and it lives exactly as long as the class does. The
+     animation is sized to the 1.6s the highlight state is held (see
+     PersonalPlanView's jumpTo* timeouts) — pop in, hold, fade out just before
+     the class is removed so the star never blinks off abruptly.
+     prefers-reduced-motion is handled globally below (caps animation-duration
+     to ~0, which here just leaves the star at its final state). */
+  .jump-star {
+    position: relative;
+  }
+  .jump-star::after {
+    content: "";
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    width: 11px;
+    height: 11px;
+    pointer-events: none;
+    background: var(--color-signal);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E")
+      center / contain no-repeat;
+    animation: jump-star 1.6s ease-out both;
+  }
+  @keyframes jump-star {
+    0% {
+      opacity: 0;
+      transform: scale(0.2) rotate(-40deg);
+    }
+    12% {
+      opacity: 1;
+      transform: scale(1.35) rotate(0deg);
+    }
+    22% {
+      transform: scale(1);
+    }
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+
   /* The ledger column: quantities and counts stay tabular (digits are
      fixed-width so they stack into an aligned column) and right-aligned.
      Deliberately NOT font-mono — most monospace stacks (Roboto Mono
