@@ -156,7 +156,15 @@ npm run preview       # serve the built dist/ (still no /api/*)
 npm run vercel:dev    # vercel dev — the real local stack: Vite + every api/*.ts, proxied on :3000.
                        #   This is what production actually runs. Reads Supabase creds from
                        #   .env.local automatically.
+npm run deploy        # vercel — preview deploy (throwaway URL), manual
+npm run deploy:prod   # vercel --prod — production deploy, manual
 ```
+
+**Deploys are manual only.** Nothing deploys on `git push` or on merging to `master` (no GitHub
+integration on this project); a change goes live only when the developer runs `npm run deploy:prod`,
+which ships the local filesystem, not a git ref. Claude never runs `deploy`/`deploy:prod` unless
+explicitly asked, and doesn't describe a push as a release. Before a deploy, `.vercelignore` must still
+list `api/agent-login.ts` (see the Playwright note below).
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
@@ -175,9 +183,13 @@ is what's actually deployed now.
 **Driving the app with Playwright** (ground rule — the full version is in Claude's memory): plain tools
 first (`navigate`/`click`/`snapshot`/`screenshot`/read-only `evaluate`), `browser_run_code_unsafe` only
 when nothing else fits; sign in only via the `agent-login` mint/redeem flow against the local
-`npm run vercel:dev` (`AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` in `.env.local`); if `:3000` already
-answers, it's the developer's own server (possibly behind ngrok) — reuse it, never start a second dev
-server on the project or kill a process by port; leave the test account as found; use a throwaway
+`npm run vercel:dev` (`AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` in `.env.local`); Claude may start or
+restart `npm run vercel:dev` itself when a task needs it (changed since 2026-09-19 — it used to be
+developer-only). Check `:3000` first: if it answers, reuse it and never start a second dev server on top of
+it; restart only when the task actually needs it, say so beforehand (it may be the developer's live
+session, possibly behind ngrok for phone testing), and find the exact process listening on `:3000` rather
+than sweeping ports; start it in the background and keep its task id, and only stop servers Claude started
+by that id; leave the test account as found; use a throwaway
 account (`agent-login` mint accepts `{"email": ...}`) for anything destructive such as
 `/api/auth-delete-account`; keep screenshots out of the repo root.
 
@@ -185,8 +197,11 @@ account (`agent-login` mint accepts `{"email": ...}`) for anything destructive s
 `api/agent-login.ts` to keep production within the 12-function Hobby limit, but `vercel dev` honors that
 file too — while the line is active, `/api/agent-login` 404s locally. Whenever Playwright needs a login,
 do this every time (never merge `agent-login` into a deployed function instead): (1) comment out the
-`api/agent-login.ts` line in `.vercelignore`; (2) ask the developer to restart their own `vercel:dev` with
-`$env:AGENT_LOGIN_SECRET='<value>'; npm run vercel:dev` (Claude never restarts it); (3) run the testing;
+`api/agent-login.ts` line in `.vercelignore`; (2) (re)start `npm run vercel:dev` — Claude can do this
+itself, see the rule above — because the ignore file is only read at startup, then check
+`GET /api/agent-login?_debug=1` — if `hasAgentLoginSecret` is `false`, restart once more as
+`$env:AGENT_LOGIN_SECRET='<value>'; npm run vercel:dev` (a plain start was enough on 2026-09-19, so the
+old env-pickup quirk may be gone); (3) run the testing;
 (4) **restore the line** before finishing. **SYNC** must flag a diff that still has the line commented
 out — deploying with it commented pushes 13+ functions and fails the Hobby limit (or ships the login
 endpoint).

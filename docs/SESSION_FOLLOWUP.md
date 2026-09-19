@@ -109,9 +109,12 @@ Round 2 (see the linked checkpoint for the full list): `src/components/ui/checkb
 - Progress rings use each tile's existing hardcoded per-metric color (blue/red/green/yellow/
   purple), not the app's single `--color-signal` accent — `MacroSummaryCard` already breaks the
   one-accent rule, and a single-accent ring would have visually mismatched its own tile's border.
-- Local `vercel dev` quirk: `AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` from `.env.local` don't
-  reach the spawned function process (other `.env.local` vars do). Workaround: launch with
-  `AGENT_LOGIN_SECRET=<value> npm run vercel:dev` instead of relying on file pickup for that key.
+- Local `vercel dev` quirk (2026-09-16): `AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` from `.env.local` didn't
+  reach the spawned function process (other `.env.local` vars did). Workaround: launch with
+  `AGENT_LOGIN_SECRET=<value> npm run vercel:dev`. **Not reproduced on 2026-09-19** — a plain
+  `npm run vercel:dev` picked the secret up (`/api/agent-login?_debug=1` → `hasAgentLoginSecret: true`) — so
+  check `_debug=1` first and only add the prefix if it reports false. Separately, `agent-login` is now
+  excluded by `.vercelignore` and 404s locally until that line is temporarily commented out (see `CLAUDE.md`).
 
 ## Constraints
 
