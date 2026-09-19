@@ -14,3 +14,7 @@ dist
 # Not part of the deployed app; contains copyrighted source textbooks up to
 # 600+MB, well over Vercel's 100MB per-file limit.
 nutrition-curriculum
+
+# Dev-only testing endpoints; run locally via npm run vercel:dev but not deployed to prod
+api/agent-login.ts
+api/_auth-test-login.ts
