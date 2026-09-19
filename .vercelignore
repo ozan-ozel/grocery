@@ -15,6 +15,9 @@ dist
 # 600+MB, well over Vercel's 100MB per-file limit.
 nutrition-curriculum
 
-# Dev-only testing endpoints; run locally via npm run vercel:dev but not deployed to prod
+# Dev-only testing endpoints, kept out of prod to stay within the 12-function Hobby limit.
+# NOTE: `vercel dev` honors this file too, so while these lines are active the endpoints are
+# NOT served locally either. To use agent-login for Playwright: comment them out, restart
+# `npm run vercel:dev`, and put them back BEFORE any `npm run deploy` / `deploy:prod`.
 api/agent-login.ts
 api/_auth-test-login.ts
