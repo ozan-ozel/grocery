@@ -2,6 +2,13 @@
 
 _Last updated: 2026-09-19_
 
+## Batch preparation UI — implemented (2026-09-19)
+
+DEC-069's backend is shipped but its only UI (`BatchPlanner.tsx`) was orphaned since 2026-09-12.
+A UI plan was written on branch `feature/batch-preparation-ui`, and implemented by Haiku 4.5:
+[`docs/superpowers/plans/2026-09-19-batch-preparation-ui.md`](superpowers/plans/2026-09-19-batch-preparation-ui.md).
+Record: [2026-09-19-02](session-checkpoints/2026-09-19-02-batch-preparation-ui.md). All code changes are complete, typechecked, built clean, and live-verified at `localhost:3000` (checklist results in the checkpoint). Still needs a real-phone check of the soft-keyboard behaviour in the create form.
+
 ## Latest Session (2026-09-19)
 
 10-item UI/UX refinement pass (Shopping header/tab alignment and editable-title affordance, visible
@@ -175,6 +182,9 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 20. [Lazy-load the Turkish categorization engine (perf follow-up)](session-checkpoints/2026-09-16-06-lazy-load-categorizer.md)
 21. [Meat meals + hindi göğsü sort-to-bottom](session-checkpoints/2026-09-16-07-meat-meals-and-hindi-sort.md)
 22. [Kişisel Plan: sources/nav polish, hydration range, citation accuracy](session-checkpoints/2026-09-17-01-kisisel-plan-sources-nav-polish.md)
+23. [Boot performance waterfall (3-tier → 1-tier API)](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md)
+24. [UI/UX refinement pass + real delete-account flow](session-checkpoints/2026-09-19-01-ui-ux-refinement-pass.md)
+25. [Batch preparation UI (DEC-069 frontend re-surface)](session-checkpoints/2026-09-19-02-batch-preparation-ui.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain

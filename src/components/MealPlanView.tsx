@@ -7,6 +7,7 @@ import { useMealPlan, todayDateStr } from "@/hooks/useMealPlan";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useRemainingToday } from "@/hooks/useRemainingToday";
+import { useBatchLedger } from "@/hooks/useBatches";
 import {
   MEAL_SLOTS,
   calculateItemsNutrition,
@@ -18,7 +19,9 @@ import { type MacroTotals } from "@/lib/mealNutrition";
 import { lookupNutrition, type Nutrition } from "@/lib/nutrition";
 import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
-import { MealContainer } from "@/components/MealContainer";
+import { MealContainer, MEAL_LABELS } from "@/components/MealContainer";
+import { BatchSheet } from "@/components/BatchSheet";
+import { BatchAllocateSheet } from "@/components/BatchAllocateSheet";
 import { FoodSearchModal } from "@/components/FoodSearchModal";
 import { MealShoppingConfirmModal } from "@/components/MealShoppingConfirmModal";
 import { RecipeSearchModal } from "@/components/RecipeSearchModal";
@@ -29,6 +32,7 @@ import {
   EVENING_CANDIDATE_PATTERNS,
   EVENING_PATTERN_BY_ID,
 } from "@/lib/eveningRecommend";
+import { batchDateLabel, hasRemaining } from "@/lib/preparationBatch";
 import type { LoggedEntry } from "@/hooks/useRemainingToday";
 
 type Props = {
@@ -95,6 +99,25 @@ export function MealPlanView({
     mode: "add" | "remove";
     item: MealItem;
   } | null>(null);
+
+  // DEC-069 batch preparation. One ledger for the whole screen; the two
+  // sheets and the origin chips below are all presentation over it.
+  const { ledger, createBatch } = useBatchLedger(householdId);
+  const [batchSheetOpen, setBatchSheetOpen] = useState(false);
+  const [allocateSlot, setAllocateSlot] = useState<MealSlot | null>(null);
+  const activeBatchCount = ledger.filter(({ remaining }) => hasRemaining(remaining)).length;
+  const batchById = new Map(ledger.map(({ batch }) => [batch.id, batch]));
+
+  function batchLabelFor(item: MealItem): string | undefined {
+    if (!item.batchId) return undefined;
+    const batch = batchById.get(item.batchId);
+    return batch ? `Parti · ${batchDateLabel(batch.preparedDate)}` : "Parti";
+  }
+
+  function handleBatchAllocate(batchId: string, foodId: string, quantityG: number) {
+    if (!allocateSlot) return;
+    addItem(allocateSlot, foodId, quantityG, undefined, batchId);
+  }
 
   const scoredCombos = scoreAllCombos(
     ALL_COMBOS,
@@ -377,9 +400,34 @@ export function MealPlanView({
                   isOnShoppingList(catalogMap.get(foodId)?.name_tr ?? foodId)
                 }
                 onToggleShoppingList={requestShoppingToggle}
+                onSelectBatch={
+                  activeBatchCount > 0 ? () => setAllocateSlot(slot) : undefined
+                }
+                batchLabelFor={batchLabelFor}
               />
             ))}
           </div>
+
+          {householdId && (
+            <button
+              type="button"
+              onClick={() => setBatchSheetOpen(true)}
+              className="flex w-full items-center justify-between rounded-lg border border-border bg-card px-4 py-3 text-left transition-colors hover:border-primary active:border-primary">
+              <span>
+                <span className="block text-sm font-semibold text-foreground">
+                  Toplu Hazırlıklar
+                </span>
+                <span className="block text-xs text-muted-foreground">
+                  {ledger.length === 0
+                    ? "Bir kere pişir, birkaç güne yay"
+                    : activeBatchCount > 0
+                      ? `${activeBatchCount} aktif parti`
+                      : "Tüm partiler tükendi"}
+                </span>
+              </span>
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </button>
+          )}
 
           {(visibleEveningSuggestions.length > 0 || eatenEveningCombos.length > 0) && (
             <div className="space-y-2">
@@ -457,6 +505,32 @@ export function MealPlanView({
           ]}
           onConfirm={confirmShoppingToggle}
           onCancel={() => setShoppingConfirm(null)}
+        />
+      )}
+
+      {batchSheetOpen && householdId && (
+        <BatchSheet
+          householdId={householdId}
+          ledger={ledger}
+          catalog={catalogMap}
+          foods={foods}
+          exclusions={personalizationProfile.foodExclusions}
+          allergenExclusions={personalizationProfile.allergenExclusions}
+          defaultDate={date}
+          createBatch={createBatch}
+          onClose={() => setBatchSheetOpen(false)}
+        />
+      )}
+
+      {allocateSlot && (
+        <BatchAllocateSheet
+          subtitle={`${dateLabel} · ${MEAL_LABELS[getMealType(allocateSlot)].tr}`}
+          ledger={ledger}
+          catalog={catalogMap}
+          exclusions={personalizationProfile.foodExclusions}
+          allergenExclusions={personalizationProfile.allergenExclusions}
+          onAdd={handleBatchAllocate}
+          onClose={() => setAllocateSlot(null)}
         />
       )}
 

@@ -31,6 +31,7 @@ on the checkboxes.
 | [2026-09-12-recipe-picker.md](2026-09-12-recipe-picker.md) | 2026-09-12 | `SHIPPED` | `RecipeSearchModal.tsx` exists |
 | [2026-09-12-saved-meal-templates.md](2026-09-12-saved-meal-templates.md) | 2026-09-12 | `NOT_STARTED` | No "template" trace beyond unrelated CSS `grid-template-rows` |
 | [2026-09-17-boot-performance-waterfall.md](2026-09-17-boot-performance-waterfall.md) | 2026-09-17 | `SHIPPED` | Phases 0-3 + 4a/4b/4c implemented on `perf/boot-waterfall`; boot calls now start within 2ms of each other vs 1.7s/3.5s/5.7s — see [2026-09-17-02 checkpoint](../../session-checkpoints/2026-09-17-02-boot-performance-waterfall.md). Phase 4d (`getClaims()`) and the asset work were out of scope by the plan's own decision |
+| [2026-09-19-batch-preparation-ui.md](2026-09-19-batch-preparation-ui.md) | 2026-09-19 | `SHIPPED` | `BatchSheet.tsx` / `BatchAllocateSheet.tsx` mounted in `MealPlanView.tsx`; `BatchPlanner.tsx` removed |
 
 ## Status vocabulary
 

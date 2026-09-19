@@ -27,6 +27,17 @@ rice/bulgur/pasta carb to 200 g raw, above `eveningRecommend.ts`'s 150 g solver 
 because that ceiling bounds the solver's recommendations, not what a person may choose. Still open:
 per-role scaling (leave oil/vegetables fixed) if uniform scaling proves too blunt.
 
+**Update 2026-09-19 — batch preparation UI re-surfaced.** DEC-069 was already `SHIPPED` in the
+backend, but its only UI (`BatchPlanner.tsx`) had been taken off Yemek Planı on 2026-09-12 and left
+orphaned, so batches were unreachable in the app. Yemek Planı now has a "Toplu Hazırlıklar" sheet
+(create a batch from a meal at N portions, or by hand; see prepared / remaining grams per food) and
+a per-meal "Partiden" button that adds a batch food into that day's slot at a chosen gram amount,
+with a "Parti · <date>" chip on the resulting entry. Leftovers stay derived, never stored; batches
+stay immutable (no edit/delete). Plan:
+`docs/superpowers/plans/2026-09-19-batch-preparation-ui.md`. Still open: batch ingredients are not
+part of the shopping consolidation (DEC-071) — the day's "Bu günü alışveriş listesine ekle" adds
+allocated foods like any other entry.
+
 ## Item 2: editable recipes are unowned, and there is a catch
 
 Combos are read-only. `ALL_COMBOS` is derived from the JSON at module load, and no add, update or

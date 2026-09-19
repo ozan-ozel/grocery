@@ -15,9 +15,12 @@ type Props = {
   onUpdateItemQuantity?: (itemId: string, quantityG: number) => void;
   isOnShoppingList: (foodId: string) => boolean;
   onToggleShoppingList: (item: MealItem) => void;
+  // DEC-069: shown only when there is batch food left to add.
+  onSelectBatch?: () => void;
+  batchLabelFor?: (item: MealItem) => string | undefined;
 };
 
-const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
+export const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
   ilk: { tr: "İlk Öğün", en: "First Meal" },
   ara: { tr: "Ara Öğün", en: "Snack" },
   son: { tr: "Son Öğün", en: "Last Meal" },
@@ -33,6 +36,8 @@ export function MealContainer({
   onUpdateItemQuantity,
   isOnShoppingList,
   onToggleShoppingList,
+  onSelectBatch,
+  batchLabelFor,
 }: Props) {
   const updateItemQuantity = onUpdateItemQuantity ?? (() => {});
   const label = MEAL_LABELS[mealType];
@@ -51,7 +56,7 @@ export function MealContainer({
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
+      <div className={`grid gap-2 ${onSelectBatch ? "grid-cols-3" : "grid-cols-2"}`}>
         <button
           type="button"
           onClick={onSelectFood}
@@ -66,6 +71,15 @@ export function MealContainer({
           <span aria-hidden="true">+</span>
           Yemekler
         </button>
+        {onSelectBatch && (
+          <button
+            type="button"
+            onClick={onSelectBatch}
+            className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground transition-colors hover:border-primary active:border-primary hover:text-primary active:text-primary">
+            <span aria-hidden="true">+</span>
+            Partiden
+          </button>
+        )}
       </div>
 
       {items.length > 0 && (
@@ -81,6 +95,7 @@ export function MealContainer({
               }
               isOnShoppingList={isOnShoppingList(item.foodId)}
               onToggleShoppingList={() => onToggleShoppingList(item)}
+              batchLabel={batchLabelFor?.(item)}
             />
           ))}
         </div>

@@ -61,6 +61,8 @@
 
 	Determine how a set of selected foods and portions is translated into constructed meals - MISSING (curated combos cover the meals; portion tiers Küçük/Normal/Büyük + custom multiplier shipped 2026-09-19, see docs/mvp-scope/meal-construction-mvp.md)
 
+	Batch cooking / leftovers (DEC-069): backend shipped earlier; Yemek Planı UI ("Toplu Hazırlıklar" sheet + per-meal "Partiden" allocation) shipped 2026-09-19, see docs/mvp-scope/meal-construction-mvp.md
+
 	We also want to be able to interfere (add, update, delete) these recipes. - MISSING
 
 	Create different section like ingredients, preparation, cooking, serve, storing for later days (freezer, how to cool and heat in later days) 

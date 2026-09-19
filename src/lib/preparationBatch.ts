@@ -125,6 +125,23 @@ export function remainingComposition(
   }));
 }
 
+// Short Turkish label for a YYYY-MM-DD prepared date, e.g. "12 Eyl". Built
+// from local date parts (not `new Date("YYYY-MM-DD")`, which parses as UTC and
+// can land on the previous day in the evening for UTC+ timezones).
+export function batchDateLabel(dateStr: string): string {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  if (!y || !m || !d) return dateStr;
+  return new Date(y, m - 1, d).toLocaleDateString("tr-TR", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+// True while at least one food in the batch still has grams left to allocate.
+export function hasRemaining(remaining: RemainingItem[]): boolean {
+  return remaining.some((item) => item.remainingG > 0);
+}
+
 // ---------------------------------------------------------------------------
 // Persistence (client <-> api/preparation-batches.ts)
 

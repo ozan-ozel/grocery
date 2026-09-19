@@ -11,6 +11,8 @@ type Props = {
   onUpdateQuantity: (quantityG: number) => void;
   isOnShoppingList: boolean;
   onToggleShoppingList: () => void;
+  // DEC-069: e.g. "Parti · 12 Eyl" when this entry was drawn from a batch.
+  batchLabel?: string;
 };
 
 export function MealItemCard({
@@ -20,6 +22,7 @@ export function MealItemCard({
   onUpdateQuantity,
   isOnShoppingList,
   onToggleShoppingList,
+  batchLabel,
 }: Props) {
   const [isEditing, setIsEditing] = useState(false);
   const [draftQuantity, setDraftQuantity] = useState(String(item.quantityG));
@@ -100,8 +103,13 @@ export function MealItemCard({
                 </button>
               </div>
             ) : (
-              <p className="mt-0.5 text-xs text-muted-foreground">
-                {item.quantityG}g
+              <p className="mt-0.5 flex items-center gap-2 text-xs text-muted-foreground">
+                <span>{item.quantityG}g</span>
+                {batchLabel && (
+                  <span className="rounded-full bg-accent/50 px-2 py-0.5 text-[10px] font-medium text-foreground">
+                    {batchLabel}
+                  </span>
+                )}
               </p>
             )}
           </div>
