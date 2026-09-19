@@ -2,13 +2,15 @@
 // useMealPlan.ts's TanStack Query pattern. Kept separate from useMealPlan
 // (a different query key, a different lifecycle — a batch list isn't pinned
 // to one date) rather than folded into it.
-import { useQuery, useQueryClient } from "@tanstack/preact-query";
+import { useQueries, useQuery, useQueryClient } from "@tanstack/preact-query";
 import {
   createPreparationBatch,
   fetchPreparationBatches,
+  remainingComposition,
   type MealAllocation,
   type NewPreparationBatch,
   type PreparationBatch,
+  type RemainingItem,
 } from "@/lib/preparationBatch";
 import { fetchMealEntriesForBatch } from "@/lib/mealPlan";
 
@@ -38,18 +40,42 @@ export function useBatches(householdId: string | null) {
   };
 }
 
-// Allocations (meal_entries rows) drawn from one specific batch — a separate
-// query key per batch id, refetched whenever a new allocation is created
-// against it (see BatchPlanner.tsx's invalidateQueries call).
-export function useBatchAllocations(householdId: string | null, batchId: string) {
-  const query = useQuery({
-    queryKey: ["batchAllocations", householdId ?? "local", batchId] as const,
-    queryFn: async (): Promise<MealAllocation[]> => {
-      const entries = await fetchMealEntriesForBatch(householdId as string, batchId);
-      return entries.map((entry) => ({ foodId: entry.foodId, quantityG: entry.quantityG }));
-    },
-    enabled: !!householdId,
-    staleTime: 15_000,
+// Every allocation (meal_entries row with this batch_id) ever drawn from one
+// batch, as the plain { foodId, quantityG } pairs remainingComposition needs.
+async function fetchBatchAllocations(
+  householdId: string,
+  batchId: string
+): Promise<MealAllocation[]> {
+  const entries = await fetchMealEntriesForBatch(householdId, batchId);
+  return entries.map((entry) => ({ foodId: entry.foodId, quantityG: entry.quantityG }));
+}
+
+export type BatchWithRemaining = {
+  batch: PreparationBatch;
+  remaining: RemainingItem[];
+};
+
+// The one place batches and their leftovers are combined: the newest-first
+// batch list, each with its derived remaining grams. Uses the SAME query keys
+// as useBatchAllocations, so one invalidation refreshes both. While a batch's
+// allocations are still loading, its remaining shows the full composition
+// (nothing allocated yet) rather than blocking the whole list.
+export function useBatchLedger(householdId: string | null) {
+  const { batches, isLoading: batchesLoading, createBatch } = useBatches(householdId);
+
+  const allocationQueries = useQueries({
+    queries: batches.map((batch) => ({
+      queryKey: ["batchAllocations", householdId ?? "local", batch.id] as const,
+      queryFn: () => fetchBatchAllocations(householdId as string, batch.id),
+      enabled: !!householdId,
+      staleTime: 15_000,
+    })),
   });
-  return { allocations: query.data ?? [], isLoading: !!householdId && query.isLoading };
+
+  const ledger: BatchWithRemaining[] = batches.map((batch, index) => ({
+    batch,
+    remaining: remainingComposition(batch, allocationQueries[index]?.data ?? []),
+  }));
+
+  return { ledger, isLoading: batchesLoading, createBatch };
 }

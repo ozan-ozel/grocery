@@ -140,6 +140,16 @@ export function useMealPlan(
     return MEAL_SLOTS.flatMap(({ slot }) => dayPlan[slot].map((item) => ({ ...item, slot })));
   }
 
+  // DEC-069: an entry linked to a batch changes what's left of that batch.
+  // Refetch the batch ledger only AFTER the server write has landed —
+  // invalidating earlier would refetch the old allocations and leave the
+  // "kaldı" grams stale.
+  function refreshBatchLedger() {
+    queryClient.invalidateQueries({
+      queryKey: ["batchAllocations", householdId ?? "local"],
+    });
+  }
+
   function addItem(
     slot: MealSlot,
     foodId: string,
@@ -157,6 +167,7 @@ export function useMealPlan(
       createMealEntry({ id, householdId, date, slot, foodId, quantityG, position, comboId, batchId }).then(
         (saved) => {
           if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", id);
+          else if (batchId) refreshBatchLedger();
         }
       );
     }
@@ -164,6 +175,8 @@ export function useMealPlan(
   }
 
   function updateItemQuantity(slot: MealSlot, itemId: string, quantityG: number) {
+    // Read before the optimistic write below, while the entry is still in cache.
+    const batchId = (query.data ?? []).find((entry) => entry.id === itemId)?.batchId;
     setEntries((prev) =>
       prev.map((entry) =>
         entry.slot === slot && entry.id === itemId ? { ...entry, quantityG } : entry
@@ -172,15 +185,18 @@ export function useMealPlan(
     if (householdId) {
       updateMealEntry(itemId, { quantityG }).then((saved) => {
         if (!saved) console.warn("[mealPlan] quantity updated locally but failed to persist:", itemId);
+        else if (batchId) refreshBatchLedger();
       });
     }
   }
 
   function removeItem(slot: MealSlot, itemId: string) {
+    const batchId = (query.data ?? []).find((entry) => entry.id === itemId)?.batchId;
     setEntries((prev) => prev.filter((entry) => !(entry.slot === slot && entry.id === itemId)));
     if (householdId) {
       deleteMealEntry(itemId).then((ok) => {
         if (!ok) console.warn("[mealPlan] entry removed locally but failed to delete remotely:", itemId);
+        else if (batchId) refreshBatchLedger();
       });
     }
   }
