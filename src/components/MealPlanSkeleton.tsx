@@ -22,9 +22,12 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 // static strings from those components, never data — rendered as real text
 // here, not shimmer, since matching them exactly costs nothing and reads
 // better than a guessed-width bar. Only true per-user numbers (kcal, the
-// rings) are shimmered. The optional "Akşam için öneriler" list below the 4th
-// card is skipped — it's conditional and its length varies 0-8+, so there's no
-// fixed shape to fake here.
+// rings) are shimmered — and the Ürünler / Yemekler add buttons, which are
+// shimmer blocks (same 48px height as the real buttons) rather than
+// dashed-border lookalikes: they look tappable but do nothing while the day
+// loads, so they read as placeholders instead. The optional "Akşam için
+// öneriler" list below the 4th card is skipped — it's conditional and its
+// length varies 0-8+, so there's no fixed shape to fake here.
 function macroTile(label: string, ringW: string, valW: string) {
   return (
     <div key={label} className="rounded-lg border-l-4 border-l-border bg-background p-2.5">
@@ -66,13 +69,11 @@ export function MealPlanSkeleton() {
         {(["İlk Öğün", "Ara Öğün", "Son Öğün", "Ara Öğün"] as const).map((label, i) => (
           <div key={i} className="space-y-3 rounded-lg border border-border bg-card p-4">
             <h3 className="font-semibold text-foreground">{label}</h3>
+            {/* h-12 = the real buttons' height: py-3 (24) + one text-sm line
+                (20) + 2px dashed borders top and bottom (4). */}
             <div className="grid grid-cols-2 gap-2">
-              <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground">
-                <span aria-hidden="true">+</span> Ürünler
-              </div>
-              <div className="flex items-center justify-center gap-2 rounded-lg border-2 border-dashed border-border bg-background py-3 text-sm font-medium text-muted-foreground">
-                <span aria-hidden="true">+</span> Yemekler
-              </div>
+              <LoadingBlock className="h-12" />
+              <LoadingBlock className="h-12" />
             </div>
           </div>
         ))}

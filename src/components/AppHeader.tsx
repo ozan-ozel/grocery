@@ -100,7 +100,7 @@ export function AppHeader({
             onClick={(e: Event) => {
               if (e.target === e.currentTarget) focusTitle();
             }}
-            className="group flex min-w-0 flex-1 cursor-text items-center gap-1.5">
+            className="group flex min-w-0 flex-1 cursor-text items-center gap-0.5">
             {/* Mirror-sizing: the invisible span holds the same text so the
                 grid cell (and the input filling it) is exactly as wide as
                 the title, which lets the pen icon sit right after the last
@@ -129,19 +129,20 @@ export function AppHeader({
                 className="col-start-1 row-start-1 w-0 min-w-full border-0 bg-transparent p-0 outline-none"
               />
             </span>
-            {/* Pinned to the right end of the title area (ml-auto), away from the
-                text, as a small raised chip: the same box-shadow the Smooth
-                Pill active tab uses — that shadow is the global
+            {/* Sits right after the last character (the mirror span's pr-0.5
+                plus this row's gap-0.5 leave ~4px). Same box-shadow as the
+                Smooth Pill active tab — that shadow is the global
                 .sp-trigger[data-active="true"] rule in index.css, not a
-                Tailwind class, so it needs both the marker class and the
-                data attribute. bg-card (white / dark card), not bg-background:
-                the header sits on bg-background, so a same-colored chip would
-                show only its shadow. */}
+                Tailwind class, so it needs both the marker class and the data
+                attribute. bg-transparent, not a filled card color: the chip is
+                fused into the header instead of reading as a white tile, and
+                its outer shadow still draws around it (a box-shadow is never
+                painted under its own box, so transparency doesn't hide it). */}
             <span
               aria-hidden="true"
               data-active="true"
               onClick={focusTitle}
-              className="sp-trigger ml-auto shrink-0 cursor-text rounded-md bg-card p-1.5 text-muted-foreground transition-opacity duration-150 group-focus-within:opacity-0">
+              className="sp-trigger shrink-0 cursor-text rounded-md bg-transparent p-1.5 text-muted-foreground transition-opacity duration-150 group-focus-within:opacity-0">
               <PenLine className="size-4" />
             </span>
           </div>

@@ -18,8 +18,9 @@ type Props = {
 //
 // Two mobile behaviours live here so every sheet gets them for free:
 //  - Swipe down from anywhere on the sheet to dismiss (see useSwipeToDismiss).
-//    The header is opted out via data-sheet-no-drag so the close button and
-//    title never start a drag; text fields are skipped by the hook itself.
+//    Only the close button is opted out (data-sheet-no-drag) so a tap on it
+//    never starts a drag; the title and the empty stretch beside it drag like
+//    the rest of the sheet. Text fields are skipped by the hook itself.
 //  - Keyboard-aware sizing. The outer container tracks the *visual* viewport
 //    (--visual-vh/--visual-top, set by useVisualViewportVars) instead of the
 //    layout viewport, so with the soft keyboard open the sheet sits just above
@@ -59,14 +60,13 @@ export function BottomSheet({ title, titleId, onClose, children }: Props) {
         style={dragY ? { transform: `translateY(${dragY}px)` } : undefined}
         className={`relative z-10 flex max-h-[calc(100%-1rem)] w-full flex-col rounded-t-2xl border border-border bg-card p-5 pt-2 ease-out starting:translate-y-full ${isDragging ? "" : "transition-transform duration-200"}`}>
         <SheetDragHandle />
-        <div
-          data-sheet-no-drag
-          className="mb-4 flex shrink-0 items-center justify-between">
+        <div className="mb-4 flex shrink-0 items-center justify-between">
           <h2 id={titleId} className="text-lg font-semibold text-foreground">
             {title}
           </h2>
           <button
             type="button"
+            data-sheet-no-drag
             onClick={onClose}
             aria-label="Kapat"
             className="rounded-md p-2 text-muted-foreground transition-colors hover:bg-accent active:bg-accent hover:text-foreground active:text-foreground">
