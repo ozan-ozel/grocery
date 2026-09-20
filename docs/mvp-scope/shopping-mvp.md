@@ -13,8 +13,11 @@ yes.
 
 ## It is implemented
 
-`addComboToList()` in `src/components/TodayView.tsx:127` puts a combo's items onto the active list.
-That is the meal-plan-to-shopping-list path, and it is the one thing Domain M needs for MVP.
+`src/components/MealPlanView.tsx` puts planned foods onto the active list: `toggleDayShoppingList()`
+for a whole day, `requestShoppingToggle()` per item, and `addEveningComboToList()` for an evening
+suggestion. That is the meal-plan-to-shopping-list path, and it is the one thing Domain M needs for
+MVP. (The earlier `addComboToList()` lived in `TodayView.tsx`, now in `archive/` — see
+`archive/README.md`.)
 
 `PROVISIONAL` means it is a deliberately temporary MVP choice, not that it is incomplete. The part
 worth verifying rather than assuming is in `DEC-071`'s own wording, **consolidation**: when two combos

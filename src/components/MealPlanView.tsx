@@ -17,7 +17,6 @@ import {
 import { calculateTargets } from "@/lib/mealPersonalization";
 import { type MacroTotals } from "@/lib/mealNutrition";
 import { lookupNutrition, type Nutrition } from "@/lib/nutrition";
-import { MealNutritionDetailSheet } from "@/components/MealNutritionDetailSheet";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
 import { MealContainer, MEAL_LABELS } from "@/components/MealContainer";
 import { BatchSheet } from "@/components/BatchSheet";
@@ -91,7 +90,6 @@ export function MealPlanView({
     dayItems.every(item =>
       isOnShoppingList(catalogMap.get(item.foodId)?.name_tr ?? item.foodId),
     );
-  const [dailyDetailOpen, setDailyDetailOpen] = useState(false);
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [comboModalOpen, setComboModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
@@ -531,16 +529,6 @@ export function MealPlanView({
           allergenExclusions={personalizationProfile.allergenExclusions}
           onAdd={handleBatchAllocate}
           onClose={() => setAllocateSlot(null)}
-        />
-      )}
-
-      {dailyDetailOpen && (
-        <MealNutritionDetailSheet
-          title="Günlük toplam"
-          macros={totals}
-          items={MEAL_SLOTS.flatMap(({ slot }) => itemsForSlot(slot))}
-          catalog={catalogMap}
-          onClose={() => setDailyDetailOpen(false)}
         />
       )}
 

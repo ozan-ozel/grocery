@@ -1,3 +1,6 @@
+// ARCHIVED — not compiled, not deployed. See archive/README.md for how to restore.
+// Depends on: archive/src/lib/matchCombos.ts, and SuggestionCard's `overBudgetBy` prop
+// (removed from src/components/ui/suggestion-card.tsx — snippet in archive/README.md).
 import { useMemo, useState } from "react";
 import { ChevronRight, Undo2 } from "lucide-react";
 import { useRemainingToday, type LoggedEntry } from "@/hooks/useRemainingToday";
@@ -5,7 +8,8 @@ import { useDetailsTransition } from "@/hooks/useDetailsTransition";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import { SuggestionCard } from "@/components/ui/suggestion-card";
 import type { MacroTotals } from "@/lib/mealNutrition";
-import { matchCombos, scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
+import { scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
+import { matchCombos } from "@/lib/matchCombos";
 import { calculateItemsNutrition, type MealItem } from "@/lib/localMealPlan";
 import { ALL_COMBOS as COMBOS, COMBO_BY_ID } from "@/lib/combos";
 import {

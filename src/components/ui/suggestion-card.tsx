@@ -12,7 +12,6 @@ export function SuggestionCard({
   combo,
   preparing,
   added,
-  overBudgetBy,
   onAdd,
   onRemove,
   onTogglePreparing,
@@ -23,10 +22,6 @@ export function SuggestionCard({
   combo: ScoredCombo;
   preparing: boolean;
   added: boolean;
-  // Only set for "Diğer kombinasyonlar" entries that don't fit today's
-  // remaining kcal — how far over, so it reads as an honest heads-up
-  // rather than hiding why it wasn't in the top suggestions.
-  overBudgetBy?: number;
   onAdd?: () => void;
   onRemove?: () => void;
   onTogglePreparing?: () => void;
@@ -68,11 +63,6 @@ export function SuggestionCard({
       </p>
       {combo.prepNote && (
         <p className="mt-1 text-xs text-muted-foreground">{combo.prepNote}</p>
-      )}
-      {!!overBudgetBy && overBudgetBy > 0 && (
-        <p className="mt-1 text-xs text-signal">
-          Kalan makronun {Math.round(overBudgetBy)} kcal üzerinde
-        </p>
       )}
       {eaten ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">
