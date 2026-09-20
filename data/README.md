@@ -1,8 +1,10 @@
 # Nutrition seed dataset
 
 **Supabase is now the source of truth.** `nutrition.json` is a seed file
-you can use to bootstrap or backfill the DB. Day-to-day edits happen in the
-Besin tab, which writes straight to Supabase via `/api/nutrition` (PUT).
+you can use to bootstrap or backfill the DB. Day-to-day edits go through the
+hidden maintenance upload in Settings, which writes to Supabase via
+`/api/nutrition` (PUT, admin accounts only — see `docs/architecture.md`
+§ Nutrition). Ordinary users cannot edit nutrition values.
 
 Row schema:
 

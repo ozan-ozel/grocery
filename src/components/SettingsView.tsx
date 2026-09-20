@@ -4,8 +4,15 @@ import { ConfirmModal } from "./ConfirmModal";
 import { DeleteAccountFlow, type DeleteFeedback } from "./DeleteAccountFlow";
 import { TenantSwitcher } from "./TenantSwitcher";
 import { ThemeSwitcher } from "./ThemeSwitcher";
+import { NutritionUploadModal } from "./dev/NutritionUploadModal";
+import { useTapSequence } from "@/hooks/useTapSequence";
 import type { Tenant } from "@/lib/store";
 import type { Theme } from "@/lib/preferences";
+
+// Tap counts, pause-separated, on the page heading: opens the maintenance
+// upload modal. Concealment only — the endpoint it calls is admin-gated
+// server-side (see NutritionUploadModal).
+const MAINTENANCE_PASSCODE = [1, 3, 2, 7] as const;
 
 type Props = {
   onSignOut: () => void;
@@ -36,10 +43,14 @@ export function SettingsView({
 }: Props) {
   const [confirmingSignOut, setConfirmingSignOut] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
+  const [maintenanceOpen, setMaintenanceOpen] = useState(false);
+  const onHeadingTap = useTapSequence(MAINTENANCE_PASSCODE, () => setMaintenanceOpen(true));
 
   return (
     <div className="space-y-5">
-      <div>
+      {/* select-none + touch-manipulation: rapid taps here must not select the
+          text or trigger double-tap zoom. Otherwise it looks like any heading. */}
+      <div onClick={onHeadingTap} className="select-none touch-manipulation">
         <p className="text-xs uppercase tracking-widest text-muted-foreground">
           Ayarlar
         </p>
@@ -94,6 +105,10 @@ export function SettingsView({
           onDelete={onDeleteAccount}
           onClose={() => setDeletingAccount(false)}
         />
+      )}
+
+      {maintenanceOpen && (
+        <NutritionUploadModal onClose={() => setMaintenanceOpen(false)} />
       )}
 
       {confirmingSignOut && (

@@ -140,9 +140,27 @@ it was removed as dead code (see `docs/archive/roadmap.md` #1 for the still-open
 **Nutrition is a separate backend**, not part of the synced list state. `src/lib/nutrition.ts` calls
 `/api/nutrition` (`api/nutrition.ts`), which
 proxies to a Supabase `nutrition` table via PostgREST: reads use the anon key, writes use the
-service_role key, both kept server-side so the client never sees them. `docs/nutrition-prompt.md` is
-a copy-paste LLM prompt for turning free-form nutrition text into the row JSON the uploader/bulk-paste
-UI expects.
+service_role key, both kept server-side so the client never sees them.
+
+**`public.nutrition` is one global table shared by every household — a write changes what every user
+sees — so writes are admin-only.** `PUT /api/nutrition` (bulk `{ rows }` upsert, merge-duplicates on
+`name_tr`) runs `requireAdmin()` from `lib/auth.ts` after `requireUser()`: the caller's
+server-verified email must be in the comma-separated **`ADMIN_EMAILS`** env var, otherwise 403. The
+check fails closed — an unset or empty `ADMIN_EMAILS` means nobody can write. Reads (`GET` browse,
+`POST` by names) stay open to any signed-in user. RLS on the table also allows `SELECT` only
+(`supabase/24-nutrition-rls.sql`), so a direct PostgREST write with the anon/user key is refused too.
+
+There is no per-user edit of nutrition values in the app. Ways to change the data:
+
+- **Hidden maintenance modal** — Settings → tap the page heading in the pause-separated rhythm
+  1 · 3 · 2 · 7 (see `src/hooks/useTapSequence.ts`), which opens
+  `src/components/dev/NutritionUploadModal.tsx` to paste a JSON array. The tap rhythm only hides the
+  UI; it is *not* the security boundary — the endpoint's admin check is.
+- **`scripts/upload-nutrition.ts`** — seeds `data/nutrition.json` straight to Supabase with the
+  service-role key (no HTTP, no `ADMIN_EMAILS`).
+
+`docs/nutrition-prompt.md` is a copy-paste LLM prompt for turning free-form nutrition text into the
+row JSON both expect.
 
 ## Personal meal planning
 
@@ -222,6 +240,11 @@ a test session, etc.) — see each file's own comments for which. `.env.local.ex
 `SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `USDA_API_KEY` because it's scoped to the one-off
 `scripts/upload-nutrition.ts` seeding script — it does not cover `SUPABASE_ANON_KEY`, which the
 functions also need.
+
+`ADMIN_EMAILS` (comma-separated, case-insensitive) lists the accounts allowed to write the global
+nutrition table via `PUT /api/nutrition` (see the Nutrition section). Set it in `.env.local` for local
+dev and with `vercel env add ADMIN_EMAILS production` for the deployed app; with it unset, nobody
+can write. Use the email the account actually signs in with (Google).
 
 `TEST_LOGIN_SECRET` (optional) was meant to enable `api/_auth-test-login.ts` — a Google-OAuth bypass
 that mints a real Supabase session cookie for a synthetic test user. **In practice it is dead code
