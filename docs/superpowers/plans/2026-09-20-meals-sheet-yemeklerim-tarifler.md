@@ -792,12 +792,12 @@ export async function deleteSavedMeal(id: string): Promise<boolean> {
 **Files:** new `supabase/28-saved-meals.sql`, new `src/hooks/useSavedMeals.ts`; modified
 `api/personal-plan.ts`, `vercel.json`.
 
-- [ ] **Step 1: Create `supabase/28-saved-meals.sql`.** Per-user table; RLS uses the **current**
+- [ ] **Step 1: `supabase/28-saved-meals.sql` (already committed to master — verify, do not recreate).** Per-user table; RLS uses the **current**
   private-schema helper `app_private.current_app_user_id()` (migration 22 moved it there — the older
   `public.current_app_user_id()` no longer exists). `on delete cascade` from `app_users` means account
   deletion needs no code change.
 
-Create `supabase/28-saved-meals.sql`:
+The file already exists in the repo with exactly this content. Check that it matches; if it does, change nothing here. (If it is missing, create it with:)
 
 ```sql
 -- supabase/28-saved-meals.sql
