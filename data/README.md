@@ -41,7 +41,8 @@ Hand-authored meal-combo suggestions used by the "Bugün" recommendation engine
   silently skipped rather than shown with wrong totals, so a name that's correct in
   `nutrition.json` but was later renamed/removed in Supabase would quietly drop that combo.
 - `prep_minutes` — rough hands-on time.
-- `tags` — free-form, not filtered on yet; informational only for now.
+- `tags` — only `kahvalti`, `ara-ogun` and `atistirmalik` are used (the "Sana uygun" slot filter in
+  `src/lib/mealRecommend.ts`); leave the array empty for a main meal. Other tags are not read by anything.
 - `prep_note` — optional, concise textual preparation note (DEC-067 Level 1). Plain descriptive
   text only — not structured steps, not a recipe. Omit the key entirely for combos with no note.
 

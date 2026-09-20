@@ -27,14 +27,7 @@ export type RemainingToday =
     }
   | {
       status: "ready";
-      target: MacroTotals;
-      consumed: MacroTotals;
       remaining: MacroTotals;
-      // True when there's no real saved profile — target is computed off
-      // DEFAULT_PROFILE (or a real-but-invalid profile fell back the same
-      // way). TodayView shows a "Tahmini" tag when this is true instead of
-      // blocking the screen the way the old "no-profile" status did.
-      isEstimated: boolean;
       foodExclusions: FoodExclusion[];
       allergenExclusions: AllergenClassExclusion[];
       catalogMap: NutritionMap;
@@ -83,7 +76,7 @@ export function useRemainingToday(
   userId: string | null,
   householdId: string | null
 ): RemainingToday {
-  const { targets, profile, hasSavedProfile } = useMealPersonalization(userId);
+  const { targets, profile } = useMealPersonalization(userId);
   const { catalogMap, status: catalogStatus } = useFoodCatalog();
   // Bugün always means today, whatever day Yemek Planı is currently browsing
   // (both read the same ?date URL param, so this instance opts out of it).
@@ -109,8 +102,7 @@ export function useRemainingToday(
 
   // A real profile that somehow fails validation (targets === null) is
   // treated the same as no profile at all — both fall back to
-  // DEFAULT_PROFILE's guaranteed-valid numbers, tagged as estimated.
-  const isEstimated = !hasSavedProfile || !targets;
+  // DEFAULT_PROFILE's guaranteed-valid numbers.
   const effectiveTargets = targets ?? calculateTargets(DEFAULT_PROFILE)!;
 
   if (catalogStatus === "error") {
@@ -132,10 +124,7 @@ export function useRemainingToday(
 
   return {
     status: "ready",
-    target,
-    consumed,
     remaining,
-    isEstimated,
     foodExclusions: profile.foodExclusions,
     allergenExclusions: profile.allergenExclusions,
     catalogMap,
