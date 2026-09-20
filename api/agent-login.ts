@@ -23,6 +23,8 @@
 //      so production access is opt-in via this flag, not unconditionally
 //      open. Never set AGENT_LOGIN_ENABLED in production unless the repo
 //      owner has explicitly decided agents may log in to the live site.
+//      This gate is checked before every route below, including `?_debug=1`
+//      (which answers only `{ "ready": boolean }`, nothing about the env).
 // Every minted token is single-use (used_at stamped on redeem) and expires
 // 10 minutes after minting, enforced server-side against agent_login_tokens.
 
@@ -79,29 +81,30 @@ function testAppUserId(email: string): string {
   return `agent-${createHash("sha256").update(email).digest("hex").slice(0, 32)}`;
 }
 
+// True only when everything mint + redeem need is configured. Deliberately a
+// single boolean: `_debug=1` must not reveal which var is missing, any value's
+// length, or any other environment detail.
+function isReady(): boolean {
+  return Boolean(
+    process.env.AGENT_LOGIN_SECRET &&
+      process.env.SUPABASE_URL &&
+      process.env.SUPABASE_ANON_KEY &&
+      process.env.SUPABASE_SECRET_KEY,
+  );
+}
+
 export default {
   async fetch(request: Request): Promise<Response> {
     const url = new URL(request.url);
-    if (url.searchParams.get("_debug") === "1") {
-      return new Response(
-        JSON.stringify({
-          VERCEL_ENV: process.env.VERCEL_ENV ?? null,
-          isProd: isProd(),
-          prodEnabled: prodEnabled(),
-          hasAgentLoginSecret: Boolean(process.env.AGENT_LOGIN_SECRET),
-          agentLoginSecretLength: process.env.AGENT_LOGIN_SECRET?.length ?? null,
-          hasSupabaseUrl: Boolean(process.env.SUPABASE_URL),
-          hasSupabaseSecretKey: Boolean(process.env.SUPABASE_SECRET_KEY),
-          gateWouldBlock: isProd() && !prodEnabled(),
-          matchingEnvKeys: Object.keys(process.env).filter(
-            (k) => k.includes("AGENT") || k.includes("LOGIN") || k.includes("TEST_LOGIN"),
-          ),
-          totalEnvKeyCount: Object.keys(process.env).length,
-        }),
-        { headers: { "content-type": "application/json" } },
-      );
-    }
+    // The production gate runs first, before anything else (including _debug):
+    // nothing here is reachable in production unless AGENT_LOGIN_ENABLED is "true".
     if (isProd() && !prodEnabled()) return notFound();
+
+    if (url.searchParams.get("_debug") === "1") {
+      return new Response(JSON.stringify({ ready: isReady() }), {
+        headers: { "content-type": "application/json" },
+      });
+    }
 
     const action = url.searchParams.get("_action");
     if (action === "mint" && request.method === "POST") return handleMint(request);

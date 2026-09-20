@@ -2,6 +2,15 @@
 
 _Last updated: 2026-09-20_
 
+## agent-login `_debug` gate fix + secret rotation (2026-09-20)
+
+`GET /api/agent-login?_debug=1` used to run before the production gate and dumped env-key names and the secret's
+length; it now sits behind the gate and answers only `{ "ready": boolean }`. Branch `fix/agent-login-debug-gate`
+— **implemented, verified and committed on the branch; not yet merged to `master`**. The local `AGENT_LOGIN_SECRET` was rotated
+because the old value had been written into memory, a plan doc and tool logs; a running `vercel dev` keeps the old
+value until restarted. **Next, after this merges:** `chore/agent-session-script` (`agent-session up/down`, planned,
+not started). Record: [2026-09-20-04](session-checkpoints/2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md).
+
 ## Yemekler sheet: Yemeklerim / Hazır Yemekler / Tarifler (2026-09-20)
 
 The Meal Plan's "Yemekler" button now opens one sheet with three tabs: the user's own saved meals (per user, `saved_meals`, optional free-text steps make a meal a recipe), the built-in meals with a deterministic "Sana uygun" block (`src/lib/mealRecommend.ts`), and Tarifler. Served by `api/personal-plan.ts` at `/api/saved-meals` (`vercel.json` rewrite, no new function). Branch `feature/meals-sheet-yemeklerim-tarifler`; **implemented and live-verified in the real app; the feature work is uncommitted** (the branch already carries `3c4c39d`, the sql migration, and `dbe9ea2`, the Task 1 cleanup; the owner commits the rest after their own test). **Needs a real-phone check:** swipe-to-dismiss on a scrolled list, the soft keyboard in the name / food-picker / steps fields, the three-pill tab row at 360 px, and the delete confirmation above the sheet with the keyboard open. **`supabase/28-saved-meals.sql` is applied to the developer's project only — run it wherever else this is deployed.** Docs trio (`meal-construction-mvp.md`, `roadmap_v2.md`, `DEC_REGISTER.md`) updated together. Record: [2026-09-20-03](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md).
@@ -134,8 +143,10 @@ Round 2 (see the linked checkpoint for the full list): `src/components/ui/checkb
 - Local `vercel dev` quirk (2026-09-16): `AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` from `.env.local` didn't
   reach the spawned function process (other `.env.local` vars did). Workaround: launch with
   `AGENT_LOGIN_SECRET=<value> npm run vercel:dev`. **Not reproduced on 2026-09-19** — a plain
-  `npm run vercel:dev` picked the secret up (`/api/agent-login?_debug=1` → `hasAgentLoginSecret: true`) — so
-  check `_debug=1` first and only add the prefix if it reports false. Separately, `agent-login` is now
+  `npm run vercel:dev` picked the secret up (`/api/agent-login?_debug=1` → `ready: true`) — so
+  check `_debug=1` first and only add the prefix if it reports `{"ready":false}`. (`_debug=1` used to dump
+  env-key names and the secret's length, and answered even in production; since `fix/agent-login-debug-gate` it
+  sits behind the production gate and returns only `{ ready: boolean }`.) Separately, `agent-login` is now
   excluded by `.vercelignore` and 404s locally until that line is temporarily commented out (see `CLAUDE.md`).
 
 ## Constraints

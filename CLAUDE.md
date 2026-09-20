@@ -199,7 +199,8 @@ file too — while the line is active, `/api/agent-login` 404s locally. Whenever
 do this every time (never merge `agent-login` into a deployed function instead): (1) comment out the
 `api/agent-login.ts` line in `.vercelignore`; (2) (re)start `npm run vercel:dev` — Claude can do this
 itself, see the rule above — because the ignore file is only read at startup, then check
-`GET /api/agent-login?_debug=1` — if `hasAgentLoginSecret` is `false`, restart once more as
+`GET /api/agent-login?_debug=1` — if it answers `{"ready":false}` (the secret or a Supabase var is missing from the
+function's env), restart once more as
 `$env:AGENT_LOGIN_SECRET='<value>'; npm run vercel:dev` (a plain start was enough on 2026-09-19, so the
 old env-pickup quirk may be gone); (3) run the testing;
 (4) **restore the line** before finishing. **SYNC** must flag a diff that still has the line commented

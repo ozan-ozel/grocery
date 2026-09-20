@@ -296,6 +296,10 @@ the client bundle) and is compared with `timingSafeEqual`, same as `TEST_LOGIN_S
 after an explicit go-ahead from the repo owner** (see Task 4 of
 `docs/superpowers/plans/2026-09-12-agent-test-login.md`).
 
+That production gate runs before every route, including `GET ?_debug=1` — the readiness probe never bypasses
+it. `_debug=1` answers only `{ "ready": boolean }` (true when the secret and the three Supabase vars are all
+present); it deliberately reports no env-key names, counts or value lengths.
+
 **It is currently local-only by deployment, not by code.** `.vercelignore` lists `api/agent-login.ts`
 (commit `48078cb`, to stay within the 12-function Hobby limit), so it is in **no** deployment — Preview
 included — and the env-var gate above never even comes into play. `vercel dev` builds its function list
