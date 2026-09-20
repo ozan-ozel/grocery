@@ -29,15 +29,17 @@ on the checkboxes.
 | [2026-09-12-meal-to-shopping-list-toggle.md](2026-09-12-meal-to-shopping-list-toggle.md) | 2026-09-12 | `SHIPPED` | Its own checkpoint says "Implementation complete," merged in `eace7f0` |
 | [2026-09-12-recent-favorites-quick-add.md](2026-09-12-recent-favorites-quick-add.md) | 2026-09-12 | `NOT_STARTED` | No "favorite"/"quick add" trace anywhere in `src/` |
 | [2026-09-12-recipe-picker.md](2026-09-12-recipe-picker.md) | 2026-09-12 | `SHIPPED` | `RecipeSearchModal.tsx` exists |
-| [2026-09-12-saved-meal-templates.md](2026-09-12-saved-meal-templates.md) | 2026-09-12 | `NOT_STARTED` | No "template" trace beyond unrelated CSS `grid-template-rows` |
+| [2026-09-12-saved-meal-templates.md](2026-09-12-saved-meal-templates.md) | 2026-09-12 | `SUPERSEDED` | Replaced on 2026-09-20 by [2026-09-20-meals-sheet-yemeklerim-tarifler.md](2026-09-20-meals-sheet-yemeklerim-tarifler.md): per-user `saved_meals` served from `api/personal-plan.ts` instead of a household-scoped `meal_templates` + new `api/meal-templates.ts` (the project is at the 12-function limit). Do not implement this one |
 | [2026-09-17-boot-performance-waterfall.md](2026-09-17-boot-performance-waterfall.md) | 2026-09-17 | `SHIPPED` | Phases 0-3 + 4a/4b/4c implemented on `perf/boot-waterfall`; boot calls now start within 2ms of each other vs 1.7s/3.5s/5.7s — see [2026-09-17-02 checkpoint](../../session-checkpoints/2026-09-17-02-boot-performance-waterfall.md). Phase 4d (`getClaims()`) and the asset work were out of scope by the plan's own decision |
 | [2026-09-19-batch-preparation-ui.md](2026-09-19-batch-preparation-ui.md) | 2026-09-19 | `SHIPPED` | `BatchSheet.tsx` / `BatchAllocateSheet.tsx` mounted in `MealPlanView.tsx`; `BatchPlanner.tsx` removed |
+| [2026-09-20-meals-sheet-yemeklerim-tarifler.md](2026-09-20-meals-sheet-yemeklerim-tarifler.md) | 2026-09-20 | `NOT_STARTED` | Plan written; every file in it was typechecked and built in a scratch copy of `master` (`tsc -b`, `tsc -p api`, `vite build`). Nothing in `src/` yet. Needs `supabase/28-saved-meals.sql` run by the owner, and five owner decisions confirmed (see the plan's "Decisions" section) |
 
 ## Status vocabulary
 
 - `SHIPPED` — verified in the source tree or an existing checkpoint
 - `NOT_STARTED` — plan exists, nothing built
 - `UNCLEAR` — not verified; needs an actual read to classify
+- `SUPERSEDED` — replaced by a newer plan for the same capability; do not implement
 - `ABANDONED` — decided against, won't build (none yet)
 
 ## Keeping this current
