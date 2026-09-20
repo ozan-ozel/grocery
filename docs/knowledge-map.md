@@ -19,6 +19,7 @@ just says where to look and when.
 | Feature implementation plans | `docs/superpowers/plans/` (index: `docs/superpowers/plans/README.md`) | Developer | Starting or resuming a planned app feature — the index tracks ship status, the plan files themselves don't |
 | Historical session narrative | `~/vault/grocery/logs/` (outside the repo) | Developer | Reconstructing session-by-session history in more detail than checkpoints carry |
 | Runtime behavior | Source under `src/`/`api/`, plus `tsc -b` | Developer | Bugs, regressions, validation — there is no test suite by design |
+| Retired code kept for possible restoration | `archive/` (index and restore steps: `archive/README.md`) | Developer | Before rebuilding something that may already have existed (e.g. the old "Bugün" screen) — it is not compiled or deployed |
 | Deep nutrition-science reference | `nutrition-curriculum/` (the numbered phase folders, `01_SOURCE_BOOKS/` for the 7-book corpus itself) | Developer | Detailed investigation beyond what a `DEC_REGISTER.md` note or `mvp-scope` file summarizes |
 
 ## Routing

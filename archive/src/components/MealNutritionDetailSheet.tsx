@@ -1,3 +1,6 @@
+// ARCHIVED — not compiled, not deployed. See archive/README.md for how to restore.
+// Built on the older hand-rolled sheet pattern (useSwipeToDismiss + SheetDragHandle);
+// when restoring, rebuild it on src/components/ui/bottom-sheet.tsx instead.
 import { useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";

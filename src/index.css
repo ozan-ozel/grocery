@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* archive/ holds retired code that is never built; keep its class names out of the
+   generated CSS (Tailwind v4 scans the whole project directory by default). */
+@source not "../archive";
+
 @theme {
   /* Paper & ink: cool mint-white stock, deep pine-black ink.
      One accent only — price-sticker red — reserved for the tally

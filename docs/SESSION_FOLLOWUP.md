@@ -1,6 +1,14 @@
 # Session Follow-up
 
-_Last updated: 2026-09-19_
+_Last updated: 2026-09-20_
+
+## Unused meal code archived (2026-09-20)
+
+`TodayView`, `MealNutritionDetailSheet` and `matchCombos` (all unreachable from the UI) moved to a new
+`archive/` folder that is not compiled, deployed, or scanned by Tailwind; `archive/README.md` has the index
+and restore steps. Still to remove next (plain deletions, not archived): `MealTrackingView`, dead
+`FoodSearchModal` props, unused combo tags, three `useRemainingToday` fields, the vestigial `Tab = "today"`.
+Record: [2026-09-20-02](session-checkpoints/2026-09-20-02-archive-unused-meal-code.md).
 
 ## Batch preparation UI — implemented (2026-09-19)
 
@@ -188,6 +196,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 23. [Boot performance waterfall (3-tier → 1-tier API)](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md)
 24. [UI/UX refinement pass + real delete-account flow](session-checkpoints/2026-09-19-01-ui-ux-refinement-pass.md)
 25. [Batch preparation UI (DEC-069 frontend re-surface)](session-checkpoints/2026-09-19-02-batch-preparation-ui.md)
+27. [Archive unused meal code](session-checkpoints/2026-09-20-02-archive-unused-meal-code.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain

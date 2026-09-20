@@ -27,9 +27,10 @@ chicken thigh were not added because live-catalog access (the `nutrition` table 
 seed) wasn't available in the implementing session. Add them once their exact live `name_tr` is
 confirmed, e.g. via the Besin tab.
 
-Wired into `TodayView.tsx`'s "Bugün" tab as a new "Akşam için öneriler" section, reusing the existing
-`SuggestionCard`/"Listeye ekle"/"Hazırlanıyor"/"Yedim" UI and the existing gram-edit flow after logging
-— no new UI component, no backend/schema change.
+Shown as the "Akşam için öneriler" section of `MealPlanView.tsx` (it was first wired into the "Bugün"
+tab of `TodayView.tsx`, which has since been retired to `archive/` — see `archive/README.md`), reusing
+the existing `SuggestionCard`/"Listeye ekle"/"Hazırlanıyor"/"Yedim" UI and the existing gram-edit flow
+after logging — no new UI component, no backend/schema change.
 
 ## The one work item
 

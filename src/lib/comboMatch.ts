@@ -91,9 +91,9 @@ function comboHasSoftConflict(
 
 // Every combo the catalog can score, hard-excluded foods dropped, ranked by
 // (no soft conflict first, then) protein — no budget filtering. Backs the
-// "Diğer kombinasyonlar" browse list, which deliberately shows combos
-// regardless of whether they fit today's remaining budget (unlike
-// matchCombos below).
+// Yemekler picker's full list, which deliberately shows combos regardless of
+// whether they fit the day's remaining budget. (A budget-filtered variant,
+// matchCombos, used to live here — see archive/src/lib/matchCombos.ts.)
 export function scoreAllCombos(
   combos: Combo[],
   exclusions: FoodExclusion[],
@@ -145,21 +145,4 @@ function hasBoneInChickenThigh(combo: Combo): boolean {
   return combo.items.some(
     (i) => i.foodId.toLocaleLowerCase("tr-TR") === "tavuk but (kemikli)"
   );
-}
-
-// Deterministic, no AI: filters out anything hard-excluded or over the
-// remaining kcal budget, then ranks by (no soft conflict first, then)
-// protein — the macro this app's target persona finds hardest to hit
-// without deliberate planning. Returns at most 5.
-export function matchCombos(
-  combos: Combo[],
-  remaining: MacroTotals,
-  exclusions: FoodExclusion[],
-  allergenExclusions: AllergenClassExclusion[],
-  catalog: NutritionMap
-): ScoredCombo[] {
-  if (remaining.kcal <= 0) return [];
-  return scoreAllCombos(combos, exclusions, allergenExclusions, catalog)
-    .filter((combo) => combo.totals.kcal <= remaining.kcal)
-    .slice(0, 5);
 }
