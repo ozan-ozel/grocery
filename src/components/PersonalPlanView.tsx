@@ -540,6 +540,9 @@ export function PersonalPlanView({ userId }: Props) {
                   <Field
                     label="Günlük aktivite"
                     sourceBadge={showSources ? "WHO" : undefined}
+                    onSourceBadgeClick={() =>
+                      jumpToSource("Günlük aktivite seviyesi")
+                    }
                     info={`${ACTIVITY_INFO_INTRO}\n\n${ACTIVITY_DESCRIPTIONS[profile.activity]}`}>
                     <Select
                       value={profile.activity}
@@ -559,7 +562,10 @@ export function PersonalPlanView({ userId }: Props) {
                 </div>
                 <Field
                   label="Hedef"
-                  sourceBadge={showSources ? "NIDDK" : undefined}>
+                  sourceBadge={showSources ? "NIDDK" : undefined}
+                  onSourceBadgeClick={() =>
+                    jumpToSource("Bazal metabolizma, koruma ve hedef kalorisi")
+                  }>
                   <Select
                     value={profile.goal}
                     onChange={event =>

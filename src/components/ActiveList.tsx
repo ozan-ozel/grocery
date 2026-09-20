@@ -11,6 +11,8 @@ import {
 } from "@/lib/categorization/userCategories";
 import { groupItems } from "@/lib/categorization/groupItems";
 import { Row } from "@/components/ActiveListRow";
+import { useFoodCatalog } from "@/hooks/useFoodCatalog";
+import type { NutritionMap } from "@/lib/nutrition";
 
 type Props = {
   list: List;
@@ -66,6 +68,13 @@ export function ActiveList({
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
+  // One lookup map for every row's inline nutrition line (see Row).
+  const { foods } = useFoodCatalog();
+  const foodsByName: NutritionMap = useMemo(
+    () => new Map(foods.map(f => [f.name_tr.toLocaleLowerCase("tr-TR"), f])),
+    [foods],
+  );
+
   useEffect(() => {
     if (!menuOpen) return;
     function onPointerDown(e: PointerEvent) {
@@ -102,6 +111,7 @@ export function ActiveList({
 
   const rowProps = {
     editingId,
+    foodsByName,
     categories,
     overlay,
     selectMode,
@@ -118,8 +128,11 @@ export function ActiveList({
 
   return (
     <div>
-      <div className="flex items-center justify-between gap-2 pb-2">
-        <div className="flex items-center gap-1">
+      <div className="flex items-start justify-between gap-2 pb-2">
+        {/* flex-wrap: with the "Besin değerleri" label the two buttons are wider
+            than a phone's content column, so the grouping button drops to a
+            second line rather than pushing the ⋯ menu off-screen. */}
+        <div className="flex min-w-0 flex-wrap items-center gap-x-1">
           <Button
             type="button"
             variant="quiet"
@@ -142,6 +155,7 @@ export function ActiveList({
                 : "border-transparent"
             )}>
             <Apple className="size-3.5" />
+            Besin değerleri
           </Button>
           <Button
             type="button"

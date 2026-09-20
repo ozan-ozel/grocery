@@ -45,6 +45,16 @@
   --radius-lg: 0.5rem;
 }
 
+/* Gradient stops for the Kişisel Plan reference-jump star (.jump-star). Light:
+   ink → the signal red — the dark end stays readable on the near-white ground
+   (a flat lime was ~1.2:1 there) and the red end ties it to the highlight's
+   tint. Dark (Arduvaz, below): signal blue → white. Deliberately not a general
+   accent, so it doesn't break the one-accent rule. */
+:root {
+  --jump-star-from: var(--color-foreground);
+  --jump-star-to: var(--color-signal);
+}
+
 /* Arduvaz: cool blue-black ground. Breaks the single-accent rule on
    purpose — electric blue drives progress/primary, red is reserved for
    destructive only. */
@@ -75,6 +85,9 @@
   --color-border: #212c3a;
   --color-input: #2b3849;
   --color-ring: #e8edf4;
+
+  --jump-star-from: var(--color-signal);
+  --jump-star-to: #ffffff;
 }
 
 /* Smooth Pill (SP) active-tab shadow — a single global rule, not a
@@ -148,9 +161,10 @@
 
 @layer utilities {
   /* "You just landed here" marker for a jump-to-reference highlight (Kişisel
-     Plan's Nasıl hesaplanıyor? <-> Kaynaklar links): a tiny signal-colored star
-     straddling the highlighted element's top-left corner, half on the tint and
-     half off it. The element already carries its own ring/tint classes; this
+     Plan's Nasıl hesaplanıyor? <-> Kaynaklar links): a small gradient star
+     (--jump-star-from → --jump-star-to, per theme, so it reads as its own
+     marker against the signal-tinted highlight) straddling the highlighted
+     element's top-left corner, about half on the tint and half off it. The element already carries its own ring/tint classes; this
      only adds the star, and it lives exactly as long as the class does. The
      animation is sized to the 1.6s the highlight state is held (see
      PersonalPlanView's jumpTo* timeouts) — pop in, hold, fade out just before
@@ -163,12 +177,13 @@
   .jump-star::after {
     content: "";
     position: absolute;
-    top: -6px;
-    left: -6px;
-    width: 11px;
-    height: 11px;
+    /* 1.3x the original 11px star and -6px offsets. */
+    top: -7.8px;
+    left: -7.8px;
+    width: 14.3px;
+    height: 14.3px;
     pointer-events: none;
-    background: var(--color-signal);
+    background: linear-gradient(135deg, var(--jump-star-from), var(--jump-star-to));
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E")
       center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z'/%3E%3C/svg%3E")

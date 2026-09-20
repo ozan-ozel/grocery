@@ -5,12 +5,14 @@ import { cn } from "@/lib/utils";
 import { categorizeSync } from "@/lib/categorization/categorizeLazy";
 import { parseEntry, type AnyCategoryId, type Item } from "@/lib/store";
 import type { MergedCategory } from "@/lib/categorization/userCategories";
-import { useFoodCatalog } from "@/hooks/useFoodCatalog";
-import { lookupNutrition } from "@/lib/nutrition";
+import { lookupNutrition, type NutritionMap } from "@/lib/nutrition";
 
 type RowProps = {
   item: Item;
   editingId: string | null;
+  // Food catalog keyed by lower-cased name_tr, built once by ActiveList so
+  // every row's nutrition lookup is O(1) instead of rebuilding a map per row.
+  foodsByName: NutritionMap;
   categories: MergedCategory[];
   selectMode: boolean;
   selectedIds: Set<string>;
@@ -30,6 +32,7 @@ const SWIPE_THRESHOLD = 56;
 export function Row({
   item,
   editingId,
+  foodsByName,
   categories,
   selectMode,
   selectedIds,
@@ -44,15 +47,11 @@ export function Row({
 }: RowProps) {
   const isEditing = editingId === item.id;
   const swipeActive = swipeMode && !selectMode;
-  const { foods } = useFoodCatalog();
 
+  // Computed whether or not the values are shown: the block below stays
+  // mounted (collapsed) so toggling can animate it open and shut.
   const nutritionDisplay = useMemo(() => {
-    if (!showNutritionValues || !foods.length) return null;
-
-    const nutrition = lookupNutrition(
-      new Map(foods.map(f => [f.name_tr.toLocaleLowerCase("tr-TR"), f])),
-      item.name
-    );
+    const nutrition = lookupNutrition(foodsByName, item.name);
 
     if (!nutrition) return null;
 
@@ -65,7 +64,7 @@ export function Row({
       carbs: (nutrition.carbs_g * multiplier).toFixed(1),
       fat: (nutrition.fat_g * multiplier).toFixed(1),
     };
-  }, [showNutritionValues, item.name, item.qty, foods]);
+  }, [foodsByName, item.name, item.qty]);
 
   const [dragX, setDragX] = useState(0);
   const draggingRef = useRef(false);
@@ -194,13 +193,25 @@ export function Row({
               )}>
               {item.name}
             </label>
+            {/* grid-rows 0fr↔1fr is the same height-to-auto trick the select-mode
+                bar in ActiveList uses; the padding sits inside the clipped
+                child so the collapsed row is exactly 0px tall. */}
             {nutritionDisplay && (
-              <div className="mt-1 text-xs text-muted-foreground space-y-0.5">
-                <div className="flex gap-2">
-                  <span>P: {nutritionDisplay.protein}g</span>
-                  <span>K: {nutritionDisplay.carbs}g</span>
-                  <span>Y: {nutritionDisplay.fat}g</span>
-                  <span className="font-medium text-foreground">{nutritionDisplay.kcal} kcal</span>
+              <div
+                aria-hidden={!showNutritionValues}
+                className={cn(
+                  "grid transition-[grid-template-rows,opacity] duration-300 ease-out",
+                  showNutritionValues
+                    ? "grid-rows-[1fr] opacity-100"
+                    : "grid-rows-[0fr] opacity-0",
+                )}>
+                <div className="overflow-hidden">
+                  <div className="flex gap-2 pt-1 text-xs text-muted-foreground">
+                    <span>P: {nutritionDisplay.protein}g</span>
+                    <span>K: {nutritionDisplay.carbs}g</span>
+                    <span>Y: {nutritionDisplay.fat}g</span>
+                    <span className="font-medium text-foreground">{nutritionDisplay.kcal} kcal</span>
+                  </div>
                 </div>
               </div>
             )}

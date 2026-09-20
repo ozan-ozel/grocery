@@ -14,7 +14,7 @@ const SLIDE_OUT_MS = 200;
 
 // Touches that start here never begin a sheet drag: text fields (dragging
 // there selects text / moves the caret) and anything explicitly opted out —
-// the sheet header with its close button carries data-sheet-no-drag.
+// the sheet's close button carries data-sheet-no-drag.
 const NO_DRAG_SELECTOR =
   "[data-sheet-no-drag], input, textarea, select, [contenteditable='true']";
 
