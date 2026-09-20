@@ -9,6 +9,10 @@ export type Combo = {
   // Optional concise textual preparation note (DEC-067 Level 1). Informational
   // only — never parsed, never consulted by matching/nutrition/shopping logic.
   prepNote?: string;
+  // Ordered preparation steps the USER wrote for their own saved meal (see
+  // savedMeals.ts). Built-in combos never set this — they only have prepNote.
+  // A meal with either one is a "Tarif" (recipe); see recipeSteps below.
+  steps?: string[];
 };
 
 // data/combos.json is hand-authored with snake_case keys (name_tr/food_id/
@@ -37,6 +41,14 @@ export const ALL_COMBOS: Combo[] = (combosData as RawCombo[]).map((raw) => ({
 }));
 
 export const COMBO_BY_ID = new Map(ALL_COMBOS.map((c) => [c.id, c]));
+
+// A meal is a recipe when it carries preparation text: the user's own ordered
+// `steps`, or a built-in combo's single `prepNote` (shown as one step). Empty
+// array = not a recipe. One accessor so no caller has to know the two shapes.
+export function recipeSteps(combo: Pick<Combo, "steps" | "prepNote">): string[] {
+  if (combo.steps && combo.steps.length > 0) return combo.steps;
+  return combo.prepNote ? [combo.prepNote] : [];
+}
 
 // Meal portion tiers for the "Yemekler" picker (Meal Plan). A portion is one
 // uniform multiplier over the combo's authored grams — On Cooking ch. 4's

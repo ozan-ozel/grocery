@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/api/auth-google-start", "destination": "/api/auth-google?_action=start" },
-    { "source": "/api/auth-callback", "destination": "/api/auth-google?_action=callback" }
+    { "source": "/api/auth-callback", "destination": "/api/auth-google?_action=callback" },
+    { "source": "/api/saved-meals", "destination": "/api/personal-plan?_resource=saved-meals" }
   ]
 }

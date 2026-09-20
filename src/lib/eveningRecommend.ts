@@ -7,7 +7,7 @@
 //
 // Deliberately does not touch comboMatch.ts: this is an additive path that
 // happens to produce the same ScoredCombo shape so the existing
-// SuggestionCard/RecipeSearchModal/shopping-list/log-as-eaten UI in
+// SuggestionCard/MealsSheet/shopping-list/log-as-eaten UI in
 // TodayView.tsx needs no changes to render it.
 import { lookupNutrition, type NutritionMap, type Nutrition } from "./nutrition";
 import { scaleNutrition, sumMacros, type MacroTotals } from "./mealNutrition";

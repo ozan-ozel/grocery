@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SmoothPillTabs } from "@/components/ui/smooth-pill";
-import { MealFoodPicker } from "@/components/MealFoodPicker";
+import { MealCompositionEditor } from "@/components/MealCompositionEditor";
 import { ALL_COMBOS, scaleComboItems } from "@/lib/combos";
 import { scoreAllCombos } from "@/lib/comboMatch";
 import { scaleNutrition, sumMacros } from "@/lib/mealNutrition";
@@ -147,37 +147,13 @@ export function BatchCreateForm({
           </label>
         </div>
       ) : (
-        <div>
-          {manualItems.length > 0 && (
-            <ul className="space-y-1">
-              {manualItems.map((item, index) => (
-                <li
-                  key={`${item.foodId}-${index}`}
-                  className="flex items-center justify-between rounded-md border border-border px-3 py-2 text-sm">
-                  <span>
-                    {item.foodId} — {item.quantityG}g
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setManualItems((prev) => prev.filter((_, i) => i !== index))
-                    }
-                    className="text-xs text-muted-foreground hover:text-foreground active:text-foreground">
-                    Kaldır
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-          <MealFoodPicker
-            foods={foods}
-            exclusions={exclusions}
-            allergenExclusions={allergenExclusions}
-            onAdd={(foodId, quantityG) =>
-              setManualItems((prev) => [...prev, { foodId, quantityG }])
-            }
-          />
-        </div>
+        <MealCompositionEditor
+          items={manualItems}
+          onChange={setManualItems}
+          foods={foods}
+          exclusions={exclusions}
+          allergenExclusions={allergenExclusions}
+        />
       )}
 
       {mode === "combo" && !multiplierValid && (

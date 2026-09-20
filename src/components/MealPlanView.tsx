@@ -8,6 +8,7 @@ import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useRemainingToday } from "@/hooks/useRemainingToday";
 import { useBatchLedger } from "@/hooks/useBatches";
+import { useSavedMeals } from "@/hooks/useSavedMeals";
 import {
   MEAL_SLOTS,
   calculateItemsNutrition,
@@ -23,8 +24,8 @@ import { BatchSheet } from "@/components/BatchSheet";
 import { BatchAllocateSheet } from "@/components/BatchAllocateSheet";
 import { FoodSearchModal } from "@/components/FoodSearchModal";
 import { MealShoppingConfirmModal } from "@/components/MealShoppingConfirmModal";
-import { RecipeSearchModal } from "@/components/RecipeSearchModal";
-import { ALL_COMBOS, scaleComboItems } from "@/lib/combos";
+import { MealsSheet } from "@/components/MealsSheet";
+import { ALL_COMBOS, scaleComboItems, type Combo } from "@/lib/combos";
 import { scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
 import {
   matchEveningCombos,
@@ -33,6 +34,11 @@ import {
 } from "@/lib/eveningRecommend";
 import { batchDateLabel, hasRemaining } from "@/lib/preparationBatch";
 import type { LoggedEntry } from "@/hooks/useRemainingToday";
+
+// DEC-069 batch-prep UI is hidden (2026-09-20): the Yemekler sheet was renamed and batch
+// prep still has to be re-wired to it. Flip to true to bring the "Toplu Hazırlıklar" row
+// and the per-slot "add from a batch" action back.
+const BATCH_PREP_VISIBLE = false;
 
 type Props = {
   userId: string | null;
@@ -53,7 +59,10 @@ export function MealPlanView({
   onRemoveShoppingItem,
 }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
-  const { profile: personalizationProfile } = useMealPersonalization(userId);
+  const { profile: personalizationProfile, hasSavedProfile } = useMealPersonalization(userId);
+  // Yemeklerim — fetched here (not inside the sheet) so the list is already
+  // there when the "Yemekler" sheet opens.
+  const savedMeals = useSavedMeals(userId);
   const {
     date,
     dateLabel,
@@ -141,6 +150,19 @@ export function MealPlanView({
         fiberG: 0,
       };
 
+  // What is left of the viewed day's targets, and which slots already have
+  // entries — the inputs "Sana uygun" (src/lib/mealRecommend.ts) needs.
+  const remainingMacros: MacroTotals = {
+    kcal: targetMacros.kcal - totals.kcal,
+    proteinG: targetMacros.proteinG - totals.proteinG,
+    fatG: targetMacros.fatG - totals.fatG,
+    carbsG: targetMacros.carbsG - totals.carbsG,
+    fiberG: targetMacros.fiberG - totals.fiberG,
+  };
+  const filledSlots = new Set<MealSlot>(
+    MEAL_SLOTS.filter(({ slot }) => itemsForSlot(slot).length > 0).map(({ slot }) => slot),
+  );
+
   // DEC-060 extension (src/lib/eveningRecommend.ts) — quantity-solved
   // protein+carb patterns against today's real remaining macros, distinct
   // from `scoredCombos` above (fixed-gram authored combos for the manual
@@ -221,7 +243,7 @@ export function MealPlanView({
   // combos.ts) — every ingredient is scaled together, so the meal's protein
   // and carb portions stay proportional. The logged comboId is unchanged:
   // it's provenance, the grams are what actually count.
-  function handleComboSelect(combo: ScoredCombo, factor: number) {
+  function handleComboSelect(combo: Combo, factor: number) {
     if (!activeSlot) return;
     for (const item of scaleComboItems(combo.items, factor)) {
       const nutrition = lookupNutrition(catalogMap, item.foodId);
@@ -399,14 +421,16 @@ export function MealPlanView({
                 }
                 onToggleShoppingList={requestShoppingToggle}
                 onSelectBatch={
-                  activeBatchCount > 0 ? () => setAllocateSlot(slot) : undefined
+                  BATCH_PREP_VISIBLE && activeBatchCount > 0
+                    ? () => setAllocateSlot(slot)
+                    : undefined
                 }
                 batchLabelFor={batchLabelFor}
               />
             ))}
           </div>
 
-          {householdId && (
+          {BATCH_PREP_VISIBLE && householdId && (
             <button
               type="button"
               onClick={() => setBatchSheetOpen(true)}
@@ -477,16 +501,28 @@ export function MealPlanView({
         onSelect={handleFoodSelect}
       />
 
-      {/* Meal picker */}
-      <RecipeSearchModal
-        title="Yemekler"
-        combos={scoredCombos}
-        catalog={catalogMap}
+      {/* Meal picker: Yemeklerim / Hazır Yemekler / Tarifler */}
+      <MealsSheet
         isOpen={comboModalOpen}
         onClose={() => {
           setComboModalOpen(false);
           setActiveSlot(null);
         }}
+        slot={activeSlot}
+        combos={scoredCombos}
+        catalog={catalogMap}
+        foods={foods}
+        exclusions={personalizationProfile.foodExclusions}
+        allergenExclusions={personalizationProfile.allergenExclusions}
+        remaining={remainingMacros}
+        filledSlots={filledSlots}
+        targetsEstimated={!hasSavedProfile}
+        canSaveMeals={!!userId}
+        savedMeals={savedMeals.savedMeals}
+        savedLoading={savedMeals.isLoading}
+        onCreateSaved={savedMeals.create}
+        onUpdateSaved={savedMeals.update}
+        onDeleteSaved={savedMeals.remove}
         onSelect={handleComboSelect}
       />
 

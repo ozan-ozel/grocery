@@ -60,7 +60,7 @@ migration design) authenticates to PostgREST as **the caller's own Supabase sess
 (`lib/auth.ts`'s `userRestHeaders`), not `anon`/`service_role`, so Postgres row-level security policies
 on `households`/`lists`/`items`/`item_category_memory`/`meal_entries`/`preparation_batches`/
 `sync_state`/`personal_plan`/`household_shares` (`supabase/19-auth-user-map-and-
-rls.sql`) are a real, independent second authorization layer behind the existing function-layer checks
+rls.sql`) and `saved_meals` (`supabase/28-saved-meals.sql`, one per-user policy like `personal_plan`) are a real, independent second authorization layer behind the existing function-layer checks
 (`requireUser`/`requireHouseholdAccess`) — not a replacement for them. Three
 `security definer` helper functions do the real work so policies don't have to re-implement the same
 logic: `current_app_user_id()` maps `auth.uid()` (a Supabase Auth uuid) to this app's pre-existing
@@ -184,6 +184,35 @@ macro/fiber ranges to the [National Academies DRI tables](https://www.ncbi.nlm.n
 and Endotext, and BMI/waist context to Endotext. These references support the formulas and
 boundaries but do not turn the feature into medical advice.
 
+### Saved meals (Yemeklerim)
+
+A user's own reusable meals live in the `saved_meals` table (`supabase/28-saved-meals.sql`): `id`,
+`user_id`, `name`, `items` (jsonb, `[{ food_id, quantity_g }]`, where `food_id` is `nutrition.name_tr`
+like `meal_entries.food_id`) and an optional `steps` (jsonb, free text). It is per user, not per
+household, like `personal_plan`: RLS is one policy on `user_id =
+app_private.current_app_user_id()`, and deleting the `app_users` row cascades, so account deletion
+needed no change. A saved meal stores only foods and grams; totals are always derived from the live
+nutrition catalog, and one with `steps` counts as a recipe (Tarifler) — there is no recipe table.
+
+There is no `api/saved-meals.ts`. The project is at the 12-function Hobby limit, so `api/personal-plan.ts`
+serves a second resource: `vercel.json` rewrites `/api/saved-meals` to
+`/api/personal-plan?_resource=saved-meals` (GET list, POST create with a client id, PATCH `?id=`,
+DELETE `?id=`; a per-user cap answers 409). The client side is `src/lib/savedMeals.ts` (type,
+validation, the `savedMealToCombo` adapter that lets saved meals reuse every `Combo` helper, and the
+fetch wrappers) and `src/hooks/useSavedMeals.ts`. The Yemekler sheet is `src/components/MealsSheet.tsx`
+(tabs Yemeklerim / Hazır Yemekler / Tarifler).
+
+The limits are enforced server-side in `api/personal-plan.ts` (the first four are mirrored in
+`SAVED_MEAL_LIMITS` in `src/lib/savedMeals.ts`): name 60 characters, 40 items, 30 steps, 500 characters per step,
+20000 g per item (the client merges duplicate foods before sending) and 100 saved meals per user. A client-side rejection or a
+server 400/409 shows one neutral Turkish failure message.
+
+"Sana uygun" is `src/lib/mealRecommend.ts`: a pure function (no network, no AI) that filters the meals a
+slot accepts, gives the slot a share of the day's remaining macros, picks the best portion tier per
+meal with `scoreInstance`, and returns the top few. The per-slot weights (`SLOT_WEIGHT`) are MVP tuning
+constants, not derived from a source. Its snack results are only as good as the slot tags in
+`data/combos.json`. Product scope: `docs/mvp-scope/meal-construction-mvp.md`.
+
 ## Deployment
 
 **Vercel is the sole deploy target** (project `grocery`, linked via `.vercel/project.json`). A
@@ -239,7 +268,8 @@ functions authenticate to PostgREST as the caller's own Supabase session (`lib/a
 a test session, etc.) — see each file's own comments for which. `.env.local.example` only lists
 `SUPABASE_URL` / `SUPABASE_SECRET_KEY` / `USDA_API_KEY` because it's scoped to the one-off
 `scripts/upload-nutrition.ts` seeding script — it does not cover `SUPABASE_ANON_KEY`, which the
-functions also need.
+functions also need. The same function-count limit is why saved meals have no function of their own:
+`/api/saved-meals` is a `vercel.json` rewrite onto `api/personal-plan.ts` (see "Personal meal planning").
 
 `ADMIN_EMAILS` (comma-separated, case-insensitive) lists the accounts allowed to write the global
 nutrition table via `PUT /api/nutrition` (see the Nutrition section). Set it in `.env.local` for local

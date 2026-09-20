@@ -61,11 +61,11 @@
 
 	Determine how a set of selected foods and portions is translated into constructed meals - MISSING (curated combos cover the meals; portion tiers Küçük/Normal/Büyük + custom multiplier shipped 2026-09-19, see docs/mvp-scope/meal-construction-mvp.md)
 
-	Batch cooking / leftovers (DEC-069): backend shipped earlier; Yemek Planı UI ("Toplu Hazırlıklar" sheet + per-meal "Partiden" allocation) shipped 2026-09-19, see docs/mvp-scope/meal-construction-mvp.md
+	Batch cooking / leftovers (DEC-069): backend shipped earlier; Yemek Planı UI ("Toplu Hazırlıklar" sheet + per-meal "Partiden" allocation) shipped 2026-09-19, UI hidden again since 2026-09-20 pending re-wiring to the renamed Yemekler sheet (BATCH_PREP_VISIBLE in MealPlanView.tsx), see docs/mvp-scope/meal-construction-mvp.md
 
-	We also want to be able to interfere (add, update, delete) these recipes. - MISSING
+	We also want to be able to interfere (add, update, delete) these recipes. - SHIPPED 2026-09-20 (user-authored saved meals with optional steps; see docs/mvp-scope/meal-construction-mvp.md)
 
-	Create different section like ingredients, preparation, cooking, serve, storing for later days (freezer, how to cool and heat in later days) 
+	Create different section like ingredients, preparation, cooking, serve, storing for later days (freezer, how to cool and heat in later days) - MISSING (only a free-text list of preparation steps exists, on the user's own saved meals; no structured sections, no food-safety guidance - see docs/mvp-scope/meal-construction-mvp.md)
 
 ## Shopping - SCOPED, see docs/mvp-scope/shopping-mvp.md
 
