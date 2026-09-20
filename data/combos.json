@@ -8,7 +8,7 @@
       { "food_id": "brokoli", "grams": 100 }
     ],
     "prep_minutes": 20,
-    "tags": ["hizli", "yuksek-protein"],
+    "tags": [],
     "prep_note": "Tavuğu haşlayıp parçalayın, pirinci pişirin, brokoliyi buharda hafifçe yumuşatın."
   },
   {
@@ -20,7 +20,7 @@
       { "food_id": "zeytinyağı", "grams": 10 }
     ],
     "prep_minutes": 20,
-    "tags": ["yuksek-protein", "omega3"]
+    "tags": []
   },
   {
     "id": "yogurt-muz-ceviz",
@@ -31,7 +31,7 @@
       { "food_id": "ceviz", "grams": 20 }
     ],
     "prep_minutes": 3,
-    "tags": ["hizli", "kahvalti"]
+    "tags": ["kahvalti"]
   },
   {
     "id": "yumurta-tam-bugday-domates",
@@ -42,7 +42,7 @@
       { "food_id": "domates", "grams": 80 }
     ],
     "prep_minutes": 10,
-    "tags": ["hizli", "kahvalti"],
+    "tags": ["kahvalti"],
     "prep_note": "Yumurtaları haşlayın veya sote edin, ekmeği kızartıp domatesle birlikte servis edin."
   },
   {
@@ -54,7 +54,7 @@
       { "food_id": "havuç", "grams": 50 }
     ],
     "prep_minutes": 30,
-    "tags": ["vejetaryen", "yuksek-lif"]
+    "tags": []
   },
   {
     "id": "nohutlu-salata",
@@ -66,7 +66,7 @@
       { "food_id": "zeytinyağı", "grams": 15 }
     ],
     "prep_minutes": 10,
-    "tags": ["hizli", "vejetaryen"]
+    "tags": []
   },
   {
     "id": "karides-kabak-mantar",
@@ -77,7 +77,7 @@
       { "food_id": "mantar", "grams": 80 }
     ],
     "prep_minutes": 15,
-    "tags": ["yuksek-protein", "dusuk-kalori"]
+    "tags": []
   },
   {
     "id": "hindi-bulgur-patlican",
@@ -88,7 +88,7 @@
       { "food_id": "patlıcan", "grams": 100 }
     ],
     "prep_minutes": 25,
-    "tags": ["yuksek-protein"]
+    "tags": []
   },
   {
     "id": "biftek-pirinc-pilavi",
@@ -98,7 +98,7 @@
       { "food_id": "pirinç", "grams": 150 }
     ],
     "prep_minutes": 20,
-    "tags": ["yuksek-protein"],
+    "tags": [],
     "prep_note": "Bifteği ızgara veya tavada pişirin, pirinci pilav olarak hazırlayın."
   },
   {
@@ -109,7 +109,7 @@
       { "food_id": "bulgur", "grams": 150 }
     ],
     "prep_minutes": 25,
-    "tags": ["yuksek-protein"],
+    "tags": [],
     "prep_note": "Dana sote (kuşbaşı) veya kontrfileyi tavada sote edin, bulguru pilav olarak hazırlayın."
   },
   {
@@ -121,7 +121,7 @@
       { "food_id": "zeytinyağı", "grams": 10 }
     ],
     "prep_minutes": 20,
-    "tags": ["hizli", "yuksek-protein"],
+    "tags": [],
     "prep_note": "Tavuk göğsünü ve dilimlenmiş patatesi zeytinyağıyla tavada ızgara gibi pişirin."
   },
   {
@@ -132,7 +132,7 @@
       { "food_id": "patates", "grams": 150 }
     ],
     "prep_minutes": 40,
-    "tags": ["yuksek-protein"],
+    "tags": [],
     "prep_note": "Kemikli tavuk butunu patatesle birlikte fırında pişirin."
   },
   {
@@ -145,7 +145,7 @@
       { "food_id": "tam buğday ekmeği", "grams": 50 }
     ],
     "prep_minutes": 5,
-    "tags": ["hizli", "kahvalti"]
+    "tags": ["kahvalti"]
   },
   {
     "id": "kiyma-makarna-domates",
@@ -156,7 +156,7 @@
       { "food_id": "domates", "grams": 100 }
     ],
     "prep_minutes": 25,
-    "tags": ["yuksek-protein"]
+    "tags": []
   },
   {
     "id": "kuru-fasulye-pirinc",
@@ -166,7 +166,7 @@
       { "food_id": "pirinç", "grams": 100 }
     ],
     "prep_minutes": 15,
-    "tags": ["vejetaryen", "yuksek-lif"]
+    "tags": []
   },
   {
     "id": "somon-patates-ispanak",
@@ -177,7 +177,7 @@
       { "food_id": "ıspanak", "grams": 80 }
     ],
     "prep_minutes": 30,
-    "tags": ["yuksek-protein"]
+    "tags": []
   },
   {
     "id": "badem-kuru-uzum",
@@ -187,7 +187,7 @@
       { "food_id": "kuru üzüm", "grams": 30 }
     ],
     "prep_minutes": 1,
-    "tags": ["hizli", "ara-ogun", "atistirmalik"]
+    "tags": ["ara-ogun", "atistirmalik"]
   },
   {
     "id": "kasarli-omlet",
@@ -198,7 +198,7 @@
       { "food_id": "yeşil biber", "grams": 50 }
     ],
     "prep_minutes": 10,
-    "tags": ["hizli", "kahvalti"],
+    "tags": ["kahvalti"],
     "prep_note": "Yumurtaları çırpıp kaşar peyniri ve biberle birlikte tavada omlet olarak pişirin."
   },
   {
@@ -210,7 +210,7 @@
       { "food_id": "zeytinyağı", "grams": 10 }
     ],
     "prep_minutes": 20,
-    "tags": ["dusuk-karbon", "yuksek-protein"]
+    "tags": []
   },
   {
     "id": "elma-ceviz",
@@ -220,6 +220,6 @@
       { "food_id": "ceviz", "grams": 20 }
     ],
     "prep_minutes": 1,
-    "tags": ["hizli", "ara-ogun"]
+    "tags": ["ara-ogun"]
   }
 ]

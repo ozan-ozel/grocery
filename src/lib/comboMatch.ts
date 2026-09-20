@@ -130,8 +130,9 @@ export function scoreAllCombos(
 }
 
 // Higher tier sorts later. 0 = normal ranking, 1 = deprioritized (bone-in
-// chicken thigh), 2 = sunk to the bottom (turkey).
-function preferenceTier(combo: Combo): number {
+// chicken thigh), 2 = sunk to the bottom (turkey). Exported so mealRecommend.ts
+// ranks with the same household preference.
+export function preferenceTier(combo: Combo): number {
   if (hasTurkey(combo)) return 2;
   if (hasBoneInChickenThigh(combo)) return 1;
   return 0;

@@ -18,6 +18,9 @@ type Props = {
   destructive?: boolean;
   // Blocks the confirm button (and only it — cancel always works).
   confirmDisabled?: boolean;
+  // Renders above a BottomSheet (z-50) instead of below it — set when the
+  // modal is opened from inside a sheet.
+  onTop?: boolean;
 };
 
 export function ConfirmModal({
@@ -31,13 +34,19 @@ export function ConfirmModal({
   onCancel,
   destructive,
   confirmDisabled,
+  onTop,
 }: Props) {
   useEffect(() => {
+    // Window + capture phase runs before every document-level listener, and
+    // stopPropagation keeps Escape from also reaching a BottomSheet this modal
+    // is rendered inside (onTop): Escape closes only the confirm.
     function onKey(e: KeyboardEvent) {
-      if (e.key === "Escape") onCancel();
+      if (e.key !== "Escape") return;
+      e.stopPropagation();
+      onCancel();
     }
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
+    window.addEventListener("keydown", onKey, true);
+    return () => window.removeEventListener("keydown", onKey, true);
   }, [onCancel]);
 
   return (
@@ -46,7 +55,7 @@ export function ConfirmModal({
     // field stays centred in the space above the on-screen keyboard instead of
     // ending up underneath it.
     <div
-      className="fixed inset-x-0 top-0 z-40 flex items-center justify-center px-5"
+      className={`fixed inset-x-0 top-0 ${onTop ? "z-[60]" : "z-40"} flex items-center justify-center px-5`}
       style={{
         height: "var(--visual-vh, 100dvh)",
         transform: "translateY(var(--visual-top, 0px))",

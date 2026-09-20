@@ -1,6 +1,16 @@
 // GET /api/personal-plan  -> PersonalPlanRow | null  (read the caller's own profile)
 // PUT /api/personal-plan  { ...profile }             -> PersonalPlanRow  (upsert)
 //
+// Also serves the caller's saved meals ("Yemeklerim") as a second resource,
+// selected by `?_resource=saved-meals` — vercel.json rewrites /api/saved-meals
+// to it. Merged into this function (rather than a new file) because the project
+// sits at the 12-function Hobby limit, and both are per-user data guarded the
+// same way (requireUser + RLS on user_id). See the handlers at the bottom:
+//   GET    /api/saved-meals            -> SavedMealRow[]   (newest first)
+//   POST   /api/saved-meals            -> SavedMealRow     (create; client id)
+//   PATCH  /api/saved-meals?id=<id>    -> SavedMealRow     (replace name/items/steps)
+//   DELETE /api/saved-meals?id=<id>    -> { ok: true }
+//
 // One profile per logged-in user, scoped entirely by the session's userId
 // (never a client-supplied id) — no separate access check needed beyond
 // requireUser. Every request authenticates to PostgREST as the caller's own
@@ -146,6 +156,10 @@ export default {
     } catch (err) {
       return authErrorResponse(err);
     }
+    const url = new URL(request.url);
+    if (url.searchParams.get("_resource") === "saved-meals") {
+      return handleSavedMeals(request, user, url);
+    }
     const method = request.method.toUpperCase();
     if (method === "GET") return handleGet(user);
     if (method === "PUT") return handleWrite(request, user);
@@ -280,6 +294,190 @@ async function handleWrite(request: Request, user: AuthUser): Promise<Response> 
     return json(data[0], 200);
   } catch (e) {
     return json({ error: `failed to save personal plan: ${e}` }, 500);
+  }
+}
+
+// -------- Saved meals ("Yemeklerim") -------------------------------------------
+
+type SavedMealItem = { food_id: string; quantity_g: number };
+
+export type SavedMealRow = {
+  id: string;
+  user_id: string;
+  name: string;
+  items: SavedMealItem[];
+  steps: string[] | null;
+  created_at: string;
+};
+
+const SAVED_MEAL_COLS = "id,user_id,name,items,steps,created_at";
+// Keep in sync with SAVED_MEAL_LIMITS in src/lib/savedMeals.ts (this file does
+// not import from src/, a separate build target).
+const SAVED_MEAL_LIMITS = {
+  nameMax: 60,
+  itemsMax: 40,
+  stepsMax: 30,
+  stepMax: 500,
+  quantityMax: 20000,
+  perUserMax: 100,
+};
+
+// Validates a create/replace body. Returns the cleaned fields, or a message for
+// a 400. Rejects (never silently truncates) oversized input.
+function parseSavedMeal(
+  body: Record<string, unknown>
+): { name: string; items: SavedMealItem[]; steps: string[] } | string {
+  const name = typeof body.name === "string" ? body.name.trim() : "";
+  if (!name || name.length > SAVED_MEAL_LIMITS.nameMax) {
+    return `expected name: string (1-${SAVED_MEAL_LIMITS.nameMax} chars)`;
+  }
+
+  if (
+    !Array.isArray(body.items) ||
+    body.items.length === 0 ||
+    body.items.length > SAVED_MEAL_LIMITS.itemsMax
+  ) {
+    return `expected items: 1-${SAVED_MEAL_LIMITS.itemsMax} entries of { food_id, quantity_g }`;
+  }
+  const items: SavedMealItem[] = [];
+  for (const raw of body.items) {
+    if (typeof raw !== "object" || raw === null) return "invalid items entry";
+    const entry = raw as Record<string, unknown>;
+    if (typeof entry.food_id !== "string" || !entry.food_id.trim()) {
+      return "items[].food_id must be a non-empty string";
+    }
+    if (
+      typeof entry.quantity_g !== "number" ||
+      !Number.isFinite(entry.quantity_g) ||
+      entry.quantity_g <= 0 ||
+      entry.quantity_g > SAVED_MEAL_LIMITS.quantityMax
+    ) {
+      return `items[].quantity_g must be a number in (0, ${SAVED_MEAL_LIMITS.quantityMax}]`;
+    }
+    items.push({ food_id: entry.food_id.trim(), quantity_g: entry.quantity_g });
+  }
+
+  const rawSteps = body.steps === undefined || body.steps === null ? [] : body.steps;
+  if (!Array.isArray(rawSteps) || rawSteps.length > SAVED_MEAL_LIMITS.stepsMax) {
+    return `expected steps: array of at most ${SAVED_MEAL_LIMITS.stepsMax} strings`;
+  }
+  const steps: string[] = [];
+  for (const step of rawSteps) {
+    if (typeof step !== "string") return "steps must be strings";
+    const trimmed = step.trim();
+    if (trimmed.length > SAVED_MEAL_LIMITS.stepMax) {
+      return `each step must be at most ${SAVED_MEAL_LIMITS.stepMax} chars`;
+    }
+    if (trimmed) steps.push(trimmed);
+  }
+
+  return { name, items, steps };
+}
+
+async function handleSavedMeals(
+  request: Request,
+  user: AuthUser,
+  url: URL
+): Promise<Response> {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  if (!supabaseUrl) return json({ error: "supabase not configured" }, 500);
+
+  const base = `${restBase(supabaseUrl)}/saved_meals`;
+  const owner = `user_id=eq.${encodeURIComponent(user.userId)}`;
+  const headers = userRestHeaders(user);
+  const writeHeaders = {
+    ...headers,
+    "content-type": "application/json",
+    prefer: "return=representation",
+  };
+  const method = request.method.toUpperCase();
+
+  try {
+    if (method === "GET") {
+      const res = await fetch(
+        `${base}?select=${SAVED_MEAL_COLS}&${owner}&order=created_at.desc`,
+        { headers }
+      );
+      if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
+      return json((await res.json()) as SavedMealRow[], 200);
+    }
+
+    if (method === "POST") {
+      let body: Record<string, unknown>;
+      try {
+        body = (await request.json()) as Record<string, unknown>;
+      } catch {
+        return json({ error: "invalid json" }, 400);
+      }
+      const id = typeof body.id === "string" ? body.id.trim() : "";
+      if (!id || id.length > 64) return json({ error: "expected id: string (1-64 chars)" }, 400);
+      const parsed = parseSavedMeal(body);
+      if (typeof parsed === "string") return json({ error: parsed }, 400);
+
+      // Per-user cap, so a runaway client can't grow one user's list forever.
+      const countRes = await fetch(
+        `${base}?select=id&${owner}&limit=${SAVED_MEAL_LIMITS.perUserMax + 1}`,
+        { headers }
+      );
+      if (!countRes.ok) return json({ error: `supabase ${countRes.status}` }, 502);
+      if (((await countRes.json()) as unknown[]).length >= SAVED_MEAL_LIMITS.perUserMax) {
+        return json({ error: "saved meal limit reached" }, 409);
+      }
+
+      const res = await fetch(`${base}?select=${SAVED_MEAL_COLS}`, {
+        method: "POST",
+        headers: writeHeaders,
+        body: JSON.stringify({ id, user_id: user.userId, ...parsed }),
+      });
+      if (!res.ok) {
+        return json({ error: `supabase ${res.status}` }, res.status === 409 ? 409 : 502);
+      }
+      const rows = (await res.json()) as SavedMealRow[];
+      if (rows.length === 0) return json({ error: "saved meal creation failed" }, 500);
+      return json(rows[0], 201);
+    }
+
+    const id = url.searchParams.get("id")?.trim();
+    if (!id) return json({ error: "expected ?id=<id>" }, 400);
+
+    if (method === "PATCH") {
+      let body: Record<string, unknown>;
+      try {
+        body = (await request.json()) as Record<string, unknown>;
+      } catch {
+        return json({ error: "invalid json" }, 400);
+      }
+      const parsed = parseSavedMeal(body);
+      if (typeof parsed === "string") return json({ error: parsed }, 400);
+      const res = await fetch(
+        `${base}?id=eq.${encodeURIComponent(id)}&${owner}&select=${SAVED_MEAL_COLS}`,
+        {
+          method: "PATCH",
+          headers: writeHeaders,
+          body: JSON.stringify({ ...parsed, updated_at: new Date().toISOString() }),
+        }
+      );
+      if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
+      const rows = (await res.json()) as SavedMealRow[];
+      if (rows.length === 0) return json({ error: "not found" }, 404);
+      return json(rows[0], 200);
+    }
+
+    if (method === "DELETE") {
+      const res = await fetch(
+        `${base}?id=eq.${encodeURIComponent(id)}&${owner}&select=id`,
+        { method: "DELETE", headers: writeHeaders }
+      );
+      if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
+      if (((await res.json()) as unknown[]).length === 0) {
+        return json({ error: "not found" }, 404);
+      }
+      return json({ ok: true }, 200);
+    }
+
+    return json({ error: "method not allowed" }, 405);
+  } catch (e) {
+    return json({ error: `saved meals request failed: ${e}` }, 500);
   }
 }
 

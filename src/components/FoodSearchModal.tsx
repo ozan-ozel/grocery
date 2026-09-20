@@ -9,8 +9,6 @@ type Props = {
   isOpen: boolean;
   onClose: () => void;
   onSelect: (food: Nutrition, quantityG: number) => void;
-  recommendationTags?: Array<{ label: string; badge?: string }>;
-  onSelectTag?: (tag: string) => void;
 };
 
 export function FoodSearchModal({
@@ -19,8 +17,6 @@ export function FoodSearchModal({
   isOpen,
   onClose,
   onSelect,
-  recommendationTags = [],
-  onSelectTag,
 }: Props) {
   const [query, setQuery] = useState("");
   const [selected, setSelected] = useState<Nutrition | null>(null);
@@ -66,34 +62,6 @@ export function FoodSearchModal({
           className="w-full rounded-lg border border-border bg-background px-9 py-2.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
         />
       </div>
-
-      {/* Recommendation Tags */}
-      {recommendationTags.length > 0 && (
-        <div className="mb-4 shrink-0 space-y-2">
-          <p className="text-xs font-semibold uppercase text-muted-foreground">
-            Kalan makroya göre önerilen
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {recommendationTags.map((tag) => (
-              <button
-                key={tag.label}
-                type="button"
-                onClick={() => {
-                  onSelectTag?.(tag.label);
-                  resetModal();
-                }}
-                className="rounded-full border border-border bg-background px-3 py-1 text-xs font-medium text-muted-foreground hover:border-primary active:border-primary hover:text-primary active:text-primary transition-colors">
-                {tag.label}
-                {tag.badge && (
-                  <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-[0.65rem] font-semibold text-primary">
-                    {tag.badge}
-                  </span>
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
 
       {/* Selected Item Quantity Picker */}
       {selected ? (

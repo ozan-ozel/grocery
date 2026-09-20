@@ -2,6 +2,10 @@
 
 _Last updated: 2026-09-20_
 
+## Yemekler sheet: Yemeklerim / Hazır Yemekler / Tarifler (2026-09-20)
+
+The Meal Plan's "Yemekler" button now opens one sheet with three tabs: the user's own saved meals (per user, `saved_meals`, optional free-text steps make a meal a recipe), the built-in meals with a deterministic "Sana uygun" block (`src/lib/mealRecommend.ts`), and Tarifler. Served by `api/personal-plan.ts` at `/api/saved-meals` (`vercel.json` rewrite, no new function). Branch `feature/meals-sheet-yemeklerim-tarifler`; **implemented and live-verified in the real app; the feature work is uncommitted** (the branch already carries `3c4c39d`, the sql migration, and `dbe9ea2`, the Task 1 cleanup; the owner commits the rest after their own test). **Needs a real-phone check:** swipe-to-dismiss on a scrolled list, the soft keyboard in the name / food-picker / steps fields, the three-pill tab row at 360 px, and the delete confirmation above the sheet with the keyboard open. **`supabase/28-saved-meals.sql` is applied to the developer's project only — run it wherever else this is deployed.** Docs trio (`meal-construction-mvp.md`, `roadmap_v2.md`, `DEC_REGISTER.md`) updated together. Record: [2026-09-20-03](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md).
+
 ## Nutrition write lockdown (2026-09-20)
 
 `PUT /api/nutrition` let any signed-in user overwrite the global nutrition table (via the Listem pencil or the
@@ -15,8 +19,9 @@ toggle, gradient jump-star (1.3×), shimmer skeleton add buttons, Kişisel Plan 
 
 `TodayView`, `MealNutritionDetailSheet` and `matchCombos` (all unreachable from the UI) moved to a new
 `archive/` folder that is not compiled, deployed, or scanned by Tailwind; `archive/README.md` has the index
-and restore steps. Still to remove next (plain deletions, not archived): `MealTrackingView`, dead
-`FoodSearchModal` props, unused combo tags, three `useRemainingToday` fields, the vestigial `Tab = "today"`.
+and restore steps. The follow-up removals (`MealTrackingView`, dead `FoodSearchModal` props, unused combo tags,
+three `useRemainingToday` fields) were done in `dbe9ea2` (the meals-sheet Task 1 cleanup). Still outstanding: the
+vestigial `Tab = "today"` value in `useUiPrefs.ts`, deliberately left (touching it risks old `?tab=today` links).
 Record: [2026-09-20-02](session-checkpoints/2026-09-20-02-archive-unused-meal-code.md).
 
 ## Batch preparation UI — implemented (2026-09-19)
@@ -24,7 +29,7 @@ Record: [2026-09-20-02](session-checkpoints/2026-09-20-02-archive-unused-meal-co
 DEC-069's backend is shipped but its only UI (`BatchPlanner.tsx`) was orphaned since 2026-09-12.
 A UI plan was written on branch `feature/batch-preparation-ui`, and implemented by Haiku 4.5:
 [`docs/superpowers/plans/2026-09-19-batch-preparation-ui.md`](superpowers/plans/2026-09-19-batch-preparation-ui.md).
-Record: [2026-09-19-02](session-checkpoints/2026-09-19-02-batch-preparation-ui.md). All code changes are complete, typechecked, built clean, and live-verified at `localhost:3000` (checklist results in the checkpoint). Still needs a real-phone check of the soft-keyboard behaviour in the create form.
+Record: [2026-09-19-02](session-checkpoints/2026-09-19-02-batch-preparation-ui.md). All code changes are complete, typechecked, built clean, and live-verified at `localhost:3000` (checklist results in the checkpoint). Still needs a real-phone check of the soft-keyboard behaviour in the create form. **Update 2026-09-20:** the UI is hidden again (`BATCH_PREP_VISIBLE = false` in `MealPlanView.tsx`) until batch prep is re-wired to the renamed Yemekler sheet; see the [2026-09-20-03 checkpoint](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md).
 
 ## Latest Session (2026-09-19)
 
@@ -207,6 +212,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 25. [Batch preparation UI (DEC-069 frontend re-surface)](session-checkpoints/2026-09-19-02-batch-preparation-ui.md)
 26. [Nutrition write lockdown + hidden maintenance upload + UI tweaks](session-checkpoints/2026-09-20-01-nutrition-write-lockdown.md)
 27. [Archive unused meal code](session-checkpoints/2026-09-20-02-archive-unused-meal-code.md)
+28. [Yemekler sheet: Yemeklerim / Hazır Yemekler / Tarifler](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live
 outside the repository in `~/vault/grocery/logs/`; durable architecture and curriculum status remain
