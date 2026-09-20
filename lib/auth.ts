@@ -324,6 +324,22 @@ export async function requireHouseholdAccess(
   if (shares.length === 0) throw new AuthError(404, "not found");
 }
 
+// Gate for maintenance operations on GLOBAL data (today: writes to the shared
+// nutrition table) that no ordinary signed-in user may perform. Call it after
+// requireUser(), whose email comes from getUser() — a server-verified Google
+// identity linked through auth_user_map — never from the client.
+//
+// The allowlist is the comma-separated ADMIN_EMAILS env var. It fails closed:
+// unset or empty means nobody is an admin, so a missing var can only ever deny.
+// Returns nothing and throws AuthError(403) on refusal, matching requireUser.
+export function requireAdmin(user: AuthUser): void {
+  const allowed = (process.env.ADMIN_EMAILS ?? "")
+    .split(",")
+    .map((email) => email.trim().toLowerCase())
+    .filter(Boolean);
+  if (!allowed.includes(user.email)) throw new AuthError(403, "forbidden");
+}
+
 export function authErrorResponse(err: unknown): Response {
   const status = err instanceof AuthError ? err.status : 401;
   const message = err instanceof AuthError ? err.message : "unauthorized";

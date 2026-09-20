@@ -2,6 +2,15 @@
 
 _Last updated: 2026-09-20_
 
+## Nutrition write lockdown (2026-09-20)
+
+`PUT /api/nutrition` let any signed-in user overwrite the global nutrition table (via the Listem pencil or the
+JSON upload). It is now admin-only server-side (`requireAdmin`, `ADMIN_EMAILS` env var, fail-closed), the Listem
+pencil is gone, and the JSON upload is a hidden modal in Settings opened by a 1·3·2·7 tap rhythm on the page
+heading. **Before the upload works again: set `ADMIN_EMAILS`** (`.env.local` and `vercel env add ADMIN_EMAILS
+production`). Same batch (its own commit): sheet-header drag area, pen chip (position + transparent), animated "Besin değerleri"
+toggle, gradient jump-star (1.3×), shimmer skeleton add buttons, Kişisel Plan badge/info-button fixes. Record: [2026-09-20-01](session-checkpoints/2026-09-20-01-nutrition-write-lockdown.md).
+
 ## Unused meal code archived (2026-09-20)
 
 `TodayView`, `MealNutritionDetailSheet` and `matchCombos` (all unreachable from the UI) moved to a new
@@ -196,6 +205,7 @@ files under [`docs/session-checkpoints/`](session-checkpoints/):
 23. [Boot performance waterfall (3-tier → 1-tier API)](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md)
 24. [UI/UX refinement pass + real delete-account flow](session-checkpoints/2026-09-19-01-ui-ux-refinement-pass.md)
 25. [Batch preparation UI (DEC-069 frontend re-surface)](session-checkpoints/2026-09-19-02-batch-preparation-ui.md)
+26. [Nutrition write lockdown + hidden maintenance upload + UI tweaks](session-checkpoints/2026-09-20-01-nutrition-write-lockdown.md)
 27. [Archive unused meal code](session-checkpoints/2026-09-20-02-archive-unused-meal-code.md)
 
 The repository remains the source of truth for code and project files. Historical session logs live

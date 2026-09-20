@@ -1,15 +1,18 @@
-// POST /api/nutrition  { names: string[] }         -> Nutrition[]     (read)
-// PUT  /api/nutrition  { row: NutritionRow }       -> Nutrition       (upsert)
+// GET  /api/nutrition  ?q&limit&offset               -> Nutrition[]     (browse)
+// POST /api/nutrition  { names: string[] }           -> Nutrition[]     (read)
+// PUT  /api/nutrition  { rows: NutritionRow[] }      -> { saved }       (bulk upsert, ADMIN ONLY)
 //
-// The read proxies to PostgREST so the anon key stays server-side. The write
+// The reads proxy to PostgREST so the anon key stays server-side. The write
 // uses the service_role key (also server-side) so RLS on public.nutrition can
 // stay locked to reads only.
 //
-// Anyone with the app URL can hit PUT. That is a deliberate trade-off for a
-// small household PWA; if this stops being personal, put the app behind
-// authentication.
+// public.nutrition is ONE global table shared by every household, so a write
+// here changes what every user sees. PUT therefore requires requireAdmin()
+// (the ADMIN_EMAILS allowlist in lib/auth.ts) on top of a normal session; the
+// only client is the hidden maintenance modal in Settings. Reads stay open to
+// any signed-in user.
 
-import { requireUser, authErrorResponse } from "../lib/auth.js";
+import { requireUser, requireAdmin, authErrorResponse } from "../lib/auth.js";
 
 // Türkiye/EU 14 — see src/lib/allergenClasses.ts for the canonical
 // definition; duplicated here per this file's existing pattern of not
@@ -35,8 +38,8 @@ type Nutrition = {
   fiber_g: number;
   // Read-only through this endpoint — see validateWrite/WriteRow below,
   // which deliberately never accept it from client input. Curated
-  // allergen data must not be alterable through the general Besin-tab
-  // macro editor with no review step.
+  // allergen data must not be alterable through the macro upload with no
+  // review step.
   allergen_classes?: AllergenClassMapping[];
   // Opaque, stable canonical Food identity (Phase 9 Canonical Food Identity
   // implementation — see src/lib/foodIdentity.ts and
@@ -89,12 +92,13 @@ function restBase(url: string): string {
 
 export default {
   async fetch(request: Request): Promise<Response> {
+  const method = request.method.toUpperCase();
   try {
-    await requireUser(request);
+    const user = await requireUser(request);
+    if (method === "PUT") requireAdmin(user);
   } catch (err) {
     return authErrorResponse(err);
   }
-  const method = request.method.toUpperCase();
   if (method === "GET") return handleBrowse(request);
   if (method === "POST") return handleRead(request);
   if (method === "PUT") return handleWrite(request);
@@ -228,15 +232,17 @@ async function handleWrite(request: Request): Promise<Response> {
     return json({ error: "supabase not configured" }, 500);
   }
 
-  let body: { row?: unknown; rows?: unknown };
+  let body: { rows?: unknown };
   try {
-    body = (await request.json()) as { row?: unknown; rows?: unknown };
+    body = (await request.json()) as { rows?: unknown };
   } catch {
     return json({ error: "invalid json" }, 400);
   }
 
-  const bulkMode = Array.isArray(body.rows);
-  const inputs: unknown[] = bulkMode ? (body.rows as unknown[]) : [body.row];
+  if (!Array.isArray(body.rows)) {
+    return json({ error: "expected { rows: NutritionRow[] }" }, 400);
+  }
+  const inputs: unknown[] = body.rows;
 
   if (inputs.length === 0) {
     return json({ error: "no rows" }, 400);
@@ -277,9 +283,7 @@ async function handleWrite(request: Request): Promise<Response> {
     ? returned.map(coerce).filter((n): n is Nutrition => n !== null)
     : [];
 
-  if (bulkMode) return json({ saved }, 200);
-  if (saved.length === 0) return json({ error: "supabase returned no row" }, 502);
-  return json(saved[0], 200);
+  return json({ saved }, 200);
 }
 
 // -------- helpers ------------------------------------------------------------

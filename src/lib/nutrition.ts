@@ -89,8 +89,8 @@ export async function fetchNutritionCached(names: string[]): Promise<NutritionMa
   return map;
 }
 
-// Called after a save/edit/bulk-upload so the cache doesn't serve a stale
-// value for a name the user just changed.
+// Called after a bulk upload so the cache doesn't serve a stale value for a
+// name that was just changed.
 export function rememberNutrition(rows: Nutrition[]) {
   if (rows.length === 0) return;
   const cache = loadCache();
@@ -218,20 +218,9 @@ export async function browseNutritionCached(
   return rows;
 }
 
-export async function saveNutrition(row: NutritionWrite): Promise<Nutrition> {
-  const res = await fetch(apiUrl("/api/nutrition"), {
-    method: "PUT",
-    headers: { "content-type": "application/json" },
-    body: JSON.stringify({ row: prepareRow(row) }),
-  });
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `save failed: ${res.status}`);
-  }
-  const saved = (await res.json()) as ApiRow;
-  return pickNutrition(saved);
-}
-
+// Maintenance-only: the server rejects this with 403 unless the caller's email
+// is in ADMIN_EMAILS (api/nutrition.ts). The only caller is the hidden upload
+// modal in Settings (components/dev/NutritionUploadModal.tsx).
 export async function saveNutritionBulk(
   rows: NutritionWrite[]
 ): Promise<Nutrition[]> {
@@ -242,6 +231,7 @@ export async function saveNutritionBulk(
     body: JSON.stringify({ rows: rows.map(prepareRow) }),
   });
   if (!res.ok) {
+    if (res.status === 403) throw new Error("Bu işlem için yetkin yok.");
     const text = await res.text().catch(() => "");
     throw new Error(text || `save failed: ${res.status}`);
   }

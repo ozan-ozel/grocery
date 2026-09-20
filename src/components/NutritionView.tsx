@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { Pencil } from "lucide-react";
 import {
   readNutritionScopeFromUrl,
   writeNutritionScopeToUrl,
@@ -9,8 +8,6 @@ import {
 import {
   fetchNutritionCached,
   lookupNutrition,
-  rememberNutrition,
-  type Nutrition,
   type NutritionMap,
 } from "@/lib/nutrition";
 import { cn } from "@/lib/utils";
@@ -18,8 +15,6 @@ import { SmoothPillTabs } from "@/components/ui/smooth-pill";
 import { AllFoodsBrowser } from "@/components/NutritionAllFoodsBrowser";
 import { NutritionCompareView } from "@/components/NutritionCompareView";
 import { CategoriesView } from "@/components/CategoriesView";
-import { EditorRow } from "@/components/NutritionEditorRow";
-import { UploadPanel, UploadTrigger } from "@/components/NutritionUpload";
 import { LoadingBlock } from "@/components/LoadingBlock";
 import type { CategoryOverlay, MergedCategory } from "@/lib/categorization/userCategories";
 
@@ -62,8 +57,6 @@ export function NutritionView({
   const [scope, setScope] = useState<Scope>(initialScope);
   const [map, setMap] = useState<NutritionMap>(() => new Map());
   const [status, setStatus] = useState<Status>("idle");
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [uploadOpen, setUploadOpen] = useState(false);
 
   const names = useMemo(() => items.map((i) => i.name), [items]);
   const namesKey = names.join(" ");
@@ -100,10 +93,6 @@ export function NutritionView({
     };
   }, [namesKey]);
 
-  useEffect(() => {
-    setEditingId(null);
-  }, [namesKey]);
-
   const rows = items.map((item) => ({
     item,
     nutrition: lookupNutrition(map, item.name),
@@ -130,25 +119,6 @@ export function NutritionView({
     },
     { kcal: 0, protein: 0, fat: 0, carbs: 0, fiber: 0, matched: 0 }
   );
-
-  function upsertLocal(saved: Nutrition, itemName: string) {
-    setMap((prev) => {
-      const next = new Map(prev);
-      next.set(saved.name_tr, saved);
-      next.set(itemName.trim().toLocaleLowerCase("tr-TR"), saved);
-      return next;
-    });
-    rememberNutrition([saved]);
-  }
-
-  function upsertBulkLocal(savedRows: Nutrition[]) {
-    rememberNutrition(savedRows);
-    setMap((prev) => {
-      const next = new Map(prev);
-      for (const s of savedRows) next.set(s.name_tr, s);
-      return next;
-    });
-  }
 
   const scopeToggle = (
     <div className="mb-3">
@@ -182,19 +152,9 @@ export function NutritionView({
       <div>
         {scopeToggle}
 
-        <div className="flex items-center justify-between px-1 pb-3">
-          <p className="text-xs text-muted-foreground">
-            Değerler 100 g / 100 ml içindir.
-          </p>
-          <UploadTrigger onClick={() => setUploadOpen(true)} />
-        </div>
-
-        {uploadOpen && (
-          <UploadPanel
-            onClose={() => setUploadOpen(false)}
-            onSaved={upsertBulkLocal}
-          />
-        )}
+        <p className="px-1 pb-3 text-xs text-muted-foreground">
+          Değerler 100 g / 100 ml içindir.
+        </p>
 
         <div className="space-y-2">
           {status === "loading"
@@ -206,83 +166,51 @@ export function NutritionView({
                   </div>
                 </div>
               ))
-            : rows.map(({ item, nutrition }) => {
-                const editing = editingId === item.id;
-                if (editing) {
-                  return (
-                    <EditorRow
-                      key={item.id}
-                      itemName={item.name}
-                      initial={nutrition}
-                      onCancel={() => setEditingId(null)}
-                      onSaved={(saved) => {
-                        upsertLocal(saved, item.name);
-                        setEditingId(null);
-                      }}
-                    />
-                  );
-                }
-                return (
-                  <div
-                    key={item.id}
-                    className={cn(
-                      "border-b border-border/60 py-2",
-                      !nutrition && "text-muted-foreground"
-                    )}
-                  >
-                    <div className="flex items-center justify-between pr-2">
-                      <div className="text-sm font-medium">{item.name}</div>
-                      <button
-                        type="button"
-                        onClick={() => setEditingId(item.id)}
-                        className="text-muted-foreground hover:text-foreground active:text-foreground"
-                        aria-label={
-                          nutrition
-                            ? `${item.name} değerlerini düzenle`
-                            : `${item.name} için değer ekle`
-                        }
-                        title={nutrition ? "Düzenle" : "Ekle"}
-                      >
-                        <Pencil className="size-3.5" />
-                      </button>
-                    </div>
-                    {showNutritionValues && nutrition && (
-                      <div className="mt-2 grid grid-cols-3 gap-2 text-xs px-1">
-                        <div className="flex flex-col">
-                          <span className="text-muted-foreground">kcal</span>
-                          <span className="font-medium">
-                            {nutrition.kcal_per_100.toFixed(0)}
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-muted-foreground">P</span>
-                          <span className="font-medium">
-                            {nutrition.protein_g.toFixed(1)}g
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-muted-foreground">Y</span>
-                          <span className="font-medium">
-                            {nutrition.fat_g.toFixed(1)}g
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-muted-foreground">K</span>
-                          <span className="font-medium">
-                            {nutrition.carbs_g.toFixed(1)}g
-                          </span>
-                        </div>
-                        <div className="flex flex-col">
-                          <span className="text-muted-foreground">L</span>
-                          <span className="font-medium">
-                            {nutrition.fiber_g.toFixed(1)}g
-                          </span>
-                        </div>
+            : rows.map(({ item, nutrition }) => (
+                <div
+                  key={item.id}
+                  className={cn(
+                    "border-b border-border/60 py-2",
+                    !nutrition && "text-muted-foreground"
+                  )}
+                >
+                  <div className="pr-2 text-sm font-medium">{item.name}</div>
+                  {showNutritionValues && nutrition && (
+                    <div className="mt-2 grid grid-cols-3 gap-2 text-xs px-1">
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground">kcal</span>
+                        <span className="font-medium">
+                          {nutrition.kcal_per_100.toFixed(0)}
+                        </span>
                       </div>
-                    )}
-                  </div>
-                );
-              })}
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground">P</span>
+                        <span className="font-medium">
+                          {nutrition.protein_g.toFixed(1)}g
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground">Y</span>
+                        <span className="font-medium">
+                          {nutrition.fat_g.toFixed(1)}g
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground">K</span>
+                        <span className="font-medium">
+                          {nutrition.carbs_g.toFixed(1)}g
+                        </span>
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-muted-foreground">L</span>
+                        <span className="font-medium">
+                          {nutrition.fiber_g.toFixed(1)}g
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
 
           {status === "ready" && totals.matched > 0 && (
             <div className="border-t border-border pt-2 mt-2">
@@ -369,18 +297,9 @@ export function NutritionView({
   return (
     <div>
       {scopeToggle}
-      <div className="flex items-center justify-between px-1 py-3">
-        <p className="text-sm text-muted-foreground">
-          Önce listene bir şeyler ekle. Besin değerleri burada görünür.
-        </p>
-        <UploadTrigger onClick={() => setUploadOpen(true)} />
-      </div>
-      {uploadOpen && (
-        <UploadPanel
-          onClose={() => setUploadOpen(false)}
-          onSaved={upsertBulkLocal}
-        />
-      )}
+      <p className="px-1 py-3 text-sm text-muted-foreground">
+        Önce listene bir şeyler ekle. Besin değerleri burada görünür.
+      </p>
     </div>
   );
 }

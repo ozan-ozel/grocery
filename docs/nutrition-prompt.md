@@ -2,7 +2,8 @@
 
 Paste this prompt into any LLM (Claude, ChatGPT, Gemini). Append your free-form
 nutrition text after the `---` marker. The model returns a JSON array ready to
-paste into the app's Besin tab uploader (or into `data/nutrition.json`).
+paste into the app's hidden maintenance upload (Settings — see `docs/architecture.md`
+§ Nutrition; admin accounts only) or into `data/nutrition.json`.
 
 ---
 
