@@ -12,9 +12,9 @@ import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions
 export type LoggedEntry = { id: string; slot: MealSlot };
 
 export type RemainingToday =
-  // Without the catalog every combo's totals lookup fails and matchCombos
-  // returns [] — indistinguishable from an honest "nothing fits your budget"
-  // unless the loading/error state is carried through to the view.
+  // Without the catalog every combo's totals lookup fails and the ranked list
+  // comes back empty — indistinguishable from an honest "nothing fits your
+  // budget" unless the loading/error state is carried through to the view.
   | {
       status: "loading-catalog";
       logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;

@@ -1,10 +1,12 @@
 # 2026-09-20-01 — Nutrition write lockdown, hidden maintenance upload, UI tweaks
 
-Branch: `fix/nutrition-write-lockdown-and-ui-tweaks` — implemented and build-verified; **not committed**.
+Branches: `fix/nutrition-write-lockdown` (the lockdown, `1745729`) and `fix/ui-tweaks-star-chip-badges` (the UI tweaks,
+`a67488c`) — implemented and build-verified, merged into `master` and pushed. Not deployed: `ADMIN_EMAILS` still has to be
+set on production first.
 
 ## The security finding
 
-`public.nutrition` is one global table shared by every household. Before this branch, `PUT /api/nutrition`
+`public.nutrition` is one global table shared by every household. Before the lockdown, `PUT /api/nutrition`
 was guarded only by `requireUser()`, so any signed-in account could overwrite it (service-role key, RLS
 bypassed). Two client paths reached it: the Listem pencil (`NutritionEditorRow` → `saveNutrition`, single
 `row`) and the JSON upload (`NutritionUpload` → `saveNutritionBulk`, `rows`). Both hit the same handler, the

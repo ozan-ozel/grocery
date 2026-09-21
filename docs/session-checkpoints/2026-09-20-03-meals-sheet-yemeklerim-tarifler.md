@@ -1,10 +1,8 @@
 # 2026-09-20-03 — Yemekler sheet: Yemeklerim / Hazır Yemekler / Tarifler
 
-Branch: `feature/meals-sheet-yemeklerim-tarifler` — implemented and verified in the real app on 2026-09-20.
-The feature work is **uncommitted** (nothing merged or pushed; the owner said not to commit until they say so).
-The branch already carries two commits: `3c4c39d` (`supabase/28-saved-meals.sql`) and `dbe9ea2` (Task 1 cleanup:
-unused code removed, `data/combos.json` tags trimmed). The working-tree `data/combos.json` restores the original
-`"tags": [...]` spacing that `dbe9ea2` had compacted, so commit the tree as it is.
+Branch: `feature/meals-sheet-yemeklerim-tarifler` — implemented and verified in the real app on 2026-09-20, then
+merged into `master` and pushed (merge `7a04dfe`). `supabase/28-saved-meals.sql` went in earlier as `3c4c39d`, and the
+Task 1 cleanup (unused code removed, `data/combos.json` tags trimmed) as `dbe9ea2`.
 
 Plan: [`docs/superpowers/plans/2026-09-20-meals-sheet-yemeklerim-tarifler.md`](../superpowers/plans/2026-09-20-meals-sheet-yemeklerim-tarifler.md)
 (supersedes `2026-09-12-saved-meal-templates.md`, now `SUPERSEDED`). The owner approved the plan's
