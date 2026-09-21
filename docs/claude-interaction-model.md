@@ -16,7 +16,7 @@ Nothing here restates those — if you need a rule, follow the link.
 | **Implement** | Branch first — before writing any code, never on `master`; plain branches in the shared checkout, no worktrees. Read the code you will change, then make the smallest change that does the job | `CLAUDE.md` § Git shorthand |
 | **Validate** | `npm run build` (`tsc -b`); exercise the running app when behavior matters. No tests — by design. Browser checks only through the agent-session flow | `CLAUDE.md` § Commands, § Agent sessions; [operations.md](operations.md) |
 | **Promote** | If the change added or altered a durable fact — an endpoint, table/migration, env var, persisted key, invariant, command/script or other durable repository fact — update its owner doc (`architecture.md` or `operations.md`) and the current state in `docs/CURRENT_STATE.md` as part of the same logical change; flip the plan's status row; keep the nutrition status documents in step. A `.vercelignore` change also carries its own deploy-safety rule. `SYNC` flags what was missed | `CLAUDE.md` § Close-out checklist (item 4); § Git shorthand (`SYNC`, checks 4 and 5) |
-| **Checkpoint** | The dated historical record that `CLAUDE.md` § Session continuity requires once a branch exists for a plan or task goes in `docs/session-checkpoints/`, with its row in that folder's `README.md` index (`session-checkpoint`). Separately, keep `docs/CURRENT_STATE.md` (state, open items, next step) accurate when the state has changed (`session-followup`, `checkpoint-and-compact`) — it is the current-state guide, not a log, and the checkpoints are the historical record, not a substitute for it | `CLAUDE.md` § Session continuity; `docs/session-checkpoints/README.md` |
+| **Checkpoint** | A branch alone does not require a historical record. When the close-out checklist (item 3) judges the work significant enough, write a dated record in `docs/session-checkpoints/` with its row in that folder's `README.md` index (`session-checkpoint`); routine work gets none. Separately, keep `docs/CURRENT_STATE.md` (state, open items, next step) accurate when the state has changed (`session-followup`, `checkpoint-and-compact`) — it is the current-state guide, not a log, and the checkpoints are the historical record, not a substitute for it | `CLAUDE.md` § Session continuity; `docs/session-checkpoints/README.md` |
 | **Close** | Run the close-out checklist (say explicitly if no item applies) and report plainly what was verified and what was not, then **stop**. Committing, merging and pushing happen only when the user asks, through the canonical workflows — `CMP`, `BCMP`, `LCMP`, `LBCMP` — whose definitions and sequencing are owned by `CLAUDE.md`, not restated here; `SYNC` is run standalone right before one of them | `CLAUDE.md` § Close-out checklist, § Git shorthand |
 
 ## Loading context
@@ -83,7 +83,7 @@ Prompt: *"Poll for list changes more/less often."*
 3. **Implement** — read `sync.ts`, change the constant.
 4. **Validate** — `npm run build`.
 5. **Promote** — nothing to update: the doc names the symbol, not the value.
-6. **Checkpoint** — the branch's dated record per `CLAUDE.md` § Session continuity (`session-checkpoint`);
-   `CURRENT_STATE.md` needs no change.
+6. **Checkpoint** — a one-line constant change is not significant enough to warrant a historical record, so none
+   is created (close-out item 3); `CURRENT_STATE.md` needs no change either.
 7. **Close** — report what was verified (types) and what was not (behavior on a real device), then stop; a commit
    happens only when the user asks for it (`CMP` / `BCMP` / …, `CLAUDE.md` § Git shorthand).

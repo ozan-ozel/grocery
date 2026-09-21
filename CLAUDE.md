@@ -54,12 +54,13 @@ Full detail (classes, the `shadow-signal-sm` token, the keyboard/visual-viewport
   and how to continue. It holds **current state only** (state, bounded open items, the next step), never a
   session history.
 - `docs/session-checkpoints/` is the separate, historical record of what happened in past collaboration sessions;
-  it is not a substitute for `CURRENT_STATE.md`, and `CURRENT_STATE.md` is not a log. After creating a branch for
-  a plan or task, create a dated session record there and add it to the index in
-  `docs/session-checkpoints/README.md`; use an ISO date prefix and sequence number so records sort
-  chronologically. Checkpoints are historical snapshots: normally preserved as written, and never rewritten into
-  a current-state record (a factual or status correction, e.g. a branch that has since merged, is fine when
-  needed).
+  it is not a substitute for `CURRENT_STATE.md`, and `CURRENT_STATE.md` is not a log. A branch for a plan or task
+  does not by itself require a record: create a dated session record there when the Close-out checklist (item 3)
+  judges the work significant enough, and add it to the index in `docs/session-checkpoints/README.md`; use an ISO
+  date prefix and sequence number so records sort chronologically. Routine work needs no record — keep
+  `CURRENT_STATE.md` accurate instead. Checkpoints are historical snapshots: normally preserved as written, and
+  never rewritten into a current-state record (a factual or status correction, e.g. a branch that has since
+  merged, is fine when needed).
 - Historical session logs belong outside the repository in `~/vault/grocery/logs/` and are written
   only for meaningful session history, not every conversation.
 - How the app works today is documented in the repo (`docs/architecture.md`, `docs/operations.md`), not in the

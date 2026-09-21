@@ -11,7 +11,7 @@ architecture document, roadmap, or task archive. The historical record of past s
 Nothing is in flight. The documentation architecture migration (goal: Claude loads the smallest set of current,
 authoritative, non-conflicting docs for a task) is landed on `master`, along with its follow-ups (see Current
 State). **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the process-optimization
-phase (checkpoint threshold, single checklist, nutrition-status ownership headers, `kill-ports` treatment).
+phase (single checklist, nutrition-status ownership headers, `kill-ports` treatment).
 
 ## Current State
 
@@ -84,7 +84,7 @@ means it was recorded as pending and has not been re-checked.
 ## Next Step
 
 Nothing is in flight. The owner decides whether to start the deferred phases (not started): the
-plans/specs/audits lifecycle cleanup, and process optimization (checkpoint threshold, a single close-out checklist,
+plans/specs/audits lifecycle cleanup, and process optimization (a single close-out checklist,
 nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the merged branches and the
 worktree above. Otherwise pick work from the Open items.
 
