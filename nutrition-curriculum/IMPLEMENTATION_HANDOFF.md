@@ -110,7 +110,7 @@ below:
 | `nutrition-curriculum/DEC_REGISTER.md` | Whether the DEC in Active/Closed still matches its registered readiness word — a mismatch means one of the two has drifted and needs reconciling before anything resumes |
 | `docs/mvp-scope/README.md` status column | Whether a `PARTIAL`/`NOT_STARTED` domain overlaps the DEC in question — implementation work here should update that table per `CLAUDE.md`'s trio rule |
 | `docs/superpowers/plans/README.md` | Any app-feature plan touching the same nutrition domain (e.g. a UI plan for a macro feature) that should be sequenced with, not duplicated by, curriculum work |
-| `docs/SESSION_FOLLOWUP.md` | Unresolved general-app continuity that might block or depend on the DEC work — surface it, don't silently ignore it because it's outside `nutrition-curriculum/` |
+| `docs/CURRENT_STATE.md` | Unresolved general-app continuity that might block or depend on the DEC work — surface it, don't silently ignore it because it's outside `nutrition-curriculum/` |
 
 If any two of these disagree about a DEC's state (e.g. `DEC_REGISTER.md` says `SHIPPED` but this
 file's Active table still shows it `PUSHED`), stop and surface the mismatch before resuming — treat

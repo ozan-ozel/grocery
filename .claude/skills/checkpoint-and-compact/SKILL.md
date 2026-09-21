@@ -1,9 +1,9 @@
 ---
 name: checkpoint-and-compact
-description: Use when the user runs /checkpoint-and-compact or asks to checkpoint and compact the session - updates docs/SESSION_FOLLOWUP.md with the current session continuation state, then prompts the user to run /compact.
+description: Use when the user runs /checkpoint-and-compact or asks to checkpoint and compact the session - updates docs/CURRENT_STATE.md with the current session continuation state, then prompts the user to run /compact.
 ---
 
-Update `docs/SESSION_FOLLOWUP.md` using the same rules and structure defined by the `session-followup` skill.
+Update `docs/CURRENT_STATE.md` using the same rules and structure defined by the `session-followup` skill.
 
 The follow-up doc must be the single active continuity record for the current project.
 
@@ -17,7 +17,7 @@ Do not attempt to invoke `/compact` directly — it is a CLI-native command and 
 
 After the follow-up doc is successfully updated:
 
-1. Tell the user that `docs/SESSION_FOLLOWUP.md` was updated.
+1. Tell the user that `docs/CURRENT_STATE.md` was updated.
 2. Tell the user that the session is ready to compact.
 3. Explicitly instruct the user to run `/compact` now.
 4. Do not perform any other action.

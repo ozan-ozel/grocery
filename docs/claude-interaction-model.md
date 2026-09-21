@@ -1,146 +1,81 @@
 # Claude Interaction Model
 
-How Claude Code approaches every task in this repository: the doc-reading sequence, skill checks, and decision pipeline that precede any implementation.
+How a task flows through this repository, from first read to hand-off. **This is the process doc.** The rules it
+refers to live in [CLAUDE.md](../CLAUDE.md) (git, secrets, commands, definition of done); *what to read* for a
+given task is [knowledge-map.md](knowledge-map.md); how the app is built is [architecture.md](architecture.md).
+Nothing here restates those — if you need a rule, follow the link.
 
-## Overview
+## Lifecycle
 
-For every prompt, Claude follows a structured initialization sequence before writing code. This document describes that sequence, which docs are consulted, and why order matters.
+`Discover → Plan → Implement → Validate → Promote → Checkpoint → Close`
 
-## Initialization Sequence
+| Stage | What happens | Where the detail lives |
+| --- | --- | --- |
+| **Discover** | `CLAUDE.md` is already loaded. Check `git status` (which branch? uncommitted work?). Find your task in the knowledge-map table and read **only the section it names**. Resuming earlier work: `docs/CURRENT_STATE.md` (current state only), then just the one plan or checkpoint it links. Anything touching nutrition guidance, macros or meal structure: check `docs/mvp-scope/README.md` *before* writing code | knowledge-map; `CLAUDE.md` § Session continuity |
+| **Plan** | Only for multi-step work: a plan under `docs/superpowers/plans/`, via the planning skills below. If a requirement is unclear or the decision is the user's, ask instead of assuming | `docs/superpowers/plans/README.md` |
+| **Implement** | Branch first, never on `master`. Read the affected files in full, then make the smallest change that does the job | `CLAUDE.md` § Git shorthand |
+| **Validate** | `npm run build` (`tsc -b`); exercise the running app when behavior matters. No tests — by design. Browser checks only through the agent-session flow | `CLAUDE.md` § Commands, § Agent sessions; [operations.md](operations.md) |
+| **Promote** | If the change added or altered a durable fact (an endpoint, table, env var, persisted key, invariant, command), update its owner doc in the same change; flip the plan's status row; keep the nutrition status documents in step | `CLAUDE.md` § Close-out checklist |
+| **Checkpoint** | Write a dated historical record in `docs/session-checkpoints/` only if the work is significant enough; either way keep `docs/CURRENT_STATE.md` (state, open items, next step) current — it is the current-state guide, not a log | `docs/session-checkpoints/README.md` |
+| **Close** | Run the close-out checklist, say plainly what was verified and what was not, then **stop** — the user commits after testing (`CMP` / `BCMP` / `LCMP`) | `CLAUDE.md` § Close-out checklist |
 
-### Step 1: Load Core Context
+## Loading context
 
-Before engaging with the task, Claude reads these files in order:
+Load the smallest set of current, authoritative documents the task needs.
 
-1. **[CLAUDE.md](../CLAUDE.md)** — project-specific ground rules
-   - Git shorthand (BCMP, CMP, LCMP conventions)
-   - Command reference (npm scripts, no tests philosophy)
-   - Historical context (retired Netlify/Cloudflare, current Vercel)
-   - This file is the **first source of truth** for any decision
+- **Always:** `CLAUDE.md`, the memory index, `git status`.
+- **Then, by task:** the knowledge-map row — a section of `architecture.md` or `operations.md`, not the whole file.
+- **Only when the process calls for it:** `docs/CURRENT_STATE.md` (resuming), the plan index (starting or
+  resuming a planned feature), `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (`COL`).
+- **Normally skip:** session checkpoints, shipped plans and specs, the audits, `docs/archive/`, `archive/`, and the
+  curriculum phase folders. They are SNAPSHOT or HISTORICAL in the registry; consult one only to learn why
+  something was built, never to learn how it works today.
+- Prefer reading a section (by heading or offset) over reading a whole document.
 
-2. **[MEMORY.md](../MEMORY.md)** — persistent session context
-   - User preferences & feedback from prior conversations
-   - Known project decisions & constraints
-   - Ground rules (e.g., "no worktrees", "no auto-commit", branch naming)
-   - Carries forward what Claude has learned about *this user's* style
+## Skills, and where this repo overrides them
 
-3. **Git status** (`git status`, `git log`) — current working state
-   - What branch is checked out?
-   - Are there uncommitted changes?
-   - What recent commits set the tone?
+Skills set the approach before implementation begins and normally override defaults. In this repo a few are
+overridden by project rules:
 
-### Step 2: Route to Subsystem Docs (If Needed)
+| Task | Skill | In this repo |
+| --- | --- | --- |
+| Debugging | `superpowers:systematic-debugging` | as written |
+| Designing a feature | `superpowers:brainstorming` | as written |
+| Multi-step implementation | `superpowers:writing-plans`, `executing-plans` | as written — but **plans never include tests** |
+| Code review | `code-review` | as written |
+| Finishing a branch | `superpowers:finishing-a-development-branch` | follow `CLAUDE.md`'s `CMP` / `BCMP`; never merge or commit unless asked |
+| Test-driven development | `superpowers:test-driven-development` | **not used** — there is no test suite by design |
+| Isolated workspaces | `superpowers:using-git-worktrees` | **not used** — plain branches in the shared checkout |
+| Claude API / LLM work | `claude-api`, `claude-code-guide` | as written |
+| Checkpoints and follow-ups | `session-checkpoint` (a historical record plus its `README.md` index row), `session-followup` and `checkpoint-and-compact` (update `docs/CURRENT_STATE.md`), `session-log` (the vault) — all in `.claude/skills/` | as written; they keep the two systems apart: `CURRENT_STATE.md` is the current-state guide, `docs/session-checkpoints/` the historical record |
 
-Depending on the task, Claude reads specialized documentation:
+Never install a skill or plugin without asking (see `CLAUDE.md` § Project constraints).
 
-- **[docs/architecture.md](./architecture.md)** — consulted for any subsystem changes
-  - State & persistence patterns
-  - RLS policies & auth model
-  - Sync, categorization, nutrition backends
-  - Deployment & environment variable setup
+## Ask, proceed, or stop
 
-- **[docs/archive/roadmap.md](./archive/roadmap.md)** — consulted before proposing new work
-  - Prevents duplication of queued tasks
-  - Clarifies prioritization & status
+- **Ask** when a requirement is unclear or the decision belongs to the user.
+- **Proceed** when the task is clear and reversible, inside the branch.
+- **Stop** at anything the rules in `CLAUDE.md` reserve for the developer: secrets and env files, deploys, a dev
+  server Claude did not start, and any permission check that blocks an action (treat the block as final). Do not
+  present something unverified as fact — mark it uncertain or leave it out.
 
-- **[docs/SESSION_FOLLOWUP.md](./SESSION_FOLLOWUP.md)** — consulted if resuming from a prior session
-  - Where the last agent left off
-  - What's blocking or ready next
+## What memory is for
 
-- **Spec docs** (`docs/superpowers/specs/*.md`) — consulted for feature detail
-  - Historical design rationale
-  - Each spec includes its own status note (check before trusting implementation details as current)
+Claude's memory (outside the repo, in `~/.claude/projects/…/memory/`) carries personal preferences and feedback
+between sessions. It is not canonical and is not linked from the repo: a rule that matters to the project belongs
+in `CLAUDE.md`, and a fact about how the app works belongs in `architecture.md` or `operations.md`.
 
-### Step 3: Check Applicable Skills
+## Worked example
 
-Claude evaluates whether specialized skills apply to the task:
+Prompt: *"Poll for list changes more/less often."*
 
-| Task Type | Skill |
-|-----------|-------|
-| Debugging a bug | `/superpowers:systematic-debugging` |
-| Designing a feature | `/superpowers:brainstorming` |
-| Multi-step implementation | `/superpowers:writing-plans` or `/superpowers:executing-plans` |
-| Code review | `/code-review` (with effort level: low/medium/high/ultra) |
-| Git operations | `/superpowers:using-git-worktrees` |
-| API/LLM questions | `/claude-api` or `claude-code-guide` |
-
-Skills set the approach *before* implementation begins. They override defaults.
-
-### Step 4: Verify State & Execute
-
-Once context is loaded:
-
-1. Read affected files (via `Read` tool, not `grep`, to see full context)
-2. Check git status before any destructive operations
-3. **Branch first, code second** — never implement on `master`
-4. Verify changes with `tsc -b` or `npm run vercel:dev` before committing
-5. Commit on the branch with proper message format
-
-### Step 5: Update Memory (If Learning Occurred)
-
-If Claude discovered something that will be relevant in future sessions:
-
-- Save to `C:\Users\4D\.claude\projects\d--CodeSpace-grocery\memory\`
-- Use proper frontmatter format with `name`, `description`, `type` (user/feedback/project/reference)
-- Link to `MEMORY.md` index
-
-## Doc Priority & Rationale
-
-| Priority | Doc | Why | Example |
-|----------|-----|-----|---------|
-| 1 | CLAUDE.md | **Project rules trump defaults** | "never commit to master", "no tests", "Vercel only" |
-| 2 | MEMORY.md | **User feedback is authoritative** | "don't use worktrees", "user commits manually after testing" |
-| 3 | git status | **Current state must be known** | Am I already on a branch? Uncommitted work? |
-| 4 | architecture.md | **Core system design before changes** | "State lives in App.tsx", "RLS is auth layer #2" |
-| 5 | archive/roadmap.md | **Avoid work duplication** | "this refactor is queued, don't propose it again" |
-| 6 | Spec docs | **Historical context when needed** | Why was this design chosen? What was the rationale? |
-| 7 | Source files | **Only after above context loaded** | Now safe to read actual code |
-
-## What Claude Does NOT Do
-
-❌ Read every spec in `docs/superpowers/specs/` unless the prompt concerns that feature  
-❌ Check git history unless the prompt asks "why did we do X?"  
-❌ Consult package-lock.json unless dependency changes are involved  
-❌ Commit to `master` directly, even if the user says "just commit this"  
-❌ Add tests, test frameworks, or test files (explicit ground rule)  
-❌ Make assumptions; if something is unclear, ask the user first  
-
-## Example: Touching the Sync System
-
-A prompt arrives: *"The sync polling interval should be 20s instead of 15s."*
-
-Claude's sequence:
-
-1. ✅ Read CLAUDE.md → "Vercel only, tsc -b to verify, test with vercel:dev"
-2. ✅ Check MEMORY.md → "No worktrees, no auto-commit, user tests themselves"
-3. ✅ Check git status → "On fix/some-branch, working tree clean"
-4. ✅ Read architecture.md § Sync → "Polling is `GET /api/state` every 15s, implemented in `src/lib/sync/sync.ts` + `api/state.ts`"
-5. ✅ No skill needed (straightforward change)
-6. ✅ Read `src/lib/sync/sync.ts` to locate the interval
-7. ✅ Edit the file, change 15s → 20s
-8. ✅ Run `npm run build` to verify types
-9. ✅ Suggest: "Ready for you to test with `npm run vercel:dev`"
-10. ✅ Wait for user to test, then commit with: `fix: increase sync polling interval from 15s to 20s`
-
-The docs guided every step; Claude didn't guess or improvise.
-
-## Implications
-
-This model means:
-
-- **Claude is fast to respond** because context is loaded upfront, not discovered mid-task
-- **Claude respects ground rules** because they're checked first, not overridden by defaults
-- **Claude doesn't duplicate work** because the roadmap is consulted before proposing changes
-- **Claude learns over time** because memory persists and is applied next session
-- **Claude avoids surprises** because the architecture doc explains WHY the system works before changes are made
-
-New collaborators reading this document understand why Claude behaves the way it does, and can trust that every prompt follows a reasoned, documented process.
-
----
-
-## See Also
-
-- [CLAUDE.md](../CLAUDE.md) — project rules & ground rules (read first)
-- [docs/architecture.md](./architecture.md) — system design (read before subsystem changes)
-- [docs/archive/roadmap.md](./archive/roadmap.md) — current prioritized work (read before proposing new tasks)
-- [MEMORY.md](../MEMORY.md) — persistent session context (carries user feedback forward)
+1. **Discover** — `CLAUDE.md` is loaded; `git status` is clean on a topic branch. The knowledge-map row for list
+   state and sync points at `architecture.md` § Sync, which names the tunable by symbol: `POLL_MS` in
+   `src/lib/sync/sync.ts`.
+2. **Plan** — none; it is a one-line change.
+3. **Implement** — read `sync.ts`, change the constant.
+4. **Validate** — `npm run build`.
+5. **Promote** — nothing to update: the doc names the symbol, not the value.
+6. **Checkpoint** — not significant; no record.
+7. **Close** — report what was verified (types) and what was not (behavior on a real device), and wait for the
+   user to test and commit.

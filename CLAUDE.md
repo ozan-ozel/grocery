@@ -1,63 +1,69 @@
 # CLAUDE.md
 
 Guidance for Claude Code when working in this repository. See [README.md](README.md) for what
-this project is. This file is a router and behavior layer, not the architecture doc — see
-"Where things live" below before diving into a subsystem.
+this project is. This file is a router, a set of hard constraints and a behavior layer — not the
+architecture doc or the runbook; see "Where things live" below before diving into a subsystem.
+
+## Project constraints
+
+- **Stack:** Preact (not React — shadcn/ui runs unmodified through `preact/compat`), Tailwind v4, Vite on the
+  client; Vercel Functions in `api/*.ts` over Supabase on the backend. User-facing copy is Turkish.
+- **The project is at Vercel's 12-function Hobby limit.** A new endpoint must fit inside an existing function
+  (see the `vercel.json` rewrites) or displace one — [docs/operations.md](docs/operations.md) § Deployment.
+- **No tests, no test framework** (see Commands). **Vercel only; deploys are manual** (see Commands).
+- **No worktrees:** plain git branches in the shared checkout only.
+- **Ask before installing any skill or plugin** — never install one proactively; propose it and wait.
+- **Secrets:** the hard boundary below applies to every task.
 
 ## Where things live
 
-- **[docs/knowledge-map.md](docs/knowledge-map.md) is the entry point** — a routing table of every
-  canonical doc in this repo, what it's for, and when to load it. Start there before searching `docs/`
-  yourself; only the two exceptions below are worth keeping inline here.
-- [docs/claude-interaction-model.md](docs/claude-interaction-model.md) — how Claude approaches every
-  task: the doc-reading sequence, skill checks, and decision pipeline. Read this to understand how
-  Claude Code makes decisions in this repository.
-- [docs/architecture.md](docs/architecture.md) — state & persistence, tenants, sync,
-  categorization, the nutrition backend, env vars, daily rollover, design tokens, theming.
-  Read the relevant section before touching that subsystem.
-- [supabase/01-schema.sql](supabase/01-schema.sql) — canonical DB schema (`households`, `lists`,
-  `items`, `item_category_memory`, `nutrition`). Treat this file, not prose descriptions of it,
-  as authoritative for column names/types.
+- **[docs/knowledge-map.md](docs/knowledge-map.md) is the entry point** — a "what should I read for X" table
+  plus a registry marking each doc CURRENT, SNAPSHOT or HISTORICAL. Start there before searching `docs/`
+  yourself, and load only the section your task needs.
+- [docs/architecture.md](docs/architecture.md) — how the app is built: data flow, invariants, API surface,
+  auth/session, state & persistence, tenants & RLS, sync, boot loading, categorization, the nutrition backend,
+  UI system. Read the relevant section before touching that subsystem.
+- [docs/operations.md](docs/operations.md) — running and deploying: env vars, `vercel dev`, agent sessions,
+  `.vercelignore`, the function-count limit, troubleshooting.
+- [docs/CURRENT_STATE.md](docs/CURRENT_STATE.md) — where the project stands now and how to continue: current
+  state, open items, next step. Current state only, not a session log; read it when resuming.
+- [docs/claude-interaction-model.md](docs/claude-interaction-model.md) — the task lifecycle (discover → plan →
+  implement → validate → promote → checkpoint → close) and skill routing.
+- [supabase/](supabase/) — the database schema is the numbered migration files `01`–`28`, applied in order;
+  there is no single canonical schema file (`01-schema.sql` only holds the early tables, several of them
+  unused today, and the repo has no `CREATE TABLE` for `nutrition`). For column names/types, read the
+  migration that creates or alters the table; `docs/architecture.md` (Persistence & schema map) says which
+  file that is. Treat the SQL, not prose descriptions of it, as authoritative.
 
 ## UI patterns
 
-- **Smooth Pill (SP)** — the standard tab style across the app: a light `bg-accent/50` container
-  (`rounded-lg p-1`), with the active tab rendered as its own `bg-background` pill
-  (`rounded-md shadow-signal-sm`) and inactive tabs as plain
-  `text-muted-foreground hover:text-foreground` text, no visible border. `shadow-signal-sm` (defined
-  in [src/index.css](src/index.css)) is the same footprint as Tailwind's `shadow-sm` but tinted with
-  `--color-signal` via `color-mix` instead of flat black, so it stays theme-aware.
-  Implemented once in [src/components/ui/smooth-pill.tsx](src/components/ui/smooth-pill.tsx):
-  `<SmoothPillTabs value={...} onChange={...} items={[{ value, label }]} />` for the common case
-  (a plain button group not already wired to a Radix `Tabs` root — see its usage in
-  [src/components/NutritionView.tsx](src/components/NutritionView.tsx)), plus exported class
-  constants (`SP_CONTAINER_CLASS`, `SP_TRIGGER_CLASS`) for a Radix `TabsTrigger` that must also
-  drive a `Tabs` root elsewhere in the tree — see the Liste/Geçmiş/Kategoriler tabs in
-  [src/components/AppHeader.tsx](src/components/AppHeader.tsx). `SP_TRIGGER_CLASS` already cancels
-  the base `TabsTrigger`'s default `border-b-2`/`data-[state=active]:border-foreground` underline
-  (from [src/components/ui/tabs.tsx](src/components/ui/tabs.tsx)), which otherwise draws a dark
-  bottom border through the pill background — if you ever build a new Radix-based SP trigger by
-  hand instead of using the constant, remember to cancel that underline yourself.
+- **Smooth Pill (SP)** — the app's standard tab style. Use `<SmoothPillTabs>` from
+  [src/components/ui/smooth-pill.tsx](src/components/ui/smooth-pill.tsx), or its `SP_CONTAINER_CLASS` /
+  `SP_TRIGGER_CLASS` constants for a Radix `TabsTrigger` that must also drive a `Tabs` root (the constant already
+  cancels the base trigger's `border-b-2` underline). Don't restyle tabs by hand.
+- **Bottom sheets** — build new ones on [src/components/ui/bottom-sheet.tsx](src/components/ui/bottom-sheet.tsx),
+  not a hand-rolled overlay (swipe-to-dismiss, keyboard-aware sizing). Give the sheet's scrolling list
+  `min-h-0 overflow-y-auto overscroll-contain` so it, not the search field, shrinks under the keyboard.
 
-- **Bottom sheets** — build new ones on
-  [src/components/ui/bottom-sheet.tsx](src/components/ui/bottom-sheet.tsx) (backdrop, dialog, grabber,
-  title + close header), not a hand-rolled overlay. It gives you swipe-down-to-dismiss from anywhere on
-  the sheet (`useSwipeToDismiss`; mark a region `data-sheet-no-drag` to opt it out) and keyboard-aware
-  sizing (the container tracks the visual viewport via the `--visual-vh`/`--visual-top`/`--kb-inset`
-  vars that `useVisualViewportVars` publishes from `AppShell`). Give the sheet's scrolling list
-  `min-h-0 overflow-y-auto overscroll-contain` so it — not the search field — shrinks under the
-  keyboard. For a search whose results render inline below a field, call `useRevealAboveKeyboard`.
+Full detail (classes, the `shadow-signal-sm` token, the keyboard/visual-viewport hooks, `data-sheet-no-drag`,
+`useRevealAboveKeyboard`): [docs/architecture.md](docs/architecture.md) § Design tokens & theming → UI patterns.
 
 ## Session continuity
 
-- `docs/SESSION_FOLLOWUP.md` is the single active project checkpoint. It records the current
-  state and what the next agent needs to continue.
-- After creating a branch for a plan or task, create a dated session record under
-  `docs/session-checkpoints/` and link it from `docs/SESSION_FOLLOWUP.md`; use an ISO date prefix
-  and sequence number so records sort chronologically.
+- `docs/CURRENT_STATE.md` is the single active continuation guide — where the project stands now, what remains,
+  and how to continue. It holds **current state only** (state, bounded open items, the next step), never a
+  session history.
+- `docs/session-checkpoints/` is the separate, historical record of what happened in past collaboration sessions;
+  it is not a substitute for `CURRENT_STATE.md`, and `CURRENT_STATE.md` is not a log. After creating a branch for
+  a plan or task, create a dated session record there and add it to the index in
+  `docs/session-checkpoints/README.md`; use an ISO date prefix and sequence number so records sort
+  chronologically. Checkpoints are historical snapshots: normally preserved as written, and never rewritten into
+  a current-state record (a factual or status correction, e.g. a branch that has since merged, is fine when
+  needed).
 - Historical session logs belong outside the repository in `~/vault/grocery/logs/` and are written
   only for meaningful session history, not every conversation.
-- Project-specific durable architecture notes belong in `~/vault/grocery/architecture/`.
+- How the app works today is documented in the repo (`docs/architecture.md`, `docs/operations.md`), not in the
+  vault; `~/vault/grocery/architecture/` is for history and cross-project material.
 - Cross-project durable knowledge belongs in `~/vault/permanent/`.
 - The Vault is outside the repository and must not be committed to Git. The repository remains the
   source of truth for source code and project files.
@@ -92,8 +98,11 @@ small; small, unframed changes are exactly what slip past the rules above:
    the `DEC_REGISTER.md` row note together, in the same commit.
 2. Did this ship a feature that has (or should have had) a `docs/superpowers/plans/*.md` entry? → flip
    its `docs/superpowers/plans/README.md` row to `SHIPPED` in the same commit.
-3. Is this significant enough to need a `docs/session-checkpoints/` record? → create one and link it
-   from `docs/SESSION_FOLLOWUP.md`.
+3. Is this significant enough to need a `docs/session-checkpoints/` record? → create one and add it to
+   `docs/session-checkpoints/README.md`'s index.
+4. Did this add or change a durable fact (an endpoint, table, env var, persisted key, invariant, or command)? →
+   update its owner in the same commit (`docs/architecture.md` or `docs/operations.md`), and update the current
+   state in `docs/CURRENT_STATE.md`.
 
 If none apply, say so explicitly in the session wrap-up rather than silently skipping this section.
 
@@ -103,7 +112,10 @@ If none apply, say so explicitly in the session wrap-up rather than silently ski
   before committing. Never write implementation code with `master` checked out, even if you intend
   to branch later; create and switch to the branch first (named for what the work does), then
   start. This applies whether the work is one file or a multi-task implementation plan (e.g.
-  subagent-driven-development executing in this checkout rather than a separate worktree).
+  subagent-driven-development executing in this checkout — plain git branches only, no worktrees).
+- **Commit only when asked.** Implement and verify, then stop; the user commits (CMP / BCMP / LCMP) after testing
+  themselves.
+- **Branch names start with a logical prefix** — `feature/`, `fix/`, `refactor/`, `test/`, `chore/`, `docs/`, …
 - **Default: never commit straight to `master`.** Every set of ready-to-commit changes gets its
   own branch first, named for what the changes actually do — even if the user just says "commit
   this" without saying BCMP, and even for doc-only changes. Treat every commit request as BCMP
@@ -140,7 +152,7 @@ If none apply, say so explicitly in the session wrap-up rather than silently ski
   index before resuming — `IMPLEMENTATION_HANDOFF.md`'s own Active/Closed tables,
   `nutrition-curriculum/DEC_REGISTER.md`, `docs/mvp-scope/README.md`'s status column,
   `docs/superpowers/plans/README.md` for any plan touching a nutrition domain, and
-  `docs/SESSION_FOLLOWUP.md` for unresolved general-app continuity — not `IMPLEMENTATION_HANDOFF.md`
+  `docs/CURRENT_STATE.md` for unresolved general-app continuity — not `IMPLEMENTATION_HANDOFF.md`
   in isolation, so a stale row elsewhere doesn't get missed. Planner/implementer are fluid roles in
   that system, not fixed people, so `COL` asks which applies whenever the continuation point is
   ambiguous rather than assuming. It is not a git shorthand like CMP/BCMP; it never
@@ -185,28 +197,20 @@ npm run dev          # Vite dev server, client only — /api/* calls will 404 (n
 npm run build         # tsc -b (typecheck src/) && vite build -> dist/
 npm run preview       # serve the built dist/ (still no /api/*)
 npm run vercel:dev    # vercel dev — the real local stack: Vite + every api/*.ts, proxied on :3000.
-                       #   This is what production actually runs. Function env = the linked project's
-                       #   Development vars, or a repo-root `.env` if present — NOT `.env.local`
-                       #   (see "Local env for `vercel dev`" below).
+                       #   This is what production actually runs (env: see docs/operations.md § Environment).
 npm run deploy        # vercel — preview deploy (throwaway URL), manual
 npm run deploy:prod   # vercel --prod — production deploy, manual
 ```
 
-**Local env for `vercel dev` (Vercel CLI 59.7.0).** `vercel dev` never reads `.env.local`. Function env is
-the linked project's Development variables, unless a repo-root `.env` exists — then `.env` replaces them
-entirely (all-or-nothing), so it must hold every var the functions need: `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
-`SUPABASE_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AGENT_LOGIN_SECRET` (and `ADMIN_EMAILS` if
-used). `AGENT_LOGIN_SECRET` is local-only and deliberately **not** in Vercel Development — never add it
-there. `.env.local` stays the developer-managed source of truth; the developer copies it to `.env` in their own
-terminal (`Copy-Item .env.local .env -Force`) before an agent session, and `agent-session up` fails its
-readiness check without it. `.env` is gitignored and in `.vercelignore`. Never run bare `vercel env pull` (its
-default target is `.env.local`).
+**Local env for `vercel dev`.** It never reads `.env.local`; it uses the repo-root `.env` if one exists (which
+replaces the linked project's Development vars entirely). The developer copies `.env.local` to `.env` in their own
+terminal; never run bare `vercel env pull`. Details: [docs/operations.md](docs/operations.md) § Environment.
 
 **Deploys are manual only.** Nothing deploys on `git push` or on merging to `master` (no GitHub
 integration on this project); a change goes live only when the developer runs `npm run deploy:prod`,
 which ships the local filesystem, not a git ref. Claude never runs `deploy`/`deploy:prod` unless
 explicitly asked, and doesn't describe a push as a release. Before a deploy, `.vercelignore` must still
-list `api/agent-login.ts` as a live line, with no `#AGENT-SESSION-TEMP#` marker (see the Playwright note below).
+list `api/agent-login.ts` as a live line, with no `#AGENT-SESSION-TEMP#` marker (see "Agent sessions" below).
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
@@ -219,70 +223,39 @@ it — do not leave a standing test behind.
 
 All backend logic lives under `api/*` (Vercel functions), with shared helpers in `lib/` (e.g.
 `lib/auth.ts`). A former `functions/api/*` Cloudflare Pages path and, later, a parallel
-`netlify/functions/*` deploy were both retired (see git history / `docs/archive/roadmap.md`); Vercel
-is what's actually deployed now.
+`netlify/functions/*` deploy were both retired (see git history and
+`docs/archive/netlify-vercel-migration-plan.md`); Vercel is what's actually deployed now.
 
-**Driving the app with Playwright** (ground rule — the full version is in Claude's memory): plain tools
-first (`navigate`/`click`/`snapshot`/`screenshot`/read-only `evaluate`), `browser_run_code_unsafe` only
-when nothing else fits; sign in only via the `agent-login` mint/redeem flow against the local
-`npm run vercel:dev` (the split `agent-session` / `agent-mint` procedure below — Claude never reads `.env` / `.env.local`
-or the secret; see "Secrets and environment files" above); Claude may start `npm run vercel:dev` itself via `agent-session` when a task needs it (changed
-since 2026-09-19 — it used to be developer-only). Check `:3000` first: if it answers, reuse it and never start a
-second dev server on top of it; a server Claude did not start is never stopped or restarted without the
-developer's explicit go-ahead (it may be their live session, possibly behind ngrok for phone testing); find
-the exact process listening on `:3000` rather than sweeping ports; only stop servers Claude started
-(`agent-session` enforces this by PID + process start time); leave the test account as found; use a throwaway
-account (`agent-mint --email x@local.dev`) for anything destructive such as
-`/api/auth-delete-account`; keep screenshots out of the repo root.
+One-off nutrition data seeding (`scripts/upload-nutrition.ts`, which loads `.env.local`) is developer-run only —
+Claude never runs it (see "Secrets and environment files" above). Procedure and data shape:
+[docs/operations.md](docs/operations.md) § Data seeding and `data/README.md`.
 
-**`agent-login` and `.vercelignore` (standing procedure, SYNC-checked).** `.vercelignore` lists
-`api/agent-login.ts` to keep production within the 12-function Hobby limit, but `vercel dev` honors that
-file too — while the line is active, `/api/agent-login` 404s locally. The mint call requires the caller to
-present `AGENT_LOGIN_SECRET`, and **Claude never reads `.env` / `.env.local`, never sees, generates, writes,
-prints, copies or compares that secret, and never uses `node --env-file`** (full rule: "Secrets and
-environment files" above) — the developer rotates it by hand. So an agent
-session is split by who may know the secret (never merge `agent-login` into a deployed function instead):
-(0) the developer makes sure the repo-root `.env` is current (a copy of `.env.local`, see "Local env for
-`vercel dev`" above); (1) Claude runs `npm run agent-session -- up` — starts the local server (or reuses one that already answers
-`{"ready":true}`) and *temporarily* comments the `.vercelignore` line out (marker `#AGENT-SESSION-TEMP#`); it
-refuses, touching nothing, if `:3000` is held by a server without the endpoint, and never stops a process it
-did not start; (2) **the developer** runs `npm run agent-mint` in their own terminal — masked prompt for the
-secret, never through Claude Code — and pastes the printed redeem URL (a single-use, 10-minute bearer token) to
-Claude; (3) Claude opens it once in the isolated in-memory Playwright browser (no storage-state file) and
-tests; (4) Claude runs `npm run agent-session -- down`, which restores the line and stops only the server it
-started. Details, the experimental `-EarlyRestore` option and the `*@local.dev` email guard (script-side
-only, not an auth boundary) are in [docs/architecture.md](docs/architecture.md). **SYNC** must flag a diff
-that still has the line commented out or a `#AGENT-SESSION-TEMP#` marker in `.vercelignore` — deploying with
-it pushes 13+ functions and fails the Hobby limit (or ships the login endpoint).
+## Agent sessions and browser QA
 
-One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
+Driving the app in a browser is allowed only through the split agent-session flow; the full procedure, the
+`.vercelignore` mechanics and troubleshooting are in [docs/operations.md](docs/operations.md) § Agent sessions.
 
-```bash
-node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.ts
-```
-
-The developer runs this in their own terminal — Claude never runs it (it loads `.env.local`, see "Secrets
-and environment files" above). Requires `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` (see
-`.env.local.example`).
-Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`.
+- Plain Playwright tools first (`navigate` / `click` / `snapshot` / `screenshot` / read-only `evaluate`);
+  `browser_run_code_unsafe` only when nothing else fits.
+- Sign in only through `agent-login` mint/redeem against the local `npm run vercel:dev`. **Claude** runs
+  `npm run agent-session -- up | down | status` (secret-free; it may start `vercel:dev` this way when a task needs
+  it); **the developer** runs `npm run agent-mint` in their own terminal and pastes the redeem URL. Claude never
+  reads `.env` / `.env.local`, never sees, generates, writes, prints, copies or compares the secret, and never uses
+  `node --env-file` (see "Secrets and environment files" above). The developer rotates the secret by hand.
+- Check `:3000` first: if it answers, reuse it and never start a second dev server on top of it. A server Claude did
+  not start is never stopped or restarted without the developer's explicit go-ahead (it may be their live session,
+  possibly behind ngrok for phone testing); find the exact process listening on `:3000` rather than sweeping
+  ports; only stop servers Claude started (`agent-session` enforces this by PID + process start time).
+- **Never merge `agent-login` into a deployed function.** `.vercelignore` keeps `api/agent-login.ts` out of
+  production (12-function limit) and `vercel dev` honors it too, so `agent-session` comments the line out
+  temporarily. **SYNC** must flag a diff that still has the line commented out or a `#AGENT-SESSION-TEMP#` marker
+  in `.vercelignore` — deploying with it pushes 13+ functions and fails the Hobby limit (or ships the login endpoint).
+- Leave the test account as found; use a throwaway account (`agent-mint --email x@local.dev`) for anything
+  destructive such as `/api/auth-delete-account`; keep screenshots out of the repo root.
 
 ## Serena (optional MCP server)
 
-[Serena](https://github.com/oraios/serena) is an optional semantic-code MCP server. Claude Code
-picks it up automatically from `.mcp.json`; other MCP-capable clients can point at it themselves.
-It's optional — the repo is fully usable without it — but it gives faster and more accurate
-symbol-level edits than plain grep/read.
-
-Requirements: [`uvx`](https://docs.astral.sh/uv/) on your `PATH`. First run of `uvx --from
-git+https://github.com/oraios/serena serena ...` fetches Serena into the uv cache; nothing to
-install manually.
-
-Files in this repo:
-
-- `.mcp.json` — MCP server registration, uses `"."` for the project path so it works from any
-  checkout location.
-- `.serena/project.yml` — checked-in project config (language server: typescript, etc.).
-- `.serena/cache/`, `.serena/memories/`, `.serena/project.local.yml` — per-developer state,
-  gitignored.
-
-If you don't want it running, delete or gitignore `.mcp.json` locally.
+[Serena](https://github.com/oraios/serena) is an optional semantic-code MCP server, picked up automatically from
+`.mcp.json`; it gives faster symbol-level edits than plain grep/read but the repo is fully usable without it.
+Setup and file layout: [docs/operations.md](docs/operations.md) § Optional tooling. Delete or gitignore
+`.mcp.json` locally to disable it.

@@ -13,7 +13,7 @@ The session log is a historical record of meaningful work completed during the s
 
 The active continuation state belongs in:
 
-`docs/SESSION_FOLLOWUP.md`
+`docs/CURRENT_STATE.md`
 
 The project name for this repository is `grocery`, so the default Vault log path is
 `~/vault/grocery/logs/YYYY-MM-DD.md`.
@@ -59,7 +59,7 @@ Rules:
 - Write the log to `~/vault/<project>/logs/YYYY-MM-DD.md`.
 - Create the required Vault directory if it does not exist.
 - Do not modify source code.
-- Do not modify `docs/SESSION_FOLLOWUP.md` unless explicitly requested.
+- Do not modify `docs/CURRENT_STATE.md` unless explicitly requested.
 - Do not modify architecture documents.
 - Do not modify unrelated files.
 - Use the current conversation as the primary source.
@@ -71,7 +71,7 @@ Rules:
 - Preserve important historical information already present in the same day's log when updating it.
 - If a log for the current date already exists, update it rather than creating a duplicate.
 - Keep the log concise enough to be useful as historical context.
-- Do not copy the entire `docs/SESSION_FOLLOWUP.md` into the session log.
+- Do not copy the entire `docs/CURRENT_STATE.md` into the session log.
 - The session log may contain information that is no longer current; that is expected because it is historical.
 
 When recording decisions, distinguish between:

@@ -1,14 +1,15 @@
 ---
 name: session-checkpoint
-description: Use when the user runs /session-checkpoint or asks to record a dated session-checkpoint doc - creates a new file under docs/session-checkpoints/ for the current task and links it from docs/SESSION_FOLLOWUP.md's index.
+description: Use when the user runs /session-checkpoint or asks to record a dated session-checkpoint doc - creates a new historical record under docs/session-checkpoints/ for the current task and adds it to that folder's README.md index (never to docs/CURRENT_STATE.md).
 ---
 
-Create exactly one new file under `docs/session-checkpoints/` documenting the current task or session, then add it to the index in `docs/SESSION_FOLLOWUP.md`.
+Create exactly one new file under `docs/session-checkpoints/` documenting the current task or session, then add one row to the index in `docs/session-checkpoints/README.md`.
 
 This is distinct from the `session-followup` skill: `session-followup` maintains the single active
-`docs/SESSION_FOLLOWUP.md` continuity summary and must never write under
-`docs/session-checkpoints/`. This skill does the opposite — it only ever adds a new dated record
-file, and makes the smallest possible index edit to `docs/SESSION_FOLLOWUP.md` to link it.
+`docs/CURRENT_STATE.md` continuation guide (current state only) and must never write under
+`docs/session-checkpoints/`. This skill does the opposite — it only ever adds a new dated *historical* record
+file and its row in `docs/session-checkpoints/README.md`. A checkpoint records what happened in a session; it is
+never a substitute for `docs/CURRENT_STATE.md`, and `docs/CURRENT_STATE.md` is never used as a session log.
 
 ## Filename
 
@@ -68,21 +69,23 @@ concise — it should let another agent resume the work without re-reading the c
 
 ## Updating the index
 
-After writing the file, add exactly one new entry to the end of the numbered list in
-`docs/SESSION_FOLLOWUP.md` (under "Detailed records are split into..."), linking to the new
-file with a short descriptive title, and refresh the `_Last updated: YYYY-MM-DD_` line at the top
-if the date changed. Do not renumber or edit existing entries.
+After writing the file, add exactly one new row at the end of the index table in
+`docs/session-checkpoints/README.md` (`| N | [Short title](filename.md) |`, with the next number), linking to the
+new file with a short descriptive title. Do not renumber or edit existing rows. Do not add an index or a list of
+records to `docs/CURRENT_STATE.md`.
 
 ## Rules
 
-- Only create new files under `docs/session-checkpoints/`; never edit an existing dated record.
-- Never touch the "Current Objective/State/..." body of `docs/SESSION_FOLLOWUP.md` itself —
-  only append the one new index line and the last-updated date.
+- Only create new files under `docs/session-checkpoints/`. Existing records are historical snapshots: never
+  rewrite one into a current-state record (a factual or status correction is a separate, deliberate edit, not
+  part of this skill).
+- Do not write to `docs/CURRENT_STATE.md` — that is the `session-followup` skill's job. Never recreate a
+  checkpoint index there.
 - Do not write to `~/vault/<project>/logs/` — that is the separate `session-log` skill's job.
 - Do not modify source code or unrelated files.
 - Use the current conversation as the primary source; inspect repository files only to verify
   facts (current branch, existing filenames in `docs/session-checkpoints/`) or to determine the
   next sequence number.
 - Do not invent information that wasn't established in the session.
-- After writing, state the new file's path and the index line you added. Do not perform any
+- After writing, state the new file's path and the index row you added to `docs/session-checkpoints/README.md`. Do not perform any
   further action.

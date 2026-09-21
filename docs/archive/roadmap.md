@@ -1,5 +1,7 @@
 # Roadmap
 
+> **Historical — not the current roadmap.** Written before several items below shipped (e.g. the Yemek Planı recipe/meal work); kept for context only. Current scope lives in `docs/roadmap_v2.md` (nutrition) and open work in `docs/CURRENT_STATE.md`.
+
 A survey of where the project's own seams point, based on reading `package.json`,
 `supabase/01-schema.sql`, and `src/components/` / `src/lib/`, cross-referenced with what's
 already documented in `CLAUDE.md`. Nothing here is scheduled — this is a menu, not a commitment.
