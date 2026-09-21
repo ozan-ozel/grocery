@@ -8,38 +8,35 @@ architecture document, roadmap, or task archive. The historical record of past s
 
 ## Current Objective
 
-Documentation architecture migration (audit → approved plan, 2026-09-21), now **landed on `master`**. Goal: Claude
-loads the smallest set of current, authoritative, non-conflicting docs for a task. Done: routing/source-of-truth
-corrections, this file reset and renamed from `SESSION_FOLLOWUP.md` to `CURRENT_STATE.md`, checkpoint index moved, `knowledge-map.md` rewritten, `docs/operations.md`
-created, architecture gained the missing subsystems and lost its runbook sections, CLAUDE.md restructured
-(the secrets section is byte-identical), the interaction model reduced to a process doc, and a one-line
-"historical" banner added to `docs/archive/roadmap.md`. **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the
-process-optimization phase (checkpoint threshold, single checklist, nutrition-status ownership headers,
-`kill-ports` treatment). A review gate and a read-routing audit then found a few factual and routing gaps
-(for example the missing explicit-analysis route), fixed before the migration was committed as `8b03bd1`. A
-follow-up (`09dea3d`) then extended the `SYNC` procedure with a durable-facts check and the `.vercelignore` check
-and documented two facts the audit found missing (the `grocery.nutrition.browse.v1` cache and the USDA fetch script).
+Nothing is in flight. The documentation architecture migration (goal: Claude loads the smallest set of current,
+authoritative, non-conflicting docs for a task) is landed on `master`, along with its follow-ups (see Current
+State). **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the process-optimization
+phase (checkpoint threshold, single checklist, nutrition-status ownership headers, `kill-ports` treatment).
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` were both at `09dea3d` when this was written (before the commit that
-  refreshes this file), with a clean working tree. The migration (`8b03bd1`, then `ffc5d19`) and the `SYNC` fix
-  (`09dea3d`) are merged and pushed, both as fast-forwards (no merge commits). The migration was docs-only apart
-  from the comment-only `.vercelignore`, one skill-name line in `.claude/settings.json` and the four session skills.
+- **Repo:** `master` and `origin/master` were both at `b6750fc` when this was written (before the commit that
+  refreshes this file), with a clean working tree. The migration (`8b03bd1`, then `ffc5d19`), the `SYNC` fix
+  (`09dea3d`), the previous refresh of this file (`4ab264b`) and the interaction-model alignment (`b6750fc`) are
+  merged and pushed, all as fast-forwards (no merge commits). The migration was docs-only apart from the
+  comment-only `.vercelignore`, one skill-name line in `.claude/settings.json` and the four session skills.
 - **Verifier:** the migration verifier (a scratch script kept outside the repo) passes every check except check
   10, which flags only the earlier-approved one-line `COL` pointer change in
   `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (the check predates that approval). Not a new problem.
-- **In flight:** nothing. No local branch is unmerged into `master` (checked 2026-09-21). The merged migration and
-  `SYNC`-fix branches (`docs/documentation-architecture-migration`, `docs/sync-durable-facts-check`) still exist
-  locally and on `origin`; the owner decides when to delete them. `origin/docs/organize-roadmap-mvp-files` exists
-  only on the remote and is not merged into `master`; it was not examined.
+- **In flight:** nothing. No local branch was unmerged into `master` (checked 2026-09-21 at `b6750fc`, before the
+  branch carrying this refresh). The merged docs branches (`docs/documentation-architecture-migration`,
+  `docs/sync-durable-facts-check`, `docs/refresh-current-state-after-landing`, `docs/refine-interaction-model`)
+  still exist locally and on `origin`; the owner decides when to delete them.
+  `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`, "Organize roadmap and MVP files into docs/roadmap
+  folder") exists only on the remote and is not merged into `master`; its contents were not examined.
 - **Worktree:** `D:/CodeSpace/grocery.worktrees/simple-test-setup` on `agents/simple-test-setup` (that branch
   is merged). Not touched by this work; the owner decides whether it stays.
 - **Recently shipped to `master` (all pushed):** the Yemekler sheet with saved meals (`1595798`, merged
   `7a04dfe`); admin-only `PUT /api/nutrition` (`3169b10`); `agent-login` `_debug` gate (`ce01c20`);
   `agent-session` / `agent-mint` (`5663fcf`), reported working end-to-end by the developer on 2026-09-21;
   the secrets boundary extended to `.env` (`9a4678b`); the documentation architecture migration (`8b03bd1`,
-  `ffc5d19`); the `SYNC` durable-facts and `.vercelignore` checks (`09dea3d`).
+  `ffc5d19`); the `SYNC` durable-facts and `.vercelignore` checks (`09dea3d`); the refresh of this file after that
+  landing (`4ab264b`); the Claude interaction model aligned with the current workflow (`b6750fc`).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see
   [`operations.md`](operations.md)).
 
