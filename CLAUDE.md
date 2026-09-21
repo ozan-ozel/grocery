@@ -133,9 +133,15 @@ If none apply, say so explicitly in the session wrap-up rather than silently ski
   workspace details and branch-naming convention in memory (`linear-github-integration`); the
   `NUT-<n>` issue prefix only does anything once a GitHub PR exists, so plain CMP/BCMP pushes won't
   auto-link regardless.
-- **SYNC** = pre-commit doc-sync check. When the user says "SYNC", check the diff about to be
-  committed (`git status --short` / `git diff --name-only` against the merge-base with `master`, plus
-  `git diff --stat` for size) against the Close-out checklist above:
+- **SYNC** = pre-commit doc-sync. When the user says "SYNC", do two things, in this order:
+  **First, refresh `docs/CURRENT_STATE.md`** so it matches the repository as it now stands, following the
+  rules and structure in `.claude/skills/current-state-update/SKILL.md` (current state only, never a log;
+  verify branch, HEAD, `origin` and the working tree with git rather than copying old text). Edit only what
+  is demonstrably stale — when nothing is, leave the file untouched. Record HEAD as it is *before* the commit
+  that carries the refresh, as the file already does.
+  **Then check the diff about to be committed** — which now includes that refresh (`git status --short` /
+  `git diff --name-only` against the merge-base with `master`, plus `git diff --stat` for size) — against the
+  Close-out checklist above:
   1. **Trio rule**: if any of `docs/roadmap_v2.md`, `docs/mvp-scope/*-mvp.md`, or
      `nutrition-curriculum/DEC_REGISTER.md` is in the diff, all three must be — report which are
      missing rather than proceeding silently.
@@ -152,9 +158,12 @@ If none apply, say so explicitly in the session wrap-up rather than silently ski
   5. **`.vercelignore`**: flag a diff that still has the `api/agent-login.ts` line commented out or a
      `#AGENT-SESSION-TEMP#` marker in `.vercelignore` — deploying with it pushes 13+ functions and fails the
      Hobby limit (or ships the login endpoint). See "Agent sessions and browser QA" below for why.
-  `SYNC` only reports; it never edits files or stages/commits anything itself. Run it standalone,
-  immediately before `CMP`/`BCMP`/`LCMP`/`LBCMP` — never as an automatic step inside them — since it's
-  checking the diff that's about to be committed, not something to run before the diff exists.
+  The five checks only report. `SYNC` writes nothing but the `docs/CURRENT_STATE.md` refresh, and it never
+  stages, commits or pushes anything itself. Report what the refresh changed (or that nothing was stale)
+  together with the check results. If `master` is checked out and that refresh is all that is pending, hand
+  it off with `BCMP`, not `CMP`. Run it standalone, immediately before `CMP`/`BCMP`/`LCMP`/`LBCMP` — never
+  as an automatic step inside them — and once the work itself is finished, since the checks look at the
+  diff that is about to be committed.
 - **COL** = collaboration checkpoint for the nutrition-curriculum plan/implementation handoff. When
   the user says "COL", follow the resume procedure defined in
   `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md`. That procedure now reads every continuity
