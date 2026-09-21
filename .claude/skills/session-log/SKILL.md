@@ -1,6 +1,6 @@
 ---
 name: session-log
-description: Use when the user runs /session-log or asks to save a historical record of the current session - writes a concise session log to ~/vault/<project>/logs/YYYY-MM-DD.md.
+description: Use when the user runs /session-log or asks to save a historical record of the current session - writes a concise session log to ~/vault/<project>/logs/YYYY-MM-DD.md. Writes only to the external vault; it does not create a repository checkpoint or update docs/CURRENT_STATE.md.
 ---
 
 Create or update the current session's historical log in:

@@ -5,7 +5,7 @@ description: Use when the user runs /session-checkpoint or asks to record a date
 
 Create exactly one new file under `docs/session-checkpoints/` documenting the current task or session, then add one row to the index in `docs/session-checkpoints/README.md`.
 
-This is distinct from the `session-followup` skill: `session-followup` maintains the single active
+This is distinct from the `current-state-update` skill: `current-state-update` maintains the single active
 `docs/CURRENT_STATE.md` continuation guide (current state only) and must never write under
 `docs/session-checkpoints/`. This skill does the opposite — it only ever adds a new dated *historical* record
 file and its row in `docs/session-checkpoints/README.md`. A checkpoint records what happened in a session; it is
@@ -79,7 +79,7 @@ records to `docs/CURRENT_STATE.md`.
 - Only create new files under `docs/session-checkpoints/`. Existing records are historical snapshots: never
   rewrite one into a current-state record (a factual or status correction is a separate, deliberate edit, not
   part of this skill).
-- Do not write to `docs/CURRENT_STATE.md` — that is the `session-followup` skill's job. Never recreate a
+- Do not write to `docs/CURRENT_STATE.md` — that is the `current-state-update` skill's job. Never recreate a
   checkpoint index there.
 - Do not write to `~/vault/<project>/logs/` — that is the separate `session-log` skill's job.
 - Do not modify source code or unrelated files.

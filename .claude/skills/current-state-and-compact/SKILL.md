@@ -1,9 +1,9 @@
 ---
-name: checkpoint-and-compact
-description: Use when the user runs /checkpoint-and-compact or asks to checkpoint and compact the session - updates docs/CURRENT_STATE.md with the current session continuation state, then prompts the user to run /compact.
+name: current-state-and-compact
+description: Use when the user runs /current-state-and-compact or asks to update the current state and compact the session (or to checkpoint and compact) - updates docs/CURRENT_STATE.md with the current session continuation state, then prompts the user to run /compact. It does not create a historical checkpoint.
 ---
 
-Update `docs/CURRENT_STATE.md` using the same rules and structure defined by the `session-followup` skill.
+Update `docs/CURRENT_STATE.md` using the same rules and structure defined by the `current-state-update` skill.
 
 The follow-up doc must be the single active continuity record for the current project.
 

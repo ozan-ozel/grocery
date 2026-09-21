@@ -1,7 +1,7 @@
 {
   "skills": [
-    "checkpoint-and-compact",
-    "session-followup",
+    "current-state-and-compact",
+    "current-state-update",
     "session-log"
   ],
   "permissions": {

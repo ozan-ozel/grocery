@@ -1,6 +1,6 @@
 ---
-name: session-followup
-description: Use when the user runs /session-followup or asks to save session continuation state - creates or updates docs/CURRENT_STATE.md, the current-state continuation guide, with a compact summary of the current objective, state, open items, and next step.
+name: current-state-update
+description: Use when the user runs /current-state-update or asks to save session continuation state - creates or updates docs/CURRENT_STATE.md, the current-state continuation guide, with a compact summary of the current objective, state, open items, and next step. Writes only that file; it does not create a historical checkpoint.
 ---
 
 Create or update exactly `docs/CURRENT_STATE.md`.
