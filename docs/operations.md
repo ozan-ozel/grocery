@@ -58,7 +58,6 @@ ports (`agent-session` enforces this by PID + process start time).
 | `ADMIN_EMAILS` | Same as above | Comma-separated, case-insensitive; who may write the global nutrition table (§3.4) |
 | `AGENT_LOGIN_SECRET` | **Local only** — the repo-root `.env`; deliberately **not** in Vercel Development, never add it there | Gates `agent-login`'s mint step (§3.5) |
 | `AGENT_LOGIN_ENABLED` | Would be a Vercel production var; **do not set** without an explicit go-ahead | §3.5 |
-| `TEST_LOGIN_SECRET` | Optional; **never** set in the production Vercel project | Dead code, §3.6 |
 | `USDA_API_KEY` | `.env.local`, for the one-off scripts only | Listed in `.env.local.example` |
 | `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `VITE_SUPABASE_AUTH_ENABLED` | **Removed** — nothing reads them; delete from Vercel if still set | §7 |
 
@@ -119,20 +118,12 @@ env-var gate above never even comes into play. Merging it into a deployed functi
 mint-a-session-for-any-email endpoint on production behind a single env flag, which is why the `.vercelignore` +
 local-session procedure (§4–§5) was chosen over that. **Never merge `agent-login` into a deployed function.**
 
-### 3.6 `TEST_LOGIN_SECRET` (dead code)
-
-`api/_auth-test-login.ts` was a Google-OAuth bypass enabled by `TEST_LOGIN_SECRET`. It is dead code: the underscore
-prefix makes Vercel treat the file as a private helper, so it is never routed (`/api/auth-test-login` always 404s,
-locally and deployed), and `.vercelignore` excludes it anyway. `api/agent-login.ts` is the working replacement. If
-it were ever routed it only works when `VERCEL_ENV !== "production"`, and **`TEST_LOGIN_SECRET` must never be set
-in the production Vercel project's env vars.**
-
 ## 4. `.vercelignore`
 
-[`.vercelignore`](../.vercelignore) does two jobs: it keeps the deploy small and correct, and it keeps two
-dev-only endpoints out of production (the 12-function Hobby limit, §6). Its active lines exclude, among others,
-`nutrition-curriculum` (multi-hundred-MB source textbooks), `archive`, `.env` / `.env.local`, `api/agent-login.ts`
-and `api/_auth-test-login.ts`.
+[`.vercelignore`](../.vercelignore) does two jobs: it keeps the deploy small and correct, and it keeps the
+dev-only `agent-login` endpoint out of production (the 12-function Hobby limit, §6). Its active lines exclude, among others,
+`nutrition-curriculum` (multi-hundred-MB source textbooks), `archive`, `.env` / `.env.local`
+and `api/agent-login.ts`.
 
 - **`vercel dev` honors this file too.** While the `api/agent-login.ts` line is active, `/api/agent-login` 404s
   locally as well. That is the normal, deploy-safe state.
@@ -143,8 +134,8 @@ and `api/_auth-test-login.ts`.
   `api/agent-login.ts` and none equal to the marker form; the toggled state is exactly one line equal to
   `#AGENT-SESSION-TEMP#api/agent-login.ts` and none equal to the plain form. Other lines, including comment lines,
   are ignored, and it refuses a file that starts with a BOM.
-- **Before any deploy:** `.vercelignore` must still list `api/agent-login.ts` (and `api/_auth-test-login.ts`) as
-  live lines, with no `#AGENT-SESSION-TEMP#` marker anywhere. Deploying with the line commented out pushes 13+
+- **Before any deploy:** `.vercelignore` must still list `api/agent-login.ts` as
+  a live line, with no `#AGENT-SESSION-TEMP#` marker anywhere. Deploying with the line commented out pushes 13+
   functions, which fails the Hobby limit (or ships the login endpoint). **`SYNC`** flags a diff that leaves the
   line commented out or the marker in place.
 - The optional `agent-session up -EarlyRestore` restores the line right after readiness — see §5.
@@ -240,7 +231,7 @@ deploy can go out with nothing committed at all. Treat `npm run deploy:prod` wit
 own. Claude never runs `deploy` / `deploy:prod` unless explicitly asked, and doesn't describe a push as a release.
 
 **Function-count limit.** The Hobby plan allows 12 serverless functions per deployment, and the project is at that
-limit. Three things keep it there: (1) `.vercelignore` excludes `api/agent-login.ts` and `api/_auth-test-login.ts`
+limit. Three things keep it there: (1) `.vercelignore` excludes `api/agent-login.ts`
 (§4); (2) `api/auth-google.ts` serves both public OAuth paths — `/api/auth-google-start` and `/api/auth-callback` —
 dispatched by an `_action` query param that `vercel.json`'s rewrites inject; (3) saved meals have no function of
 their own: `/api/saved-meals` is a `vercel.json` rewrite onto `api/personal-plan.ts` (`?_resource=saved-meals`).

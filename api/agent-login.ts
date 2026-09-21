@@ -10,16 +10,16 @@
 //   GET  /api/agent-login?_action=redeem&token=<token>  (the URL the agent
 //     actually navigates to) -> single use, checked against expiry, mints
 //     a real Supabase session cookie via the Admin API magic-link dance
-//     (same mechanism as api/_auth-test-login.ts's generateLink+verifyOtp).
+//     (Admin API generateLink + verifyOtp).
 //
 // Gates, independent of each other:
 //   1. AGENT_LOGIN_SECRET must be set, and the mint call's
 //      x-agent-login-secret header must match it (timing-safe compare).
 //   2. AGENT_LOGIN_ENABLED must be the literal string "true" for this
 //      endpoint to do anything AT ALL in production
-//      (process.env.VERCEL_ENV === "production"). Unlike
-//      api/_auth-test-login.ts (hard-blocked in prod), this endpoint is
-//      meant to also run against the deployed app for live agent testing —
+//      (process.env.VERCEL_ENV === "production"). This endpoint is not
+//      hard-blocked in prod: it is meant to also run against the deployed
+//      app for live agent testing —
 //      so production access is opt-in via this flag, not unconditionally
 //      open. Never set AGENT_LOGIN_ENABLED in production unless the repo
 //      owner has explicitly decided agents may log in to the live site.

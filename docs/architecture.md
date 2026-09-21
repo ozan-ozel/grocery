@@ -116,8 +116,7 @@ layer and themselves use the service role for their lookups.
 | `auth-logout.ts` | POST → clears session cookies | — | no data access |
 | `auth-delete-account.ts` | DELETE `{ reason?, otherText? }` | owned households, invites, `app_users`, the Auth user, optional reason | `requireUser`, then service role |
 
-Not counted: `agent-login.ts` (excluded by `.vercelignore`, local-only) and `_auth-test-login.ts` (underscore =
-private helper, never routed; dead code). Rewrites live in `vercel.json`.
+Not counted: `agent-login.ts` (excluded by `.vercelignore`, local-only). Rewrites live in `vercel.json`.
 
 ## Auth & session
 
@@ -448,7 +447,7 @@ boundaries that shape the architecture:
   never deploys.
 - **The project is at the 12-function Hobby limit**, which is why `auth-google.ts` serves two public paths and
   `personal-plan.ts` serves `/api/saved-meals` (rewrites in `vercel.json`).
-- **`agent-login.ts` and `_auth-test-login.ts` are excluded from every deployment** by `.vercelignore`.
+- **`agent-login.ts` is excluded from every deployment** by `.vercelignore`.
 - **All Supabase and Google credentials are server-side env vars**; the frontend bundle reads none.
 
 ## Daily rollover

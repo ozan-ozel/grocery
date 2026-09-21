@@ -19,11 +19,10 @@ nutrition-curriculum
 # or imported, so it has no business in a deploy.
 archive
 
-# Dev-only testing endpoints, kept out of prod to stay within the 12-function Hobby limit.
-# NOTE: `vercel dev` honors this file too, so while these lines are active the endpoints are
-# NOT served locally either. Do not hand-edit them for a browser session: `npm run agent-session -- up`
+# Dev-only testing endpoint, kept out of prod to stay within the 12-function Hobby limit.
+# NOTE: `vercel dev` honors this file too, so while this line is active the endpoint is
+# NOT served locally either. Do not hand-edit it for a browser session: `npm run agent-session -- up`
 # comments out the agent-login line temporarily and `-- down` restores it (see docs/operations.md,
-# section ".vercelignore"). Both lines must be live, with no temporary marker left behind, BEFORE
+# section ".vercelignore"). That line must be live, with no temporary marker left behind, BEFORE
 # any `npm run deploy` / `deploy:prod`.
 api/agent-login.ts
-api/_auth-test-login.ts
