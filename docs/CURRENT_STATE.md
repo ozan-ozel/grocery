@@ -15,7 +15,7 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` were both at `67ce9fb` when this was written (before the commit that
+- **Repo:** `master` and `origin/master` were both at `82ab8d4` when this was written (before the commit that
   refreshes this file), with a clean working tree. The migration (`8b03bd1`, then `ffc5d19`), the `SYNC` fix
   (`09dea3d`), the previous refresh of this file (`4ab264b`) and the interaction-model alignment (`b6750fc`) are
   merged and pushed, all as fast-forwards (no merge commits). The migration was docs-only apart from the
@@ -23,12 +23,12 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
 - **Verifier:** the migration verifier (a scratch script kept outside the repo) passes every check except check
   10, which flags only the earlier-approved one-line `COL` pointer change in
   `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (the check predates that approval). Not a new problem.
-- **In flight:** nothing. No local branch was unmerged into `master` (checked 2026-09-21 at `67ce9fb`, before the
-  branch carrying this refresh). The 49 merged local branches were deleted that day (`git branch -d`, so nothing
-  unmerged was lost). Locally only `master`, `agents/simple-test-setup` and three merged docs branches
-  (`docs/sync-refreshes-current-state`, `docs/fill-copilot-instructions`,
-  `docs/refresh-current-state-after-cleanup`) remain; 8 merged branches still exist on `origin`. The owner
-  decides when to delete the rest.
+- **In flight:** nothing. No local branch is unmerged into `master` (checked 2026-09-21 at `82ab8d4`). The 49
+  merged local branches were deleted that day (`git branch -d`, so nothing unmerged was lost). Locally only
+  `master`, `agents/simple-test-setup` and five merged branches (`docs/sync-refreshes-current-state`,
+  `docs/fill-copilot-instructions`, `docs/refresh-current-state-after-cleanup`,
+  `docs/refresh-current-state-worktree-removed`, `chore/current-state-open-items-cleanup`) remain; 8 merged
+  branches still exist on `origin`. The owner decides when to delete the rest.
   `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`, "Organize roadmap and MVP files into docs/roadmap
   folder") exists only on the remote and is not merged into `master`; its contents were not examined.
 - **Worktree:** none. The `simple-test-setup` worktree was removed on 2026-09-21 (its only uncommitted change
@@ -47,7 +47,8 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
   (`708cd57`); the status docs refreshed (`6e3c657`); the UI options mockup moved from `public/` to
   `docs/mockups/` so it no longer ships (`ce0a28f` — it leaves production only on the next manual deploy);
   `SYNC` made to refresh this file before its checks (`52df6c4`); the Copilot instructions template filled in
-  (`7e5f547`); the refresh of this file after that (`67ce9fb`).
+  (`7e5f547`); the refreshes of this file after that (`67ce9fb`, `e1a59e7`); the vestigial `today` tab and the archived
+  Bugün screen removed, and the boot `GET /api/personal-plan` deduped (`82ab8d4`).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see
   [`operations.md`](operations.md)).
 
@@ -86,9 +87,8 @@ means it was recorded as pending and has not been re-checked.
 
 ## Next Step
 
-The `chore/current-state-open-items-cleanup` work (vestigial `today` tab and archived Bugün screen removed, boot
-`GET /api/personal-plan` deduped, schema/stale-pointer notes corrected) is merged. Still to confirm in the browser: a
-single boot `GET /api/personal-plan` (open items 2-3). The owner decides whether to start the deferred phases (not started): the
+Confirm in the browser that boot makes a single `GET /api/personal-plan` and check for a duplicate `PUT` (open items
+2-3). The owner decides whether to start the deferred phases (not started): the
 plans/specs/audits lifecycle cleanup, and process optimization (a single close-out checklist,
 nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the remaining merged branches.
 Otherwise pick work from the Open items.
