@@ -2,6 +2,8 @@ import type { MealItem } from "@/lib/localMealPlan";
 import { calculateItemsNutrition } from "@/lib/localMealPlan";
 import type { NutritionMap } from "@/lib/nutrition";
 import { MealItemCard } from "./MealItemCard";
+import { MealGroup } from "./MealGroup";
+import { groupSlotItems } from "@/lib/mealGroups";
 
 export type MealType = "ilk" | "ara" | "son";
 
@@ -18,6 +20,11 @@ type Props = {
   // DEC-069: shown only when there is batch food left to add.
   onSelectBatch?: () => void;
   batchLabelFor?: (item: MealItem) => string | undefined;
+  // Resolves a comboId to the meal's display name (built-in, saved or evening
+  // pattern). An id that resolves to nothing is not carded.
+  mealNameFor: (comboId: string) => string | undefined;
+  // Removes every item in this slot as one undoable step.
+  onClear: () => void;
 };
 
 export const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
@@ -38,11 +45,26 @@ export function MealContainer({
   onToggleShoppingList,
   onSelectBatch,
   batchLabelFor,
+  mealNameFor,
+  onClear,
 }: Props) {
   const updateItemQuantity = onUpdateItemQuantity ?? (() => {});
   const label = MEAL_LABELS[mealType];
   const totals =
     items.length > 0 ? calculateItemsNutrition(items, catalog) : null;
+
+  const renderItem = (item: MealItem) => (
+    <MealItemCard
+      key={item.id}
+      item={item}
+      nutrition={catalog.get(item.foodId)}
+      onRemove={() => onRemoveItem(item.id)}
+      onUpdateQuantity={quantityG => updateItemQuantity(item.id, quantityG)}
+      isOnShoppingList={isOnShoppingList(item.foodId)}
+      onToggleShoppingList={() => onToggleShoppingList(item)}
+      batchLabel={batchLabelFor?.(item)}
+    />
+  );
 
   return (
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
@@ -84,20 +106,26 @@ export function MealContainer({
 
       {items.length > 0 && (
         <div className="space-y-2 border-t border-border pt-3">
-          {items.map(item => (
-            <MealItemCard
-              key={item.id}
-              item={item}
-              nutrition={catalog.get(item.foodId)}
-              onRemove={() => onRemoveItem(item.id)}
-              onUpdateQuantity={quantityG =>
-                updateItemQuantity(item.id, quantityG)
-              }
-              isOnShoppingList={isOnShoppingList(item.foodId)}
-              onToggleShoppingList={() => onToggleShoppingList(item)}
-              batchLabel={batchLabelFor?.(item)}
-            />
-          ))}
+          {groupSlotItems(items, mealNameFor).map(group =>
+            group.kind === "single" ? (
+              renderItem(group.item)
+            ) : (
+              <MealGroup
+                key={group.items[0].id}
+                name={group.name}
+                kcal={calculateItemsNutrition(group.items, catalog).kcal}>
+                {group.items.map(renderItem)}
+              </MealGroup>
+            ),
+          )}
+          <div className="flex justify-end">
+            <button
+              type="button"
+              onClick={onClear}
+              className="rounded-md px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-foreground active:text-foreground">
+              Temizle
+            </button>
+          </div>
         </div>
       )}
     </div>

@@ -49,6 +49,7 @@ below. Files are named `YYYY-MM-DD-NN-slug.md`, so they sort chronologically.
 | 28 | [Archive unused meal code](2026-09-20-02-archive-unused-meal-code.md) |
 | 29 | [Yemekler sheet: Yemeklerim / Hazır Yemekler / Tarifler](2026-09-20-03-meals-sheet-yemeklerim-tarifler.md) |
 | 30 | [agent-login `_debug` gate fix, secret rotation, `agent-session` / `agent-mint` split](2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md) |
+| 31 | [Meal plan: meal cards, bulk clear, 5-step undo](2026-09-21-01-meal-plan-cards-clear-undo.md) |
 
 The UI polish pass of 2026-09-16 (buttons, spacing, macro rings, nav feel) has no checkpoint of its own; its
 full record is [`../ui-ux-audit-2026-09-16-polish.md`](../ui-ux-audit-2026-09-16-polish.md).

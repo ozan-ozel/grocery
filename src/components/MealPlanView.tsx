@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+import { ChevronLeft, ChevronRight, Undo2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MealPlanSkeleton } from "@/components/MealPlanSkeleton";
 import { SuggestionCard } from "@/components/ui/suggestion-card";
@@ -9,6 +9,9 @@ import { useMealPersonalization } from "@/hooks/useMealPersonalization";
 import { useRemainingToday } from "@/hooks/useRemainingToday";
 import { useBatchLedger } from "@/hooks/useBatches";
 import { useSavedMeals } from "@/hooks/useSavedMeals";
+import { useMealPlanHistory } from "@/hooks/useMealPlanHistory";
+import { SwipeToast } from "@/components/ui/swipe-toast";
+import { dismissHistoryToast, runAsOneStep } from "@/lib/mealPlanHistory";
 import {
   MEAL_SLOTS,
   calculateItemsNutrition,
@@ -49,6 +52,9 @@ type Props = {
   onAddShoppingItem: (name: string, qty: string) => void;
   isOnShoppingList: (name: string) => boolean;
   onRemoveShoppingItem: (name: string) => void;
+  // True while App's shopping-list undo toast is showing, so the meal-plan
+  // toast stacks above it instead of covering it.
+  shoppingUndoVisible?: boolean;
 };
 
 export function MealPlanView({
@@ -57,6 +63,7 @@ export function MealPlanView({
   onAddShoppingItem,
   isOnShoppingList,
   onRemoveShoppingItem,
+  shoppingUndoVisible,
 }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
   const { profile: personalizationProfile, hasSavedProfile } = useMealPersonalization(userId);
@@ -75,7 +82,19 @@ export function MealPlanView({
     updateItemQuantity,
     removeItem,
     dailyNutrition,
+    clearSlot,
+    clearDay,
+    undoLast,
   } = useMealPlan(householdId, catalogMap);
+  const history = useMealPlanHistory(householdId);
+  const historyToast = history.toast;
+  // The toast hides after 6 s (like the shopping-list one); the history itself
+  // stays, reachable from the Geri al button.
+  useEffect(() => {
+    if (!historyToast) return;
+    const timer = window.setTimeout(dismissHistoryToast, 6000);
+    return () => window.clearTimeout(timer);
+  }, [historyToast?.id]);
   // Evening recommendations only make sense against *today's* actual
   // remaining budget — reuses the existing hook wholesale rather than
   // recomputing target-minus-consumed here (its internal useMealPlan call
@@ -125,6 +144,14 @@ export function MealPlanView({
     if (!allocateSlot) return;
     addItem(allocateSlot, foodId, quantityG, undefined, batchId);
   }
+
+  // comboId -> display name, for the meal cards in each slot. Built-in meals,
+  // the user's saved meals (their id is the comboId) and evening patterns all
+  // stamp their id on the entries they add.
+  const mealNameById = new Map<string, string>();
+  for (const combo of ALL_COMBOS) mealNameById.set(combo.id, combo.nameTr);
+  for (const meal of savedMeals.savedMeals) mealNameById.set(meal.id, meal.name);
+  for (const [id, pattern] of EVENING_PATTERN_BY_ID) mealNameById.set(id, pattern.nameTr);
 
   const scoredCombos = scoreAllCombos(
     ALL_COMBOS,
@@ -244,12 +271,14 @@ export function MealPlanView({
   // it's provenance, the grams are what actually count.
   function handleComboSelect(combo: Combo, factor: number) {
     if (!activeSlot) return;
-    for (const item of scaleComboItems(combo.items, factor)) {
-      const nutrition = lookupNutrition(catalogMap, item.foodId);
-      if (nutrition) {
-        addItem(activeSlot, nutrition.name_tr, item.grams, combo.id);
+    runAsOneStep(`${combo.nameTr} eklendi`, () => {
+      for (const item of scaleComboItems(combo.items, factor)) {
+        const nutrition = lookupNutrition(catalogMap, item.foodId);
+        if (nutrition) {
+          addItem(activeSlot, nutrition.name_tr, item.grams, combo.id);
+        }
       }
-    }
+    });
     setComboModalOpen(false);
     setActiveSlot(null);
   }
@@ -330,9 +359,11 @@ export function MealPlanView({
   // independently of anything in this component.
   function eatEveningCombo(combo: ScoredCombo) {
     if (remainingToday.status !== "ready") return;
-    for (const item of combo.items) {
-      remainingToday.logConsumption(item.foodId, item.grams, combo.id);
-    }
+    runAsOneStep(`${combo.nameTr} eklendi`, () => {
+      for (const item of combo.items) {
+        remainingToday.logConsumption(item.foodId, item.grams, combo.id);
+      }
+    });
     setEveningPreparingIds((prev) => {
       if (!prev.has(combo.id)) return prev;
       const next = new Set(prev);
@@ -345,7 +376,9 @@ export function MealPlanView({
     if (remainingToday.status !== "ready") return;
     const found = eatenEveningCombos.find((e) => e.combo.id === comboId);
     if (!found) return;
-    remainingToday.undoConsumption(found.entries);
+    runAsOneStep(`${found.combo.nameTr} kaldırıldı`, () => {
+      remainingToday.undoConsumption(found.entries);
+    });
   }
 
   return (
@@ -353,9 +386,23 @@ export function MealPlanView({
     // wraps to two lines) against a 80px spacer, which left the last card only
     // ~4px clear of it — this adds the breathing room (~28px total).
     <div className="space-y-4 pb-6">
-      <p className="text-xs uppercase tracking-widest text-muted-foreground">
-        Yemek Planı
-      </p>
+      <div className="flex min-h-6 items-center justify-between">
+        <p className="text-xs uppercase tracking-widest text-muted-foreground">
+          Yemek Planı
+        </p>
+        {history.steps.length > 0 && (
+          <Button
+            type="button"
+            variant="quiet"
+            size="sm"
+            className="h-6 gap-1 px-2"
+            onClick={undoLast}
+            aria-label={`Son işlemi geri al, ${history.steps.length} adım`}>
+            <Undo2 className="size-3.5" />
+            Geri al · {history.steps.length}
+          </Button>
+        )}
+      </div>
 
       <div className="flex items-center justify-between">
         <Button
@@ -424,6 +471,8 @@ export function MealPlanView({
                     : undefined
                 }
                 batchLabelFor={batchLabelFor}
+                mealNameFor={id => mealNameById.get(id)}
+                onClear={() => clearSlot(slot)}
               />
             ))}
           </div>
@@ -566,6 +615,17 @@ export function MealPlanView({
         />
       )}
 
+      {dayItems.length > 0 && (
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="w-full"
+          onClick={clearDay}>
+          Günü temizle
+        </Button>
+      )}
+
       {/* Add to shopping list button */}
       {hasTotals && (
         <Button
@@ -578,6 +638,16 @@ export function MealPlanView({
             ? "Bu günü alışveriş listesinden çıkar"
             : "Bu günü alışveriş listesine ekle"}
         </Button>
+      )}
+
+      {historyToast && (
+        <SwipeToast
+          key={historyToast.id}
+          message={historyToast.label}
+          onAction={undoLast}
+          onDismiss={dismissHistoryToast}
+          bottomRem={shoppingUndoVisible ? 4.75 : 1.25}
+        />
       )}
     </div>
   );

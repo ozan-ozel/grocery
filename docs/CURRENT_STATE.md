@@ -8,26 +8,29 @@ architecture document, roadmap, or task archive. The historical record of past s
 
 ## Current Objective
 
-Nothing is in flight. The documentation architecture migration (goal: Claude loads the smallest set of current,
-authoritative, non-conflicting docs for a task) is landed on `master`, along with its follow-ups (see Current
-State). **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the process-optimization
+Nothing is in flight once branch `feature/meal-plan-cards-clear-undo` (Yemek Planı meal cards, slot/day clear and a
+5-step undo) is merged; that merge carries this refresh. The documentation architecture migration (goal: Claude
+loads the smallest set of current, authoritative, non-conflicting docs for a task) is landed on `master`, along
+with its follow-ups (see Current State). **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the process-optimization
 phase (single checklist, nutrition-status ownership headers, `kill-ports` treatment).
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` were both at `82ab8d4` when this was written (before the commit that
-  refreshes this file), with a clean working tree. The migration (`8b03bd1`, then `ffc5d19`), the `SYNC` fix
+- **Repo:** `master` and `origin/master` were both at `70c581b` when this was written (before the commit that
+  refreshes this file); the working tree held only the meal-plan work described above, on branch
+  `feature/meal-plan-cards-clear-undo` (verified in a desktop browser, build passing). The migration (`8b03bd1`, then `ffc5d19`), the `SYNC` fix
   (`09dea3d`), the previous refresh of this file (`4ab264b`) and the interaction-model alignment (`b6750fc`) are
   merged and pushed, all as fast-forwards (no merge commits). The migration was docs-only apart from the
   comment-only `.vercelignore`, one skill-name line in `.claude/settings.json` and the four session skills.
 - **Verifier:** the migration verifier (a scratch script kept outside the repo) passes every check except check
   10, which flags only the earlier-approved one-line `COL` pointer change in
   `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (the check predates that approval). Not a new problem.
-- **In flight:** nothing. No local branch is unmerged into `master` (checked 2026-09-21 at `82ab8d4`). The 49
-  merged local branches were deleted that day (`git branch -d`, so nothing unmerged was lost). Locally only
-  `master`, `agents/simple-test-setup` and five merged branches (`docs/sync-refreshes-current-state`,
-  `docs/fill-copilot-instructions`, `docs/refresh-current-state-after-cleanup`,
-  `docs/refresh-current-state-worktree-removed`, `chore/current-state-open-items-cleanup`) remain; 8 merged
+- **In flight:** the meal-plan branch above, which is the only local branch not yet merged into `master` (checked
+  2026-09-21 at `70c581b`). The 49 merged local branches were deleted that day (`git branch -d`, so nothing
+  unmerged was lost). Locally besides it only `master`, `agents/simple-test-setup` and six merged branches
+  (`docs/sync-refreshes-current-state`, `docs/fill-copilot-instructions`,
+  `docs/refresh-current-state-after-cleanup`, `docs/refresh-current-state-worktree-removed`,
+  `docs/refresh-current-state-after-today-cleanup`, `chore/current-state-open-items-cleanup`) remain; 8 merged
   branches still exist on `origin`. The owner decides when to delete the rest.
   `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`, "Organize roadmap and MVP files into docs/roadmap
   folder") exists only on the remote and is not merged into `master`; its contents were not examined.
@@ -48,7 +51,8 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
   `docs/mockups/` so it no longer ships (`ce0a28f` — it leaves production only on the next manual deploy);
   `SYNC` made to refresh this file before its checks (`52df6c4`); the Copilot instructions template filled in
   (`7e5f547`); the refreshes of this file after that (`67ce9fb`, `e1a59e7`); the vestigial `today` tab and the archived
-  Bugün screen removed, and the boot `GET /api/personal-plan` deduped (`82ab8d4`).
+  Bugün screen removed, and the boot `GET /api/personal-plan` deduped (`82ab8d4`); the refresh of this file after
+  that (`70c581b`). Not yet on `master`: Yemek Planı meal cards, slot/day clear and the 5-step undo (this branch).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see
   [`operations.md`](operations.md)).
 
@@ -61,11 +65,14 @@ means it was recorded as pending and has not been re-checked.
    scrolled list, soft keyboard in the name/food/steps fields, three-pill tab row at 360 px, delete
    confirmation above the keyboard); batch-preparation create form keyboard; the 2026-09-19 UI refinement
    keyboard behavior and a look at Supabase Auth users after an account deletion; nutrition-upload header drag
-   and tap rhythm. Sources: checkpoints
+   and tap rhythm; Yemek Planı meal cards (layout on a phone — the spec has a header-only fallback if the box is
+   too busy) and the undo-toast swipe; the meal-plan toast stacking above the shopping-list toast
+   (`shoppingUndoVisible`), not exercised even in a browser. Sources: checkpoints
    [09-19-01](session-checkpoints/2026-09-19-01-ui-ux-refinement-pass.md),
    [09-19-02](session-checkpoints/2026-09-19-02-batch-preparation-ui.md),
    [09-20-01](session-checkpoints/2026-09-20-01-nutrition-write-lockdown.md),
-   [09-20-03](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md).
+   [09-20-03](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md),
+   [09-21-01](session-checkpoints/2026-09-21-01-meal-plan-cards-clear-undo.md).
 2. **Boot-performance leftovers** (checkpoint
    [09-17-02](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md), plan in
    [`superpowers/plans/`](superpowers/plans/README.md)): Phase 4d (`getClaims()` / custom JWT claims) and the
@@ -84,11 +91,14 @@ means it was recorded as pending and has not been re-checked.
 5. **Stale pointers in historical records, left alone on purpose:** a few checkpoints, plans and specs use the
    old name `SESSION_FOLLOWUP.md` and cite architecture headings that no longer exist ("Deployment", "Environment
    variables" — now in [`operations.md`](operations.md)); they are snapshots.
+6. **Meal-plan entries saved before 2026-09-21 may reorder on reload:** their items of one meal share a
+   `position`, and the server orders by `(date, slot, position)` only. New entries get distinct positions; no
+   backfill was written. Source: checkpoint [09-21-01](session-checkpoints/2026-09-21-01-meal-plan-cards-clear-undo.md).
 
 ## Next Step
 
-Confirm in the browser that boot makes a single `GET /api/personal-plan` and check for a duplicate `PUT` (open items
-2-3). The owner decides whether to start the deferred phases (not started): the
+Check the meal-plan changes on a real phone (open item 1), then confirm in the browser that boot makes a single
+`GET /api/personal-plan` and check for a duplicate `PUT` (open items 2-3). The owner decides whether to start the deferred phases (not started): the
 plans/specs/audits lifecycle cleanup, and process optimization (a single close-out checklist,
 nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the remaining merged branches.
 Otherwise pick work from the Open items.

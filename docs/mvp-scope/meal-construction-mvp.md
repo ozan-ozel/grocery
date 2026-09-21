@@ -70,6 +70,20 @@ data (tag more light meals), not code. When all four slots are already filled, `
 snack against the whole day's remaining budget (the slot weight collapses to 1.0), which amplifies this.
 Per-role portion scaling (leaving oil and vegetables fixed) is not part of this feature.
 
+**Update 2026-09-21 — meal cards, clear, undo.** Yemek Planı now shows meals added from the Yemekler
+sheet as cards inside their slot (items sharing a persisted `comboId`; a card exists only while it has 2+
+items, so deleting down to one dissolves it; the same meal added twice is split where a food repeats — a
+heuristic, there is no per-instance id). Each slot has a "Temizle" action and the day a "Günü temizle";
+both are one undoable step with no confirm dialog. Every meal-plan change — add, add a meal, grams edit,
+remove, clear, "Yedim" — is recorded in an in-memory history of the last 5 steps, reachable from a
+"Geri al · N" button beside the date and from a swipeable toast (the shopping-list undo toast uses the
+same component). History is cleared on reload and has no redo. This extends `DEC-070` (adjusting when the
+user deviates). New entries now get a distinct, increasing `position` per slot (previously every item of
+one meal shared a position, so the server, which orders by position only, could return them in arbitrary
+order after a reload). Plan: `docs/superpowers/plans/2026-09-21-meal-plan-cards-clear-undo.md`. Still
+open: entries saved before this change that share a `position` can still come back in arbitrary order on
+reload, and the toast swipe and card layout are only verified in a desktop browser, not on a real phone.
+
 ## Item 2: user-authored recipes are now saved meals
 
 Built-in combos are still read-only: `ALL_COMBOS` is derived from the JSON at module load, and no

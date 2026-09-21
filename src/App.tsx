@@ -709,6 +709,7 @@ function AppShell({
               onAddShoppingItem={addItem}
               isOnShoppingList={isOnList}
               onRemoveShoppingItem={removeItemByName}
+              shoppingUndoVisible={!!undo}
             />
           </Suspense>
         ) : section === "kisisel" ? (

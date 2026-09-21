@@ -441,6 +441,25 @@ meal with `scoreInstance`, and returns the top few. The per-slot weights (`SLOT_
 constants, not derived from a source. Its snack results are only as good as the slot tags in
 `data/combos.json`. Product scope: `docs/mvp-scope/meal-construction-mvp.md`.
 
+### Meal-plan undo history and meal cards
+
+`src/lib/mealPlanHistory.ts` is a module-level, in-memory store (last 5 steps, cleared on reload, no redo)
+that every `useMealPlan` mutator records into. It is a store rather than component state because Yemek
+Planı's `useMealPlan` instance and `useRemainingToday`'s (which backs "Yedim") share the query cache but
+not React state. `useMealPlan` splits each mutator into an unrecorded `apply*` core (optimistic cache write
+plus the per-entry API call) and a recording wrapper; `undoLast` replays the inverses of the newest step in
+reverse order through the cores, so undo never records itself. A removal records the entry's cache index so
+a restored entry returns to its place. One user action is one step (`runAsOneStep`): adding a meal, "Yedim",
+clearing a slot or the day. Components subscribe with `useMealPlanHistory`. Nothing here touches an
+endpoint, table or persisted key; bulk clear is N parallel `DELETE /api/meal-entries?id=` calls.
+
+New entries get `position` = one past the slot's highest position, read from the live cache — the server
+orders by `(date, slot, position)` only, so entries sharing a position come back in arbitrary order.
+
+Meal cards are derived, not stored: `src/lib/mealGroups.ts` groups a slot's contiguous items that share a
+`comboId` (a repeated food starts a new group); a group of one renders plain. Names come from the built-in
+combos, the user's saved meals and the evening patterns.
+
 ## Deployment & environment
 
 Running, configuring and deploying the app is in [operations.md](operations.md): the env-var inventory, how
@@ -511,6 +530,11 @@ The two shared UI patterns every new screen must reuse (`CLAUDE.md`'s `## UI pat
   vars that `useVisualViewportVars` publishes from `AppShell`). Give the sheet's scrolling list
   `min-h-0 overflow-y-auto overscroll-contain` so it — not the search field — shrinks under the
   keyboard. For a search whose results render inline below a field, call `useRevealAboveKeyboard`.
+
+- **Toasts** — use [src/components/ui/swipe-toast.tsx](../src/components/ui/swipe-toast.tsx) rather than a
+  hand-rolled toast. It is the shared undo-toast shell (message, "Geri al", close) and dismisses on a
+  horizontal swipe (`useSwipeToDismissX`, pointer events, `touch-action: pan-y`); a swipe dismisses only the
+  toast and never triggers its action. `bottomRem` stacks a second toast above another.
 
 ## Security boundaries
 

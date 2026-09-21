@@ -63,6 +63,8 @@
 
 	Batch cooking / leftovers (DEC-069): backend shipped earlier; Yemek Planı UI ("Toplu Hazırlıklar" sheet + per-meal "Partiden" allocation) shipped 2026-09-19, UI hidden again since 2026-09-20 pending re-wiring to the renamed Yemekler sheet (BATCH_PREP_VISIBLE in MealPlanView.tsx), see docs/mvp-scope/meal-construction-mvp.md
 
+	Adjusting the plan when the user deviates (DEC-070): meal cards for meals added from Yemekler, slot/day clear and a 5-step undo of every meal-plan change - SHIPPED 2026-09-21, see docs/mvp-scope/meal-construction-mvp.md
+
 	We also want to be able to interfere (add, update, delete) these recipes. - SHIPPED 2026-09-20 (user-authored saved meals with optional steps; see docs/mvp-scope/meal-construction-mvp.md)
 
 	Create different section like ingredients, preparation, cooking, serve, storing for later days (freezer, how to cool and heat in later days) - MISSING (only a free-text list of preparation steps exists, on the user's own saved meals; no structured sections, no food-safety guidance - see docs/mvp-scope/meal-construction-mvp.md)
