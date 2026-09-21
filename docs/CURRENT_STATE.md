@@ -15,16 +15,20 @@ created, architecture gained the missing subsystems and lost its runbook section
 (the secrets section is byte-identical), the interaction model reduced to a process doc, and a one-line
 "historical" banner added to `docs/archive/roadmap.md`. **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the
 process-optimization phase (checkpoint threshold, single checklist, nutrition-status ownership headers,
-`kill-ports` treatment). A review gate then found a few factual and routing errors, fixed in a correction pass
-before commit.
+`kill-ports` treatment). A review gate and a read-routing audit then found a few factual and routing gaps
+(for example the missing explicit-analysis route), fixed before the migration was committed as `8b03bd1`.
 
 ## Current State
 
 - **Repo:** branch `docs/documentation-architecture-migration`, cut from `master` at `6f93963` (equal to
-  `origin/master` when the branch was created). The migration is **uncommitted, docs-only** (plus the
-  comment-only `.vercelignore` and the skills list in `.claude/settings.json`); it awaits the owner's review.
-  `master` itself is clean.
-- **In flight:** nothing else. No local branch is unmerged into `master` (checked 2026-09-21).
+  `origin/master` when the branch was created). The migration is **committed** as a single commit, `8b03bd1`,
+  docs-only apart from the comment-only `.vercelignore`, one skill-name line in `.claude/settings.json` and the
+  four session skills. The working tree was clean at that commit. The branch is **one commit ahead of `master`,
+  not pushed** (no upstream is configured) **and not merged**; `master` is still at `6f93963`.
+- **Verifier:** the migration verifier (a scratch script kept outside the repo) passes every check except check
+  10, which flags only the earlier-approved one-line `COL` pointer change in
+  `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (the check predates that approval). Not a new problem.
+- **In flight:** nothing else. This branch is the only local branch unmerged into `master` (checked 2026-09-21).
 - **Worktree:** `D:/CodeSpace/grocery.worktrees/simple-test-setup` on `agents/simple-test-setup` (that branch
   is merged). Not touched by this work; the owner decides whether it stays.
 - **Recently shipped to `master` (all pushed):** the Yemekler sheet with saved meals (`1595798`, merged
@@ -77,8 +81,10 @@ means it was recorded as pending and has not been re-checked.
 
 ## Next Step
 
-Review this branch's diff and decide how to land it (the owner commits — `BCMP`/`CMP` when ready). Then decide
-whether to start the deferred lifecycle and process-optimization phases.
+The migration is committed (`8b03bd1`) but not yet landed. The owner reviews the branch
+(`git diff master...HEAD`) and decides whether to push and merge it: `CMP` from this branch, since the commit
+already exists. Nothing has been pushed or merged yet. Then decide whether to start the deferred lifecycle and
+process-optimization phases.
 
 ## Constraints and decisions that affect continuation
 
