@@ -164,7 +164,7 @@ npm run deploy:prod   # vercel --prod — production deploy, manual
 integration on this project); a change goes live only when the developer runs `npm run deploy:prod`,
 which ships the local filesystem, not a git ref. Claude never runs `deploy`/`deploy:prod` unless
 explicitly asked, and doesn't describe a push as a release. Before a deploy, `.vercelignore` must still
-list `api/agent-login.ts` (see the Playwright note below).
+list `api/agent-login.ts` as a live line, with no `#AGENT-SESSION-TEMP#` marker (see the Playwright note below).
 
 There is no test suite and no lint script in this repo — `npm run build`'s `tsc -b` is the only
 automated check. Run it after any change to confirm the types still hold.
@@ -183,29 +183,33 @@ is what's actually deployed now.
 **Driving the app with Playwright** (ground rule — the full version is in Claude's memory): plain tools
 first (`navigate`/`click`/`snapshot`/`screenshot`/read-only `evaluate`), `browser_run_code_unsafe` only
 when nothing else fits; sign in only via the `agent-login` mint/redeem flow against the local
-`npm run vercel:dev` (`AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` in `.env.local`); Claude may start or
-restart `npm run vercel:dev` itself when a task needs it (changed since 2026-09-19 — it used to be
-developer-only). Check `:3000` first: if it answers, reuse it and never start a second dev server on top of
-it; restart only when the task actually needs it, say so beforehand (it may be the developer's live
-session, possibly behind ngrok for phone testing), and find the exact process listening on `:3000` rather
-than sweeping ports; start it in the background and keep its task id, and only stop servers Claude started
-by that id; leave the test account as found; use a throwaway
-account (`agent-login` mint accepts `{"email": ...}`) for anything destructive such as
+`npm run vercel:dev` (the split `agent-session` / `agent-mint` procedure below — Claude never reads `.env.local`
+or the secret); Claude may start `npm run vercel:dev` itself via `agent-session` when a task needs it (changed
+since 2026-09-19 — it used to be developer-only). Check `:3000` first: if it answers, reuse it and never start a
+second dev server on top of it; a server Claude did not start is never stopped or restarted without the
+developer's explicit go-ahead (it may be their live session, possibly behind ngrok for phone testing); find
+the exact process listening on `:3000` rather than sweeping ports; only stop servers Claude started
+(`agent-session` enforces this by PID + process start time); leave the test account as found; use a throwaway
+account (`agent-mint --email x@local.dev`) for anything destructive such as
 `/api/auth-delete-account`; keep screenshots out of the repo root.
 
 **`agent-login` and `.vercelignore` (standing procedure, SYNC-checked).** `.vercelignore` lists
 `api/agent-login.ts` to keep production within the 12-function Hobby limit, but `vercel dev` honors that
-file too — while the line is active, `/api/agent-login` 404s locally. Whenever Playwright needs a login,
-do this every time (never merge `agent-login` into a deployed function instead): (1) comment out the
-`api/agent-login.ts` line in `.vercelignore`; (2) (re)start `npm run vercel:dev` — Claude can do this
-itself, see the rule above — because the ignore file is only read at startup, then check
-`GET /api/agent-login?_debug=1` — if it answers `{"ready":false}` (the secret or a Supabase var is missing from the
-function's env), restart once more as
-`$env:AGENT_LOGIN_SECRET='<value>'; npm run vercel:dev` (a plain start was enough on 2026-09-19, so the
-old env-pickup quirk may be gone); (3) run the testing;
-(4) **restore the line** before finishing. **SYNC** must flag a diff that still has the line commented
-out — deploying with it commented pushes 13+ functions and fails the Hobby limit (or ships the login
-endpoint).
+file too — while the line is active, `/api/agent-login` 404s locally. The mint call requires the caller to
+present `AGENT_LOGIN_SECRET`, and **Claude never reads `.env.local`, never sees, generates, writes, prints or
+compares that secret, and never uses `node --env-file`** — the developer rotates it by hand. So an agent
+session is split by who may know the secret (never merge `agent-login` into a deployed function instead):
+(1) Claude runs `npm run agent-session -- up` — starts the local server (or reuses one that already answers
+`{"ready":true}`) and *temporarily* comments the `.vercelignore` line out (marker `#AGENT-SESSION-TEMP#`); it
+refuses, touching nothing, if `:3000` is held by a server without the endpoint, and never stops a process it
+did not start; (2) **the developer** runs `npm run agent-mint` in their own terminal — masked prompt for the
+secret, never through Claude Code — and pastes the printed redeem URL (a single-use, 10-minute bearer token) to
+Claude; (3) Claude opens it once in the isolated in-memory Playwright browser (no storage-state file) and
+tests; (4) Claude runs `npm run agent-session -- down`, which restores the line and stops only the server it
+started. Details, the experimental `-EarlyRestore` option and the `*@local.dev` email guard (script-side
+only, not an auth boundary) are in [docs/architecture.md](docs/architecture.md). **SYNC** must flag a diff
+that still has the line commented out or a `#AGENT-SESSION-TEMP#` marker in `.vercelignore` — deploying with
+it pushes 13+ functions and fails the Hobby limit (or ships the login endpoint).
 
 One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 

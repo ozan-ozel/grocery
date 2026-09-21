@@ -13,7 +13,9 @@
     "vercel:dev": "vercel dev",
     "deploy": "vercel",
     "deploy:prod": "vercel --prod",
-    "kill-ports": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/kill-ports.ps1"
+    "kill-ports": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/kill-ports.ps1",
+    "agent-session": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/agent-session.ps1",
+    "agent-mint": "node scripts/agent-mint.mjs"
   },
   "dependencies": {
     "@radix-ui/react-checkbox": "^1.1.4",

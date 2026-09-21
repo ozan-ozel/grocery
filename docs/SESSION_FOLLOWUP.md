@@ -1,15 +1,24 @@
 # Session Follow-up
 
-_Last updated: 2026-09-20_
+_Last updated: 2026-09-21_
 
-## agent-login `_debug` gate fix + secret rotation (2026-09-20)
+## agent-login: `_debug` gate fix, secret rotation, `agent-session` / `agent-mint` split (2026-09-20)
 
-`GET /api/agent-login?_debug=1` used to run before the production gate and dumped env-key names and the secret's
-length; it now sits behind the gate and answers only `{ "ready": boolean }`. Branch `fix/agent-login-debug-gate`
-— **implemented, verified and committed on the branch; not yet merged to `master`**. The local `AGENT_LOGIN_SECRET` was rotated
-because the old value had been written into memory, a plan doc and tool logs; a running `vercel dev` keeps the old
-value until restarted. **Next, after this merges:** `chore/agent-session-script` (`agent-session up/down`, planned,
-not started). Record: [2026-09-20-04](session-checkpoints/2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md).
+`GET /api/agent-login?_debug=1` used to run before the production gate and dumped env-key names and the
+secret's length; it now sits behind the gate and answers only `{ "ready": boolean }` — branch
+`fix/agent-login-debug-gate`, commit `ce01c20`, **committed, not yet merged to `master`**. The local
+`AGENT_LOGIN_SECRET` was rotated once by Claude (value never seen) because the old one had been written into
+memory, a plan doc and tool logs; the developer now rotates it by hand and **Claude must never read
+`.env.local` or any secret**. Because `mint` requires the caller to present the secret, the session flow is
+split: `npm run agent-session -- up|down|status` (Claude-runnable, secret-free lifecycle + transactional
+`.vercelignore` edit) and `npm run agent-mint` (developer-run in their own terminal, masked prompt, prints only
+the redeem URL). Branch `chore/agent-session-script` (stacked on the fix branch) — **implemented and
+fake-server-tested and, on 2026-09-21, verified with a real `vercel dev`: `agent-session up` → `status` → `down`
+(default mode) started/stopped only the script-owned process tree and restored `.vercelignore` byte-for-byte;
+uncommitted**. **Still not verified (developer to test):** `agent-mint` has not been live-tested (real masked
+prompt + a real mint), `-EarlyRestore` is unverified (unknown if `vercel dev` re-reads `.vercelignore`), and the
+developer's own manual `AGENT_LOGIN_SECRET` rotation is still to do. Record:
+[2026-09-20-04](session-checkpoints/2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md).
 
 ## Yemekler sheet: Yemeklerim / Hazır Yemekler / Tarifler (2026-09-20)
 
@@ -141,8 +150,9 @@ Round 2 (see the linked checkpoint for the full list): `src/components/ui/checkb
   purple), not the app's single `--color-signal` accent — `MacroSummaryCard` already breaks the
   one-accent rule, and a single-accent ring would have visually mismatched its own tile's border.
 - Local `vercel dev` quirk (2026-09-16): `AGENT_LOGIN_SECRET`/`AGENT_LOGIN_ENABLED` from `.env.local` didn't
-  reach the spawned function process (other `.env.local` vars did). Workaround: launch with
-  `AGENT_LOGIN_SECRET=<value> npm run vercel:dev`. **Not reproduced on 2026-09-19** — a plain
+  reach the spawned function process (other `.env.local` vars did). The old workaround (launching with the
+  secret on the command line) is retired — Claude must never put the secret on a command line; if `_debug=1`
+  says `{"ready":false}`, tell the developer. **Not reproduced on 2026-09-19** — a plain
   `npm run vercel:dev` picked the secret up (`/api/agent-login?_debug=1` → `ready: true`) — so
   check `_debug=1` first and only add the prefix if it reports `{"ready":false}`. (`_debug=1` used to dump
   env-key names and the secret's length, and answered even in production; since `fix/agent-login-debug-gate` it

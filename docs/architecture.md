@@ -305,10 +305,44 @@ present); it deliberately reports no env-key names, counts or value lengths.
 included — and the env-var gate above never even comes into play. `vercel dev` builds its function list
 through the same `.vercelignore`, so **while that line is active the endpoint 404s locally too**
 (`/api/agent-login?_debug=1` returns Vercel's own `NOT_FOUND` page, not the function's). To use it for
-local Playwright QA, comment the line out, restart the developer's `npm run vercel:dev`, and put the
-line back before any deploy — the standing procedure is in `CLAUDE.md`. Merging it into a deployed
+local Playwright QA, use the two-command flow below (`agent-session` comments the line out for the session and
+puts it back; the standing procedure is in `CLAUDE.md`). Merging it into a deployed
 function instead would put a mint-a-session-for-any-email endpoint on production behind a single env
 flag, which is why this procedure was chosen over that.
+
+**Local agent sessions: two commands, split by who may know the secret.** `POST ?_action=mint` requires the
+caller to present `AGENT_LOGIN_SECRET`, and Claude Code (and anything it launches) must never hold it: it
+never reads `.env.local`, never generates, writes, prints or compares the value, and never uses
+`node --env-file`; the developer rotates the secret by hand. So the flow is split (record:
+[2026-09-20-04](session-checkpoints/2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md)):
+
+- `npm run agent-session -- up | down | status` (`scripts/agent-session.ps1`; Claude may run it) manages the
+  server lifecycle and the temporary `.vercelignore` edit, and is secret-free by construction (no environment
+  file, no secret, no token minting). `up` probes `:3000` first: a foreign server that already answers
+  `{"ready":true}` is reused untouched; a foreign server without the endpoint is refused and nothing is
+  modified — it never stops, restarts or takes over a process it did not start. Otherwise it runs a
+  transaction: state file first (`%LOCALAPPDATA%\grocery-agent-session\`, outside the repo), then a
+  byte-exact, CRLF-preserving `.vercelignore` edit (marker `#AGENT-SESSION-TEMP#`), then the server (root PID +
+  process start time recorded; the port listener recorded only if it descends from that root), then a
+  `{ready:true}` poll — any failure rolls back the edit, the owned processes and the state. `down` restores the
+  line first, stops only processes whose PID *and* start time still match, and deletes state and logs. The
+  server logs are never printed (a redeem request URL carries the token).
+- `npm run agent-mint [-- --email x@local.dev]` (`scripts/agent-mint.mjs`; **the developer runs it in their
+  own terminal, never through Claude Code**) asks for the secret at a masked TTY prompt (it refuses without a
+  TTY), sends it only as the `x-agent-login-secret` header to `http://localhost:3000` (hard-coded, redirects
+  never followed, loopback-only name resolution), and prints only the redeem URL on stdout; failures print a
+  fixed message with an HTTP status at most. It reads no file and no environment variable and writes nothing.
+- The redeem URL is a bearer credential (single-use, 10 minutes, hash-only at rest): the developer pastes it
+  to Claude, which opens it once in the isolated in-memory Playwright browser. No storage-state file, no
+  cookies on disk; `browser_close` discards the session.
+- **The `*@local.dev` email check in `agent-mint` is a script-side safety guard only, not an authentication
+  boundary.** The endpoint itself still mints for any email to a caller that knows the secret (deliberately
+  unchanged), so protecting the secret is what protects real accounts.
+- `.vercelignore` timing: by default the line stays commented out until `down`. `agent-session up
+  -EarlyRestore` restores it right after readiness and re-probes to verify the endpoint survived, rolling
+  back loudly if not. Whether a running `vercel dev` keeps its function list when `.vercelignore` changes is
+  **unverified** (the CLI appears to call `getVercelIgnore` once in the dev server, but a file watcher was
+  not ruled out), so the option stays opt-in until confirmed live.
 
 Two things outside this repo have to be set for the OAuth flow to work at all: Supabase's Auth →
 URL Configuration → Redirect URLs must include `<vercel-domain>/api/auth-callback` (and the local

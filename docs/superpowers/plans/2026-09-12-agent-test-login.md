@@ -414,12 +414,12 @@ Expected: no errors referencing `api/agent-login.ts`.
 
 - [ ] **Step 5: Manual verification against local dev**
 
-Set `AGENT_LOGIN_SECRET=test-secret-value` in `.env.local`, then:
+Set `AGENT_LOGIN_SECRET=<AGENT_LOGIN_SECRET>` in `.env.local`, then:
 
 ```bash
 npm run vercel:dev
 curl -X POST "http://localhost:3000/api/agent-login?_action=mint" \
-  -H "x-agent-login-secret: test-secret-value" \
+  -H "x-agent-login-secret: <AGENT_LOGIN_SECRET>" \
   -H "content-type: application/json" -d "{}"
 ```
 
