@@ -1,12 +1,9 @@
 node_modules
 dist
 *.tsbuildinfo
-.dev.vars
 .env
 .env.local
 .env.*.local
-.wrangler
-deno.lock
 
 # Local geolocation-simulation cache written by the `vercel` CLI package
 # itself (unrelated to the retired Netlify integration — that's just its
