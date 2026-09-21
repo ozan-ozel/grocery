@@ -15,7 +15,7 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` were both at `708cd57` when this was written (before the commit that
+- **Repo:** `master` and `origin/master` were both at `7e5f547` when this was written (before the commit that
   refreshes this file), with a clean working tree. The migration (`8b03bd1`, then `ffc5d19`), the `SYNC` fix
   (`09dea3d`), the previous refresh of this file (`4ab264b`) and the interaction-model alignment (`b6750fc`) are
   merged and pushed, all as fast-forwards (no merge commits). The migration was docs-only apart from the
@@ -23,9 +23,11 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
 - **Verifier:** the migration verifier (a scratch script kept outside the repo) passes every check except check
   10, which flags only the earlier-approved one-line `COL` pointer change in
   `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (the check predates that approval). Not a new problem.
-- **In flight:** nothing. No local branch was unmerged into `master` (checked 2026-09-21 at `708cd57`, before the
-  branch carrying this refresh). The 48 other merged local branches (docs, chore, feature, fix and others) still
-  exist, and 8 merged branches also still exist on `origin`; the owner decides when to delete them.
+- **In flight:** nothing. No local branch was unmerged into `master` (checked 2026-09-21 at `7e5f547`, before the
+  branch carrying this refresh). The 49 merged local branches were deleted that day (`git branch -d`, so nothing
+  unmerged was lost). Locally only `master`, the worktree branch below and two merged docs branches
+  (`docs/sync-refreshes-current-state`, `docs/fill-copilot-instructions`) remain; 8 merged branches still exist
+  on `origin`. The owner decides when to delete the rest.
   `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`, "Organize roadmap and MVP files into docs/roadmap
   folder") exists only on the remote and is not merged into `master`; its contents were not examined.
 - **Worktree:** `D:/CodeSpace/grocery.worktrees/simple-test-setup` on `agents/simple-test-setup` (that branch
@@ -40,7 +42,10 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
   policy aligned on significant-work-only (`e1a6e35`); session skill names normalized (`7cc7ce6`) and
   `current-state-and-compact` retired (`cf2ae77`); dead source files and exports removed (`7796181`); the dead
   `_auth-test-login` endpoint retired (`1105466`); legacy Cloudflare/Deno ignore rules and `opencode.json` removed
-  (`708cd57`).
+  (`708cd57`); the status docs refreshed (`6e3c657`); the UI options mockup moved from `public/` to
+  `docs/mockups/` so it no longer ships (`ce0a28f` — it leaves production only on the next manual deploy);
+  `SYNC` made to refresh this file before its checks (`52df6c4`); the Copilot instructions template filled in
+  (`7e5f547`).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see
   [`operations.md`](operations.md)).
 
@@ -89,7 +94,7 @@ means it was recorded as pending and has not been re-checked.
 
 Nothing is in flight. The owner decides whether to start the deferred phases (not started): the
 plans/specs/audits lifecycle cleanup, and process optimization (a single close-out checklist,
-nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the merged branches and the
+nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the remaining merged branches and the
 worktree above. Otherwise pick work from the Open items.
 
 ## Constraints and decisions that affect continuation
