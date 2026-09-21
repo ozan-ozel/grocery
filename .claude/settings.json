@@ -6,7 +6,10 @@
   ],
   "permissions": {
     "allow": [
-      "Bash(npm run *)",
+      "Bash(npm run build)",
+      "Bash(npm run agent-session -- up)",
+      "Bash(npm run agent-session -- down)",
+      "Bash(npm run agent-session -- status)",
       "Bash(timeout 15 npm run vercel:dev)"
     ],
     "deny": [
@@ -19,7 +22,18 @@
       "Bash(type .env*)",
       "Bash(Get-Content .env*)",
       "Bash(more .env*)",
-      "Bash(less .env*)"
+      "Bash(less .env*)",
+      "Edit(.env)",
+      "Edit(.env.local)",
+      "Edit(.env.*.local)",
+      "Edit(**/.env)",
+      "Edit(**/.env.local)",
+      "Edit(**/.env.*.local)",
+      "Bash(npm run agent-mint *)",
+      "Bash(node scripts/agent-mint.mjs*)",
+      "Bash(node --env-file*)",
+      "Bash(vercel env pull*)",
+      "Bash(npx vercel env pull*)"
     ]
   }
 }
