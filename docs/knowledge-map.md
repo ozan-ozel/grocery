@@ -44,7 +44,7 @@ If two documents disagree, the **CURRENT** owner in the registry below wins; a S
 | Run the app, set env, drive a browser, or deploy | `docs/operations.md`; `CLAUDE.md` § Secrets and § Agent sessions | — |
 | Resume earlier work | `docs/CURRENT_STATE.md` (current-only), then only the one plan or checkpoint it links | Every other checkpoint |
 | Resume the nutrition-curriculum handoff (`COL`) | `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` — it defines its own procedure | — |
-| Commit, merge or push (`CMP`, `BCMP`, `LCMP`, `SYNC`) | `CLAUDE.md` § Git shorthand | — |
+| Commit, merge or push (`CMP`, `BCMP`, `LCMP`, `LBCMP`, `SYNC`) | `CLAUDE.md` § Git shorthand | — |
 | Finish or close out a task | `CLAUDE.md` § Close-out checklist; `docs/claude-interaction-model.md` § Lifecycle | — |
 | Learn why a past feature was built | `docs/superpowers/plans/README.md` (status) → the plan → its spec → the checkpoint index | Treat all of them as SNAPSHOTs |
 | Restore retired code | `archive/README.md` | — |
