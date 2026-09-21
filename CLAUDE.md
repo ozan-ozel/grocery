@@ -146,6 +146,37 @@ If none apply, say so explicitly in the session wrap-up rather than silently ski
   ambiguous rather than assuming. It is not a git shorthand like CMP/BCMP; it never
   commits/merges/pushes by itself.
 
+## Secrets and environment files (hard boundary)
+
+**Claude must never read, inspect, parse, print, compare, expand, source, load, copy, generate, write,
+expose or otherwise handle the contents or values of `.env`, `.env.local`, any other `.env*` file (e.g.
+`.env.development.local`, anything under `.vercel/` that holds env values), or any other local
+environment/secrets file** — nor any value that lives in one, such as `AGENT_LOGIN_SECRET` or
+`SUPABASE_SECRET_KEY` (equally `SUPABASE_ANON_KEY`, `GOOGLE_CLIENT_SECRET`, `ADMIN_EMAILS` and any future
+secret). This holds for direct access and for every indirect route:
+
+- **Loaders:** `node --env-file[=...]`, dotenv (`dotenv`, `process.loadEnvFile`), `vercel env pull`, or any
+  script or one-liner that loads an env file and hands the values on.
+- **Reading the files:** `cat` / `type` / `Get-Content` / `grep` / `rg` / the Read and Grep tools pointed at
+  them, an editor or IDE view driven by Claude, and shell expansion or sourcing (`$VAR`, `$env:X`, `%VAR%`,
+  `source`, dot-sourcing).
+- **Copying or moving them:** `cp` / `Copy-Item` / `mv`, hardlinks, symlinks — the developer's own local
+  copy step (e.g. `.env.local` to `.env` for `vercel dev`) is theirs to run in their own terminal, never Claude's.
+- **Runtime state:** inspecting `process.env`, `Get-ChildItem Env:`, `printenv`, `set`, or a process's
+  environment block for a secret's value *or* metadata about it (its length, prefix, hash, or whether two
+  values are equal) — including Claude's own environment and the `vercel dev` server's.
+- **Clipboard:** `Set-Clipboard` / `Get-Clipboard` or any clipboard step that involves a secret.
+- **Transfer or exposure helpers:** scripts, hooks or commands whose purpose is to reveal, move or transform
+  env values, and anything that would surface one in a log, screenshot, artifact, doc, memory or commit.
+
+The developer generates, rotates and copies secrets by hand in their own terminal; Claude writes no secret
+anywhere. If a step seems to need a secret value, stop and ask the developer to do that step themselves —
+never work around it, and if a permission check blocks such an action, treat the block as final.
+
+Still fine: reading code that *consumes* env vars (`process.env.X` references), listing env file *names*
+(never opening them), `vercel env ls` (names only, values masked), and clearly synthetic placeholder values
+(e.g. `TEST_ONLY_NOT_A_REAL_SECRET`) for negative-path tests.
+
 ## Commands
 
 ```bash
@@ -154,11 +185,22 @@ npm run dev          # Vite dev server, client only — /api/* calls will 404 (n
 npm run build         # tsc -b (typecheck src/) && vite build -> dist/
 npm run preview       # serve the built dist/ (still no /api/*)
 npm run vercel:dev    # vercel dev — the real local stack: Vite + every api/*.ts, proxied on :3000.
-                       #   This is what production actually runs. Reads Supabase creds from
-                       #   .env.local automatically.
+                       #   This is what production actually runs. Function env = the linked project's
+                       #   Development vars, or a repo-root `.env` if present — NOT `.env.local`
+                       #   (see "Local env for `vercel dev`" below).
 npm run deploy        # vercel — preview deploy (throwaway URL), manual
 npm run deploy:prod   # vercel --prod — production deploy, manual
 ```
+
+**Local env for `vercel dev` (Vercel CLI 59.7.0).** `vercel dev` never reads `.env.local`. Function env is
+the linked project's Development variables, unless a repo-root `.env` exists — then `.env` replaces them
+entirely (all-or-nothing), so it must hold every var the functions need: `SUPABASE_URL`, `SUPABASE_ANON_KEY`,
+`SUPABASE_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `AGENT_LOGIN_SECRET` (and `ADMIN_EMAILS` if
+used). `AGENT_LOGIN_SECRET` is local-only and deliberately **not** in Vercel Development — never add it
+there. `.env.local` stays the developer-managed source of truth; the developer copies it to `.env` in their own
+terminal (`Copy-Item .env.local .env -Force`) before an agent session, and `agent-session up` fails its
+readiness check without it. `.env` is gitignored and in `.vercelignore`. Never run bare `vercel env pull` (its
+default target is `.env.local`).
 
 **Deploys are manual only.** Nothing deploys on `git push` or on merging to `master` (no GitHub
 integration on this project); a change goes live only when the developer runs `npm run deploy:prod`,
@@ -183,8 +225,8 @@ is what's actually deployed now.
 **Driving the app with Playwright** (ground rule — the full version is in Claude's memory): plain tools
 first (`navigate`/`click`/`snapshot`/`screenshot`/read-only `evaluate`), `browser_run_code_unsafe` only
 when nothing else fits; sign in only via the `agent-login` mint/redeem flow against the local
-`npm run vercel:dev` (the split `agent-session` / `agent-mint` procedure below — Claude never reads `.env.local`
-or the secret); Claude may start `npm run vercel:dev` itself via `agent-session` when a task needs it (changed
+`npm run vercel:dev` (the split `agent-session` / `agent-mint` procedure below — Claude never reads `.env` / `.env.local`
+or the secret; see "Secrets and environment files" above); Claude may start `npm run vercel:dev` itself via `agent-session` when a task needs it (changed
 since 2026-09-19 — it used to be developer-only). Check `:3000` first: if it answers, reuse it and never start a
 second dev server on top of it; a server Claude did not start is never stopped or restarted without the
 developer's explicit go-ahead (it may be their live session, possibly behind ngrok for phone testing); find
@@ -196,10 +238,12 @@ account (`agent-mint --email x@local.dev`) for anything destructive such as
 **`agent-login` and `.vercelignore` (standing procedure, SYNC-checked).** `.vercelignore` lists
 `api/agent-login.ts` to keep production within the 12-function Hobby limit, but `vercel dev` honors that
 file too — while the line is active, `/api/agent-login` 404s locally. The mint call requires the caller to
-present `AGENT_LOGIN_SECRET`, and **Claude never reads `.env.local`, never sees, generates, writes, prints or
-compares that secret, and never uses `node --env-file`** — the developer rotates it by hand. So an agent
+present `AGENT_LOGIN_SECRET`, and **Claude never reads `.env` / `.env.local`, never sees, generates, writes,
+prints, copies or compares that secret, and never uses `node --env-file`** (full rule: "Secrets and
+environment files" above) — the developer rotates it by hand. So an agent
 session is split by who may know the secret (never merge `agent-login` into a deployed function instead):
-(1) Claude runs `npm run agent-session -- up` — starts the local server (or reuses one that already answers
+(0) the developer makes sure the repo-root `.env` is current (a copy of `.env.local`, see "Local env for
+`vercel dev`" above); (1) Claude runs `npm run agent-session -- up` — starts the local server (or reuses one that already answers
 `{"ready":true}`) and *temporarily* comments the `.vercelignore` line out (marker `#AGENT-SESSION-TEMP#`); it
 refuses, touching nothing, if `:3000` is held by a server without the endpoint, and never stops a process it
 did not start; (2) **the developer** runs `npm run agent-mint` in their own terminal — masked prompt for the
@@ -217,7 +261,9 @@ One-off nutrition data seeding (bypasses the app, writes straight to Supabase):
 node --env-file=.env.local --experimental-strip-types scripts/upload-nutrition.ts
 ```
 
-Requires `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` (see `.env.local.example`).
+The developer runs this in their own terminal — Claude never runs it (it loads `.env.local`, see "Secrets
+and environment files" above). Requires `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` (see
+`.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`.
 
 ## Serena (optional MCP server)

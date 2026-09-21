@@ -245,8 +245,9 @@ commented out temporarily for local Playwright testing (see `CLAUDE.md`).
 
 ## Environment variables
 
-**Required env vars** (Vercel project settings for production; `.env.local` for local dev via
-`npm run vercel:dev`): `SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`,
+**Required env vars** (Vercel project settings for production; for local `npm run vercel:dev`, the linked
+project's Development vars or a repo-root `.env` — not `.env.local`, see "Local env for `vercel dev`" below):
+`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`,
 `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`. These are server-only — the frontend bundle never
 receives Supabase or Google credentials directly; the entire Google OAuth handshake (public paths
 `/api/auth-google-start` → `/api/auth-callback`) runs server-side instead of via a browser-side
@@ -271,10 +272,23 @@ a test session, etc.) — see each file's own comments for which. `.env.local.ex
 functions also need. The same function-count limit is why saved meals have no function of their own:
 `/api/saved-meals` is a `vercel.json` rewrite onto `api/personal-plan.ts` (see "Personal meal planning").
 
+**Local env for `vercel dev` (Vercel CLI 59.7.0).** `vercel dev` reads the repo-root `.env` for local functions
+and does **not** read `.env.local` (the dev server's env loader only looks at `.env` / `.env.build`; without a
+`.env` it falls back to the linked project's Development vars pulled from Vercel). A non-empty `.env` replaces
+that Development set entirely — it does not merge — so it must contain every var the functions need
+(`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, plus
+`AGENT_LOGIN_SECRET`, and `ADMIN_EMAILS` if used), and `vercel dev` then talks to whichever Supabase project
+`.env` points at. `AGENT_LOGIN_SECRET` is local-only: it is deliberately **not** in Vercel Development and must
+not be added there. `.env.local` remains the developer-managed source of truth (it is also what the one-off
+seeding scripts load via `--env-file`); the developer copies it to `.env` by hand when needed for the local
+agent-session workflow. `.env` is covered by `.gitignore` (`.env*`) and `.vercelignore`, so it is neither
+committed nor deployed. `vercel env pull` writes `.env.local` by default — never run it bare. Without a
+complete `.env`, `GET /api/agent-login?_debug=1` answers `{"ready":false}` and `agent-session up` rolls back.
+
 `ADMIN_EMAILS` (comma-separated, case-insensitive) lists the accounts allowed to write the global
-nutrition table via `PUT /api/nutrition` (see the Nutrition section). Set it in `.env.local` for local
-dev and with `vercel env add ADMIN_EMAILS production` for the deployed app; with it unset, nobody
-can write. Use the email the account actually signs in with (Google).
+nutrition table via `PUT /api/nutrition` (see the Nutrition section). Set it in the local `.env` (not
+`.env.local`, which `vercel dev` ignores) for local dev and with `vercel env add ADMIN_EMAILS production`
+for the deployed app; with it unset, nobody can write. Use the email the account actually signs in with (Google).
 
 `TEST_LOGIN_SECRET` (optional) was meant to enable `api/_auth-test-login.ts` — a Google-OAuth bypass
 that mints a real Supabase session cookie for a synthetic test user. **In practice it is dead code
@@ -312,9 +326,12 @@ flag, which is why this procedure was chosen over that.
 
 **Local agent sessions: two commands, split by who may know the secret.** `POST ?_action=mint` requires the
 caller to present `AGENT_LOGIN_SECRET`, and Claude Code (and anything it launches) must never hold it: it
-never reads `.env.local`, never generates, writes, prints or compares the value, and never uses
-`node --env-file`; the developer rotates the secret by hand. So the flow is split (record:
+never reads `.env` / `.env.local`, never generates, writes, prints, copies or compares the value, and never
+uses `node --env-file`; the developer rotates the secret by hand. So the flow is split (record:
 [2026-09-20-04](session-checkpoints/2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md)):
+
+- **Prerequisite (developer, own terminal):** the repo-root `.env` must be current — a copy of `.env.local`
+  holding the full var set (see "Local env for `vercel dev`" above). `agent-session` never reads or writes it.
 
 - `npm run agent-session -- up | down | status` (`scripts/agent-session.ps1`; Claude may run it) manages the
   server lifecycle and the temporary `.vercelignore` edit, and is secret-free by construction (no environment
