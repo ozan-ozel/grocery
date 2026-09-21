@@ -19,6 +19,7 @@ shown.
 | `npm run deploy` / `deploy:prod` | ✅ | ❌ unless explicitly asked |
 | `npm run kill-ports` | ✅ | ❌ (see §2) |
 | `node --env-file=.env.local … scripts/upload-nutrition.ts` | ✅ | ❌ never |
+| `node --env-file=.env.local … scripts/fetch-usda-nutrition.ts` | ✅ | ❌ never |
 | Set Vercel env vars, edit Supabase/Google console settings, apply SQL migrations | ✅ | ❌ |
 
 ## 2. Commands
@@ -276,6 +277,18 @@ The developer runs this in their own terminal — Claude never runs it (it loads
 secrets boundary). Requires `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` (see `.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`. The app's hidden
 maintenance upload modal is the other way in — see architecture § Nutrition.
+
+**Refreshing `data/nutrition.json` from USDA** (optional, rarer still):
+
+```bash
+node --env-file=.env.local --experimental-strip-types scripts/fetch-usda-nutrition.ts
+```
+
+Developer-only, for the same reason (it loads `.env.local`; it needs `USDA_API_KEY`). `scripts/usda-mapping.json`
+is the input: a hand-curated array of `{ name_tr, aliases, fdc_id }` entries, each `fdc_id` picked and verified
+against the USDA FoodData Central API in advance. The script does not search — it resolves those ids to values
+and upserts the rows by `name_tr` into `data/nutrition.json`, in place. It uploads nothing: review the git diff,
+then seed Supabase with `scripts/upload-nutrition.ts` as above.
 
 ## 9. Troubleshooting
 

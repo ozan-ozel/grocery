@@ -174,6 +174,7 @@ several independent layers with different scopes:
 | Personal plan profile | `grocery.personalPlan.v1:<userId>` (local cache) + Supabase `personal_plan` table | per user | yes, via `api/personal-plan.ts` |
 | Boot cache (session hint, active tenant) | `grocery.session.v1`, `grocery.activeTenant.v1` (`src/lib/bootCache.ts`, alongside the `grocery.state.v1:` mirror) | device | no |
 | Nutrition catalog cache | `grocery.nutrition.v1` (`src/lib/nutrition.ts`) | device | no (cache of `/api/nutrition`) |
+| Nutrition browse cache | `grocery.nutrition.browse.v1` (`src/lib/nutrition.ts`, `browseNutritionCached`): first page only, one entry per query, expires after `BROWSE_CACHE_TTL_MS` (5 min); dropped whenever nutrition rows are saved | device | no (cache of `GET /api/nutrition`) |
 | Meal-plan / nutrition UI prefs | `grocery.showNutritionValues.v1`, `grocery.shoppingTab.v1`, `grocery.mealPortion.v1` (`src/lib/preferences.ts`) | device | no |
 
 Category customization stays device-local even though it's keyed by tenant. Item category memory

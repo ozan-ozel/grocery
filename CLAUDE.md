@@ -143,6 +143,14 @@ If none apply, say so explicitly in the session wrap-up rather than silently ski
      this is a reminder, not a hard check, since intent can't be read from a filename.
   3. **Session-checkpoint**: flag, from the diff's size/paths, whether this looks significant enough
      to warrant a `docs/session-checkpoints/` record — a judgment call to surface, not to decide.
+  4. **Durable facts** (Close-out item 4): flag any changed endpoint, table/migration, environment variable,
+     persisted key, command/script, or other durable repository fact whose owner documentation is not updated
+     or whose documented owner is now stale. Owners: `docs/architecture.md` (endpoints, tables, persisted keys,
+     invariants) and `docs/operations.md` (env vars, commands, scripts). This is a flag for the human to judge,
+     not a proof of semantic correctness.
+  5. **`.vercelignore`**: flag a diff that still has the `api/agent-login.ts` line commented out or a
+     `#AGENT-SESSION-TEMP#` marker in `.vercelignore` — deploying with it pushes 13+ functions and fails the
+     Hobby limit (or ships the login endpoint). See "Agent sessions and browser QA" below for why.
   `SYNC` only reports; it never edits files or stages/commits anything itself. Run it standalone,
   immediately before `CMP`/`BCMP`/`LCMP`/`LBCMP` — never as an automatic step inside them — since it's
   checking the diff that's about to be committed, not something to run before the diff exists.
@@ -248,8 +256,9 @@ Driving the app in a browser is allowed only through the split agent-session flo
   ports; only stop servers Claude started (`agent-session` enforces this by PID + process start time).
 - **Never merge `agent-login` into a deployed function.** `.vercelignore` keeps `api/agent-login.ts` out of
   production (12-function limit) and `vercel dev` honors it too, so `agent-session` comments the line out
-  temporarily. **SYNC** must flag a diff that still has the line commented out or a `#AGENT-SESSION-TEMP#` marker
-  in `.vercelignore` — deploying with it pushes 13+ functions and fails the Hobby limit (or ships the login endpoint).
+  temporarily. **SYNC** (§ Git shorthand, check 5) must flag a diff that still has the line commented out or a
+  `#AGENT-SESSION-TEMP#` marker in `.vercelignore` — deploying with it pushes 13+ functions and fails the Hobby
+  limit (or ships the login endpoint).
 - Leave the test account as found; use a throwaway account (`agent-mint --email x@local.dev`) for anything
   destructive such as `/api/auth-delete-account`; keep screenshots out of the repo root.
 
