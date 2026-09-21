@@ -65,36 +65,30 @@ means it was recorded as pending and has not been re-checked.
    [09-19-02](session-checkpoints/2026-09-19-02-batch-preparation-ui.md),
    [09-20-01](session-checkpoints/2026-09-20-01-nutrition-write-lockdown.md),
    [09-20-03](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md).
-2. **`supabase/28-saved-meals.sql`** is recorded as applied to the developer's Supabase project only (checkpoint
-   09-20-03) — apply it anywhere else the app's database lives. Unverified whether another database exists.
-3. **`ADMIN_EMAILS`** must be set for the hidden nutrition upload to work (local repo-root `.env` for
-   `vercel dev`, and Vercel production) — see [`operations.md`](operations.md) and checkpoint 09-20-01. Whether it
-   has been set is unverified.
-4. **Manual rotation of `AGENT_LOGIN_SECRET`** by the developer was recorded as a remaining step (checkpoint
-   09-20-04). Only the developer can confirm it. `agent-session up -EarlyRestore` is also still unverified.
-5. **Batch-preparation UI is hidden:** `BATCH_PREP_VISIBLE = false` in `src/components/MealPlanView.tsx` (line 41,
-   verified 2026-09-21) until batch prep is re-wired to the Yemekler sheet.
-6. **Vestigial `today` tab:** `Tab` in `src/hooks/useUiPrefs.ts` still includes `"today"` and it is the fallback
-   tab (lines 22-37, verified 2026-09-21). Left deliberately so old `?tab=today` links keep working
-   (checkpoint 09-20-02).
-7. **Boot-performance leftovers** (checkpoint
+2. **Boot-performance leftovers** (checkpoint
    [09-17-02](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md), plan in
    [`superpowers/plans/`](superpowers/plans/README.md)): Phase 4d (`getClaims()` / custom JWT claims) and the
-   asset work were out of scope by the plan's own decision; the server-side gain was structural, not measured
-   in ms (a preview-deploy measurement is still open); `MealPlanView` was reported to fire duplicate
-   `/api/personal-plan` calls on boot. All unverified since 2026-09-17.
-8. **Schema is not reproducible from the repo:** no `CREATE TABLE` for `nutrition`, and `meal_entries` is
-   created in both `supabase/01-schema.sql` and `07-meal-entries.sql` (grep-verified 2026-09-21). See
-   [`architecture.md`](architecture.md) (Persistence & schema map).
-
-9. **Stale pointers deliberately left alone:** the root `.copilot-agent-kit-adaptation.md` (a tooling prompt) still
-   names `docs/SESSION_FOLLOWUP.md`, the old name of this file. A few historical checkpoints, plans and specs
-   likewise use the old name and cite architecture headings that no longer exist ("Deployment", "Environment
-   variables" — now in [`operations.md`](operations.md)); they are snapshots, so leave them.
+   asset work were out of scope by the plan's own decision, and the server-side gain was structural, not measured
+   in ms (a preview-deploy measurement is still open). The duplicate boot `GET /api/personal-plan` is fixed in
+   code (concurrent calls share one request, `fetchPersonalPlan` in `src/lib/personalPlan.ts`), but that was
+   found by reading the code and not yet confirmed in the browser's network tab.
+3. **Possible duplicate `PUT /api/personal-plan` on boot (unverified):** in `useMealPersonalization`, applying
+   the server copy replaces `profile`, which fires the debounced save effect, so each mounted instance (App,
+   `MealPlanView`, `useRemainingToday`) may write the profile straight back. Confirm in the network tab before
+   changing it — the save path guards against losing a failed persist, so it is not a one-line dedupe.
+4. **Schema is not reproducible from the repo:** there is no `CREATE TABLE` for `nutrition`. Its columns are
+   visible in `api/nutrition.ts` but not their types or constraints, so closing this needs a schema-only dump of the
+   live table from the developer (Claude has no database access). `meal_entries` in both `01` and `07` is
+   intentional (`07` drops and recreates). See [`architecture.md`](architecture.md) (Persistence & schema map).
+5. **Stale pointers in historical records, left alone on purpose:** a few checkpoints, plans and specs use the
+   old name `SESSION_FOLLOWUP.md` and cite architecture headings that no longer exist ("Deployment", "Environment
+   variables" — now in [`operations.md`](operations.md)); they are snapshots.
 
 ## Next Step
 
-Nothing is in flight. The owner decides whether to start the deferred phases (not started): the
+The `chore/current-state-open-items-cleanup` work (vestigial `today` tab and archived Bugün screen removed, boot
+`GET /api/personal-plan` deduped, schema/stale-pointer notes corrected) is merged. Still to confirm in the browser: a
+single boot `GET /api/personal-plan` (open items 2-3). The owner decides whether to start the deferred phases (not started): the
 plans/specs/audits lifecycle cleanup, and process optimization (a single close-out checklist,
 nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the remaining merged branches.
 Otherwise pick work from the Open items.
@@ -103,6 +97,11 @@ Otherwise pick work from the Open items.
 
 - **No live app roadmap.** `docs/archive/roadmap.md` is historical. Nutrition scope is `docs/roadmap_v2.md`;
   actionable debt goes in the Open items above.
+- **Batch-preparation UI is out of MVP scope** (owner decision, 2026-09-21). It stays hidden behind
+  `BATCH_PREP_VISIBLE = false` in `src/components/MealPlanView.tsx`; re-wiring it to the Yemekler sheet is not
+  planned.
+- **Applied by the owner (2026-09-21):** `supabase/28-saved-meals.sql`, `ADMIN_EMAILS` (local and production), and
+  the `AGENT_LOGIN_SECRET` rotation.
 - **Checkpoints are historical snapshots, not the current state.** They are normally preserved as written and are
   never rewritten into current-state records; a factual or status correction may be made when necessary. Route
   around them from [`knowledge-map.md`](knowledge-map.md) and the checkpoint index.

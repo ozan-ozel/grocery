@@ -92,8 +92,7 @@ function comboHasSoftConflict(
 // Every combo the catalog can score, hard-excluded foods dropped, ranked by
 // (no soft conflict first, then) protein — no budget filtering. Backs the
 // Yemekler picker's full list, which deliberately shows combos regardless of
-// whether they fit the day's remaining budget. (A budget-filtered variant,
-// matchCombos, used to live here — see archive/src/lib/matchCombos.ts.)
+// whether they fit the day's remaining budget.
 export function scoreAllCombos(
   combos: Combo[],
   exclusions: FoodExclusion[],

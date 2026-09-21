@@ -1,11 +1,8 @@
 import { ChefHat, Undo2 } from "lucide-react";
 import type { ScoredCombo } from "@/lib/comboMatch";
 
-// Mechanically extracted from TodayView.tsx (originally private to that
-// file) so MealPlanView.tsx's evening-recommendation section can render the
-// exact same card without a second implementation. `eaten`/`onUndo` are a
-// later addition (not part of the original TodayView card) so a single
-// pattern's card can flip in place from "recommended" to "already eaten,
+// The evening-recommendation card MealPlanView.tsx renders. `eaten`/`onUndo`
+// let a single pattern's card flip in place from "recommended" to "already eaten,
 // with undo" without moving to a separate section or requiring the caller
 // to hunt down the logged ingredients elsewhere to remove them.
 export function SuggestionCard({
@@ -40,8 +37,7 @@ export function SuggestionCard({
   // border's primary→signal blend) and low-opacity so it reads as a subtle
   // tint rather than a loud color in every theme, light or dark, without
   // touching text contrast. Eaten reuses that same signal-tinted wash
-  // permanently (no toggle) — same visual language TodayView's separate
-  // "Bugün yediklerin" section already used for "this was eaten."
+  // permanently (no toggle).
   const content = (
     <div
       className={`rounded-[calc(0.5rem-1px)] bg-background p-3 ${

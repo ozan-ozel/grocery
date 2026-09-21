@@ -19,8 +19,8 @@ import {
 } from "@/lib/preferences";
 
 export type Section = "alisveris" | "besin" | "yemek" | "kisisel" | "ayarlar";
-export type Tab = "today" | "list" | "history";
-const TABS: Tab[] = ["today", "list", "history"];
+export type Tab = "list" | "history";
+const TABS: Tab[] = ["list", "history"];
 
 export function initialSection(): Section {
   const fromUrl = readSectionFromUrl();
@@ -32,9 +32,11 @@ export function initialSection(): Section {
   return "yemek";
 }
 
+// An unknown value in ?tab= (including the retired "today") falls back to the
+// last-used Shopping tab, so an old link still lands somewhere sensible.
 function initialTab(): Tab {
   const fromUrl = readTabFromUrl();
-  return (TABS as string[]).includes(fromUrl ?? "") ? (fromUrl as Tab) : "today";
+  return (TABS as string[]).includes(fromUrl ?? "") ? (fromUrl as Tab) : loadShoppingTab();
 }
 
 export function useUiPrefs() {
@@ -56,7 +58,7 @@ export function useUiPrefs() {
   useEffect(() => {
     writeTabToUrl(tab);
     // Save Shopping tab when in Shopping section and tab changes
-    if (section === "alisveris" && (tab === "list" || tab === "history")) {
+    if (section === "alisveris") {
       saveShoppingTab(tab);
     }
   }, [tab, section]);

@@ -48,9 +48,26 @@ function apiUrl(path: string): string {
   return `${baseUrl}${path}`;
 }
 
-// Scoped server-side to the logged-in session (no id to pass) — see
-// api/personal-plan.ts.
-export async function fetchPersonalPlan(): Promise<PersonalProfile | null> {
+// Scoped server-side to the logged-in session — see api/personal-plan.ts. The
+// userId is not sent; it only keys the in-flight request below.
+//
+// useMealPersonalization is mounted by App, MealPlanView and (through
+// useRemainingToday) MealPlanView again, so a boot straight into the Yemek
+// section asks for the same profile three times at once. Concurrent calls for
+// the same user share one request; keying by userId keeps a sign-out/sign-in
+// during the request from handing the old user's profile to the new one.
+let inflightFetch: { userId: string; promise: Promise<PersonalProfile | null> } | null = null;
+
+export function fetchPersonalPlan(userId: string): Promise<PersonalProfile | null> {
+  if (inflightFetch?.userId === userId) return inflightFetch.promise;
+  const promise = requestPersonalPlan().finally(() => {
+    if (inflightFetch?.promise === promise) inflightFetch = null;
+  });
+  inflightFetch = { userId, promise };
+  return promise;
+}
+
+async function requestPersonalPlan(): Promise<PersonalProfile | null> {
   try {
     const res = await fetch(apiUrl("/api/personal-plan"), {
       method: "GET",

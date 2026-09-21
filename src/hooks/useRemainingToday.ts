@@ -31,9 +31,9 @@ export type RemainingToday =
       foodExclusions: FoodExclusion[];
       allergenExclusions: AllergenClassExclusion[];
       catalogMap: NutritionMap;
-      // Every ingredient logged today, slot attached — TodayView groups
-      // whichever of these carry a comboId to reconstruct "Bugün
-      // yediklerin" from real data, so it survives a reload.
+      // Every ingredient logged today, slot attached — MealPlanView groups
+      // whichever of these carry a comboId to reconstruct the eaten evening
+      // combos from real data, so it survives a reload.
       todaysItems: (MealItem & { slot: MealSlot })[];
       logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
@@ -78,7 +78,7 @@ export function useRemainingToday(
 ): RemainingToday {
   const { targets, profile } = useMealPersonalization(userId);
   const { catalogMap, status: catalogStatus } = useFoodCatalog();
-  // Bugün always means today, whatever day Yemek Planı is currently browsing
+  // "Remaining" always means today, whatever day Yemek Planı is currently browsing
   // (both read the same ?date URL param, so this instance opts out of it).
   const {
     dailyNutrition,

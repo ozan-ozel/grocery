@@ -71,16 +71,16 @@ function toDayPlan(entries: MealEntry[]): DayPlan {
 // always derives it from the live catalog. Without a household (no tenant
 // selected yet) the plan stays in-memory only, same as before this landed.
 //
-// Backed by TanStack Query rather than a bare useEffect+useState: Bugün
-// (pinned to today) and Yemek Planı (browsing today) end up with the exact
+// Backed by TanStack Query rather than a bare useEffect+useState: the
+// today-pinned instance (useRemainingToday) and Yemek Planı (browsing today) end up with the exact
 // same queryKey when they overlap, so they share one fetch and one cache
 // entry — a mutation from either is instantly visible in the other, and
 // switching tabs away and back repaints from cache instead of flashing
 // empty while a fresh request round-trips.
 //
 // `options.pinnedDate` opts a caller out of the shared ?date URL param entirely:
-// the plan is fixed to that date and never reads or writes the URL. Bugün needs
-// this — it must always mean today, while Yemek Planı's prev/next-day navigation
+// the plan is fixed to that date and never reads or writes the URL. useRemainingToday
+// needs this — it must always mean today, while Yemek Planı's prev/next-day navigation
 // keeps steering the URL param for its own instance.
 export function useMealPlan(
   householdId: string | null,
@@ -134,7 +134,7 @@ export function useMealPlan(
   }
 
   // Every item across all slots for the pinned date, slot attached — backs
-  // TodayView's reconstruction of "Bugün yediklerin" from real data (grouped
+  // MealPlanView's reconstruction of eaten evening combos from real data (grouped
   // by comboId) instead of only component state that resets on reload.
   function allItems(): (MealItem & { slot: MealSlot })[] {
     return MEAL_SLOTS.flatMap(({ slot }) => dayPlan[slot].map((item) => ({ ...item, slot })));

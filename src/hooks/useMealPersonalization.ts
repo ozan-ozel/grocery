@@ -67,8 +67,8 @@ function loadProfile(userId: string | null): PersonalProfile {
 
 // Distinguishes "the user has a profile" from "we fell back to DEFAULT_PROFILE".
 // calculateTargets(DEFAULT_PROFILE) returns perfectly valid targets, so callers
-// that need to know whether those targets describe a real person (Bugün's
-// setup prompt) can't infer it from `targets` alone.
+// that need to know whether those targets describe a real person (the Meal
+// Plan's setup prompt) can't infer it from `targets` alone.
 function hasSavedProfileLocally(userId: string | null): boolean {
   try {
     return localStorage.getItem(storageKey(userId)) !== null;
@@ -125,7 +125,7 @@ export function useMealPersonalization(userId: string | null) {
     if (!userId) return;
 
     let cancelled = false;
-    fetchPersonalPlan().then(server => {
+    fetchPersonalPlan(userId).then(server => {
       if (cancelled) return;
       setRemoteChecked(true);
       if (!server) return;
@@ -142,7 +142,7 @@ export function useMealPersonalization(userId: string | null) {
     // The untouched DEFAULT_PROFILE fallback is not something the user ever
     // filled in, so it must not be written anywhere: persisting it would
     // fabricate a "saved" profile on the very first render and permanently
-    // hide the Kişisel Plan setup prompt Bugün owes a new user. Every real
+    // hide the Kişisel Plan setup prompt the Meal Plan owes a new user. Every real
     // profile — device cache, server copy, or an edit via update() — is a
     // fresh object, so identity is what separates the two.
     if (profile === DEFAULT_PROFILE) return;

@@ -8,7 +8,7 @@
 // Deliberately does not touch comboMatch.ts: this is an additive path that
 // happens to produce the same ScoredCombo shape so the existing
 // SuggestionCard/MealsSheet/shopping-list/log-as-eaten UI in
-// TodayView.tsx needs no changes to render it.
+// MealPlanView.tsx needs no changes to render it.
 import { lookupNutrition, type NutritionMap, type Nutrition } from "./nutrition";
 import { scaleNutrition, sumMacros, type MacroTotals } from "./mealNutrition";
 import type { ScoredCombo } from "./comboMatch";
@@ -112,7 +112,7 @@ export const EVENING_CANDIDATE_PATTERNS: CandidatePattern[] = [
   },
 ];
 
-// Lookup for TodayView's "Bugün yediklerin" reconstruction — an evening
+// Lookup for MealPlanView's eaten-evening-combo reconstruction — an evening
 // suggestion, once eaten, is logged with its pattern id as comboId (same
 // convention combos.ts's COMBO_BY_ID already serves for authored combos),
 // but patterns live in this module, not combos.ts, so that lookup needs a
@@ -168,7 +168,7 @@ const FAT_SHORTFALL_WEIGHT = 0.3;
 
 // Top-level per-macro weights — how much each macro's (already-weighted)
 // error contributes to the final score. kcal and protein dominate, matching
-// what TodayView/SuggestionCard already surface most prominently today.
+// what SuggestionCard already surfaces most prominently today.
 const SCORE_WEIGHT_KCAL = 0.35;
 const SCORE_WEIGHT_PROTEIN = 0.3;
 const SCORE_WEIGHT_CARBS = 0.2;

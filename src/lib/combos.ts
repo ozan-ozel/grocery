@@ -20,7 +20,7 @@ export type Combo = {
 // but this module's Combo type and comboMatch.ts consume camelCase. A bare
 // `as Combo[]` cast doesn't even typecheck ("neither type sufficiently
 // overlaps with the other"), so this is the one place the raw JSON is
-// adapted — every consumer (TodayView's suggestions, the DEC-069 batch
+// adapted — every consumer (the Yemekler picker, the DEC-069 batch
 // planner) imports ALL_COMBOS rather than re-parsing the file itself.
 type RawCombo = {
   id: string;

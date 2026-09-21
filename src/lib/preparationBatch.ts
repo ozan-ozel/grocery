@@ -99,7 +99,7 @@ export type MealAllocation = {
 export type RemainingItem = BatchCompositionItem & {
   // Can go negative on over-allocation — never clamped to zero here. The
   // caller/UI decides how to present that (this app's existing convention,
-  // e.g. TodayView's RemainingSummary, is to show the raw negative number in
+  // e.g. the Meal Plan's remaining-macros summary, is to show the raw negative number in
   // a warning color rather than hide or auto-correct it).
   remainingG: number;
 };

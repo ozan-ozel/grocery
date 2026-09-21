@@ -247,9 +247,13 @@ migration itself._
 
 **Schema authority.** The schema is the numbered migration files `supabase/01`–`28`, applied by hand in order
 (see [operations.md](operations.md) § External configuration). There is **no single canonical schema file**:
-`01-schema.sql` holds only the early tables (`lists` and `items` are unused today), `meal_entries` is created in
-both `01` and `07`, and the repo has **no `CREATE TABLE` for `nutrition`** (only `ALTER`s and RLS in `14`, `16`,
-`24`), so the database cannot be rebuilt from the repo alone. A change is a **new numbered file**, not an edit to an
+`01-schema.sql` holds only the early tables (`lists` and `items` are unused today), and the repo has **no
+`CREATE TABLE` for `nutrition`** (only `ALTER`s and RLS in `14`, `16`, `24`), so the database cannot be rebuilt from
+the repo alone. (`meal_entries` is created in both `01` and `07`, on purpose: `07` does `drop table if exists`
+first and redefines it, so a fresh install in order still works — but re-running `07` on a database that holds
+meal entries deletes them.) The columns `nutrition` is read with are visible in `api/nutrition.ts` (`SELECT_COLS`),
+but their types and constraints are not recorded anywhere in the repo; capture them from the live database (a
+schema-only dump of the table) before writing its `CREATE TABLE`. A change is a **new numbered file**, not an edit to an
 applied one — `20` fixes `19`'s policy, `18` fixes `17`'s, `22` moves `21`'s functions. For column names and types,
 read the migration that creates or alters the table.
 

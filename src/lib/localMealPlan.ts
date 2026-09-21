@@ -6,8 +6,8 @@ export type { MealSlot };
 
 // What the user actually controls per spec: a food and a quantity. Nutrition
 // is always derived (see calculateItemsNutrition), never stored here.
-// `comboId` is set only when this item was logged via Bugün's "Yedim" —
-// TodayView groups by it to reconstruct "Bugün yediklerin" after a reload.
+// `comboId` is set only when this item was logged via "Yedim" on an evening
+// suggestion — MealPlanView groups by it to reconstruct the eaten combo after a reload.
 export type MealItem = {
   id: string;
   foodId: string; // Nutrition.name_tr

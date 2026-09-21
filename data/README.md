@@ -29,7 +29,7 @@ Bulk-seed flow (rare):
 
 ## `combos.json`
 
-Hand-authored meal-combo suggestions used by the "Bugün" recommendation engine
+Hand-authored meal-combo suggestions used by the Meal Plan's Yemekler picker
 (`src/lib/comboMatch.ts`). Each row:
 
 - `id` — stable string id.

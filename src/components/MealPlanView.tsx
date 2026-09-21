@@ -184,8 +184,7 @@ export function MealPlanView({
   // Patterns already logged today (via "Yedim" below), grouped back to
   // their own card so undo lives right on it instead of requiring the
   // per-ingredient delete in whichever slot they landed in. Real logged
-  // totals (not the nominal solved-quantity ones), same precedent as
-  // TodayView.tsx's now-unmounted "Bugün yediklerin" reconstruction.
+  // totals (not the nominal solved-quantity ones).
   const eatenEveningCombos: { combo: ScoredCombo; entries: LoggedEntry[] }[] =
     isToday && remainingToday.status === "ready"
       ? (() => {
@@ -293,8 +292,7 @@ export function MealPlanView({
   }
 
   // Mirrors toggleDayShoppingList's own name/qty pattern exactly — this
-  // component's onAddShoppingItem has no `exact`-match option (unlike
-  // TodayView's onAddItem), so this is the same fuzzy-resolvable add every
+  // component's onAddShoppingItem has no `exact`-match option, so this is the same fuzzy-resolvable add every
   // other shopping-list action on this screen already uses.
   function addEveningComboToList(combo: ScoredCombo) {
     for (const item of combo.items) {
