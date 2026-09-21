@@ -54,7 +54,7 @@ all fixed and re-verified live in both themes:
    and gave each ring a faded color-mix disc backdrop (`color-mix(in oklab, ${color} 12%,
    transparent)`) instead of sitting bare on the tile background — reads as a lit badge/indicator
    now instead of a thin colored line. Checked the North Star mockup
-   (`public/mockups/grocery-ui-options.html`) for a reference pattern first; it only has bar
+   (`docs/mockups/grocery-ui-options.html`) for a reference pattern first; it only has bar
    meters, no circular rings, so this was an original treatment rather than a borrowed one.
 6. **Bottom nav active tab was nearly invisible on Arduvaz.** The `bg-accent` pill from the first
    pass used `--color-accent: #1a222e` on Arduvaz, which sits almost on top of

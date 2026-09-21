@@ -8,7 +8,7 @@
 
 A structured UI/UX review of the shipped app, cross-checked against the documented
 [Version 2 North Star direction](v2-north-star-design.md) and the
-[5-option comparison mockup](../public/mockups/grocery-ui-options.html), plus a first pass at
+[5-option comparison mockup](mockups/grocery-ui-options.html), plus a first pass at
 identifying where motion would clarify state changes. See
 [docs/session-checkpoints/](session-checkpoints/) for how to log follow-up work; this document is
 the Pass 1–6 findings artifact referenced from the audit plan.
