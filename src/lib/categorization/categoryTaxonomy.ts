@@ -95,8 +95,3 @@ export const CATEGORIES: CategoryDef[] = [
 export const CATEGORY_BY_ID: Record<CategoryId, CategoryDef> = Object.fromEntries(
   CATEGORIES.map((c) => [c.id, c])
 ) as Record<CategoryId, CategoryDef>;
-
-export function categoryLabel(id: CategoryId | undefined): string {
-  if (!id) return CATEGORY_BY_ID.diger.label;
-  return CATEGORY_BY_ID[id]?.label ?? CATEGORY_BY_ID.diger.label;
-}

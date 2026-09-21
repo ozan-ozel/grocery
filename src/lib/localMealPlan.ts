@@ -1,6 +1,5 @@
 import type { MealSlot } from "./mealPlan";
 import type { Nutrition, NutritionMap } from "./nutrition";
-import { uid } from "./store";
 import { scaleNutrition, sumMacros, type MacroTotals } from "./mealNutrition";
 
 export type { MealSlot };
@@ -26,10 +25,6 @@ export const MEAL_SLOTS: { slot: MealSlot; label: string }[] = [
   { slot: "aksam", label: "Akşam" },
   { slot: "ara", label: "Ara öğün" },
 ];
-
-export function createMealItem(foodId: string, quantityG: number): MealItem {
-  return { id: uid(), foodId, quantityG };
-}
 
 // Items whose foodId isn't in the catalog (e.g. catalog still loading) are
 // skipped rather than throwing — the UI shows partial totals until the

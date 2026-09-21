@@ -60,10 +60,6 @@ export function saveTheme(theme: Theme) {
   }
 }
 
-export function themeGroup(theme: Theme): ThemeGroup {
-  return THEME_OPTIONS.find((t) => t.id === theme)?.group ?? "light";
-}
-
 export function loadSwipeMode(): boolean {
   try {
     return localStorage.getItem(SWIPE_KEY) === "1";

@@ -74,8 +74,6 @@ export const COMBO_PORTIONS: { id: PortionId; label: string; factor: number }[] 
   { id: "large", label: "Büyük", factor: 4 / 3 },
 ];
 
-export const DEFAULT_PORTION: PortionId = "normal";
-
 const PORTION_STEP_G = 5;
 
 // Scales every item by `factor`, rounded to the nearest 5 g (the scale's

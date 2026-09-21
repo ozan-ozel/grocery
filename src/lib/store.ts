@@ -142,10 +142,6 @@ export function writeMealDateToUrl(date: string) {
   writeUrlParam(MEAL_DATE_QUERY_PARAM, date);
 }
 
-export function newTenant(name: string): Tenant {
-  return { id: uid(), name: name.trim() || "Ev", createdAt: Date.now(), ownerId: null };
-}
-
 /**
  * Stable id used for the built-in "Evim" household. Every device using the
  * app-wide default tenant lands on this same id.
@@ -303,10 +299,6 @@ export async function categorizeItems(items: Item[]): Promise<Item[]> {
       return { ...item, category: await categorizeAsync(item.name) };
     })
   );
-}
-
-export function isSameCategory(a: AnyCategoryId | undefined, b: AnyCategoryId | undefined) {
-  return (a ?? undefined) === (b ?? undefined);
 }
 
 // Re-export so callers importing from the store also get the item-level id type.

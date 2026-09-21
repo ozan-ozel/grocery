@@ -55,24 +55,6 @@ export async function renameHousehold(
   }
 }
 
-export async function fetchHousehold(id: string): Promise<Household | null> {
-  try {
-    const res = await fetch(apiUrl(`/api/households?id=${encodeURIComponent(id)}`), {
-      method: "GET",
-      headers: { "content-type": "application/json" },
-    });
-    if (!res.ok) {
-      if (res.status === 404) return null;
-      console.warn("[households] fetch failed:", res.status);
-      return null;
-    }
-    return (await res.json()) as Household;
-  } catch (err) {
-    console.warn("[households] fetch threw:", err);
-    return null;
-  }
-}
-
 export async function deleteHousehold(id: string): Promise<boolean> {
   try {
     const res = await fetch(apiUrl(`/api/households?id=${encodeURIComponent(id)}`), {
