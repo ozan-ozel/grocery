@@ -80,8 +80,8 @@ If two documents disagree, the **CURRENT** owner in the registry below wins; a S
 | `~/vault/grocery/` | outside the repo | Session history and cross-project notes; never committed | Reconstructing history beyond the checkpoints |
 | Claude memory (`~/.claude/…/memory/`) | non-canonical | Personal preferences carried between sessions; repo rules live in `CLAUDE.md` | — |
 
-Repo-root tooling and meta files (`opencode.json`, `.copilot-agent-kit-adaptation.md`, the "Project-Agnostic
-Knowledge Architecture" prompt) are prompts and tool configuration, not project knowledge, and are not routed.
+Repo-root tooling and meta files (`.copilot-agent-kit-adaptation.md`, the "Project-Agnostic
+Knowledge Architecture" prompt) are prompts, not project knowledge, and are not routed.
 
 ## Runtime behavior
 

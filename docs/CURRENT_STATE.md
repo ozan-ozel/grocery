@@ -15,7 +15,7 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` were both at `b6750fc` when this was written (before the commit that
+- **Repo:** `master` and `origin/master` were both at `708cd57` when this was written (before the commit that
   refreshes this file), with a clean working tree. The migration (`8b03bd1`, then `ffc5d19`), the `SYNC` fix
   (`09dea3d`), the previous refresh of this file (`4ab264b`) and the interaction-model alignment (`b6750fc`) are
   merged and pushed, all as fast-forwards (no merge commits). The migration was docs-only apart from the
@@ -23,10 +23,9 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
 - **Verifier:** the migration verifier (a scratch script kept outside the repo) passes every check except check
   10, which flags only the earlier-approved one-line `COL` pointer change in
   `nutrition-curriculum/IMPLEMENTATION_HANDOFF.md` (the check predates that approval). Not a new problem.
-- **In flight:** nothing. No local branch was unmerged into `master` (checked 2026-09-21 at `b6750fc`, before the
-  branch carrying this refresh). The merged docs branches (`docs/documentation-architecture-migration`,
-  `docs/sync-durable-facts-check`, `docs/refresh-current-state-after-landing`, `docs/refine-interaction-model`)
-  still exist locally and on `origin`; the owner decides when to delete them.
+- **In flight:** nothing. No local branch was unmerged into `master` (checked 2026-09-21 at `708cd57`, before the
+  branch carrying this refresh). The 48 other merged local branches (docs, chore, feature, fix and others) still
+  exist, and 8 merged branches also still exist on `origin`; the owner decides when to delete them.
   `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`, "Organize roadmap and MVP files into docs/roadmap
   folder") exists only on the remote and is not merged into `master`; its contents were not examined.
 - **Worktree:** `D:/CodeSpace/grocery.worktrees/simple-test-setup` on `agents/simple-test-setup` (that branch
@@ -36,7 +35,12 @@ phase (single checklist, nutrition-status ownership headers, `kill-ports` treatm
   `agent-session` / `agent-mint` (`5663fcf`), reported working end-to-end by the developer on 2026-09-21;
   the secrets boundary extended to `.env` (`9a4678b`); the documentation architecture migration (`8b03bd1`,
   `ffc5d19`); the `SYNC` durable-facts and `.vercelignore` checks (`09dea3d`); the refresh of this file after that
-  landing (`4ab264b`); the Claude interaction model aligned with the current workflow (`b6750fc`).
+  landing (`4ab264b`); the Claude interaction model aligned with the current workflow (`b6750fc`); the refresh of
+  this file (`a819601`); Claude permissions tightened to the `CLAUDE.md` boundaries (`226ec83`); the checkpoint
+  policy aligned on significant-work-only (`e1a6e35`); session skill names normalized (`7cc7ce6`) and
+  `current-state-and-compact` retired (`cf2ae77`); dead source files and exports removed (`7796181`); the dead
+  `_auth-test-login` endpoint retired (`1105466`); legacy Cloudflare/Deno ignore rules and `opencode.json` removed
+  (`708cd57`).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see
   [`operations.md`](operations.md)).
 
