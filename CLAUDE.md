@@ -271,6 +271,15 @@ Driving the app in a browser is allowed only through the split agent-session flo
   limit (or ships the login endpoint).
 - Leave the test account as found; use a throwaway account (`agent-mint --email x@local.dev`) for anything
   destructive such as `/api/auth-delete-account`; keep screenshots out of the repo root.
+- **MOBILEUP** / **MOBILEDOWN** — phone-testing shorthand (not a git operation, doesn't commit/merge/push).
+  **MOBILEUP:** start (or reuse) the local dev server via `agent-session up`, then start (or reuse) an
+  `ngrok http 3000` tunnel and report the public URL. Same discipline as the dev-server rule above, extended to
+  ngrok: check for an existing tunnel first (its local API at `:4040`) and reuse it rather than starting a second
+  one; if Claude starts a new one, track it by the tool call that launched it (there is no PID-tracking script for
+  ngrok the way `agent-session` has one for the dev server) so `MOBILEDOWN` stops only that process, never a
+  foreign ngrok instance. **MOBILEDOWN:** stop the ngrok tunnel Claude started (if any), then run
+  `npm run agent-session -- down`, in that order. Full procedure: [docs/operations.md](docs/operations.md) §
+  Agent sessions and browser QA → Phone testing through ngrok.
 
 ## Serena (optional MCP server)
 

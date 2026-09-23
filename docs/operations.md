@@ -203,10 +203,32 @@ verified live versus faked.
 
 ### Phone testing through ngrok
 
-Live device testing has used an ngrok tunnel to `localhost:3000` (`ngrok http 3000`, with `vercel dev` already
+Live device testing uses an ngrok tunnel to `localhost:3000` (`ngrok http 3000`, with `vercel dev` already
 running). `lib/auth.ts` trusts `x-forwarded-proto` / `x-forwarded-host`, so the OAuth redirect URI and the cookie
 `Secure` flag reflect the public URL. Editing source while the developer is connected can make their phone fetch a
 half-written module — say so when finishing a batch of edits.
+
+**`MOBILEUP` / `MOBILEDOWN`** (§ Agent sessions and browser QA in `CLAUDE.md`) is the shorthand for this:
+
+- **`MOBILEUP`:**
+  1. `npm run agent-session -- up` (or reuse if `:3000` already answers — same rule as plain browser QA above).
+  2. Check whether a tunnel is already running: `GET http://127.0.0.1:4040/api/tunnels` (ngrok's local API). If a
+     tunnel to `localhost:3000` already exists, reuse its `public_url` and start nothing new.
+  3. Otherwise start one: `ngrok http 3000` as a background process. Unlike the dev server, there is no
+     PID-tracking script for ngrok (`agent-session` only manages `vercel dev`) — Claude's only record that it
+     started this particular process is the background-task id from the tool call that launched it. Keep that
+     id; it is what `MOBILEDOWN` uses to stop the right process.
+  4. Re-query `http://127.0.0.1:4040/api/tunnels` for the `public_url` and report it.
+- **`MOBILEDOWN`:**
+  1. If Claude started a tunnel in step 3 above (tracked by its background-task id), stop only that process —
+     never a blanket `taskkill`/`pkill` on `ngrok`, since a foreign ngrok instance (the developer's own tunnel,
+     for something else entirely) must never be touched. If `MOBILEUP` reused an existing tunnel instead of
+     starting one, `MOBILEDOWN` leaves it running, same as the dev-server rule never stops a server Claude didn't
+     start.
+  2. `npm run agent-session -- down`.
+
+Both directions are Claude-runnable without secrets — `ngrok http 3000` needs no token for a transient HTTP
+tunnel on the free tier, and `agent-session` is secret-free by construction (§5 above).
 
 ## 6. Deployment
 
