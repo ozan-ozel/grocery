@@ -51,6 +51,7 @@ below. Files are named `YYYY-MM-DD-NN-slug.md`, so they sort chronologically.
 | 30 | [agent-login `_debug` gate fix, secret rotation, `agent-session` / `agent-mint` split](2026-09-20-04-agent-login-debug-gate-and-secret-rotation.md) |
 | 31 | [Meal plan: meal cards, bulk clear, 5-step undo](2026-09-21-01-meal-plan-cards-clear-undo.md) |
 | 32 | [DEC-033 per-occasion protein target consumer](2026-09-23-01-meal-plan-protein-target-consumer.md) |
+| 33 | [Meal-plan UI polish batch](2026-09-23-02-meal-plan-ui-polish-batch.md) |
 
 The UI polish pass of 2026-09-16 (buttons, spacing, macro rings, nav feel) has no checkpoint of its own; its
 full record is [`../ui-ux-audit-2026-09-16-polish.md`](../ui-ux-audit-2026-09-16-polish.md).
