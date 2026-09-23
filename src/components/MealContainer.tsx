@@ -76,8 +76,7 @@ export function MealContainer({
         <p className="text-xs text-muted-foreground">
           {totals ? (
             <>
-              {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g /
-              {proteinTargetG.min}-{proteinTargetG.max}g hedef · K:{" "}
+              {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g / {proteinTargetG.min}-{proteinTargetG.max}g hedef · K:{" "}
               {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
             </>
           ) : (
