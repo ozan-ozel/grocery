@@ -174,7 +174,7 @@ already requires elsewhere in this file.
 
 | DEC | Spec | Status | Pushed | Notes / Blockers |
 |---|---|---|---|---|
-| _none yet_ | | | | |
+| `DEC-033` | [`09_HANDOFF_SPECS/DEC-033-per-occasion-protein-consumer.md`](09_HANDOFF_SPECS/DEC-033-per-occasion-protein-consumer.md) | `PUSHED` | 2026-09-23 | Gives the existing, already-implemented `occasionProteinTargetG()` a display consumer in `MealContainer.tsx`. Implementing on `feature/meal-plan-protein-target-consumer` via subagent-driven-development. |
 
 ## Closed
 
