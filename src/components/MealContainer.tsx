@@ -25,6 +25,8 @@ type Props = {
   mealNameFor: (comboId: string) => string | undefined;
   // Removes every item in this slot as one undoable step.
   onClear: () => void;
+  // Protein target range for this occasion (min/max grams).
+  proteinTargetG: { min: number; max: number };
 };
 
 export const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
@@ -47,6 +49,7 @@ export function MealContainer({
   batchLabelFor,
   mealNameFor,
   onClear,
+  proteinTargetG,
 }: Props) {
   const updateItemQuantity = onUpdateItemQuantity ?? (() => {});
   const label = MEAL_LABELS[mealType];
@@ -70,12 +73,19 @@ export function MealContainer({
     <div className="space-y-3 rounded-lg border border-border bg-card p-4">
       <div className="flex items-baseline justify-between gap-2">
         <h3 className="font-semibold text-foreground">{label.tr}</h3>
-        {totals && (
-          <p className="text-xs text-muted-foreground">
-            {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g ·
-            K: {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
-          </p>
-        )}
+        <p className="text-xs text-muted-foreground">
+          {totals ? (
+            <>
+              {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g /
+              {proteinTargetG.min}-{proteinTargetG.max}g hedef · K:{" "}
+              {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
+            </>
+          ) : (
+            <>
+              P: 0g / {proteinTargetG.min}-{proteinTargetG.max}g hedef
+            </>
+          )}
+        </p>
       </div>
 
       <div className={`grid gap-2 ${onSelectBatch ? "grid-cols-3" : "grid-cols-2"}`}>

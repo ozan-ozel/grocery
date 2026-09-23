@@ -18,7 +18,7 @@ import {
   type MealItem,
   type MealSlot,
 } from "@/lib/localMealPlan";
-import { calculateTargets } from "@/lib/mealPersonalization";
+import { calculateTargets, occasionProteinTargetG } from "@/lib/mealPersonalization";
 import { type MacroTotals } from "@/lib/mealNutrition";
 import { lookupNutrition, type Nutrition } from "@/lib/nutrition";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
@@ -443,38 +443,42 @@ export function MealPlanView({
 
           {/* Meal Containers */}
           <div className="space-y-3">
-            {MEAL_SLOTS.map(({ slot }) => (
-              <MealContainer
-                key={slot}
-                mealType={getMealType(slot)}
-                items={itemsForSlot(slot)}
-                catalog={catalogMap}
-                onSelectFood={() => {
-                  setActiveSlot(slot);
-                  setFoodModalOpen(true);
-                }}
-                onSelectRecipe={() => {
-                  setActiveSlot(slot);
-                  setComboModalOpen(true);
-                }}
-                onRemoveItem={itemId => removeItem(slot, itemId)}
-                onUpdateItemQuantity={(itemId, quantityG) =>
-                  updateItemQuantity(slot, itemId, quantityG)
-                }
-                isOnShoppingList={foodId =>
-                  isOnShoppingList(catalogMap.get(foodId)?.name_tr ?? foodId)
-                }
-                onToggleShoppingList={requestShoppingToggle}
-                onSelectBatch={
-                  BATCH_PREP_VISIBLE && activeBatchCount > 0
-                    ? () => setAllocateSlot(slot)
-                    : undefined
-                }
-                batchLabelFor={batchLabelFor}
-                mealNameFor={id => mealNameById.get(id)}
-                onClear={() => clearSlot(slot)}
-              />
-            ))}
+            {(() => {
+              const proteinTarget = occasionProteinTargetG(personalizationProfile.weightKg);
+              return MEAL_SLOTS.map(({ slot }) => (
+                <MealContainer
+                  key={slot}
+                  mealType={getMealType(slot)}
+                  items={itemsForSlot(slot)}
+                  catalog={catalogMap}
+                  onSelectFood={() => {
+                    setActiveSlot(slot);
+                    setFoodModalOpen(true);
+                  }}
+                  onSelectRecipe={() => {
+                    setActiveSlot(slot);
+                    setComboModalOpen(true);
+                  }}
+                  onRemoveItem={itemId => removeItem(slot, itemId)}
+                  onUpdateItemQuantity={(itemId, quantityG) =>
+                    updateItemQuantity(slot, itemId, quantityG)
+                  }
+                  isOnShoppingList={foodId =>
+                    isOnShoppingList(catalogMap.get(foodId)?.name_tr ?? foodId)
+                  }
+                  onToggleShoppingList={requestShoppingToggle}
+                  onSelectBatch={
+                    BATCH_PREP_VISIBLE && activeBatchCount > 0
+                      ? () => setAllocateSlot(slot)
+                      : undefined
+                  }
+                  batchLabelFor={batchLabelFor}
+                  mealNameFor={id => mealNameById.get(id)}
+                  onClear={() => clearSlot(slot)}
+                  proteinTargetG={proteinTarget}
+                />
+              ));
+            })()}
           </div>
 
           {BATCH_PREP_VISIBLE && householdId && (
