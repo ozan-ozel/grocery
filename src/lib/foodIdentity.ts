@@ -90,20 +90,3 @@ export function resolveFood(input: string, index: FoodIdentityIndex): FoodResolu
 
   return { status: "unknown" };
 }
-
-// Reports every canonical name or alias currently owned by more than one
-// Food — the audit decision 4 requires before alias writes are trusted.
-// Never picks a winner; that is exactly what this function refuses to do.
-export function auditFoodIdentityCollisions(foods: Nutrition[]): {
-  nameCollisions: string[];
-  aliasCollisions: string[];
-} {
-  const index = buildFoodIdentityIndex(foods);
-  const nameCollisions = [...index.byName.entries()]
-    .filter(([, owners]) => owners.length > 1)
-    .map(([key]) => key);
-  const aliasCollisions = [...index.byAlias.entries()]
-    .filter(([, owners]) => owners.length > 1)
-    .map(([key]) => key);
-  return { nameCollisions, aliasCollisions };
-}

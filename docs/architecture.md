@@ -198,7 +198,7 @@ session for every verb, including reads). On boot `useTenants` (`src/hooks/useTe
 `App.tsx`) calls `listHouseholds()`; only a successful but *empty* answer seeds a first household — "Evim",
 with a generated id — via `createHousehold()`, so a fresh project still boots. A `null` answer means the request
 itself failed (expired cookie, 502, offline): the hook keeps the optimistic tenant and never seeds.
-(`DEFAULT_TENANT_ID = "default"` in `store.ts` is not used anywhere today.) Deleting a household
+Deleting a household
 (`DELETE /api/households?id=`) cascades `lists`/`items`/`item_category_memory`/`sync_state` via Supabase FK
 constraints — no manual cleanup needed. Switching tenants tears down and recreates the sync channel: the effect
 in `useListSync` (`src/hooks/useListSync.ts`) is keyed on `activeTenantId` and calls `sync.stop()` in its

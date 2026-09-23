@@ -143,12 +143,6 @@ export function writeMealDateToUrl(date: string) {
 }
 
 /**
- * Stable id used for the built-in "Evim" household. Every device using the
- * app-wide default tenant lands on this same id.
- */
-export const DEFAULT_TENANT_ID = "default";
-
-/**
  * Splits a typed line into a name and a quantity so people can type
  * naturally: "2 süt", "domates 500g", "zeytinyağı".
  */
