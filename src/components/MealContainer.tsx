@@ -3,7 +3,7 @@ import { calculateItemsNutrition } from "@/lib/localMealPlan";
 import type { NutritionMap } from "@/lib/nutrition";
 import { MealItemCard } from "./MealItemCard";
 import { MealGroup } from "./MealGroup";
-import { groupSlotItems } from "@/lib/mealGroups";
+import { groupSlotItems, type MealGroupInfo } from "@/lib/mealGroups";
 
 export type MealType = "ilk" | "ara" | "son";
 
@@ -20,9 +20,13 @@ type Props = {
   // DEC-069: shown only when there is batch food left to add.
   onSelectBatch?: () => void;
   batchLabelFor?: (item: MealItem) => string | undefined;
-  // Resolves a comboId to the meal's display name (built-in, saved or evening
-  // pattern). An id that resolves to nothing is not carded.
-  mealNameFor: (comboId: string) => string | undefined;
+  // Resolves a comboId to the meal's display name and source (built-in, saved
+  // or evening pattern). An id that resolves to nothing is not carded.
+  mealNameFor: (comboId: string) => MealGroupInfo | undefined;
+  // Opens the saved meal (Yemeklerim) with this comboId for editing. Absent
+  // groups (built-in/evening) never call this — MealGroup only shows the
+  // edit affordance for a "saved" group.
+  onEditSavedMeal?: (comboId: string) => void;
   // Removes every item in this slot as one undoable step.
   onClear: () => void;
   // Protein target range for this occasion (min/max grams).
@@ -48,6 +52,7 @@ export function MealContainer({
   onSelectBatch,
   batchLabelFor,
   mealNameFor,
+  onEditSavedMeal,
   onClear,
   proteinTargetG,
 }: Props) {
@@ -122,7 +127,13 @@ export function MealContainer({
               <MealGroup
                 key={group.items[0].id}
                 name={group.name}
-                kcal={calculateItemsNutrition(group.items, catalog).kcal}>
+                source={group.source}
+                kcal={calculateItemsNutrition(group.items, catalog).kcal}
+                onEdit={
+                  group.source === "saved" && onEditSavedMeal
+                    ? () => onEditSavedMeal(group.comboId)
+                    : undefined
+                }>
                 {group.items.map(renderItem)}
               </MealGroup>
             ),

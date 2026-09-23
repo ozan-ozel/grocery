@@ -12,7 +12,7 @@ import {
 import { groupItems } from "@/lib/categorization/groupItems";
 import { Row } from "@/components/ActiveListRow";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
-import type { NutritionMap } from "@/lib/nutrition";
+import { scaledNutritionForItem, type NutritionMap } from "@/lib/nutrition";
 
 type Props = {
   list: List;
@@ -99,6 +99,25 @@ export function ActiveList({
     () => groupItems(pending, categories),
     [pending, groupByCategory, categories], // eslint-disable-line react-hooks/exhaustive-deps
   );
+
+  // Aggregate macro total across the whole list (pending + sepette), scaled
+  // by each item's own quantity — the one thing the old standalone "Listem"
+  // nutrition tab had that this grouped view didn't; embedded here instead
+  // of keeping a second, duplicate place to see it.
+  const nutritionTotals = useMemo(() => {
+    let kcal = 0, protein = 0, fat = 0, carbs = 0, fiber = 0, matched = 0;
+    for (const item of list.items) {
+      const scaled = scaledNutritionForItem(foodsByName, item);
+      if (!scaled) continue;
+      kcal += scaled.kcal;
+      protein += scaled.protein_g;
+      fat += scaled.fat_g;
+      carbs += scaled.carbs_g;
+      fiber += scaled.fiber_g;
+      matched += 1;
+    }
+    return { kcal, protein, fat, carbs, fiber, matched };
+  }, [list.items, foodsByName]);
 
   if (list.items.length === 0) {
     return (
@@ -346,6 +365,36 @@ export function ActiveList({
             ))}
           </ul>
         </>
+      )}
+
+      {showNutritionValues && nutritionTotals.matched > 0 && (
+        <div className="border-t border-border pt-2 mt-6">
+          <div className="text-xs text-muted-foreground">
+            Toplam ({nutritionTotals.matched}/{list.items.length})
+          </div>
+          <div className="mt-2 grid grid-cols-3 gap-2 px-1 text-xs font-medium">
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">kcal</span>
+              <span>{nutritionTotals.kcal.toFixed(0)}</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">P</span>
+              <span>{nutritionTotals.protein.toFixed(1)}g</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">Y</span>
+              <span>{nutritionTotals.fat.toFixed(1)}g</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">K</span>
+              <span>{nutritionTotals.carbs.toFixed(1)}g</span>
+            </div>
+            <div className="flex flex-col">
+              <span className="text-xs text-muted-foreground">L</span>
+              <span>{nutritionTotals.fiber.toFixed(1)}g</span>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

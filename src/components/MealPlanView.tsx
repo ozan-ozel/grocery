@@ -37,6 +37,7 @@ import {
 } from "@/lib/eveningRecommend";
 import { batchDateLabel, hasRemaining } from "@/lib/preparationBatch";
 import type { LoggedEntry } from "@/hooks/useRemainingToday";
+import type { MealGroupInfo } from "@/lib/mealGroups";
 
 // DEC-069 batch-prep UI is hidden (2026-09-20): the Yemekler sheet was renamed and batch
 // prep still has to be re-wired to it. Flip to true to bring the "Toplu Hazırlıklar" row
@@ -121,6 +122,9 @@ export function MealPlanView({
   const [foodModalOpen, setFoodModalOpen] = useState(false);
   const [comboModalOpen, setComboModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
+  // Set when a MealGroup's edit pencil opens the sheet directly into the
+  // "edit this saved meal" form, instead of the normal Yemeklerim list.
+  const [editSavedMealId, setEditSavedMealId] = useState<string | null>(null);
   const [shoppingConfirm, setShoppingConfirm] = useState<{
     mode: "add" | "remove";
     item: MealItem;
@@ -145,13 +149,13 @@ export function MealPlanView({
     addItem(allocateSlot, foodId, quantityG, undefined, batchId);
   }
 
-  // comboId -> display name, for the meal cards in each slot. Built-in meals,
-  // the user's saved meals (their id is the comboId) and evening patterns all
-  // stamp their id on the entries they add.
-  const mealNameById = new Map<string, string>();
-  for (const combo of ALL_COMBOS) mealNameById.set(combo.id, combo.nameTr);
-  for (const meal of savedMeals.savedMeals) mealNameById.set(meal.id, meal.name);
-  for (const [id, pattern] of EVENING_PATTERN_BY_ID) mealNameById.set(id, pattern.nameTr);
+  // comboId -> display name + source, for the meal cards in each slot.
+  // Built-in meals, the user's saved meals (their id is the comboId) and
+  // evening patterns all stamp their id on the entries they add.
+  const mealInfoById = new Map<string, MealGroupInfo>();
+  for (const combo of ALL_COMBOS) mealInfoById.set(combo.id, { name: combo.nameTr, source: "builtin" });
+  for (const meal of savedMeals.savedMeals) mealInfoById.set(meal.id, { name: meal.name, source: "saved" });
+  for (const [id, pattern] of EVENING_PATTERN_BY_ID) mealInfoById.set(id, { name: pattern.nameTr, source: "evening" });
 
   const scoredCombos = scoreAllCombos(
     ALL_COMBOS,
@@ -473,7 +477,12 @@ export function MealPlanView({
                       : undefined
                   }
                   batchLabelFor={batchLabelFor}
-                  mealNameFor={id => mealNameById.get(id)}
+                  mealNameFor={id => mealInfoById.get(id)}
+                  onEditSavedMeal={id => {
+                    setActiveSlot(slot);
+                    setEditSavedMealId(id);
+                    setComboModalOpen(true);
+                  }}
                   onClear={() => clearSlot(slot)}
                   proteinTargetG={proteinTarget}
                 />
@@ -558,6 +567,7 @@ export function MealPlanView({
         onClose={() => {
           setComboModalOpen(false);
           setActiveSlot(null);
+          setEditSavedMealId(null);
         }}
         slot={activeSlot}
         combos={scoredCombos}
@@ -575,6 +585,7 @@ export function MealPlanView({
         onUpdateSaved={savedMeals.update}
         onDeleteSaved={savedMeals.remove}
         onSelect={handleComboSelect}
+        openEditMealId={editSavedMealId}
       />
 
       {shoppingConfirm && (

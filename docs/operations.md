@@ -230,6 +230,26 @@ half-written module — say so when finishing a batch of edits.
 Both directions are Claude-runnable without secrets — `ngrok http 3000` needs no token for a transient HTTP
 tunnel on the free tier, and `agent-session` is secret-free by construction (§5 above).
 
+### `QATEST` — live browser verification shorthand
+
+**`QATEST`** (§ Agent sessions and browser QA in `CLAUDE.md`) is the shorthand for a one-off live verification
+pass using the mint/redeem + Playwright flow above (§5), for when the user wants a change checked live in a
+browser rather than by static/code review alone:
+
+1. **Claude** runs `npm run agent-session -- up` (or reuses `:3000` if it already answers).
+2. **The developer** runs `npm run agent-mint [-- --email x@local.dev]` in their own terminal and pastes the
+   redeem URL.
+3. **Claude** opens the URL in the isolated Playwright browser and exercises the specific flow(s) under test —
+   plain tools first (`navigate` / `click` / `snapshot` / `screenshot` / read-only `evaluate`), using a throwaway
+   account for anything destructive. Reports findings against what was actually asked, not a general pass over
+   the app.
+4. **Claude** closes the browser session (`browser_close` — no persistent storage, so this discards it) and runs
+   `npm run agent-session -- down`.
+
+`QATEST` never commits/merges/pushes by itself — it's a verification step, not a git shorthand. Say `QATEST` when
+you want this live pass; otherwise Claude verifies by `tsc -b`/`npm run build` and code reading alone, per
+CLAUDE.md's "no test suite" rule.
+
 ## 6. Deployment
 
 **Vercel is the sole deploy target** (project `grocery`, linked via `.vercel/project.json`). A parallel Netlify

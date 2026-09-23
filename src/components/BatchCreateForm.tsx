@@ -112,6 +112,7 @@ export function BatchCreateForm({
           { value: "combo", label: "Yemekten" },
           { value: "manual", label: "Elle seç" },
         ]}
+        surface="card"
       />
 
       {mode === "combo" ? (

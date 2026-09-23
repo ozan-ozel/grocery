@@ -1,5 +1,6 @@
 import { normalize } from "./categorization/itemCategories";
 import type { AllergenClassMapping } from "./allergenClasses";
+import type { Item } from "./store";
 
 export type Nutrition = {
   name_tr: string;
@@ -256,6 +257,36 @@ export function lookupNutrition(
   name: string
 ): Nutrition | undefined {
   return map.get(normalize(name));
+}
+
+export type ScaledMacros = {
+  kcal: number;
+  protein_g: number;
+  fat_g: number;
+  carbs_g: number;
+  fiber_g: number;
+};
+
+// A list item's nutrition scaled by its own quantity (item.qty, free text —
+// "2", "500g", "1 L" — parsed leading-number-only, grams assumed; unparsable
+// or absent falls back to 100, matching a single 100g/100ml reference
+// serving). Shared by ActiveListRow (per-row display) and ActiveList (the
+// list's aggregate total) so the two never compute this differently.
+export function scaledNutritionForItem(
+  foodsByName: NutritionMap,
+  item: Pick<Item, "name" | "qty">
+): ScaledMacros | undefined {
+  const nutrition = lookupNutrition(foodsByName, item.name);
+  if (!nutrition) return undefined;
+  const qty = item.qty ? parseFloat(item.qty) : 100;
+  const multiplier = Number.isFinite(qty) ? qty / 100 : 1;
+  return {
+    kcal: nutrition.kcal_per_100 * multiplier,
+    protein_g: nutrition.protein_g * multiplier,
+    fat_g: nutrition.fat_g * multiplier,
+    carbs_g: nutrition.carbs_g * multiplier,
+    fiber_g: nutrition.fiber_g * multiplier,
+  };
 }
 
 function pickNutrition(row: ApiRow): Nutrition {

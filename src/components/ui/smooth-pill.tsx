@@ -20,6 +20,11 @@ export const SP_BASE_CLASS =
   "sp-trigger rounded-md px-3 py-1.5 text-sm font-medium transition-colors";
 
 export const SP_ACTIVE_CLASS = "bg-background text-foreground";
+// Variant for tabs rendered inside a `bg-card` surface (e.g. BottomSheet):
+// `bg-background` there would show the page's own color instead of sinking
+// into the sheet it actually sits on, so it looks mismatched rather than
+// selected. Use via the `surface="card"` prop below.
+export const SP_ACTIVE_CLASS_CARD = "bg-card text-foreground";
 
 export const SP_INACTIVE_CLASS = "text-muted-foreground hover:text-foreground active:text-foreground";
 
@@ -49,6 +54,11 @@ type SmoothPillTabsProps<T extends string> = {
   // Extra classes for every pill button — e.g. `px-2` to fit a fourth tab on a
   // narrow phone without changing the padding of tab rows that have room.
   itemClassName?: string;
+  // "page" (default): active pill uses bg-background, sinking into the page
+  // itself. "card": active pill uses bg-card instead — for tabs rendered
+  // inside a bg-card surface (e.g. BottomSheet), where bg-background would
+  // show the page's darker/lighter color instead of the sheet it sits on.
+  surface?: "page" | "card";
 };
 
 export function SmoothPillTabs<T extends string>({
@@ -57,7 +67,9 @@ export function SmoothPillTabs<T extends string>({
   items,
   className,
   itemClassName,
+  surface = "page",
 }: SmoothPillTabsProps<T>) {
+  const activeClass = surface === "card" ? SP_ACTIVE_CLASS_CARD : SP_ACTIVE_CLASS;
   return (
     <div className={cn(SP_CONTAINER_CLASS, className)}>
       {items.map((item) => {
@@ -70,7 +82,7 @@ export function SmoothPillTabs<T extends string>({
             data-active={active ? "true" : undefined}
             className={cn(
               SP_BASE_CLASS,
-              active ? SP_ACTIVE_CLASS : SP_INACTIVE_CLASS,
+              active ? activeClass : SP_INACTIVE_CLASS,
               itemClassName
             )}
           >

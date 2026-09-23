@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import { categorizeSync } from "@/lib/categorization/categorizeLazy";
 import { parseEntry, type AnyCategoryId, type Item } from "@/lib/store";
 import type { MergedCategory } from "@/lib/categorization/userCategories";
-import { lookupNutrition, type NutritionMap } from "@/lib/nutrition";
+import { scaledNutritionForItem, type NutritionMap } from "@/lib/nutrition";
 
 type RowProps = {
   item: Item;
@@ -51,18 +51,14 @@ export function Row({
   // Computed whether or not the values are shown: the block below stays
   // mounted (collapsed) so toggling can animate it open and shut.
   const nutritionDisplay = useMemo(() => {
-    const nutrition = lookupNutrition(foodsByName, item.name);
-
-    if (!nutrition) return null;
-
-    const qty = item.qty ? parseFloat(item.qty) : 100;
-    const multiplier = qty / 100;
+    const scaled = scaledNutritionForItem(foodsByName, item);
+    if (!scaled) return null;
 
     return {
-      kcal: Math.round(nutrition.kcal_per_100 * multiplier),
-      protein: (nutrition.protein_g * multiplier).toFixed(1),
-      carbs: (nutrition.carbs_g * multiplier).toFixed(1),
-      fat: (nutrition.fat_g * multiplier).toFixed(1),
+      kcal: Math.round(scaled.kcal),
+      protein: scaled.protein_g.toFixed(1),
+      carbs: scaled.carbs_g.toFixed(1),
+      fat: scaled.fat_g.toFixed(1),
     };
   }, [foodsByName, item.name, item.qty]);
 

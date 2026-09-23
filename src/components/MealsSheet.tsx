@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pencil, Search, Trash2 } from "lucide-react";
+import { Loader2, Pencil, Search, Trash2 } from "lucide-react";
 import type { ScoredCombo } from "@/lib/comboMatch";
 import { recipeSteps, type Combo, type PortionId } from "@/lib/combos";
 import { recommendMeals } from "@/lib/mealRecommend";
@@ -50,6 +50,11 @@ type Props = {
   // `factor` is the portion multiplier over the meal's authored grams (1 = as
   // saved/authored); the caller scales the items with scaleComboItems.
   onSelect: (combo: Combo, factor: number) => void;
+  // A saved meal id to open straight into edit mode for, instead of the
+  // normal Yemeklerim list — set when a MealGroup's edit pencil opens this
+  // sheet. Ignored (falls back to the list) if the id no longer matches a
+  // saved meal.
+  openEditMealId?: string | null;
 };
 
 // Mounted fresh on every open (the wrapper returns null while closed), so its
@@ -82,11 +87,17 @@ function MealsSheetBody({
   onUpdateSaved,
   onDeleteSaved,
   onSelect,
+  openEditMealId,
 }: Props) {
+  const editTarget = openEditMealId
+    ? (savedMeals.find(meal => meal.id === openEditMealId) ?? null)
+    : null;
   const [tab, setTab] = useState<Tab>(
-    canSaveMeals && savedMeals.length > 0 ? "mine" : "ready"
+    editTarget || (canSaveMeals && savedMeals.length > 0) ? "mine" : "ready"
   );
-  const [view, setView] = useState<View>({ kind: "list" });
+  const [view, setView] = useState<View>(
+    editTarget ? { kind: "form", editing: editTarget } : { kind: "list" }
+  );
   const [query, setQuery] = useState("");
   // The last tier picked — what tapping a built-in row's body adds, so the old
   // one-tap "tap a meal, it's added" flow stays one tap.
@@ -94,6 +105,9 @@ function MealsSheetBody({
   // Only one custom-multiplier editor open at a time; keyed by the row's DOM id.
   const [editingRow, setEditingRow] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<SavedMeal | null>(null);
+  // The saved meal whose delete request is in flight (after the confirm
+  // modal already closed) — drives the row's trash icon -> spinner swap.
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const queryLower = query.trim().toLocaleLowerCase("tr-TR");
 
@@ -140,8 +154,13 @@ function MealsSheetBody({
     if (!deleting) return;
     const target = deleting;
     setDeleting(null);
-    const ok = await onDeleteSaved(target.id);
-    setNotice(ok ? null : `"${target.name}" silinemedi. Tekrar dene.`);
+    setDeletingId(target.id);
+    try {
+      const ok = await onDeleteSaved(target.id);
+      setNotice(ok ? null : `"${target.name}" silinemedi. Tekrar dene.`);
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   // Desktop keeps instant typing; a touch device browses first (rows are tall
@@ -183,9 +202,14 @@ function MealsSheetBody({
             <button
               type="button"
               onClick={() => setDeleting(meal)}
+              disabled={deletingId === meal.id}
               aria-label={`${meal.name} yemeğini sil`}
-              className="text-muted-foreground hover:text-signal active:text-signal">
-              <Trash2 className="size-4" />
+              className="text-muted-foreground hover:text-signal active:text-signal disabled:opacity-50">
+              {deletingId === meal.id ? (
+                <Loader2 className="size-4 animate-spin text-signal" aria-hidden="true" />
+              ) : (
+                <Trash2 className="size-4" />
+              )}
             </button>
           </div>
           <p className="mt-1 text-xs text-signal">
@@ -221,9 +245,14 @@ function MealsSheetBody({
             <button
               type="button"
               onClick={() => setDeleting(meal)}
-              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-signal active:text-signal">
-              <Trash2 className="size-3.5" />
-              Sil
+              disabled={deletingId === meal.id}
+              className="flex items-center gap-1 rounded-md px-2 py-1.5 text-xs text-muted-foreground hover:text-signal active:text-signal disabled:opacity-50">
+              {deletingId === meal.id ? (
+                <Loader2 className="size-3.5 animate-spin text-signal" aria-hidden="true" />
+              ) : (
+                <Trash2 className="size-3.5" />
+              )}
+              {deletingId === meal.id ? "Siliniyor…" : "Sil"}
             </button>
           </>
         }
@@ -332,6 +361,7 @@ function MealsSheetBody({
                 setEditingRow(null);
               }}
               items={tabItems}
+              surface="card"
             />
           </div>
 

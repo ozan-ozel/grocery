@@ -41,6 +41,12 @@ architecture doc or the runbook; see "Where things live" below before diving int
   [src/components/ui/smooth-pill.tsx](src/components/ui/smooth-pill.tsx), or its `SP_CONTAINER_CLASS` /
   `SP_TRIGGER_CLASS` constants for a Radix `TabsTrigger` that must also drive a `Tabs` root (the constant already
   cancels the base trigger's `border-b-2` underline). Don't restyle tabs by hand.
+- **SP `surface` prop** — any `<SmoothPillTabs>` rendered inside a `bg-card` container (a
+  [BottomSheet](src/components/ui/bottom-sheet.tsx) or any other card-surfaced parent) must pass `surface="card"`.
+  The default (`surface="page"`) makes the active pill `bg-background`, which sinks into the *page* — correct when
+  the tabs sit directly on the page background, but a visibly mismatched color when the parent surface is
+  `bg-card` instead. Apply this to every new tab set until a broader theming change removes the distinction; see
+  `MealsSheet.tsx` and `BatchCreateForm.tsx` for the pattern.
 - **Bottom sheets** — build new ones on [src/components/ui/bottom-sheet.tsx](src/components/ui/bottom-sheet.tsx),
   not a hand-rolled overlay (swipe-to-dismiss, keyboard-aware sizing). Give the sheet's scrolling list
   `min-h-0 overflow-y-auto overscroll-contain` so it, not the search field, shrinks under the keyboard.
@@ -280,6 +286,12 @@ Driving the app in a browser is allowed only through the split agent-session flo
   foreign ngrok instance. **MOBILEDOWN:** stop the ngrok tunnel Claude started (if any), then run
   `npm run agent-session -- down`, in that order. Full procedure: [docs/operations.md](docs/operations.md) §
   Agent sessions and browser QA → Phone testing through ngrok.
+- **QATEST** — one-off live browser verification shorthand (not a git operation, doesn't commit/merge/push). Runs
+  the mint/redeem + Playwright flow above against a specific change: `agent-session up`, developer mints and
+  pastes the redeem URL, Claude drives the isolated Playwright browser through the flow under test and reports
+  findings, then `browser_close` + `agent-session down`. Use when the user wants a change checked live rather than
+  by code review alone. Full procedure: [docs/operations.md](docs/operations.md) § Agent sessions and browser QA
+  → `QATEST` — live browser verification shorthand.
 
 ## Serena (optional MCP server)
 

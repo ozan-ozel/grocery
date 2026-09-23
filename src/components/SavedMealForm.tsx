@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { MealCompositionEditor } from "@/components/MealCompositionEditor";
@@ -53,7 +54,11 @@ export function SavedMealForm({
   const [items, setItems] = useState<BatchCompositionItem[]>(initial?.items ?? []);
   const [stepsOpen, setStepsOpen] = useState((initial?.steps.length ?? 0) > 0);
   const [stepsText, setStepsText] = useState(stepsToText(initial?.steps ?? []));
-  const [submitting, setSubmitting] = useState(false);
+  // Which button triggered the in-flight submit — not just whether one is in
+  // flight — so the loading state renders on the button that was actually
+  // pressed, not always on "Kaydet".
+  const [submittingVariant, setSubmittingVariant] = useState<"save" | "saveAndAdd" | null>(null);
+  const submitting = submittingVariant !== null;
   const [error, setError] = useState<string | null>(null);
 
   const composition = normalizeComposition(items);
@@ -90,7 +95,7 @@ export function SavedMealForm({
       return;
     }
     setError(null);
-    setSubmitting(true);
+    setSubmittingVariant(addToSlot ? "saveAndAdd" : "save");
     try {
       const ok = await onSubmit(data, addToSlot);
       // On success the parent swaps this form out, so only a failure needs to
@@ -101,7 +106,7 @@ export function SavedMealForm({
         );
       }
     } finally {
-      setSubmitting(false);
+      setSubmittingVariant(null);
     }
   }
 
@@ -170,7 +175,10 @@ export function SavedMealForm({
           className="flex-1"
           disabled={submitting}
           onClick={() => submit(false)}>
-          {submitting ? "Kaydediliyor…" : "Kaydet"}
+          {submittingVariant === "save" && (
+            <Loader2 className="animate-spin text-signal" aria-hidden="true" />
+          )}
+          {submittingVariant === "save" ? "Kaydediliyor…" : "Kaydet"}
         </Button>
         {canAddToSlot && (
           <Button
@@ -179,7 +187,10 @@ export function SavedMealForm({
             className="flex-1"
             disabled={submitting}
             onClick={() => submit(true)}>
-            Kaydet ve ekle
+            {submittingVariant === "saveAndAdd" && (
+              <Loader2 className="animate-spin text-signal" aria-hidden="true" />
+            )}
+            {submittingVariant === "saveAndAdd" ? "Kaydediliyor…" : "Kaydet ve ekle"}
           </Button>
         )}
         <Button type="button" variant="quiet" onClick={onCancel} disabled={submitting}>

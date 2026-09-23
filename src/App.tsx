@@ -689,8 +689,6 @@ function AppShell({
         ) : section === "besin" ? (
           <Suspense fallback={<SectionSuspenseFallback section={section} />}>
             <NutritionView
-              items={active.items}
-              showNutritionValues={showNutritionValues}
               mergedCategories={mergedCategories}
               overlay={overlay}
               onRenameCategory={renameCat}

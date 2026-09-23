@@ -8,32 +8,43 @@ architecture document, roadmap, or task archive. The historical record of past s
 
 ## Current Objective
 
-Nothing is in flight. The Yemek Planı meal cards / slot-day-clear / 5-step-undo feature and a small dead-code
-cleanup are both merged (see Current State). **Not started (planned only):** the plans/specs/audits lifecycle
-cleanup and the process-optimization phase (single checklist, nutrition-status ownership headers, `kill-ports`
-treatment).
+A meal-plan UI polish batch is finishing on `feature/meal-plan-ui-polish-batch` (about to be committed/merged via
+SYNC → CMP). **Not started (planned only):** the plans/specs/audits lifecycle cleanup and the process-optimization
+phase (single checklist, nutrition-status ownership headers, `kill-ports` treatment).
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` are both at `d6ff51e` (working tree clean, verified with git). Recent
-  history: `d6ff51e` (dead-code exports removed) on top of `78a6143` (meal-plan cards/clear/undo feature) on top
-  of `70c581b` (previous refresh of this file).
-- **In flight:** nothing. Local branches other than `master`: `chore/remove-dead-code-exports` (merged, tip
-  `d6ff51e`), `feature/meal-plan-cards-clear-undo` (merged, tip `78a6143`), `agents/simple-test-setup` and five
-  other merged `docs/`/`chore/` branches from earlier cleanup — none unmerged, not re-verified this session, safe
-  to delete when the owner wants. `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`) still exists only on
-  the remote and is not merged into `master`; its contents were not examined.
+- **Repo:** `master` and `origin/master` are both at `3d0dc77` (verified with git). Recent history: `3d0dc77`
+  (MOBILEUP/MOBILEDOWN docs) on `74c8a4e`/`d77c0ef`/`a6850f9`/`a1aad83`/`28851a0`/`19757c8` (DEC-033 protein-target
+  consumer, via subagent-driven-development) on `dca29db` (previous refresh of this file) on `d6ff51e` (dead-code
+  exports removed) on `78a6143` (meal-plan cards/clear/undo feature).
+- **In flight:** `feature/meal-plan-ui-polish-batch`, currently checked out with uncommitted changes (about to be
+  committed by this SYNC → CMP). Contents: a collapse/expand toggle + edit shortcut on saved-meal `MealGroup`
+  cards; the "Listem" sub-tab removed from Besin Değerleri and its grouped/macro totals embedded directly in
+  Alışveriş's own "Besin değerleri" toggle (`ActiveList.tsx`, via a new shared `scaledNutritionForItem` helper in
+  `src/lib/nutrition.ts`); a save-button spinner fix in `SavedMealForm` (the wrong button was showing the loading
+  label); a delete-spinner on Yemeklerim's trash-icon buttons; per-source background tinting on `MealGroup` cards
+  (saved/builtin/evening, same primary-color family); and a `SmoothPillTabs` `surface="card"` prop fixing the
+  Yemekler-sheet (and Batch-sheet) active-tab color mismatch against their `bg-card` surface — see the new SP
+  `surface` rule in `CLAUDE.md` § UI patterns. Live-verified via `QATEST` (Playwright against `agent-mint`/
+  `agent-login`): all items confirmed working, including the tab-color fix (active pill now measures the same
+  `#121822` as the sheet's own background).
+- **Local branches other than `master`:** `feature/meal-plan-ui-polish-batch` (above, in flight); everything else
+  listed previously (`chore/remove-dead-code-exports`, `feature/meal-plan-cards-clear-undo`,
+  `agents/simple-test-setup`, five `docs/`/`chore/` branches) is merged and not re-verified this session, safe to
+  delete when the owner wants. `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`) still exists only on the
+  remote and is not merged into `master`; its contents were not examined.
 - **Worktree:** none.
-- **Recently shipped to `master` (all pushed):** dead-code exports removed — `auditFoodIdentityCollisions`
-  (`src/lib/foodIdentity.ts`), `DEFAULT_TENANT_ID` (`src/lib/store.ts`), and the stale doc callout for it in
-  `architecture.md` (`d6ff51e`); Yemek Planı meal cards, slot/day clear and a 5-step undo (`78a6143`); the
-  vestigial `today` tab and archived Bugün screen removed, boot `GET /api/personal-plan` deduped (`82ab8d4`).
-  Earlier history (documentation architecture migration, `SYNC`/`.vercelignore` checks, Yemekler sheet, admin-only
-  nutrition writes, agent-session tooling, etc.) is unchanged from prior refreshes — see
-  [`session-checkpoints/README.md`](session-checkpoints/README.md) for the full list.
-  `occasionProteinTargetG` (`src/lib/mealPersonalization.ts`) is also unused but was deliberately left in place —
-  it's tied to a nutrition-curriculum DEC and needs the roadmap/mvp-scope/DEC_REGISTER trio update, not a quiet
-  deletion.
+- **Recently shipped to `master` (all pushed):** DEC-033 `occasionProteinTargetG` wired into the meal-slot header
+  (`P: Xg / min-max g hedef` text in `MealContainer.tsx`/`MealPlanView.tsx`), trio-synced across
+  `macros-mvp.md`/`roadmap_v2.md`/`DEC_REGISTER.md` (`a1aad83`..`d77c0ef`); MOBILEUP/MOBILEDOWN phone-testing
+  shorthand documented in `CLAUDE.md`/`operations.md` (`3d0dc77`); dead-code exports removed —
+  `auditFoodIdentityCollisions` (`src/lib/foodIdentity.ts`), `DEFAULT_TENANT_ID` (`src/lib/store.ts`) (`d6ff51e`);
+  Yemek Planı meal cards, slot/day clear and a 5-step undo (`78a6143`); the vestigial `today` tab and archived
+  Bugün screen removed, boot `GET /api/personal-plan` deduped (`82ab8d4`). Earlier history is unchanged from prior
+  refreshes — see [`session-checkpoints/README.md`](session-checkpoints/README.md) for the full list.
+- **`QATEST` shorthand added** this session: one-off live browser verification via the `agent-mint`/`agent-login`
+  + Playwright flow, documented in `CLAUDE.md` and `operations.md` § Agent sessions (not a git operation).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see
   [`operations.md`](operations.md)).
 
@@ -53,7 +64,10 @@ means it was recorded as pending and has not been re-checked.
    [09-19-02](session-checkpoints/2026-09-19-02-batch-preparation-ui.md),
    [09-20-01](session-checkpoints/2026-09-20-01-nutrition-write-lockdown.md),
    [09-20-03](session-checkpoints/2026-09-20-03-meals-sheet-yemeklerim-tarifler.md),
-   [09-21-01](session-checkpoints/2026-09-21-01-meal-plan-cards-clear-undo.md).
+   [09-21-01](session-checkpoints/2026-09-21-01-meal-plan-cards-clear-undo.md). The meal-plan UI polish batch
+   (`feature/meal-plan-ui-polish-batch`, see Current State) was `QATEST`-verified against a desktop-viewport
+   Playwright browser only — a real-phone pass on the new `MealGroup` collapse/edit/tint, the Alışveriş totals
+   footer, and the two spinners is still open.
 2. **Boot-performance leftovers** (checkpoint
    [09-17-02](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md), plan in
    [`superpowers/plans/`](superpowers/plans/README.md)): Phase 4d (`getClaims()` / custom JWT claims) and the
@@ -78,11 +92,12 @@ means it was recorded as pending and has not been re-checked.
 
 ## Next Step
 
-Check the meal-plan changes on a real phone (open item 1), then confirm in the browser that boot makes a single
-`GET /api/personal-plan` and check for a duplicate `PUT` (open items 2-3). The owner decides whether to start the deferred phases (not started): the
-plans/specs/audits lifecycle cleanup, and process optimization (a single close-out checklist,
-nutrition-status ownership headers, `kill-ports` treatment); and whether to delete the remaining merged branches.
-Otherwise pick work from the Open items.
+Finish landing `feature/meal-plan-ui-polish-batch` (SYNC → CMP, in progress as this file is written), then check
+the meal-plan UI polish batch and the earlier meal-plan changes on a real phone (open item 1), and confirm in the
+browser that boot makes a single `GET /api/personal-plan` and check for a duplicate `PUT` (open items 2-3). The
+owner decides whether to start the deferred phases (not started): the plans/specs/audits lifecycle cleanup, and
+process optimization (a single close-out checklist, nutrition-status ownership headers, `kill-ports` treatment);
+and whether to delete the remaining merged branches. Otherwise pick work from the Open items.
 
 ## Constraints and decisions that affect continuation
 
