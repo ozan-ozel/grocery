@@ -10,7 +10,7 @@ anything new is built.
 
 | Item | Owning DEC | Readiness | Reality |
 |---|---|---|---|
-| Protein across eating occasions | `DEC-033` | `PROVISIONAL` | Implemented, but flat and display-only |
+| Protein across eating occasions | `DEC-033` | `PROVISIONAL` | Implemented; now has a display consumer in `MealContainer.tsx` (per-slot header shows the target band next to consumed protein), shipped 2026-09-23. Still flat/display-only per DEC-033's provisional scope |
 | Total daily carbohydrate | `DEC-034` | `SHIPPED` | Implemented; the value below was corrected 2026-09-15 |
 | Min/max macros per meal | `DEC-056` | `COVERED` | Per-slot totals exist, per-meal macro bounds do not |
 | Dietary pattern constraint | `DEC-038` | `BLOCKED` | Nothing in the code today |
@@ -46,6 +46,10 @@ is display-only: nothing reads it to gate or resize an entry.
 For MVP, keep the band flat and give it a consumer, so a per-slot protein target shows against what was
 actually eaten. Redistributing by occasion size, timing, or training proximity is `DEC-035` and
 `DEC-057`, both blocked on exercise-timing data that the app does not collect.
+
+**Consumer shipped 2026-09-23**: the per-slot header in `MealContainer.tsx` now shows
+`P: {consumed}g / {min}-{max}g hedef` for every slot, reading `occasionProteinTargetG()`'s existing
+flat band against that slot's actual consumed protein.
 
 ## Min and max macros per meal
 

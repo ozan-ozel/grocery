@@ -174,7 +174,7 @@ already requires elsewhere in this file.
 
 | DEC | Spec | Status | Pushed | Notes / Blockers |
 |---|---|---|---|---|
-| `DEC-033` | [`09_HANDOFF_SPECS/DEC-033-per-occasion-protein-consumer.md`](09_HANDOFF_SPECS/DEC-033-per-occasion-protein-consumer.md) | `PUSHED` | 2026-09-23 | Gives the existing, already-implemented `occasionProteinTargetG()` a display consumer in `MealContainer.tsx`. Implementing on `feature/meal-plan-protein-target-consumer` via subagent-driven-development. |
+| _none yet_ | | | | |
 
 ## Closed
 
@@ -182,5 +182,5 @@ already requires elsewhere in this file.
 |---|---|---|---|---|
 | `DEC-046` | *(pre-dates this file's per-spec workflow — see `08_APP_TRANSLATION/PSM_ITERATION_1_IMPLEMENTATION_LEDGER.md`)* | — | — | Baseline fluid needs. MVP-1 PROVISIONAL, tagged in code as `MVP-1 PROVISIONAL / REVISIT AFTER QA-1`. Backfilled into this table from `DEC_REGISTER.md`'s "IMPLEMENTED" note; exact push/close dates weren't recorded under the old process |
 | `DEC-009` | *(same — PSM Iteration 1)* | — | — | Profile-data (BMI) plausibility check. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded |
-| `DEC-033` | *(same — PSM Iteration 1)* | — | — | Protein distribution across eating occasions. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded |
+| `DEC-033` | *(same — PSM Iteration 1)* | — | — | Protein distribution across eating occasions. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded. Display consumer added 2026-09-23 (spec: 09_HANDOFF_SPECS/DEC-033-per-occasion-protein-consumer.md, plan: ../docs/superpowers/plans/2026-09-23-meal-plan-protein-target-consumer.md). |
 | `DEC-071` | *(same — PSM Iteration 1)* | — | — | Meal plan → consolidated shopping list. MVP-1 PROVISIONAL, same tagging. Backfilled, dates not recorded |

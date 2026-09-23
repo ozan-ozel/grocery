@@ -9,7 +9,7 @@ One file per `docs/roadmap_v2.md` domain, each mapping that domain to its `nutri
 | --- | --- | --- | --- |
 | [goal-mvp-roadmap.md](goal-mvp-roadmap.md) | A · Goal | DEC-001–004 | `DONE` — maintain/loss/gain selection already shipped |
 | [body-composition-mvp.md](body-composition-mvp.md) | E · Body Composition | DEC-025–030 | `NOT_STARTED` — capture-only scope defined, not built |
-| [macros-mvp.md](macros-mvp.md) | F · Macros | DEC-031–040 | `PARTIAL` — carb-band correction shipped 2026-09-15; per-occasion protein consumer, per-meal macro bounds, and dietary-pattern-as-exclusion still open |
+| [macros-mvp.md](macros-mvp.md) | F · Macros | DEC-031–040 | `PARTIAL` — carb-band correction shipped 2026-09-15; per-occasion protein consumer shipped 2026-09-23; per-meal macro bounds and dietary-pattern-as-exclusion still open |
 | [hydration-mvp.md](hydration-mvp.md) | H · Hydration | DEC-046–050 | `PARTIAL` — baseline fluid need (DEC-046) implemented; the rest blocked on missing exercise/environmental data |
 | [gi-tolerance-mvp.md](gi-tolerance-mvp.md) | I · GI Tolerance | DEC-051–054 | `DONE` — nothing left to build for MVP (only DEC-053 is shippable; the rest are blocked) |
 | [meal-structure-mvp.md](meal-structure-mvp.md) | J · Meal Structure | DEC-055–059 | `PARTIAL` — see file for which of the four roadmap items are already covered |

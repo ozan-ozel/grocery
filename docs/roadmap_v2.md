@@ -18,7 +18,7 @@
 
 ## Macros - MVP, done in individualization - SCOPED, see docs/mvp-scope/macros-mvp.md
 
-	Determine how the protein requirement is distributed across the day’s eating occasions !IMPORTANT
+	Determine how the protein requirement is distributed across the day’s eating occasions !IMPORTANT - provisional consumer shipped 2026-09-23, see docs/mvp-scope/macros-mvp.md
 
 	Determine an appropriate total daily carbohydrate requirement given goal, energy prescription, and tra… - DONE, CHECKED (2026-09-15: very_high band corrected from 10-12 to 6-10 g/kg/day, 130g DRI floor and sedentary/light AMDR added, see docs/mvp-scope/macros-mvp.md)
 
