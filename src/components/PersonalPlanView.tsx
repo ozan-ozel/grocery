@@ -47,7 +47,10 @@ const REASON_LABEL_SHORT: Record<ExclusionReason, string> = {
   unclassified: "neden yok",
 };
 
-type Source = { label: string; href: string; badge: string };
+// `href` is optional: a book citation (see SN4_SOURCE below) has no single
+// page to link to, so it renders without the link affordance instead of
+// pointing at a fabricated URL.
+type Source = { label: string; href?: string; badge: string };
 
 // Canonical, deduplicated sources — defined once and reused by every
 // SOURCE_GROUPS entry that cites them. The same NCBI Endotext chapter
@@ -87,6 +90,18 @@ const ACSM_2016_SOURCE: Source = {
   href: "https://pubmed.ncbi.nlm.nih.gov/26891166/",
   badge: "ACSM 2016",
 };
+// The one book source in this list — no href, since it's a physical/ebook
+// citation rather than a single linkable page. Grounds the protein tiers'
+// hypertrophy-plateau correction (DEC-031, nutrition-curriculum Gate 6 §7):
+// SN4 places the plateau at ~1.6-1.7 g/kg, the bottom of the app's 1.6-2.2
+// g/kg tier, not its upper half — see nutrition-curriculum's
+// DECISION_LOGIC_SPECIFICATION.md §3.3. Other curriculum books exist
+// (see nutrition-curriculum/03_PHASE_1_CURRICULUM_ANALYSIS/BOOK_ROLES.md)
+// but don't back a currently-SHIPPED decision, so they're not cited here.
+const SN4_SOURCE: Source = {
+  label: "Jeukendrup & Gleeson, Sport Nutrition, 4. Baskı (2025)",
+  badge: "SN4",
+};
 
 const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
   {
@@ -103,7 +118,7 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
   },
   {
     feature: "Protein, yağ, karbonhidrat ve lif aralıkları",
-    sources: [DRI_SOURCE, ENDOTEXT_SOURCE, HECTOR_2018_SOURCE, ACSM_2016_SOURCE],
+    sources: [DRI_SOURCE, ENDOTEXT_SOURCE, HECTOR_2018_SOURCE, ACSM_2016_SOURCE, SN4_SOURCE],
   },
   {
     feature: "BMI ve bel çevresi bağlamı",
@@ -1299,7 +1314,7 @@ function SourceMap({
                 false;
               return (
                 <div
-                  key={`${group.feature}-${source.href}-${source.label}`}
+                  key={`${group.feature}-${source.badge}-${source.label}`}
                   className="flex overflow-hidden rounded-md border border-signal/70 shadow-sm">
                   {/* Left: jumps back up the page to where this source is
                       cited — same outlined/tinted weight as the citation
@@ -1327,14 +1342,24 @@ function SourceMap({
                       than the left's page-nav segment (bg-signal/10) so the
                       two actions read as visually distinct at a glance, not
                       just via the divider and font weight. */}
-                  <a
-                    className="flex flex-1 items-center gap-1.5 bg-background px-1.5 py-1.5 text-foreground/80 transition-colors hover:bg-signal/10 hover:text-signal active:bg-signal/10 active:text-signal"
-                    href={source.href}
-                    target="_blank"
-                    rel="noreferrer">
-                    <span className="flex-1">{source.label}</span>
-                    <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
-                  </a>
+                  {source.href ? (
+                    <a
+                      className="flex flex-1 items-center gap-1.5 bg-background px-1.5 py-1.5 text-foreground/80 transition-colors hover:bg-signal/10 hover:text-signal active:bg-signal/10 active:text-signal"
+                      href={source.href}
+                      target="_blank"
+                      rel="noreferrer">
+                      <span className="flex-1">{source.label}</span>
+                      <ExternalLink className="size-3 shrink-0 text-muted-foreground" />
+                    </a>
+                  ) : (
+                    // A book citation: no single linkable page, so this
+                    // renders as plain text instead of a link — no
+                    // ExternalLink icon, which would promise a tap target
+                    // that isn't there.
+                    <span className="flex flex-1 items-center bg-background px-1.5 py-1.5 text-foreground/80">
+                      {source.label}
+                    </span>
+                  )}
                 </div>
               );
             })}
