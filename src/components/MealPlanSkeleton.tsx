@@ -14,7 +14,7 @@ import { LoadingBlock } from "@/components/LoadingBlock";
 // Returns a fragment on purpose: in MealPlanView both blocks are direct
 // children of its space-y-4 root, and the fallback wraps them the same way.
 //
-// Mirrors MacroSummaryCard.tsx's "GÜNLÜK MAKROLAR" card (rounded-lg border
+// Mirrors MacroSummaryCard.tsx's "PLANDAKİ MAKROLAR" card (rounded-lg border
 // p-3, h2, a 2-col then 3-col grid of border-l-4 tiles, each with a 40px ring
 // + two-line value) and MealContainer.tsx's 4 fixed meal-slot cards
 // (space-y-3 rounded-lg border p-4, h3 + a 2-col grid of dashed-border add
@@ -47,7 +47,7 @@ export function MealPlanSkeleton() {
   return (
     <>
       <div className="rounded-lg border border-border bg-card p-3">
-        <h2 className="mb-2 text-xs font-semibold text-muted-foreground">GÜNLÜK MAKROLAR</h2>
+        <h2 className="mb-2 text-xs font-semibold text-muted-foreground">PLANDAKİ MAKROLAR</h2>
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
             {macroTile("Kalori", "w-6", "w-10")}

@@ -4,7 +4,11 @@ import type { MacroTotals } from "@/lib/mealNutrition";
 type Props = {
   consumed: MacroTotals;
   target: MacroTotals;
+  // True when `target` comes from the example DEFAULT_PROFILE rather than the
+  // user's own saved profile — the numbers must not read as personal advice.
   isEstimated?: boolean;
+  // Opens Kişisel Plan; shown as a call to action only while isEstimated.
+  onPersonalize?: () => void;
 };
 
 // Ring fill matches each tile's existing (hardcoded, pre-token-system)
@@ -46,7 +50,7 @@ function getMacroStatus(ratio: number) {
   };
 }
 
-export function MacroSummaryCard({ consumed, target, isEstimated }: Props) {
+export function MacroSummaryCard({ consumed, target, isEstimated, onPersonalize }: Props) {
   const topMetrics: Metric[] = [
     { label: "Kalori", key: "kcal", borderColor: "border-l-blue-500", ringColor: "#3b82f6" },
     { label: "Protein", key: "proteinG", borderColor: "border-l-red-500", ringColor: "#ef4444" },
@@ -91,14 +95,32 @@ export function MacroSummaryCard({ consumed, target, isEstimated }: Props) {
 
   return (
     <div className="rounded-lg border border-border bg-card p-3">
+      {/* "Plandaki": meal_entries has no planned/eaten flag, so the "+N" under
+          each target is everything on the day's plan, not only what was eaten. */}
       <h2 className="mb-2 text-xs font-semibold text-muted-foreground">
-        GÜNLÜK MAKROLAR
+        PLANDAKİ MAKROLAR
         {isEstimated && (
           <span className="ml-2 rounded-full border border-border px-2 py-0.5 text-[0.65rem] uppercase tracking-wide text-muted-foreground">
-            Tahmini
+            Örnek hedef
           </span>
         )}
       </h2>
+      {isEstimated && (
+        <p className="mb-2 text-xs text-muted-foreground">
+          Bu hedefler örnek bir profile göre hesaplandı, sana özel değil.
+          {onPersonalize && (
+            <>
+              {" "}
+              <button
+                type="button"
+                onClick={onPersonalize}
+                className="font-medium text-foreground underline underline-offset-2">
+                Hedeflerini kişiselleştir
+              </button>
+            </>
+          )}
+        </p>
+      )}
       <div className="space-y-2">
         <div className="grid grid-cols-2 gap-2">{topMetrics.map(renderTile)}</div>
         <div className="grid grid-cols-3 gap-2">{bottomMetrics.map(renderTile)}</div>

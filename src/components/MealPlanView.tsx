@@ -56,6 +56,8 @@ type Props = {
   // True while App's shopping-list undo toast is showing, so the meal-plan
   // toast stacks above it instead of covering it.
   shoppingUndoVisible?: boolean;
+  // Opens Kişisel Plan from the macro card's "Hedeflerini kişiselleştir".
+  onOpenPersonalPlan?: () => void;
 };
 
 export function MealPlanView({
@@ -65,9 +67,17 @@ export function MealPlanView({
   isOnShoppingList,
   onRemoveShoppingItem,
   shoppingUndoVisible,
+  onOpenPersonalPlan,
 }: Props) {
   const { foods, catalogMap, status } = useFoodCatalog();
-  const { profile: personalizationProfile, hasSavedProfile } = useMealPersonalization(userId);
+  const {
+    profile: personalizationProfile,
+    hasSavedProfile,
+    remoteChecked,
+  } = useMealPersonalization(userId);
+  // Only label targets as an example once the server has confirmed there is
+  // no profile — a returning user on a fresh device has no local cache yet.
+  const targetsAreExample = !hasSavedProfile && remoteChecked;
   // Yemeklerim — fetched here (not inside the sheet) so the list is already
   // there when the "Yemekler" sheet opens.
   const savedMeals = useSavedMeals(userId);
@@ -442,7 +452,8 @@ export function MealPlanView({
           <MacroSummaryCard
             consumed={totals}
             target={targetMacros}
-            isEstimated={false}
+            isEstimated={targetsAreExample}
+            onPersonalize={onOpenPersonalPlan}
           />
 
           {/* Meal Containers */}
@@ -577,7 +588,7 @@ export function MealPlanView({
         allergenExclusions={personalizationProfile.allergenExclusions}
         remaining={remainingMacros}
         filledSlots={filledSlots}
-        targetsEstimated={!hasSavedProfile}
+        targetsEstimated={targetsAreExample}
         canSaveMeals={!!userId}
         savedMeals={savedMeals.savedMeals}
         savedLoading={savedMeals.isLoading}

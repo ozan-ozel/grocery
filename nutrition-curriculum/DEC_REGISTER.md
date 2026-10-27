@@ -46,7 +46,7 @@ Four things a newcomer needs to know before using this table:
    through its own ratification process — never by an implementer's judgement.
 3. **`COVERED` is not `SHIPPED`.** `SHIPPED` means the decision was implemented as specified.
    `COVERED` means the app has *something adequate* in that space and the curriculum's fuller version
-   is a later refinement. `DEC-022` is the clearest case: the app applies +400/−250 kcal where the
+   is a later refinement. `DEC-022` is the clearest case: the app applies −400 kcal (loss) / +250 kcal (gain) where the
    curriculum says ±500 — "a numeric-tuning question for a human, not an architecture gap." A
    `COVERED` row is a candidate for later sanding, not a closed item.
 4. **`PARTIAL` is not `SHIPPED`, and it spans two ledger categories on purpose.** Use it only when a
@@ -90,7 +90,7 @@ parameters. Unblocking one means building its subsystem first, not reasoning har
 | `DEC-019` | D · Energy | Determine how disclosed activity/training data is incorporated into the initial total-energy-expenditu… | `SHIPPED` | A | PAL-band activity multiplier implemented, unchanged |
 | `DEC-020` | D · Energy | Determine what constitutes sufficient observed data (logged intake plus weight/ composition trend over… | `BLOCKED` | E | Needs an observed-weight-trend data loop that doesn't exist — a multi-week feature, not a fast MVP; building a fake "… |
 | `DEC-021` | D · Energy | Determine how to weigh the initial model-based estimate against the individual's observed response whe… | `BLOCKED` | E | Deviation-cap numeric parameter explicitly deferred to Phase 8/Gate 5, do-not-resolve-autonomously |
-| `DEC-022` | D · Energy | Determine the current energy prescription given the individualized maintenance figure (DEC-021) and th… | `COVERED` | G | Static +400/-250 kcal adjustment already implemented; adjusting to match the curriculum's ±500 exactly is a numeric-t… |
+| `DEC-022` | D · Energy | Determine the current energy prescription given the individualized maintenance figure (DEC-021) and th… | `COVERED` | G | Static −400 kcal (loss) / +250 kcal (gain) adjustment already implemented (note corrected 2026-10-27: it previously read "+400/-250", the reverse of `calculateTargets()`); adjusting to match the curriculum's ±500 exactly is a numeric-t… |
 | `DEC-023` | D · Energy | Determine the triggers for recomputing the energy estimate or prescription as new profile or observed… | `BLOCKED` | E | Recompute-trigger cadence depends on the same missing observed-data loop as DEC-020 |
 | `DEC-024` | D · Energy | Determine how estimate/prescription confidence or uncertainty is represented and communicated to the user | `COVERED` | G | `warnings`/`assumptions` string arrays already communicate estimate caveats; not confidence-scaled, but present |
 | `DEC-025` | E · Body Composition | Determine which body-composition metrics the application requests and tracks for a given user/goal com… | `BLOCKED` | E | All depend on a weight/body-comp logging-and-trend subsystem that does not exist |

@@ -708,6 +708,7 @@ function AppShell({
               isOnShoppingList={isOnList}
               onRemoveShoppingItem={removeItemByName}
               shoppingUndoVisible={!!undo}
+              onOpenPersonalPlan={() => selectSection("kisisel")}
             />
           </Suspense>
         ) : section === "kisisel" ? (
