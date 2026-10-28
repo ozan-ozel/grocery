@@ -77,7 +77,7 @@ güvenliği, arayüz kararları. Bunlar karar kaydına değil `docs/architecture
 
 ---
 
-## 3. Yedi kitap
+## 3. Kaynak kitaplar (7 beslenme + 1 mutfak)
 
 [Belge] `nutrition-curriculum/01_SOURCE_BOOKS/` (dosyalar yerelde, git'te değil):
 
@@ -88,9 +88,9 @@ güvenliği, arayüz kararları. Bunlar karar kaydına değil `docs/architecture
 | 3 | *Human Metabolism: A Regulatory Perspective* | Keith N. Frayn, Rhys D. Evans | 4. baskı, (yıl dosya adında yok), Wiley | Akademik ders kitabı (metabolizma) |
 | 4 | *An Introduction to Nutrition and Metabolism* | David A. Bender | 3. baskı, 2002, CRC Press | Ders kitabı — **en eski kaynak** |
 | 5 | *Nutrition Research Methodologies* | Lovegrove, Hodson, Sharma, Lanham-New (ed.) | The Nutrition Society Textbook | Araştırma yöntemleri ders kitabı |
-| 6 | *Sport Nutrition* | Asker Jeukendrup, Michael Gleeson | 4. baskı, 2024, Human Kinetics | Akademik ders kitabı |
+| 6 | *Sport Nutrition* | Asker Jeukendrup, Michael Gleeson | 4. baskı, 2025, Human Kinetics (dosya adında 2024 yazıyor; künye © 2025) | Akademik ders kitabı |
 | 7 | *Krause and Mahan's Food and the Nutrition Care Process* | Janice L. Raymond, Kelly Morrow | 16. baskı, 2022, Elsevier | Klinik beslenme referansı |
-| (8) | *On Cooking* | Labensky, Martel, Hause | 2023, Pearson | Mutfak ders kitabı (Gate 6 ile eklendi) |
+| 8 | *On Cooking* | Labensky, Martel, Hause | 2023, Pearson | Mutfak ders kitabı (Gate 6 ile eklendi; `08_On_Cooking/`) |
 
 Kitapların rolleri, kapsamları ve örtüşmeleri zaten analiz edilmiş: `03_PHASE_1_CURRICULUM_ANALYSIS/BOOK_ROLES.md`,
 `BOOK_TOPIC_COVERAGE.md`, `TOPIC_OVERLAPS.md`, `02_TOC_AND_SOURCE_ANALYSIS/`. Bu denetimde kitap metinleri
@@ -332,7 +332,7 @@ kilo verme kombinasyonunda ortaya çıkıyor.
 | Güvenlik | Admin yazma kilidi, RLS, iki katmanlı yetki | OWASP/rate-limit/KVKK denetimi | — |
 | "Bugün ne pişirsem?" | Öneri motorları, 20 hazır yemek, plana ve listeye ekleme | Bunları bir araya getiren ana bölüm; tarif havuzu | — |
 | Dağıtım | Vercel, elle deploy, `agent-login` yayında değil | Canlıdaki commit'in kaydı | Netlify izleri yalnızca tarihsel notlarda |
-| Karar kayıtları | 112 DEC, 11 gate kaydı, 7+1 kitap | — | ~~DEC-022 notu tersti~~ (düzeltildi) |
+| Karar kayıtları | 112 DEC, 11 gate kaydı, 7 beslenme + 1 mutfak kitabı | — | ~~DEC-022 notu tersti~~ (düzeltildi) |
 
 ---
 

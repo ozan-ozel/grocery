@@ -20,17 +20,18 @@ type Props = {
   // DEC-069: shown only when there is batch food left to add.
   onSelectBatch?: () => void;
   batchLabelFor?: (item: MealItem) => string | undefined;
-  // Resolves a comboId to the meal's display name and source (built-in, saved
+  // Resolves a mealId to the meal's display name and source (built-in, saved
   // or evening pattern). An id that resolves to nothing is not carded.
-  mealNameFor: (comboId: string) => MealGroupInfo | undefined;
-  // Opens the saved meal (Yemeklerim) with this comboId for editing. Absent
+  mealNameFor: (mealId: string) => MealGroupInfo | undefined;
+  // Opens the saved meal (Yemeklerim) with this mealId for editing. Absent
   // groups (built-in/evening) never call this — MealGroup only shows the
   // edit affordance for a "saved" group.
-  onEditSavedMeal?: (comboId: string) => void;
+  onEditSavedMeal?: (mealId: string) => void;
   // Removes every item in this slot as one undoable step.
   onClear: () => void;
   // Protein target range for this occasion (min/max grams).
-  proteinTargetG: { min: number; max: number };
+  // Absent when the user is outside the app's automated scope (DEC-012).
+  proteinTargetG?: { min: number; max: number };
 };
 
 export const MEAL_LABELS: Record<MealType, { tr: string; en: string }> = {
@@ -81,14 +82,15 @@ export function MealContainer({
         <p className="text-xs text-muted-foreground">
           {totals ? (
             <>
-              {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g / {proteinTargetG.min}-{proteinTargetG.max}g hedef · K:{" "}
+              {Math.round(totals.kcal)} kcal · P: {Math.round(totals.proteinG)}g
+              {proteinTargetG && <> / {proteinTargetG.min}-{proteinTargetG.max}g hedef</>} · K:{" "}
               {Math.round(totals.carbsG)}g · Y: {Math.round(totals.fatG)}g
             </>
-          ) : (
+          ) : proteinTargetG ? (
             <>
               P: 0g / {proteinTargetG.min}-{proteinTargetG.max}g hedef
             </>
-          )}
+          ) : null}
         </p>
       </div>
 
@@ -131,7 +133,7 @@ export function MealContainer({
                 kcal={calculateItemsNutrition(group.items, catalog).kcal}
                 onEdit={
                   group.source === "saved" && onEditSavedMeal
-                    ? () => onEditSavedMeal(group.comboId)
+                    ? () => onEditSavedMeal(group.mealId)
                     : undefined
                 }>
                 {group.items.map(renderItem)}

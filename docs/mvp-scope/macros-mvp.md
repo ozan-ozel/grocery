@@ -10,7 +10,7 @@ anything new is built.
 
 | Item | Owning DEC | Readiness | Reality |
 |---|---|---|---|
-| Protein across eating occasions | `DEC-033` | `PROVISIONAL` | Implemented; now has a display consumer in `MealContainer.tsx` (per-slot header shows the target band next to consumed protein), shipped 2026-09-23. Still flat/display-only per DEC-033's provisional scope |
+| Protein across eating occasions | `DEC-033` | `PROVISIONAL` | Implemented; now has a display consumer in `MealContainer.tsx` (per-slot header shows the target band next to consumed protein), shipped 2026-09-23. Still flat/display-only per DEC-033's provisional scope. Source now cited in Kişisel Plan (2026-10-28): Benardot, *Advanced Sports Nutrition* 3e p. 44 (0.3-0.4 g/kg/meal) and Schoenfeld & Aragon 2018 |
 | Total daily carbohydrate | `DEC-034` | `SHIPPED` | Implemented; the value below was corrected 2026-09-15 |
 | Min/max macros per meal | `DEC-056` | `COVERED` | Per-slot totals exist, per-meal macro bounds do not |
 | Dietary pattern constraint | `DEC-038` | `BLOCKED` | Nothing in the code today |

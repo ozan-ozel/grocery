@@ -59,7 +59,7 @@ function toDayPlan(entries: MealEntry[]): DayPlan {
       id: entry.id,
       foodId: entry.foodId,
       quantityG: entry.quantityG,
-      comboId: entry.comboId ?? undefined,
+      mealId: entry.mealId ?? undefined,
       batchId: entry.batchId ?? undefined,
     });
   }
@@ -153,8 +153,8 @@ export function useMealPlan(
   }
 
   // Every item across all slots for the pinned date, slot attached — backs
-  // MealPlanView's reconstruction of eaten evening combos from real data (grouped
-  // by comboId) instead of only component state that resets on reload.
+  // MealPlanView's reconstruction of eaten evening meals from real data (grouped
+  // by mealId) instead of only component state that resets on reload.
   function allItems(): (MealItem & { slot: MealSlot })[] {
     return MEAL_SLOTS.flatMap(({ slot }) => dayPlan[slot].map((item) => ({ ...item, slot })));
   }
@@ -186,7 +186,7 @@ export function useMealPlan(
       foodId: entry.foodId,
       quantityG: entry.quantityG,
       position: entry.position,
-      comboId: entry.comboId ?? undefined,
+      mealId: entry.mealId ?? undefined,
       batchId: entry.batchId ?? undefined,
     }).then((saved) => {
       if (!saved) console.warn("[mealPlan] entry created locally but failed to persist:", entry.id);
@@ -233,7 +233,7 @@ export function useMealPlan(
     slot: MealSlot,
     foodId: string,
     quantityG: number,
-    comboId?: string,
+    mealId?: string,
     batchId?: string
   ): string {
     const id = uid();
@@ -253,7 +253,7 @@ export function useMealPlan(
       foodId,
       quantityG,
       position,
-      comboId: comboId ?? null,
+      mealId: mealId ?? null,
       batchId: batchId ?? null,
     };
     applyAdd(entry);

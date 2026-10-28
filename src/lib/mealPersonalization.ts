@@ -192,8 +192,9 @@ export function calculateTargets(
     ? profile.weightKg * trainingCarbRange.max
     : (safeTarget * CARB_AMDR_ENERGY_SHARE.max) / 4;
   const bmi = profile.weightKg / Math.pow(profile.heightCm / 100, 2);
-  // MVP-1 PROVISIONAL (DEC-046): the drafted 30-35 mL/kg/day DRI
-  // baseline-fluid range itself — no exercise (DEC-047) or heat/altitude
+  // MVP-1 PROVISIONAL (DEC-046): the drafted 30-35 mL/kg/day
+  // baseline-fluid range itself (a clinical estimate, Krause 16th ed. p. 218;
+  // DRI's own total-water AI is a fixed 3.7 L men / 2.7 L women) — no exercise (DEC-047) or heat/altitude
   // (DEC-048) adjustment. REVISIT AFTER QA-1.
   const waterMl = range(profile.weightKg * 30, profile.weightKg * 35);
   const warnings: string[] = [];

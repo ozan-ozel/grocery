@@ -1,7 +1,7 @@
 # Nutrition Curriculum
 
-A university-level Human Nutrition, Metabolism, and Sport Nutrition curriculum built from an
-eight-book source corpus, then translated into decision logic and application architecture for the
+A university-level Human Nutrition, Metabolism, and Sport Nutrition curriculum built from seven
+nutrition textbooks plus one culinary textbook (*On Cooking*, added at Gate 6), then translated into decision logic and application architecture for the
 Grocery app.
 
 **213 topics · 112 application decisions · Phases 1–8 closed · Phase 9 in progress**
@@ -83,4 +83,7 @@ executable decision today is a deliberately temporary `PROVISIONAL` choice. See
 `01_SOURCE_BOOKS/` is **git-ignored** — it holds full copies of copyrighted commercial textbooks, which
 are this project's raw material, not its output. Only the analysis derived from them is versioned. The
 corpus was fixed at 7 books in Phase 1 and extended exactly once, at Gate 6, with one bounded culinary
-source. See `00_PROJECT_CONTROL/README.md` for the rationale.
+source (`08_On_Cooking/`). See `00_PROJECT_CONTROL/README.md` for the rationale.
+
+**The books are cited, never redistributed.** The app, the repo and any published material may name a
+book, its authors and a chapter or page; they must not reproduce its text, tables or figures.

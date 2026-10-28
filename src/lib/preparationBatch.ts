@@ -9,7 +9,7 @@
 // "Immutability" section, §6.3).
 //
 // CRITICAL: composition[].foodId uses the SAME value space as
-// MealEntry.foodId / Combo.items[].foodId (nutrition.name_tr) — NOT the
+// MealEntry.foodId / Meal.items[].foodId (nutrition.name_tr) — NOT the
 // opaque Nutrition.food_id UUID from Canonical Food Identity. These are two
 // different "food_id" concepts in this codebase; conflating them would
 // break leftover derivation's equality join against meal_entries.food_id.
@@ -25,7 +25,7 @@ export type PreparationBatch = {
   householdId: string;
   preparedDate: string; // YYYY-MM-DD
   storageNote?: string;
-  sourceComboId?: string; // provenance only — never authoritative for composition
+  sourceReadyMealId?: string; // provenance only — never authoritative for composition
   composition: BatchCompositionItem[];
 };
 
@@ -34,6 +34,7 @@ type PreparationBatchRow = {
   household_id: string;
   prepared_date: string;
   storage_note: string | null;
+  // DB/API column keeps its pre-rename name; in code it is sourceReadyMealId.
   source_combo_id: string | null;
   composition: { food_id: string; quantity_g: number }[];
 };
@@ -44,7 +45,7 @@ function fromRow(row: PreparationBatchRow): PreparationBatch {
     householdId: row.household_id,
     preparedDate: row.prepared_date,
     storageNote: row.storage_note ?? undefined,
-    sourceComboId: row.source_combo_id ?? undefined,
+    sourceReadyMealId: row.source_combo_id ?? undefined,
     composition: row.composition.map((item) => ({
       foodId: item.food_id,
       quantityG: item.quantity_g,
@@ -170,7 +171,7 @@ export type NewPreparationBatch = {
   householdId: string;
   preparedDate: string;
   storageNote?: string;
-  sourceComboId?: string;
+  sourceReadyMealId?: string;
   composition: BatchCompositionItem[];
 };
 
@@ -186,7 +187,7 @@ export async function createPreparationBatch(
         household_id: batch.householdId,
         prepared_date: batch.preparedDate,
         storage_note: batch.storageNote ?? null,
-        source_combo_id: batch.sourceComboId ?? null,
+        source_combo_id: batch.sourceReadyMealId ?? null,
         composition: batch.composition.map((item) => ({
           food_id: item.foodId,
           quantity_g: item.quantityG,

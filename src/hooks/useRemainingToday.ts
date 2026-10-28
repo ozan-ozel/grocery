@@ -12,17 +12,17 @@ import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions
 export type LoggedEntry = { id: string; slot: MealSlot };
 
 export type RemainingToday =
-  // Without the catalog every combo's totals lookup fails and the ranked list
+  // Without the catalog every meal's totals lookup fails and the ranked list
   // comes back empty — indistinguishable from an honest "nothing fits your
   // budget" unless the loading/error state is carried through to the view.
   | {
       status: "loading-catalog";
-      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
+      logConsumption: (foodId: string, grams: number, mealId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     }
   | {
       status: "catalog-error";
-      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
+      logConsumption: (foodId: string, grams: number, mealId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     }
   | {
@@ -32,10 +32,10 @@ export type RemainingToday =
       allergenExclusions: AllergenClassExclusion[];
       catalogMap: NutritionMap;
       // Every ingredient logged today, slot attached — MealPlanView groups
-      // whichever of these carry a comboId to reconstruct the eaten evening
-      // combos from real data, so it survives a reload.
+      // whichever of these carry a mealId to reconstruct the eaten evening
+      // meals from real data, so it survives a reload.
       todaysItems: (MealItem & { slot: MealSlot })[];
-      logConsumption: (foodId: string, grams: number, comboId?: string) => LoggedEntry;
+      logConsumption: (foodId: string, grams: number, mealId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     };
 
@@ -90,9 +90,9 @@ export function useRemainingToday(
     pinnedDate: todayDateStr(),
   });
 
-  function logConsumption(foodId: string, grams: number, comboId?: string): LoggedEntry {
+  function logConsumption(foodId: string, grams: number, mealId?: string): LoggedEntry {
     const slot = inferSlot();
-    const id = addItem(slot, foodId, grams, comboId);
+    const id = addItem(slot, foodId, grams, mealId);
     return { id, slot };
   }
 
@@ -110,7 +110,7 @@ export function useRemainingToday(
   }
 
   // Anything short of "ready" (today: "loading"; "idle" is in useFoodCatalog's
-  // Status union but unreachable) means an empty catalogMap, so no combo could
+  // Status union but unreachable) means an empty catalogMap, so no meal could
   // score even if one fit. Today's meal_entries still loading gets the same
   // treatment — otherwise remaining would flash the full target before
   // dropping to the real (already-consumed) value a moment later.

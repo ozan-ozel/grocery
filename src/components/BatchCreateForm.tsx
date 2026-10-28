@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { SmoothPillTabs } from "@/components/ui/smooth-pill";
 import { MealCompositionEditor } from "@/components/MealCompositionEditor";
-import { ALL_COMBOS, scaleComboItems } from "@/lib/combos";
-import { scoreAllCombos } from "@/lib/comboMatch";
+import { scaleMealItems } from "@/lib/meals";
+import { ALL_READY_MEALS } from "@/lib/readyMeals";
+import { scoreAllMeals } from "@/lib/mealMatch";
 import { scaleNutrition, sumMacros } from "@/lib/mealNutrition";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
@@ -17,7 +18,7 @@ import {
 export type BatchCreateData = {
   preparedDate: string;
   storageNote?: string;
-  sourceComboId?: string;
+  sourceReadyMealId?: string;
   composition: BatchCompositionItem[];
 };
 
@@ -31,7 +32,7 @@ type Props = {
   onCancel: () => void;
 };
 
-type Mode = "combo" | "manual";
+type Mode = "readyMeal" | "manual";
 
 // Same sane range the Yemekler picker's custom multiplier uses — a typo can't
 // create a 50 kg batch.
@@ -47,14 +48,14 @@ export function BatchCreateForm({
   onSubmit,
   onCancel,
 }: Props) {
-  const [mode, setMode] = useState<Mode>("combo");
+  const [mode, setMode] = useState<Mode>("readyMeal");
   const [preparedDate, setPreparedDate] = useState(defaultDate);
   const [storageNote, setStorageNote] = useState("");
   const [multiplierText, setMultiplierText] = useState("4");
-  // Hard-excluded combos are already dropped by scoreAllCombos — a batch can
-  // never be created from a combo containing a hard-excluded food.
-  const allowedCombos = scoreAllCombos(ALL_COMBOS, exclusions, allergenExclusions, catalog);
-  const [comboId, setComboId] = useState(allowedCombos[0]?.id ?? "");
+  // Hard-excluded meals are already dropped by scoreAllMeals — a batch can
+  // never be created from a meal containing a hard-excluded food.
+  const allowedReadyMeals = scoreAllMeals(ALL_READY_MEALS, exclusions, allergenExclusions, catalog);
+  const [readyMealId, setReadyMealId] = useState(allowedReadyMeals[0]?.id ?? "");
   const [manualItems, setManualItems] = useState<BatchCompositionItem[]>([]);
   const [submitting, setSubmitting] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -65,10 +66,10 @@ export function BatchCreateForm({
 
   function buildComposition(): BatchCompositionItem[] {
     if (mode === "manual") return normalizeComposition(manualItems);
-    const combo = allowedCombos.find((c) => c.id === comboId);
-    if (!combo || !multiplierValid) return [];
+    const meal = allowedReadyMeals.find((c) => c.id === readyMealId);
+    if (!meal || !multiplierValid) return [];
     return normalizeComposition(
-      scaleComboItems(combo.items, multiplier).map((item) => ({
+      scaleMealItems(meal.items, multiplier).map((item) => ({
         foodId: item.foodId,
         quantityG: item.grams,
       }))
@@ -92,7 +93,7 @@ export function BatchCreateForm({
       const saved = await onSubmit({
         preparedDate,
         storageNote: storageNote.trim() ? storageNote.trim() : undefined,
-        sourceComboId: mode === "combo" ? comboId : undefined,
+        sourceReadyMealId: mode === "readyMeal" ? readyMealId : undefined,
         composition,
       });
       // On success the parent swaps this form out, so there is nothing to
@@ -109,24 +110,24 @@ export function BatchCreateForm({
         value={mode}
         onChange={setMode}
         items={[
-          { value: "combo", label: "Yemekten" },
+          { value: "readyMeal", label: "Yemekten" },
           { value: "manual", label: "Elle seç" },
         ]}
         surface="card"
       />
 
-      {mode === "combo" ? (
+      {mode === "readyMeal" ? (
         <div className="grid grid-cols-[1fr_6rem] gap-3">
           <label className="text-xs text-muted-foreground">
             Yemek
             <select
-              value={comboId}
-              onChange={(event) => setComboId((event.target as HTMLSelectElement).value)}
+              value={readyMealId}
+              onChange={(event) => setReadyMealId((event.target as HTMLSelectElement).value)}
               className="mt-1 h-11 w-full rounded-md border border-input bg-card px-2 text-base text-foreground">
-              {allowedCombos.length === 0 && <option value="">Uygun yemek yok</option>}
-              {allowedCombos.map((combo) => (
-                <option key={combo.id} value={combo.id}>
-                  {combo.nameTr}
+              {allowedReadyMeals.length === 0 && <option value="">Uygun yemek yok</option>}
+              {allowedReadyMeals.map((meal) => (
+                <option key={meal.id} value={meal.id}>
+                  {meal.nameTr}
                 </option>
               ))}
             </select>
@@ -157,7 +158,7 @@ export function BatchCreateForm({
         />
       )}
 
-      {mode === "combo" && !multiplierValid && (
+      {mode === "readyMeal" && !multiplierValid && (
         <p className="text-xs text-signal">
           Porsiyon sayısı {MULTIPLIER_MIN} ile {MULTIPLIER_MAX} arasında olmalı.
         </p>

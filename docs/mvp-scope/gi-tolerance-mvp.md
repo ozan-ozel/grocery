@@ -16,7 +16,7 @@ The roadmap marks this TO BE CHECKED. It is present on both levels.
 
 - **Foods.** `src/lib/foodExclusions.ts` carries a reason taxonomy of allergy, intolerance, unclear,
   preference and unclassified, split into hard and soft tiers. That split is `DEC-053`, shipped.
-- **Meals.** `src/lib/comboMatch.ts` blocks a composite combo the moment any one of its items is hard
+- **Meals.** `src/lib/mealMatch.ts` blocks a composite meal the moment any one of its items is hard
   excluded.
 
 **The real gap is data, not code.** `DEC-061` is `PARTIAL` for one reason: allergen-class enforcement

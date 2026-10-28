@@ -25,6 +25,13 @@ import type { Nutrition } from "@/lib/nutrition";
 import { buildFoodIdentityIndex } from "@/lib/foodIdentity";
 import { groupByCategory } from "@/lib/categorization/categories";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
+import { useScopeAttestation } from "@/hooks/useScopeAttestation";
+import { ScopeCheck } from "@/components/ScopeCheck";
+import {
+  OUT_OF_SCOPE_MESSAGE,
+  RED_FLAG_NOTE,
+  TARGET_ESTIMATE_NOTE,
+} from "@/lib/safetyCopy";
 import { useFoodCatalog } from "@/hooks/useFoodCatalog";
 import { useDetailsTransition } from "@/hooks/useDetailsTransition";
 import { useRevealAboveKeyboard } from "@/hooks/useVisualViewport";
@@ -70,10 +77,15 @@ const ENDOTEXT_SOURCE: Source = {
   href: "https://www.ncbi.nlm.nih.gov/books/NBK278991/",
   badge: "Endotext",
 };
-const WHO_SOURCE: Source = {
-  label: "WHO physical activity guidance",
-  href: "https://www.who.int/news-room/fact-sheets/detail/physical-activity",
-  badge: "WHO",
+// The activity multipliers (1.4 / 1.55 / 1.7 / 1.9 / 2.1, mealPersonalization.ts)
+// are PAL values, and PAL bands come from this report's Table 5.3 (sedentary or
+// light 1.40-1.69, active 1.70-1.99, vigorous 2.00-2.40). The WHO
+// physical-activity fact sheet cited here before gives exercise minutes, not
+// PAL values.
+const FAO_2004_SOURCE: Source = {
+  label: "FAO/WHO/UNU (2004): Human energy requirements, Tablo 5.3 (PAL)",
+  href: "https://www.fao.org/4/y5686e/y5686e07.htm",
+  badge: "FAO 2004",
 };
 const DRI_SOURCE: Source = {
   label: "National Academies DRI tables",
@@ -102,6 +114,37 @@ const SN4_SOURCE: Source = {
   label: "Jeukendrup & Gleeson, Sport Nutrition, 4. Baskı (2025)",
   badge: "SN4",
 };
+// Per-meal protein (0.3-0.4 g/kg per meal, DEC-033, shown on Yemek Planı's
+// meal cards via occasionProteinTargetG). The book states the range verbatim
+// (p. 44, repeated in Appendix C p. 431); Schoenfeld & Aragon is the primary
+// study behind the 0.4 g/kg upper end.
+const AS3_SOURCE: Source = {
+  label: "Benardot, Advanced Sports Nutrition, 3. Baskı (2021), s. 44: öğün başı protein",
+  badge: "AS3",
+};
+const SCHOENFELD_2018_SOURCE: Source = {
+  label: "Schoenfeld & Aragon (2018): öğün başına protein dağılımı",
+  href: "https://pmc.ncbi.nlm.nih.gov/articles/PMC5828430/",
+  badge: "Schoenfeld 2018",
+};
+// The 30-35 mL/kg baseline-fluid range is a clinical estimate, and Krause
+// states it verbatim (16th ed., ch. 12, p. 218). DRI's Adequate Intake for
+// total water is a fixed figure (3.7 L men / 2.7 L women, including water from
+// food) rather than a per-kg rule, so DRI stays as context, not as the
+// source of the range.
+const KRAUSE_SOURCE: Source = {
+  label: "Krause and Mahan's Food & the Nutrition Care Process, 16. Baskı (2022), s. 218: 30-35 mL/kg",
+  badge: "Krause",
+};
+const USDA_FDC_SOURCE: Source = {
+  label: "USDA ARS, FoodData Central (kamu malı, CC0)",
+  href: "https://fdc.nal.usda.gov/",
+  badge: "USDA",
+};
+const TR_LABELS_SOURCE: Source = {
+  label: "Paketli ve konserve ürünler: Türkiye'deki ürün etiketlerindeki değerler",
+  badge: "Etiket",
+};
 
 const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
   {
@@ -114,25 +157,32 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
   },
   {
     feature: "Günlük aktivite seviyesi",
-    sources: [WHO_SOURCE],
+    sources: [FAO_2004_SOURCE],
   },
   {
     feature: "Protein, yağ, karbonhidrat ve lif aralıkları",
     sources: [DRI_SOURCE, ENDOTEXT_SOURCE, HECTOR_2018_SOURCE, ACSM_2016_SOURCE, SN4_SOURCE],
   },
   {
+    feature: "Öğün başına protein",
+    sources: [AS3_SOURCE, SCHOENFELD_2018_SOURCE],
+  },
+  {
     feature: "BMI ve bel çevresi bağlamı",
     sources: [ENDOTEXT_SOURCE],
   },
   {
-    // Own group rather than folded into "Protein, yağ, karbonhidrat ve lif
-    // aralıkları" — the "Su" card used to show that macro-range group's DRI
-    // badge, which pointed at the wrong feature entirely: the 30-35 mL/kg
-    // baseline-fluid figure is DRI's own Adequate Intake for total water,
-    // not the AMDR macro ranges. Same DRI_SOURCE object (it's genuinely the
-    // same National Academies DRI reference), separate citation context.
+    // Own group rather than folded into the macro ranges. Krause is the
+    // source of the 30-35 mL/kg range; DRI is listed second for its
+    // fixed total-water Adequate Intake (see KRAUSE_SOURCE).
     feature: "Su ihtiyacı (temel sıvı)",
-    sources: [DRI_SOURCE],
+    sources: [KRAUSE_SOURCE, DRI_SOURCE],
+  },
+  {
+    // Not cited anywhere else on this page (no referrer anchor), so its
+    // badges render as plain labels, not jump buttons.
+    feature: "Besin değerleri",
+    sources: [USDA_FDC_SOURCE, TR_LABELS_SOURCE],
   },
 ];
 
@@ -149,10 +199,10 @@ const SOURCE_GROUPS: { feature: string; sources: Source[] }[] = [
 const REFERRER_EXACT_BADGES: Record<string, Set<string>> = {
   "Profil girdileri ve enerji planlama çerçevesi": new Set(["NIDDK"]),
   "Bazal metabolizma, koruma ve hedef kalorisi": new Set(["Endotext"]),
-  "Günlük aktivite seviyesi": new Set(["WHO"]),
+  "Günlük aktivite seviyesi": new Set(["FAO 2004"]),
   "Protein, yağ, karbonhidrat ve lif aralıkları": new Set(["DRI"]),
   "BMI ve bel çevresi bağlamı": new Set(["Endotext"]),
-  "Su ihtiyacı (temel sıvı)": new Set(["DRI"]),
+  "Su ihtiyacı (temel sıvı)": new Set(["Krause"]),
 };
 
 type Props = { userId: string | null };
@@ -168,6 +218,7 @@ export function PersonalPlanView({ userId }: Props) {
     saveError,
     retrySave,
   } = useMealPersonalization(userId);
+  const { outOfScope, setOutOfScope } = useScopeAttestation(userId);
   const [showSources, setShowSources] = useState(false);
   const [howOpen, setHowOpen] = useState(false);
   const howDetails = useDetailsTransition<HTMLElement>();
@@ -486,10 +537,7 @@ export function PersonalPlanView({ userId }: Props) {
             />
           </Field>
         </div>
-        <p className="mt-3 text-xs text-muted-foreground">
-          Bu uygulama 18 yaş altı, hamilelik, emzirme dönemi ve yeme bozukluğu
-          tedavisi gören kullanıcılar için tasarlanmadı.
-        </p>
+        <ScopeCheck checked={outOfScope} onChange={setOutOfScope} />
         <div className="mt-3 rounded-lg border border-border">
           <button
             type="button"
@@ -554,7 +602,7 @@ export function PersonalPlanView({ userId }: Props) {
                   )}>
                   <Field
                     label="Günlük aktivite"
-                    sourceBadge={showSources ? "WHO" : undefined}
+                    sourceBadge={showSources ? "FAO 2004" : undefined}
                     onSourceBadgeClick={() =>
                       jumpToSource("Günlük aktivite seviyesi")
                     }
@@ -871,7 +919,16 @@ export function PersonalPlanView({ userId }: Props) {
         </div>
       </section>
 
-      {targets && (
+      {outOfScope && (
+        <section className="rounded-lg border border-border p-3 text-sm">
+          <h2 className="font-semibold">Günlük hedeflerin</h2>
+          <p className="mt-1 text-xs text-muted-foreground">
+            {OUT_OF_SCOPE_MESSAGE}
+          </p>
+        </section>
+      )}
+
+      {targets && !outOfScope && (
         <TargetSummary
           targets={targets}
           activity={activityLabel(profile.activity)}
@@ -887,6 +944,11 @@ export function PersonalPlanView({ userId }: Props) {
           }}
         />
       )}
+
+      <div className="space-y-1 px-1 text-xs text-muted-foreground">
+        {targets && !outOfScope && <p>{TARGET_ESTIMATE_NOTE}</p>}
+        <p>{RED_FLAG_NOTE}</p>
+      </div>
 
       <div className="glow-signal rounded-lg">
         <details
@@ -955,7 +1017,7 @@ export function PersonalPlanView({ userId }: Props) {
                     onJump={jumpToSource}
                   />
                   <SourceBadgeLink
-                    label="WHO"
+                    label="FAO 2004"
                     feature="Günlük aktivite seviyesi"
                     onJump={jumpToSource}
                   />
@@ -1016,6 +1078,7 @@ export function PersonalPlanView({ userId }: Props) {
               hastalık, gebelik, emzirme veya yeme bozukluğu durumlarında
               diyetisyen ya da hekimle görüş.
             </p>
+
           </div>
         </details>
       </div>
@@ -1128,11 +1191,13 @@ function TargetSummary({
     ],
     // MVP-1 PROVISIONAL (DEC-046) — baseline fluid range only, see
     // mealPersonalization.ts. Shown as a range (not a collapsed midpoint)
-    // per hydration-mvp.md's own outstanding-work note.
+    // per hydration-mvp.md's own outstanding-work note. Total fluid, not a
+    // drinking target: Krause's 30-35 mL/kg estimate counts every source,
+    // water from food included (owner decision 2026-10-28).
     [
       "Su",
       `${(targets.waterMl.min / 1000).toFixed(1)}-${(targets.waterMl.max / 1000).toFixed(1)} L`,
-      "aralık, taslak",
+      "toplam sıvı, yiyecekler dahil",
     ],
   ];
   return (
@@ -1145,14 +1210,14 @@ function TargetSummary({
               <span>{activity}</span>
               {showSources && (
                 <SourceBadgeLink
-                  label="WHO"
+                  label="FAO 2004"
                   feature="Günlük aktivite seviyesi"
                   onJump={onJumpToSource}
                 />
               )}
             </span>
             <span className="inline-flex items-center gap-1.5">
-              {/* Dropped once sources show — the extra WHO/Endotext badges
+              {/* Dropped once sources show — the extra FAO 2004/Endotext badges
                   already push this onto its own line, where a leading
                   separator has nothing to separate from anymore. */}
               {!showSources && <span aria-hidden="true">·</span>}
@@ -1222,9 +1287,9 @@ function TargetSummary({
           // "Nasıl hesaplanıyor" 's "Bazal metabolizma, koruma ve hedef
           // kalorisi" block (same citation as "Koruma" right above this
           // grid — Endotext, not DRI, and no separate referrer anchor
-          // needed since Koruma's is right there), and "Su" cites DRI's own
-          // Adequate Intake for total water, a different DRI category than
-          // the macro ranges, with its own dedicated citation group.
+          // needed since Koruma's is right there), and "Su" cites Krause's
+          // 30-35 mL/kg baseline-fluid estimate, with its own dedicated
+          // citation group.
           const citation =
             label === "Günlük enerji"
               ? {
@@ -1232,7 +1297,7 @@ function TargetSummary({
                   badge: "Endotext",
                 }
               : label === "Su"
-                ? { feature: "Su ihtiyacı (temel sıvı)", badge: "DRI" }
+                ? { feature: "Su ihtiyacı (temel sıvı)", badge: "Krause" }
                 : {
                     feature: "Protein, yağ, karbonhidrat ve lif aralıkları",
                     badge: "DRI",

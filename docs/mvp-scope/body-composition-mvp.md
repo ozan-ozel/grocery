@@ -79,3 +79,9 @@ costs nothing extra and unblocks that path later, without committing to any of i
 See `nutrition-curriculum/12_ENERGY_INDIVIDUALIZATION/` for that work, in particular
 `ENERGY_INDIVIDUALIZATION_MVP_ARCHITECTURE.html`, where this subsystem is named as the highest-leverage
 missing piece.
+
+## Interim note (2026-10-28)
+
+Until the weight log exists, `DEC-020` has a copy-only posture: Kişisel Plan shows "Bu hedefler bir
+başlangıç tahmini. 2-3 hafta boyunca kilonu izle; beklediğin yönde değişmiyorsa hedefi ayarla." under
+the targets (`src/lib/safetyCopy.ts`). Owner decision; nothing in this file's scope is built by it.

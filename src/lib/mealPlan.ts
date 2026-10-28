@@ -7,10 +7,10 @@ export type MealEntry = {
   foodId: string; // Nutrition.name_tr
   quantityG: number;
   position: number;
-  comboId: string | null;
+  mealId: string | null;
   // DEC-069: set when this entry is an allocation drawn from a
   // PreparationBatch rather than a fresh addition. Nullable/FK-less,
-  // mirroring comboId's own precedent exactly — every existing row is
+  // mirroring mealId's own precedent exactly — every existing row is
   // unaffected (batchId: null).
   batchId: string | null;
 };
@@ -23,6 +23,7 @@ type MealEntryRow = {
   food_id: string;
   quantity_g: number;
   position: number;
+  // DB/API column keeps its pre-rename name; in code it is MealEntry.mealId.
   combo_id: string | null;
   batch_id: string | null;
 };
@@ -35,7 +36,7 @@ function fromRow(row: MealEntryRow): MealEntry {
     foodId: row.food_id,
     quantityG: row.quantity_g,
     position: row.position,
-    comboId: row.combo_id,
+    mealId: row.combo_id,
     batchId: row.batch_id,
   };
 }
@@ -103,7 +104,7 @@ export type NewMealEntry = {
   foodId: string;
   quantityG: number;
   position: number;
-  comboId?: string;
+  mealId?: string;
   // DEC-069: set when this entry allocates from an existing PreparationBatch.
   batchId?: string;
 };
@@ -121,7 +122,7 @@ export async function createMealEntry(entry: NewMealEntry): Promise<MealEntry | 
         food_id: entry.foodId,
         quantity_g: entry.quantityG,
         position: entry.position,
-        combo_id: entry.comboId ?? null,
+        combo_id: entry.mealId ?? null,
         batch_id: entry.batchId ?? null,
       }),
     });

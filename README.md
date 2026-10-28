@@ -190,8 +190,9 @@ Nutrition advice in the app isn't improvised. It comes from a separate research 
 
 ```mermaid
 flowchart LR
-  B["8 textbooks<br/>(Krause, ACSM, Sport Nutrition…)"] --> T["213 curriculum topics"]
+  B["7 nutrition textbooks<br/>(Krause, ACSM, Sport Nutrition…)"] --> T["213 curriculum topics"]
   T --> D["112 application decisions<br/>(DEC-001 … DEC-112)"]
+  OC["+1 culinary textbook<br/>(On Cooking)"] --> D
   D --> R["Readiness per decision<br/>SHIPPED / READY / BLOCKED …"]
   R --> C["App code<br/>only what a decision specifies"]
 ```
@@ -199,8 +200,9 @@ flowchart LR
 - **Energy:** Mifflin-St Jeor for resting energy, an activity multiplier, and conservative
   loss/gain adjustments. BMI and waist are shown as context only, never as a diagnosis.
 - **Sources in the UI:** the Kişisel Plan "Kaynakları göster" switch maps each feature to its
-  reference (NIDDK Body Weight Planner, NCBI Endotext, WHO, the National Academies DRI tables, and a
-  sport-nutrition textbook).
+  reference: NIDDK Body Weight Planner, NCBI Endotext, FAO/WHO/UNU energy requirements, the National
+  Academies DRI tables, ACSM and other position papers, three of the source textbooks (sport nutrition and
+  clinical nutrition), and USDA FoodData Central for food values.
 - **Scope limits are explicit:** adults only, and no automated targets for pregnancy, minors,
   medical conditions or eating-disorder recovery.
 - **Food data:** each Turkish food name is hand-mapped to a USDA FoodData Central record

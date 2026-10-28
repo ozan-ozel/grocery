@@ -6,13 +6,13 @@ export type { MealSlot };
 
 // What the user actually controls per spec: a food and a quantity. Nutrition
 // is always derived (see calculateItemsNutrition), never stored here.
-// `comboId` is set only when this item was logged via "Yedim" on an evening
-// suggestion — MealPlanView groups by it to reconstruct the eaten combo after a reload.
+// `mealId` is set only when this item was logged via "Yedim" on an evening
+// suggestion — MealPlanView groups by it to reconstruct the eaten meal after a reload.
 export type MealItem = {
   id: string;
   foodId: string; // Nutrition.name_tr
   quantityG: number;
-  comboId?: string;
+  mealId?: string;
   // DEC-069: set when this item allocates from a PreparationBatch.
   batchId?: string;
 };

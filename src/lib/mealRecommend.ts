@@ -8,13 +8,13 @@
 import type { MealSlot } from "./mealPlan";
 import type { MacroTotals } from "./mealNutrition";
 import type { NutritionMap } from "./nutrition";
-import { COMBO_PORTIONS, type Combo, type PortionId } from "./combos";
-import { scaledComboTotals, preferenceTier, type ScoredCombo } from "./comboMatch";
+import { MEAL_PORTIONS, type Meal, type PortionId } from "./meals";
+import { scaledMealTotals, preferenceTier, type ScoredMeal } from "./mealMatch";
 import { scoreInstance } from "./eveningRecommend";
 
 export type RecommendedMeal = {
-  combo: ScoredCombo;
-  // The portion tier (COMBO_PORTIONS) that fit the slot budget best.
+  meal: ScoredMeal;
+  // The portion tier (MEAL_PORTIONS) that fit the slot budget best.
   portionId: PortionId;
   factor: number;
   // Totals at that tier — computed from the same rounded grams that get logged.
@@ -61,23 +61,23 @@ export function slotBudget(
 
 const SNACK_TAGS = ["ara-ogun", "atistirmalik"];
 
-// Only three of combos.json's tags are used for this: "kahvalti", "ara-ogun",
+// Only three of ready-meals.json's tags are used for this: "kahvalti", "ara-ogun",
 // "atistirmalik". Untagged meals are treated as main meals.
 //  - kahvalti slot: breakfast-tagged meals only
 //  - ara slot: snack- or breakfast-tagged (light) meals
 //  - ogle / aksam: everything that is neither breakfast- nor snack-tagged
 // Slot ids are used, never the card labels (two cards read "Ara Öğün").
-export function fitsSlot(combo: Pick<Combo, "tags">, slot: MealSlot): boolean {
-  const isBreakfast = combo.tags.includes("kahvalti");
-  const isSnack = combo.tags.some((tag) => SNACK_TAGS.includes(tag));
+export function fitsSlot(meal: Pick<Meal, "tags">, slot: MealSlot): boolean {
+  const isBreakfast = meal.tags.includes("kahvalti");
+  const isSnack = meal.tags.some((tag) => SNACK_TAGS.includes(tag));
   if (slot === "kahvalti") return isBreakfast;
   if (slot === "ara") return isSnack || isBreakfast;
   return !isBreakfast && !isSnack;
 }
 
 export type RecommendInput = {
-  // Already exclusion-filtered and totalled — pass scoreAllCombos' output.
-  combos: ScoredCombo[];
+  // Already exclusion-filtered and totalled — pass scoreAllMeals' output.
+  meals: ScoredMeal[];
   slot: MealSlot;
   // The whole day's remaining macros (target − consumed) for the day being viewed.
   remaining: MacroTotals;
@@ -94,29 +94,29 @@ export const DEFAULT_RECOMMEND_LIMIT = 4;
 // preference tier, no soft conflict first, then score. [] when nothing is left
 // in the day's calorie budget.
 export function recommendMeals(input: RecommendInput): RecommendedMeal[] {
-  const { combos, slot, remaining, filledSlots, catalog } = input;
+  const { meals, slot, remaining, filledSlots, catalog } = input;
   if (remaining.kcal <= 0) return [];
 
   const budget = slotBudget(remaining, slot, filledSlots);
   const out: RecommendedMeal[] = [];
-  for (const combo of combos) {
-    if (!fitsSlot(combo, slot)) continue;
-    let best: Omit<RecommendedMeal, "combo"> | null = null;
-    for (const portion of COMBO_PORTIONS) {
-      const totals = scaledComboTotals(combo, portion.factor, catalog);
+  for (const meal of meals) {
+    if (!fitsSlot(meal, slot)) continue;
+    let best: Omit<RecommendedMeal, "meal"> | null = null;
+    for (const portion of MEAL_PORTIONS) {
+      const totals = scaledMealTotals(meal, portion.factor, catalog);
       if (!totals) continue;
       const score = scoreInstance(totals, budget);
       if (!best || score < best.score) {
         best = { portionId: portion.id, factor: portion.factor, totals, score };
       }
     }
-    if (best) out.push({ combo, ...best });
+    if (best) out.push({ meal, ...best });
   }
 
   out.sort(
     (a, b) =>
-      preferenceTier(a.combo) - preferenceTier(b.combo) ||
-      Number(a.combo.hasSoftConflict) - Number(b.combo.hasSoftConflict) ||
+      preferenceTier(a.meal) - preferenceTier(b.meal) ||
+      Number(a.meal.hasSoftConflict) - Number(b.meal.hasSoftConflict) ||
       a.score - b.score
   );
   return out.slice(0, input.limit ?? DEFAULT_RECOMMEND_LIMIT);

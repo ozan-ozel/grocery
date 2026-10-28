@@ -16,7 +16,7 @@ type Props = {
 
 // Same color family (the primary tint), a different step per source so the
 // three kinds of group stay visually distinguishable without introducing a
-// second hue: evening suggestions are the most ambient, built-in combos a
+// second hue: evening suggestions are the most ambient, built-in meals a
 // step up, and the user's own Yemeklerim meals the most prominent.
 const SOURCE_CLASS: Record<MealGroupSource, string> = {
   evening: "border-primary/20 bg-primary/5",

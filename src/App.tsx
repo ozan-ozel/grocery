@@ -19,6 +19,7 @@ import { useItemCategories } from "@/hooks/useItemCategories";
 import { useSelection } from "@/hooks/useSelection";
 import { useAuth } from "@/hooks/useAuth";
 import { useMealPersonalization } from "@/hooks/useMealPersonalization";
+import { useScopeAttestation } from "@/hooks/useScopeAttestation";
 import { useVisualViewportVars } from "@/hooks/useVisualViewport";
 import { useOnboarding } from "@/hooks/useOnboarding";
 import { OnboardingQuickSetup } from "@/components/OnboardingQuickSetup";
@@ -559,6 +560,7 @@ function AppShell({
     useItemCategories(activeTenantId);
 
   const personalization = useMealPersonalization(currentUserId);
+  const scopeAttestation = useScopeAttestation(currentUserId);
   const onboarding = useOnboarding(
     currentUserId,
     personalization.hasSavedProfile,
@@ -685,6 +687,8 @@ function AppShell({
               personalization.setGoal(answers.goal);
             }}
             onSkip={onboarding.skip}
+            outOfScope={scopeAttestation.outOfScope}
+            onOutOfScopeChange={scopeAttestation.setOutOfScope}
           />
         ) : section === "besin" ? (
           <Suspense fallback={<SectionSuspenseFallback section={section} />}>

@@ -20,7 +20,7 @@ One file per `docs/roadmap_v2.md` domain, each mapping that domain to its `nutri
 | [sport-training-mvp.md](sport-training-mvp.md) | P · Sport/Training Data | DEC-092–095 | `NOT_STARTED` — explicitly deferred to V3 (2026-09-15 decision); real per-activity energy-cost research already done (see `docs/session-checkpoints/` around that date) if picked back up |
 | [access-affordability-mvp.md](access-affordability-mvp.md) | S · Access/Affordability | DEC-106–107 | `DONE` — already covered, nothing to build |
 | [governance-confidence-mvp.md](governance-confidence-mvp.md) | T · Governance/Confidence | DEC-108–112, DEC-024 | `DONE` — nothing needs building; also the file that flags the range-based energy-target idea as an explicit V2-upgrade, not MVP |
-| [life-stage-mvp.md](life-stage-mvp.md) | R · Life Stages | DEC-103–105 | `DONE` — excluded-populations copy shipped 2026-09-15 |
+| [life-stage-mvp.md](life-stage-mvp.md) | R · Life Stages | DEC-103–105 | `DONE` — excluded-populations copy shipped 2026-09-15; replaced 2026-10-28 by a self-attestation checkbox that hides targets (DEC-012 MVP posture) |
 
 ## Status vocabulary
 

@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Loader2, Pencil, Search, Trash2 } from "lucide-react";
-import type { ScoredCombo } from "@/lib/comboMatch";
-import { recipeSteps, type Combo, type PortionId } from "@/lib/combos";
+import type { ScoredMeal } from "@/lib/mealMatch";
+import { recipeSteps, type Meal, type PortionId } from "@/lib/meals";
 import { recommendMeals } from "@/lib/mealRecommend";
 import type { MealSlot } from "@/lib/mealPlan";
 import type { MacroTotals } from "@/lib/mealNutrition";
@@ -10,7 +10,7 @@ import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
 import {
   annotateSavedMeals,
-  savedMealToCombo,
+  savedMealToMeal,
   type NewSavedMeal,
   type SavedMeal,
 } from "@/lib/savedMeals";
@@ -29,8 +29,8 @@ type Props = {
   onClose: () => void;
   // The meal slot the sheet was opened for; null while closed.
   slot: MealSlot | null;
-  // Every built-in meal, hard-exclusions already dropped (scoreAllCombos output).
-  combos: ScoredCombo[];
+  // Every built-in meal, hard-exclusions already dropped (scoreAllMeals output).
+  readyMeals: ScoredMeal[];
   catalog: NutritionMap;
   foods: Nutrition[];
   exclusions: FoodExclusion[];
@@ -40,6 +40,8 @@ type Props = {
   remaining: MacroTotals;
   filledSlots: ReadonlySet<MealSlot>;
   targetsEstimated: boolean;
+  // DEC-012: no target-based "Sana uygun" for a user outside the app's scope.
+  hideRecommendations?: boolean;
   // Yemeklerim. `canSaveMeals` is false until there is a signed-in user.
   canSaveMeals: boolean;
   savedMeals: SavedMeal[];
@@ -48,8 +50,8 @@ type Props = {
   onUpdateSaved: (id: string, input: Omit<NewSavedMeal, "id">) => Promise<SavedMeal | null>;
   onDeleteSaved: (id: string) => Promise<boolean>;
   // `factor` is the portion multiplier over the meal's authored grams (1 = as
-  // saved/authored); the caller scales the items with scaleComboItems.
-  onSelect: (combo: Combo, factor: number) => void;
+  // saved/authored); the caller scales the items with scaleMealItems.
+  onSelect: (meal: Meal, factor: number) => void;
   // A saved meal id to open straight into edit mode for, instead of the
   // normal Yemeklerim list — set when a MealGroup's edit pencil opens this
   // sheet. Ignored (falls back to the list) if the id no longer matches a
@@ -72,7 +74,7 @@ const sectionLabel = "ledger text-xs uppercase tracking-widest text-muted-foregr
 function MealsSheetBody({
   onClose,
   slot,
-  combos,
+  readyMeals,
   catalog,
   foods,
   exclusions,
@@ -80,6 +82,7 @@ function MealsSheetBody({
   remaining,
   filledSlots,
   targetsEstimated,
+  hideRecommendations = false,
   canSaveMeals,
   savedMeals,
   savedLoading,
@@ -116,20 +119,20 @@ function MealsSheetBody({
 
   const recommendations = useMemo(
     () =>
-      slot ? recommendMeals({ combos, slot, remaining, filledSlots, catalog }) : [],
-    [combos, slot, remaining, filledSlots, catalog]
+      slot ? recommendMeals({ meals: readyMeals, slot, remaining, filledSlots, catalog }) : [],
+    [readyMeals, slot, remaining, filledSlots, catalog]
   );
   const savedEntries = useMemo(
     () => annotateSavedMeals(savedMeals, exclusions, allergenExclusions, catalog),
     [savedMeals, exclusions, allergenExclusions, catalog]
   );
 
-  function add(combo: Combo, factor: number, rememberTier?: PortionId) {
+  function add(meal: Meal, factor: number, rememberTier?: PortionId) {
     if (rememberTier) {
       setPortion(rememberTier);
       saveMealPortion(rememberTier);
     }
-    onSelect(combo, factor);
+    onSelect(meal, factor);
     onClose();
   }
 
@@ -140,7 +143,7 @@ function MealsSheetBody({
       : await onCreateSaved({ id: uid(), ...data });
     if (!saved) return false;
     if (addToSlot) {
-      onSelect(savedMealToCombo(saved), 1);
+      onSelect(savedMealToMeal(saved), 1);
       onClose();
     } else {
       setView({ kind: "list" });
@@ -172,12 +175,12 @@ function MealsSheetBody({
     view.kind === "form" ? (view.editing ? "Yemeği düzenle" : "Yeni yemek") : "Yemekler";
 
   // ---- one row, three sources -------------------------------------------------
-  const builtInRow = (combo: ScoredCombo, scope: string, activeTier: PortionId) => {
-    const domId = `${scope}-${combo.id}`;
+  const builtInRow = (meal: ScoredMeal, scope: string, activeTier: PortionId) => {
+    const domId = `${scope}-${meal.id}`;
     return (
       <MealRow
         key={domId}
-        combo={combo}
+        meal={meal}
         catalog={catalog}
         domId={domId}
         showTiers
@@ -224,7 +227,7 @@ function MealsSheetBody({
     return (
       <MealRow
         key={domId}
-        combo={scored}
+        meal={scored}
         catalog={catalog}
         domId={domId}
         showTiers={false}
@@ -289,8 +292,9 @@ function MealsSheetBody({
       </>
     );
   } else if (tab === "ready") {
-    const rows = combos.filter((combo) => matches(combo.nameTr));
-    const showRecommendations = !queryLower && recommendations.length > 0;
+    const rows = readyMeals.filter((meal) => matches(meal.nameTr));
+    const showRecommendations =
+      !hideRecommendations && !queryLower && recommendations.length > 0;
     body = (
       <>
         {showRecommendations && (
@@ -301,21 +305,21 @@ function MealsSheetBody({
                 {targetsEstimated ? "Tahmini hedefine göre" : "Kalan hedefine göre"}
               </p>
             </div>
-            {recommendations.map((rec) => builtInRow(rec.combo, "rec", rec.portionId))}
+            {recommendations.map((rec) => builtInRow(rec.meal, "rec", rec.portionId))}
             <p className={`${sectionLabel} pt-2`}>Tüm hazır yemekler</p>
           </section>
         )}
         {rows.length === 0
           ? empty(`"${query.trim()}" ile eşleşen yemek yok`)
-          : rows.map((combo) => builtInRow(combo, "all", portion))}
+          : rows.map((meal) => builtInRow(meal, "all", portion))}
       </>
     );
   } else {
     const savedRecipes = savedEntries.filter(
       (entry) => entry.scored && recipeSteps(entry.scored).length > 0 && matches(entry.meal.name)
     );
-    const builtInRecipes = combos.filter(
-      (combo) => recipeSteps(combo).length > 0 && matches(combo.nameTr)
+    const builtInRecipes = readyMeals.filter(
+      (meal) => recipeSteps(meal).length > 0 && matches(meal.nameTr)
     );
     body =
       savedRecipes.length + builtInRecipes.length === 0
@@ -327,7 +331,7 @@ function MealsSheetBody({
         : (
           <>
             {savedRecipes.map((entry) => savedRow(entry, "recipe"))}
-            {builtInRecipes.map((combo) => builtInRow(combo, "recipe", portion))}
+            {builtInRecipes.map((meal) => builtInRow(meal, "recipe", portion))}
           </>
         );
   }

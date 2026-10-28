@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { Input } from "@/components/ui/input";
-import { COMBO_BY_ID } from "@/lib/combos";
+import { READY_MEAL_BY_ID } from "@/lib/readyMeals";
 import type { NutritionMap } from "@/lib/nutrition";
 import {
   hasHardExclusion,
@@ -61,8 +61,8 @@ export function BatchAllocateSheet({
           </p>
         )}
         {offered.map(({ batch, rows }) => {
-          const title = batch.sourceComboId
-            ? (COMBO_BY_ID.get(batch.sourceComboId)?.nameTr ?? "Parti")
+          const title = batch.sourceReadyMealId
+            ? (READY_MEAL_BY_ID.get(batch.sourceReadyMealId)?.nameTr ?? "Parti")
             : "Elle hazırlanan parti";
           return (
             <section key={batch.id} className="rounded-lg border border-border bg-background p-3">

@@ -22,16 +22,19 @@ import { calculateTargets, occasionProteinTargetG } from "@/lib/mealPersonalizat
 import { type MacroTotals } from "@/lib/mealNutrition";
 import { lookupNutrition, type Nutrition } from "@/lib/nutrition";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
+import { useScopeAttestation } from "@/hooks/useScopeAttestation";
+import { OUT_OF_SCOPE_MESSAGE } from "@/lib/safetyCopy";
 import { MealContainer, MEAL_LABELS } from "@/components/MealContainer";
 import { BatchSheet } from "@/components/BatchSheet";
 import { BatchAllocateSheet } from "@/components/BatchAllocateSheet";
 import { FoodSearchModal } from "@/components/FoodSearchModal";
 import { MealShoppingConfirmModal } from "@/components/MealShoppingConfirmModal";
 import { MealsSheet } from "@/components/MealsSheet";
-import { ALL_COMBOS, scaleComboItems, type Combo } from "@/lib/combos";
-import { scoreAllCombos, type ScoredCombo } from "@/lib/comboMatch";
+import { scaleMealItems, type Meal } from "@/lib/meals";
+import { ALL_READY_MEALS } from "@/lib/readyMeals";
+import { scoreAllMeals, type ScoredMeal } from "@/lib/mealMatch";
 import {
-  matchEveningCombos,
+  matchEveningMeals,
   EVENING_CANDIDATE_PATTERNS,
   EVENING_PATTERN_BY_ID,
 } from "@/lib/eveningRecommend";
@@ -75,6 +78,9 @@ export function MealPlanView({
     hasSavedProfile,
     remoteChecked,
   } = useMealPersonalization(userId);
+  // DEC-012: a user outside the app's scope sees no targets or target-based
+  // suggestions here; logging, meals and the shopping list still work.
+  const { outOfScope } = useScopeAttestation(userId);
   // Only label targets as an example once the server has confirmed there is
   // no profile — a returning user on a fresh device has no local cache yet.
   const targetsAreExample = !hasSavedProfile && remoteChecked;
@@ -130,7 +136,7 @@ export function MealPlanView({
       isOnShoppingList(catalogMap.get(item.foodId)?.name_tr ?? item.foodId),
     );
   const [foodModalOpen, setFoodModalOpen] = useState(false);
-  const [comboModalOpen, setComboModalOpen] = useState(false);
+  const [mealModalOpen, setMealModalOpen] = useState(false);
   const [activeSlot, setActiveSlot] = useState<MealSlot | null>(null);
   // Set when a MealGroup's edit pencil opens the sheet directly into the
   // "edit this saved meal" form, instead of the normal Yemeklerim list.
@@ -159,16 +165,16 @@ export function MealPlanView({
     addItem(allocateSlot, foodId, quantityG, undefined, batchId);
   }
 
-  // comboId -> display name + source, for the meal cards in each slot.
-  // Built-in meals, the user's saved meals (their id is the comboId) and
+  // mealId -> display name + source, for the meal cards in each slot.
+  // Built-in meals, the user's saved meals (their id is the mealId) and
   // evening patterns all stamp their id on the entries they add.
   const mealInfoById = new Map<string, MealGroupInfo>();
-  for (const combo of ALL_COMBOS) mealInfoById.set(combo.id, { name: combo.nameTr, source: "builtin" });
+  for (const meal of ALL_READY_MEALS) mealInfoById.set(meal.id, { name: meal.nameTr, source: "builtin" });
   for (const meal of savedMeals.savedMeals) mealInfoById.set(meal.id, { name: meal.name, source: "saved" });
   for (const [id, pattern] of EVENING_PATTERN_BY_ID) mealInfoById.set(id, { name: pattern.nameTr, source: "evening" });
 
-  const scoredCombos = scoreAllCombos(
-    ALL_COMBOS,
+  const scoredReadyMeals = scoreAllMeals(
+    ALL_READY_MEALS,
     personalizationProfile.foodExclusions,
     personalizationProfile.allergenExclusions,
     catalogMap,
@@ -206,14 +212,14 @@ export function MealPlanView({
 
   // DEC-060 extension (src/lib/eveningRecommend.ts) — quantity-solved
   // protein+carb patterns against today's real remaining macros, distinct
-  // from `scoredCombos` above (fixed-gram authored combos for the manual
+  // from `scoredReadyMeals` above (fixed-gram authored meals for the manual
   // picker modal). Gated to today only: `remainingToday` is always today's
   // budget regardless of which day is being browsed via goToPrevDay/
   // goToNextDay, so showing it on a different day would misrepresent a
   // past/future day's plan as "tonight."
-  const eveningSuggestions: ScoredCombo[] =
+  const eveningSuggestions: ScoredMeal[] =
     isToday && remainingToday.status === "ready"
-      ? matchEveningCombos(
+      ? matchEveningMeals(
           EVENING_CANDIDATE_PATTERNS,
           remainingToday.remaining,
           remainingToday.foodExclusions,
@@ -226,7 +232,7 @@ export function MealPlanView({
   // their own card so undo lives right on it instead of requiring the
   // per-ingredient delete in whichever slot they landed in. Real logged
   // totals (not the nominal solved-quantity ones).
-  const eatenEveningCombos: { combo: ScoredCombo; entries: LoggedEntry[] }[] =
+  const eatenEveningMeals: { meal: ScoredMeal; entries: LoggedEntry[] }[] =
     isToday && remainingToday.status === "ready"
       ? (() => {
           const byPattern = new Map<
@@ -234,18 +240,18 @@ export function MealPlanView({
             { entries: LoggedEntry[]; items: MealItem[] }
           >();
           for (const item of remainingToday.todaysItems) {
-            if (!item.comboId || !EVENING_PATTERN_BY_ID.has(item.comboId)) continue;
-            const bucket = byPattern.get(item.comboId) ?? { entries: [], items: [] };
+            if (!item.mealId || !EVENING_PATTERN_BY_ID.has(item.mealId)) continue;
+            const bucket = byPattern.get(item.mealId) ?? { entries: [], items: [] };
             bucket.entries.push({ id: item.id, slot: item.slot });
             bucket.items.push(item);
-            byPattern.set(item.comboId, bucket);
+            byPattern.set(item.mealId, bucket);
           }
-          const result: { combo: ScoredCombo; entries: LoggedEntry[] }[] = [];
+          const result: { meal: ScoredMeal; entries: LoggedEntry[] }[] = [];
           for (const [patternId, bucket] of byPattern) {
             const pattern = EVENING_PATTERN_BY_ID.get(patternId);
             if (!pattern) continue;
             result.push({
-              combo: {
+              meal: {
                 id: patternId,
                 nameTr: pattern.nameTr,
                 items: bucket.items.map((item) => ({
@@ -263,13 +269,13 @@ export function MealPlanView({
           return result;
         })()
       : [];
-  const eatenEveningIds = new Set(eatenEveningCombos.map((e) => e.combo.id));
+  const eatenEveningIds = new Set(eatenEveningMeals.map((e) => e.meal.id));
   // A pattern already eaten today shouldn't also show as a fresh
-  // recommendation card — matchEveningCombos doesn't know about "already
+  // recommendation card — matchEveningMeals doesn't know about "already
   // eaten" state, so this is filtered here rather than in eveningRecommend.ts.
-  const visibleEveningSuggestions = eveningSuggestions.filter(
-    (combo) => !eatenEveningIds.has(combo.id)
-  );
+  const visibleEveningSuggestions = outOfScope
+    ? []
+    : eveningSuggestions.filter((meal) => !eatenEveningIds.has(meal.id));
 
   function handleFoodSelect(food: Nutrition, quantityG: number) {
     if (activeSlot) {
@@ -279,21 +285,21 @@ export function MealPlanView({
     }
   }
 
-  // `factor` is the chosen portion multiplier (see COMBO_PORTIONS in
-  // combos.ts) — every ingredient is scaled together, so the meal's protein
-  // and carb portions stay proportional. The logged comboId is unchanged:
+  // `factor` is the chosen portion multiplier (see MEAL_PORTIONS in
+  // meals.ts) — every ingredient is scaled together, so the meal's protein
+  // and carb portions stay proportional. The logged mealId is unchanged:
   // it's provenance, the grams are what actually count.
-  function handleComboSelect(combo: Combo, factor: number) {
+  function handleMealSelect(meal: Meal, factor: number) {
     if (!activeSlot) return;
-    runAsOneStep(`${combo.nameTr} eklendi`, () => {
-      for (const item of scaleComboItems(combo.items, factor)) {
+    runAsOneStep(`${meal.nameTr} eklendi`, () => {
+      for (const item of scaleMealItems(meal.items, factor)) {
         const nutrition = lookupNutrition(catalogMap, item.foodId);
         if (nutrition) {
-          addItem(activeSlot, nutrition.name_tr, item.grams, combo.id);
+          addItem(activeSlot, nutrition.name_tr, item.grams, meal.id);
         }
       }
     });
-    setComboModalOpen(false);
+    setMealModalOpen(false);
     setActiveSlot(null);
   }
 
@@ -337,31 +343,31 @@ export function MealPlanView({
   // Mirrors toggleDayShoppingList's own name/qty pattern exactly — this
   // component's onAddShoppingItem has no `exact`-match option, so this is the same fuzzy-resolvable add every
   // other shopping-list action on this screen already uses.
-  function addEveningComboToList(combo: ScoredCombo) {
-    for (const item of combo.items) {
+  function addEveningMealToList(meal: ScoredMeal) {
+    for (const item of meal.items) {
       const name = catalogMap.get(item.foodId)?.name_tr ?? item.foodId;
       onAddShoppingItem(name, `${item.grams}g`);
     }
   }
 
-  function removeEveningComboFromList(combo: ScoredCombo) {
-    for (const item of combo.items) {
+  function removeEveningMealFromList(meal: ScoredMeal) {
+    for (const item of meal.items) {
       const name = catalogMap.get(item.foodId)?.name_tr ?? item.foodId;
       onRemoveShoppingItem(name);
     }
   }
 
-  function isEveningComboOnList(combo: ScoredCombo) {
-    return combo.items.every((item) =>
+  function isEveningMealOnList(meal: ScoredMeal) {
+    return meal.items.every((item) =>
       isOnShoppingList(catalogMap.get(item.foodId)?.name_tr ?? item.foodId)
     );
   }
 
-  function toggleEveningPreparing(comboId: string) {
+  function toggleEveningPreparing(mealId: string) {
     setEveningPreparingIds((prev) => {
       const next = new Set(prev);
-      if (next.has(comboId)) next.delete(comboId);
-      else next.add(comboId);
+      if (next.has(mealId)) next.delete(mealId);
+      else next.add(mealId);
       return next;
     });
   }
@@ -371,26 +377,26 @@ export function MealPlanView({
   // whatever slot a modal happens to have selected. logConsumption infers
   // its own slot from time-of-day (see useRemainingToday.ts's inferSlot),
   // independently of anything in this component.
-  function eatEveningCombo(combo: ScoredCombo) {
+  function eatEveningMeal(meal: ScoredMeal) {
     if (remainingToday.status !== "ready") return;
-    runAsOneStep(`${combo.nameTr} eklendi`, () => {
-      for (const item of combo.items) {
-        remainingToday.logConsumption(item.foodId, item.grams, combo.id);
+    runAsOneStep(`${meal.nameTr} eklendi`, () => {
+      for (const item of meal.items) {
+        remainingToday.logConsumption(item.foodId, item.grams, meal.id);
       }
     });
     setEveningPreparingIds((prev) => {
-      if (!prev.has(combo.id)) return prev;
+      if (!prev.has(meal.id)) return prev;
       const next = new Set(prev);
-      next.delete(combo.id);
+      next.delete(meal.id);
       return next;
     });
   }
 
-  function undoEveningCombo(comboId: string) {
+  function undoEveningMeal(mealId: string) {
     if (remainingToday.status !== "ready") return;
-    const found = eatenEveningCombos.find((e) => e.combo.id === comboId);
+    const found = eatenEveningMeals.find((e) => e.meal.id === mealId);
     if (!found) return;
-    runAsOneStep(`${found.combo.nameTr} kaldırıldı`, () => {
+    runAsOneStep(`${found.meal.nameTr} kaldırıldı`, () => {
       remainingToday.undoConsumption(found.entries);
     });
   }
@@ -449,17 +455,25 @@ export function MealPlanView({
       {!isLoading && (
         <>
           {/* Daily Macro Summary */}
-          <MacroSummaryCard
-            consumed={totals}
-            target={targetMacros}
-            isEstimated={targetsAreExample}
-            onPersonalize={onOpenPersonalPlan}
-          />
+          {outOfScope ? (
+            <p className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
+              {OUT_OF_SCOPE_MESSAGE}
+            </p>
+          ) : (
+            <MacroSummaryCard
+              consumed={totals}
+              target={targetMacros}
+              isEstimated={targetsAreExample}
+              onPersonalize={onOpenPersonalPlan}
+            />
+          )}
 
           {/* Meal Containers */}
           <div className="space-y-3">
             {(() => {
-              const proteinTarget = occasionProteinTargetG(personalizationProfile.weightKg);
+              const proteinTarget = outOfScope
+                ? undefined
+                : occasionProteinTargetG(personalizationProfile.weightKg);
               return MEAL_SLOTS.map(({ slot }) => (
                 <MealContainer
                   key={slot}
@@ -472,7 +486,7 @@ export function MealPlanView({
                   }}
                   onSelectRecipe={() => {
                     setActiveSlot(slot);
-                    setComboModalOpen(true);
+                    setMealModalOpen(true);
                   }}
                   onRemoveItem={itemId => removeItem(slot, itemId)}
                   onUpdateItemQuantity={(itemId, quantityG) =>
@@ -492,7 +506,7 @@ export function MealPlanView({
                   onEditSavedMeal={id => {
                     setActiveSlot(slot);
                     setEditSavedMealId(id);
-                    setComboModalOpen(true);
+                    setMealModalOpen(true);
                   }}
                   onClear={() => clearSlot(slot)}
                   proteinTargetG={proteinTarget}
@@ -522,32 +536,32 @@ export function MealPlanView({
             </button>
           )}
 
-          {(visibleEveningSuggestions.length > 0 || eatenEveningCombos.length > 0) && (
+          {(visibleEveningSuggestions.length > 0 || eatenEveningMeals.length > 0) && (
             <div className="space-y-2">
               <h3 className="text-sm font-medium text-muted-foreground">
                 Akşam için öneriler
               </h3>
               <ul className="space-y-2">
-                {visibleEveningSuggestions.map((combo) => (
+                {visibleEveningSuggestions.map((meal) => (
                   <SuggestionCard
-                    key={combo.id}
-                    combo={combo}
-                    preparing={eveningPreparingIds.has(combo.id)}
-                    added={isEveningComboOnList(combo)}
-                    onAdd={() => addEveningComboToList(combo)}
-                    onRemove={() => removeEveningComboFromList(combo)}
-                    onTogglePreparing={() => toggleEveningPreparing(combo.id)}
-                    onEat={() => eatEveningCombo(combo)}
+                    key={meal.id}
+                    meal={meal}
+                    preparing={eveningPreparingIds.has(meal.id)}
+                    added={isEveningMealOnList(meal)}
+                    onAdd={() => addEveningMealToList(meal)}
+                    onRemove={() => removeEveningMealFromList(meal)}
+                    onTogglePreparing={() => toggleEveningPreparing(meal.id)}
+                    onEat={() => eatEveningMeal(meal)}
                   />
                 ))}
-                {eatenEveningCombos.map(({ combo }) => (
+                {eatenEveningMeals.map(({ meal }) => (
                   <SuggestionCard
-                    key={combo.id}
-                    combo={combo}
+                    key={meal.id}
+                    meal={meal}
                     preparing={false}
-                    added={isEveningComboOnList(combo)}
+                    added={isEveningMealOnList(meal)}
                     eaten
-                    onUndo={() => undoEveningCombo(combo.id)}
+                    onUndo={() => undoEveningMeal(meal.id)}
                   />
                 ))}
               </ul>
@@ -574,14 +588,14 @@ export function MealPlanView({
 
       {/* Meal picker: Yemeklerim / Hazır Yemekler / Tarifler */}
       <MealsSheet
-        isOpen={comboModalOpen}
+        isOpen={mealModalOpen}
         onClose={() => {
-          setComboModalOpen(false);
+          setMealModalOpen(false);
           setActiveSlot(null);
           setEditSavedMealId(null);
         }}
         slot={activeSlot}
-        combos={scoredCombos}
+        readyMeals={scoredReadyMeals}
         catalog={catalogMap}
         foods={foods}
         exclusions={personalizationProfile.foodExclusions}
@@ -589,13 +603,14 @@ export function MealPlanView({
         remaining={remainingMacros}
         filledSlots={filledSlots}
         targetsEstimated={targetsAreExample}
+        hideRecommendations={outOfScope}
         canSaveMeals={!!userId}
         savedMeals={savedMeals.savedMeals}
         savedLoading={savedMeals.isLoading}
         onCreateSaved={savedMeals.create}
         onUpdateSaved={savedMeals.update}
         onDeleteSaved={savedMeals.remove}
-        onSelect={handleComboSelect}
+        onSelect={handleMealSelect}
         openEditMealId={editSavedMealId}
       />
 

@@ -1,6 +1,6 @@
 # Current State
 
-_Last updated: 2026-10-27._
+_Last updated: 2026-10-28._
 
 This file describes the current project state and how to continue from it. It is not a historical session log,
 architecture document, roadmap, or task archive. The historical record of past sessions is a separate thing:
@@ -8,28 +8,26 @@ architecture document, roadmap, or task archive. The historical record of past s
 
 ## Current Objective
 
-A product relaunch is being prepared. The first step is finishing on `docs/product-relaunch-audit` (about to be
-committed/merged via SYNC → CMP): an audit report, the example-target labelling on the macro card, a DEC-022 note
-fix and an employer-facing README. Next comes a code-only rename of "combo" to "readyMeal" (decided, not started),
-then the food-catalog expansion (decisions pending, see Open items).
+A product relaunch is being prepared. The relaunch audit is merged (`d2adb35`). `refactor/combo-to-ready-meal`
+is about to be merged and pushed (CMP). It carries three things: the readyMeal rename, corrected nutrition source
+citations, and an MVP safety posture for DEC-012/013/020. A live `QATEST` of that branch comes next, then the
+remaining blocked decisions and the food-catalog expansion (decisions pending, see Open items).
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` are both at `6e65f11` (verified with git). Recent history: `6e65f11` (SN4
-  book citation in Kişisel Plan sources; plans index cleanup) on `574c9da` (checkpoint for the polish batch) on
-  `75abe85` (meal-plan UI polish batch). Earlier history: [`session-checkpoints/README.md`](session-checkpoints/README.md).
-- **In flight:** `docs/product-relaunch-audit`, checked out, uncommitted, branched from `6e65f11`. Contents:
-  - `docs/product-relaunch/00-current-state.md` — the relaunch audit report (new).
-  - Macro card on Yemek Planı: title is now "PLANDAKİ MAKROLAR" (the "+N" figures are everything planned, not
-    only eaten — `meal_entries` has no eaten flag). Without a saved profile the card shows an "Örnek hedef" badge,
-    a "not personal" note and a "Hedeflerini kişiselleştir" link to Kişisel Plan (`MacroSummaryCard.tsx`,
-    `MealPlanView.tsx`, `App.tsx`); the loading skeleton title matches (`MealPlanSkeleton.tsx`).
-  - `nutrition-curriculum/DEC_REGISTER.md`: DEC-022 note corrected to −400 kcal loss / +250 kcal gain (it read
-    the reverse of `calculateTargets()`). Note-only; the status stays `COVERED`.
-  - `README.md` rewritten for an outside (employer) reader: features, architecture and sync diagrams, engineering
-    decisions, nutrition backbone, AI-assisted workflow.
-  - `npx tsc -b` clean; the macro-card change was live-verified via `QATEST` (desktop 1280 and mobile 360,
-    throwaway account `qatest@local.dev`).
+- **Repo:** `master` and `origin/master` are both at `d2adb35` (verified with git): relaunch audit, example-target
+  labelling, DEC-022 note fix, employer README. Before it: `6e65f11` (SN4 citation), `574c9da`, `75abe85`.
+  Earlier history: [`session-checkpoints/README.md`](session-checkpoints/README.md).
+- **In flight:** `refactor/combo-to-ready-meal`, checked out, branched from `d2adb35`, being committed in this
+  CMP. Details: checkpoint
+  [10-28-01](session-checkpoints/2026-10-28-01-ready-meal-rename-sources-safety.md). In short:
+  - Rename "combo" → Meal / readyMeal in code. DB/API `combo_id` fields and the cache's `comboId` are kept.
+  - Kişisel Plan source citations corrected: PAL → FAO/WHO/UNU 2004, water → Krause (now "toplam sıvı"),
+    per-meal protein → AS3 + Schoenfeld 2018, food values → USDA FDC + labels.
+  - Out-of-scope self-attestation hides all targets (`useScopeAttestation`, browser key
+    `grocery.scopeAttestation.v1:<userId>`). The red-flag note and the "starting estimate" note are always
+    shown. Copy lives in `src/lib/safetyCopy.ts`.
+  - `tsc -b` and the build are clean; not yet browser-verified.
 - **Local branches other than `master`:** eleven, all merged into `master` (verified with `git branch --merged`):
   `agents/simple-test-setup`, `chore/current-state-open-items-cleanup`, `chore/remove-dead-code-exports`,
   `docs/fill-copilot-instructions`, `docs/refresh-current-state-after-cleanup`,
@@ -39,18 +37,17 @@ then the food-catalog expansion (decisions pending, see Open items).
   `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`) is remote-only, unmerged, not examined.
 - **Worktree: one exists** — `D:/CodeSpace/grocery.worktrees/simple-test-setup` on `agents/simple-test-setup`
   (`e999c02`), despite the no-worktrees rule. Not created this session; left untouched for the owner to remove.
-- **Recently shipped to `master` (all pushed):** SN4 book citation in Kişisel Plan sources (`6e65f11`); meal-plan UI
+- **Recently shipped to `master` (all pushed):** relaunch audit (`d2adb35`); SN4 book citation in Kişisel Plan sources (`6e65f11`); meal-plan UI
   polish batch (`75abe85`); MOBILEUP/MOBILEDOWN docs (`3d0dc77`); DEC-033 protein-target consumer (`a1aad83`..`d77c0ef`).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see [`operations.md`](operations.md)).
 
 ## Open items
 
-1. **Rename "combo" → "readyMeal" in code (decided 2026-10-27, not started).** Code-only: `src/lib/combos.ts`,
-   `comboMatch.ts`, `data/combos.json` and identifiers. Kept as-is for compatibility: the DB columns `combo_id` /
-   `source_combo_id`, the API's `combo_id` field, the `comboId` field in the local meal-plan cache, and the
-   existing combo ids. Shopping-list naming (`item` / `food`) stays unchanged.
+1. **Live QA of `refactor/combo-to-ready-meal` (pending).** Check the scope checkbox in onboarding and Kişisel
+   Plan, the hidden targets on Yemek Planı, the new source badges, and the Hazır Yemekler / "Yedim" flows after
+   the rename. Persisting the attestation across devices would need a `personal_plan` column (live migration).
 2. **Food-catalog expansion: proposal drafted, owner decisions pending.** The draft table (outside the repo, a
-   private Artifact) adds canned fish and turkey from Turkish label medians (Migros, 2026-10-27) and a whole-wheat
+   private Artifact, now with a separate "Öneriler ve değişiklikler" tab) adds canned fish and turkey from Turkish label medians (Migros, 2026-10-27) and a whole-wheat
    pasta row (USDA 169738). Decided: all foods and meal grams are dry/raw; canned and packaged goods use label
    values as sold. Pending: converting 8 ready-made meals that use 100–150 g of dry grains/pulses to dry portions;
    merging duplicate rows (`pirinç` ×3, `ceviz`/`ceviz içi`, `soğan`/`kuru soğan`, `kıyma`/`dana kıyma`); removing
@@ -71,8 +68,8 @@ then the food-catalog expansion (decisions pending, see Open items).
 
 ## Next Step
 
-Commit and merge `docs/product-relaunch-audit` (CMP). Then branch `refactor/` from `master` for the readyMeal
-rename (open item 1).
+`QATEST` the merged rename/sources/safety work (open item 1). Then the remaining blocked decisions: weight
+loop (DEC-027/084), training data (DEC-092), micronutrients (DEC-041), substitutions (DEC-063), pantry (DEC-065).
 
 ## Constraints and decisions that affect continuation
 

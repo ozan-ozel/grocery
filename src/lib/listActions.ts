@@ -59,7 +59,7 @@ export function createListActions(params: {
     // name (no close match) passes through unchanged.
     //
     // opts.exact skips this rewrite entirely — used when `name` already IS
-    // a canonical Food identity (e.g. a combo's foodId) rather than
+    // a canonical Food identity (e.g. a meal's foodId) rather than
     // free-typed text. Fuzzy-rewriting an already-canonical id would run it
     // through the shopping catalog's fuzzy key space, which is exactly the
     // coupling Phase 9 §20.6 (C1) flags as unsafe for anything beyond human
@@ -81,7 +81,7 @@ export function createListActions(params: {
     const existing = active.items.find((i) =>
       // Prefer exact foodId equality when BOTH sides have a resolved
       // identity — this is the fix for the residual bug the investigation
-      // flagged: `{ exact: true }` (a combo add) skipped the canonical-name
+      // flagged: `{ exact: true }` (a meal add) skipped the canonical-name
       // rewrite but this existing-row check still fuzzy-matched against
       // shopping history, so an exact Food ID add could still be silently
       // absorbed into an unrelated near-spelling row. Anything that doesn't

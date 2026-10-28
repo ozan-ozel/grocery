@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Field, NumberInput } from "@/components/PersonalPlanFields";
+import { ScopeCheck } from "@/components/ScopeCheck";
 import {
   ACTIVITY_OPTIONS,
   validateProfile,
@@ -16,11 +17,19 @@ type Props = {
   initialProfile: PersonalProfile;
   onFinish: (answers: QuickAnswers) => void;
   onSkip: () => void;
+  outOfScope: boolean;
+  onOutOfScopeChange: (value: boolean) => void;
 };
 
 const STEP_COUNT = 4;
 
-export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props) {
+export function OnboardingQuickSetup({
+  initialProfile,
+  onFinish,
+  onSkip,
+  outOfScope,
+  onOutOfScopeChange,
+}: Props) {
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<QuickAnswers>({
     ageYears: initialProfile.ageYears,
@@ -119,10 +128,7 @@ export function OnboardingQuickSetup({ initialProfile, onFinish, onSkip }: Props
                   ))}
                 </ul>
               )}
-              <p className="mt-3 text-xs text-muted-foreground">
-                Bu uygulama 18 yaş altı, hamilelik, emzirme dönemi ve yeme
-                bozukluğu tedavisi gören kullanıcılar için tasarlanmadı.
-              </p>
+              <ScopeCheck checked={outOfScope} onChange={onOutOfScopeChange} />
             </StepBody>
           )}
 

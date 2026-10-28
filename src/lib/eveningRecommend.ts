@@ -1,17 +1,17 @@
 // Evening-meal recommendation engine — extends DEC-060 (Domain K, Food
-// Selection, SHIPPED, implemented by comboMatch.ts's scoreAllCombos) with a
-// quantity-aware variant. Unlike comboMatch.ts's combos (fixed grams,
+// Selection, SHIPPED, implemented by mealMatch.ts's scoreAllMeals) with a
+// quantity-aware variant. Unlike mealMatch.ts's meals (fixed grams,
 // authored by hand), a CandidatePattern names two foods only; grams are
 // solved per call against the caller's actual `remaining` macros via a
-// small bounded discrete search — see matchEveningCombos below.
+// small bounded discrete search — see matchEveningMeals below.
 //
-// Deliberately does not touch comboMatch.ts: this is an additive path that
-// happens to produce the same ScoredCombo shape so the existing
+// Deliberately does not touch mealMatch.ts: this is an additive path that
+// happens to produce the same ScoredMeal shape so the existing
 // SuggestionCard/MealsSheet/shopping-list/log-as-eaten UI in
 // MealPlanView.tsx needs no changes to render it.
 import { lookupNutrition, type NutritionMap, type Nutrition } from "./nutrition";
 import { scaleNutrition, sumMacros, type MacroTotals } from "./mealNutrition";
-import type { ScoredCombo } from "./comboMatch";
+import type { ScoredMeal } from "./mealMatch";
 import {
   hasHardExclusion,
   hasSoftConstraint,
@@ -112,10 +112,10 @@ export const EVENING_CANDIDATE_PATTERNS: CandidatePattern[] = [
   },
 ];
 
-// Lookup for MealPlanView's eaten-evening-combo reconstruction — an evening
-// suggestion, once eaten, is logged with its pattern id as comboId (same
-// convention combos.ts's COMBO_BY_ID already serves for authored combos),
-// but patterns live in this module, not combos.ts, so that lookup needs a
+// Lookup for MealPlanView's eaten-evening-meal reconstruction — an evening
+// suggestion, once eaten, is logged with its pattern id as mealId (same
+// convention readyMeals.ts's READY_MEAL_BY_ID already serves for ready meals),
+// but patterns live in this module, not readyMeals.ts, so that lookup needs a
 // second map to find them again after a reload.
 export const EVENING_PATTERN_BY_ID = new Map(
   EVENING_CANDIDATE_PATTERNS.map((p) => [p.id, p])
@@ -127,7 +127,7 @@ type GramBounds = { minG: number; maxG: number; stepG: number };
 // (pirinç 365 kcal/100g, bulgur 342, makarna 371 — all raw/dry; cooked
 // versions of these run roughly a third of that per gram). Grams are
 // therefore raw/dry ingredient weight throughout — the same convention
-// data/combos.json's existing 16 combos already use (e.g. tavuk-pirinc-
+// data/ready-meals.json's existing 16 meals already use (e.g. tavuk-pirinc-
 // brokoli's "pirinç": 150g, paired with the prep_note "pirinci pişirin" —
 // cook the rice — confirming the logged grams are pre-cooking). Bounds
 // below are calibrated on that basis: a dry-grain ceiling of 150g is
@@ -154,7 +154,7 @@ function gridRange(bounds: GramBounds): number[] {
 // fat excess is the worst outcome (over-budget fat from a fatty protein
 // portion is the concrete failure mode this solver exists to avoid),
 // protein shortfall is worse than protein excess (this app already ranks
-// combos by protein as the hardest macro to hit), kcal excess is worse
+// meals by protein as the hardest macro to hit), kcal excess is worse
 // than kcal shortfall, and carbs are treated symmetrically since nothing
 // in this app singles out carb excess or shortfall as worse.
 const KCAL_EXCESS_WEIGHT = 1.5;
@@ -257,22 +257,22 @@ function bestInstance(
 
 // Deterministic, no AI: for each pattern, resolves both foods against the
 // live catalog (silently skipped if either is missing, same convention
-// comboMatch.ts's resolveItems uses), drops hard-excluded patterns
+// mealMatch.ts's resolveItems uses), drops hard-excluded patterns
 // entirely, solves the best-fitting quantities via bounded discrete search,
 // and ranks survivors by (no soft conflict first, then) fit score.
-// Returns ScoredCombo[] so every existing consumer — SuggestionCard,
+// Returns ScoredMeal[] so every existing consumer — SuggestionCard,
 // "Listeye ekle", "Yedim", gram editing after logging — works unmodified.
-export function matchEveningCombos(
+export function matchEveningMeals(
   patterns: CandidatePattern[],
   remaining: MacroTotals,
   exclusions: FoodExclusion[],
   allergenExclusions: AllergenClassExclusion[],
   catalog: NutritionMap,
   maxResults = 8
-): ScoredCombo[] {
+): ScoredMeal[] {
   if (remaining.kcal <= 0) return [];
 
-  const scored: ScoredCombo[] = [];
+  const scored: ScoredMeal[] = [];
   for (const pattern of patterns) {
     const protein = lookupNutrition(catalog, pattern.proteinFoodId);
     const carb = lookupNutrition(catalog, pattern.carbFoodId);
@@ -307,7 +307,7 @@ export function matchEveningCombos(
 
   scored.sort((a, b) => {
     // Household preference overrides, checked before fit score — matching
-    // comboMatch.ts's scoreAllCombos: hindi (turkey) sinks to the very
+    // mealMatch.ts's scoreAllMeals: hindi (turkey) sinks to the very
     // bottom, bone-in chicken thigh sinks low too, just not as low.
     const tierDiff = preferenceTier(a) - preferenceTier(b);
     if (tierDiff !== 0) return tierDiff;
@@ -320,18 +320,18 @@ export function matchEveningCombos(
 
 // Higher tier sorts later. 0 = normal ranking, 1 = deprioritized (bone-in
 // chicken thigh), 2 = sunk to the bottom (turkey).
-function preferenceTier(combo: ScoredCombo): number {
-  if (hasTurkey(combo)) return 2;
-  if (hasBoneInChickenThigh(combo)) return 1;
+function preferenceTier(meal: ScoredMeal): number {
+  if (hasTurkey(meal)) return 2;
+  if (hasBoneInChickenThigh(meal)) return 1;
   return 0;
 }
 
-function hasTurkey(combo: ScoredCombo): boolean {
-  return combo.items.some((i) => i.foodId.toLocaleLowerCase("tr-TR").startsWith("hindi"));
+function hasTurkey(meal: ScoredMeal): boolean {
+  return meal.items.some((i) => i.foodId.toLocaleLowerCase("tr-TR").startsWith("hindi"));
 }
 
-function hasBoneInChickenThigh(combo: ScoredCombo): boolean {
-  return combo.items.some(
+function hasBoneInChickenThigh(meal: ScoredMeal): boolean {
+  return meal.items.some(
     (i) => i.foodId.toLocaleLowerCase("tr-TR") === "tavuk but (kemikli)"
   );
 }

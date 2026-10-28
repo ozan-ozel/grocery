@@ -5,7 +5,7 @@ exclude function. The MISSING label is not.
 
 | DEC | What | Readiness | Reality |
 |---|---|---|---|
-| `DEC-060` | Per-occasion target to candidate foods | `SHIPPED` | `scoreAllCombos` implements the translation; `matchEveningCombos` (`src/lib/eveningRecommend.ts`, shipped 2026-09-16) extends it with a quantity-solving evening path — see below |
+| `DEC-060` | Per-occasion target to candidate foods | `SHIPPED` | `scoreAllMeals` implements the translation; `matchEveningMeals` (`src/lib/eveningRecommend.ts`, shipped 2026-09-16) extends it with a quantity-solving evening path — see below |
 | `DEC-061` | Restrictions, allergies and preferences filter | `PARTIAL` | Code done and safety-tested, data incomplete |
 | `DEC-062` | Prioritize candidates by nutrient density | `BLOCKED` | Needs micronutrient-density data |
 | `DEC-063` | Generate substitutions | `BLOCKED` | No substitution mechanism |
@@ -14,12 +14,12 @@ exclude function. The MISSING label is not.
 
 ## Evening-meal quantity-aware recommendation (2026-09-16)
 
-`DEC-060` was already `SHIPPED` via `scoreAllCombos`/`matchCombos` (`src/lib/comboMatch.ts`), which
+`DEC-060` was already `SHIPPED` via `scoreAllMeals` (`src/lib/mealMatch.ts`; `scoreAllCombos`/`comboMatch.ts` before the 2026-10-27 rename), which
 rank fixed-gram authored combos by protein within a kcal budget. `src/lib/eveningRecommend.ts` adds a
 second, additive path — `matchEveningCombos` — that solves grams per candidate protein+carb pattern
 against the caller's actual remaining macros (bounded discrete search over realistic gram grids, not a
 sequential protein-then-kcal formula, so a higher-fat protein source doesn't blow the remaining fat
-budget the way a sequential solver would). `comboMatch.ts` itself is unchanged.
+budget the way a sequential solver would). `mealMatch.ts` itself is unchanged.
 
 Candidates are limited to foods confirmed in the checked-in `data/nutrition.json` seed (`tavuk göğsü`,
 `dana kıyma`, `hindi göğsü` × `pirinç`, `bulgur`, `makarna`, 7 patterns) — antrikot/bonfile/kontrfile/

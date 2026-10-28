@@ -13,14 +13,14 @@ Domain L is `DEC-066` through `DEC-070`. Four of the five are already done.
 ## Item 1 is not missing
 
 Translating selected foods and portions into constructed meals is `DEC-066`, covered by the curated
-`combos.json` and `combos.ts`. Nothing to build.
+`data/ready-meals.json` and `src/lib/readyMeals.ts`. Nothing to build.
 
 **Update 2026-09-19 — portion tiers shipped.** The Meal Plan's "Yemekler" picker no longer adds a
 combo at one fixed portion. Each meal offers Küçük / Normal / Büyük (×⅔ / ×1 / ×1⅓ of the authored
 grams) plus a custom multiplier, and a plain tap adds at the last-used tier (remembered per device).
 Every ingredient is scaled by the same factor, so protein and carb stay proportional — the
 On Cooking ch. 4 recipe/portion conversion factor, the same mechanism the DEC-069 batch planner's
-"Kat sayısı" already uses (`scaleComboItems` in `combos.ts`). The gram anchors are **not** from On
+"Kat sayısı" already uses (`scaleMealItems` in `src/lib/meals.ts`). The gram anchors are **not** from On
 Cooking, whose execution record supplies no portion tables; they come from this app's own data (the
 authored combo is Normal; 100/150/200 g protein matches the evening solver's 25 g grid). Large takes
 rice/bulgur/pasta carb to 200 g raw, above `eveningRecommend.ts`'s 150 g solver ceiling — accepted,
@@ -61,7 +61,7 @@ meal the slot accepts, and ranks by the same score the evening solver uses. The 
 an allergy or exclusion are shown disabled with the reason instead of vanishing. Plan:
 `docs/superpowers/plans/2026-09-20-meals-sheet-yemeklerim-tarifler.md`. Still open: the batch
 form's "Yemekten" list shows only the built-in meals (saved meals are not listed there yet);
-"Sana uygun" for the snack slot is only as good as the slot tags in `data/combos.json` — only 6 of
+"Sana uygun" for the snack slot is only as good as the slot tags in `data/ready-meals.json` — only 6 of
 the 20 built-in meals carry one, and in the live check the four snack suggestions were all
 breakfast-tagged meals of 410-460 kcal rather than light items. The snack slot also admits
 `kahvalti`-tagged meals (`fitsSlot`), and only 2 of the 20 meals carry `ara-ogun` / `atistirmalik`, so on a
@@ -71,7 +71,7 @@ snack against the whole day's remaining budget (the slot weight collapses to 1.0
 Per-role portion scaling (leaving oil and vegetables fixed) is not part of this feature.
 
 **Update 2026-09-21 — meal cards, clear, undo.** Yemek Planı now shows meals added from the Yemekler
-sheet as cards inside their slot (items sharing a persisted `comboId`; a card exists only while it has 2+
+sheet as cards inside their slot (items sharing a persisted `combo_id` (`mealId` in code); a card exists only while it has 2+
 items, so deleting down to one dissolves it; the same meal added twice is split where a food repeats — a
 heuristic, there is no per-instance id). Each slot has a "Temizle" action and the day a "Günü temizle";
 both are one undoable step with no confirm dialog. Every meal-plan change — add, add a meal, grams edit,
@@ -86,7 +86,7 @@ reload, and the toast swipe and card layout are only verified in a desktop brows
 
 ## Item 2: user-authored recipes are now saved meals
 
-Built-in combos are still read-only: `ALL_COMBOS` is derived from the JSON at module load, and no
+Ready meals are still read-only: `ALL_READY_MEALS` is derived from the JSON at module load, and no
 path edits them. What changed on 2026-09-20 is that a user can add, edit and delete **their own**
 meals (Yemeklerim, `saved_meals`, per user). Nothing here edits or overrides a curated combo, and
 saved meals are not shared with the household.

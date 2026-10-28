@@ -1,12 +1,12 @@
 import { ChefHat, Undo2 } from "lucide-react";
-import type { ScoredCombo } from "@/lib/comboMatch";
+import type { ScoredMeal } from "@/lib/mealMatch";
 
 // The evening-recommendation card MealPlanView.tsx renders. `eaten`/`onUndo`
 // let a single pattern's card flip in place from "recommended" to "already eaten,
 // with undo" without moving to a separate section or requiring the caller
 // to hunt down the logged ingredients elsewhere to remove them.
 export function SuggestionCard({
-  combo,
+  meal,
   preparing,
   added,
   onAdd,
@@ -16,7 +16,7 @@ export function SuggestionCard({
   eaten,
   onUndo,
 }: {
-  combo: ScoredCombo;
+  meal: ScoredMeal;
   preparing: boolean;
   added: boolean;
   onAdd?: () => void;
@@ -48,17 +48,17 @@ export function SuggestionCard({
             : ""
       }`}>
       <div className="flex items-center justify-between">
-        <span className="font-medium">{combo.nameTr}</span>
+        <span className="font-medium">{meal.nameTr}</span>
         <span className="text-xs text-muted-foreground">
-          {combo.prepMinutes} dk
+          {meal.prepMinutes} dk
         </span>
       </div>
       <p className="mt-1 text-xs text-muted-foreground">
-        {Math.round(combo.totals.kcal)} kcal ·{" "}
-        {Math.round(combo.totals.proteinG)}g protein
+        {Math.round(meal.totals.kcal)} kcal ·{" "}
+        {Math.round(meal.totals.proteinG)}g protein
       </p>
-      {combo.prepNote && (
-        <p className="mt-1 text-xs text-muted-foreground">{combo.prepNote}</p>
+      {meal.prepNote && (
+        <p className="mt-1 text-xs text-muted-foreground">{meal.prepNote}</p>
       )}
       {eaten ? (
         <div className="mt-2 flex flex-wrap items-center gap-2">

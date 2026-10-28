@@ -10,8 +10,9 @@ Domain S is `DEC-106` and `DEC-107`. They are different questions with different
 ## The roadmap item is DEC-107, and it is already covered
 
 The app cites named external standards throughout: Mifflin-St Jeor and DRI-style constants in the
-calculations, and the `Kaynakları göster` sources map links NIDDK, NCBI Endotext, WHO and the National
-Academies DRI tables.
+calculations, and the `Kaynakları göster` sources map links NIDDK, NCBI Endotext, FAO/WHO/UNU 2004 (PAL;
+replaced the WHO activity fact sheet 2026-10-28), the National Academies DRI tables, ACSM 2016, Hector 2018,
+Schoenfeld 2018, three textbooks (SN4, AS3, Krause) and USDA FoodData Central.
 
 Nothing to build. The only ongoing work is keeping that sources map accurate as the cited standards
 change, which the energy individualization documents already flag in one place: the drafted

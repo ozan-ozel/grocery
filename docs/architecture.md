@@ -171,6 +171,7 @@ several independent layers with different scopes:
 | UI prefs (theme, swipe mode)                   | `grocery.theme.v1`, `grocery.swipeMode.v1`                                             | device            | no                                                   |
 | Onboarding quick-setup seen?                   | `grocery.onboarding.v1:<userId>`                                                        | device             | no                                                    |
 | Personal plan profile | `grocery.personalPlan.v1:<userId>` (local cache) + Supabase `personal_plan` table | per user | yes, via `api/personal-plan.ts` |
+| Out-of-scope self-attestation (DEC-012) | `grocery.scopeAttestation.v1:<userId>` = `"out"` (absent = in scope) | per user, per browser | no — browser only; another device asks again |
 | Boot cache (session hint, active tenant) | `grocery.session.v1`, `grocery.activeTenant.v1` (`src/lib/bootCache.ts`, alongside the `grocery.state.v1:` mirror) | device | no |
 | Nutrition catalog cache | `grocery.nutrition.v1` (`src/lib/nutrition.ts`) | device | no (cache of `/api/nutrition`) |
 | Nutrition browse cache | `grocery.nutrition.browse.v1` (`src/lib/nutrition.ts`, `browseNutritionCached`): first page only, one entry per query, expires after `BROWSE_CACHE_TTL_MS` (5 min); dropped whenever nutrition rows are saved | device | no (cache of `GET /api/nutrition`) |
@@ -406,10 +407,14 @@ recovery, medical conditions, therapeutic diets, or micronutrient adequacy.
 
 The `Kaynakları göster` switch exposes a feature-to-source map. It links profile and energy
 planning to the [NIDDK Body Weight Planner](https://www.niddk.nih.gov/bwp) and
-[NCBI Endotext](https://www.ncbi.nlm.nih.gov/books/NBK278991/), activity to
-[WHO physical activity guidance](https://www.who.int/news-room/fact-sheets/detail/physical-activity),
-macro/fiber ranges to the [National Academies DRI tables](https://www.ncbi.nlm.nih.gov/books/NBK545442/)
-and Endotext, and BMI/waist context to Endotext. These references support the formulas and
+[NCBI Endotext](https://www.ncbi.nlm.nih.gov/books/NBK278991/), activity (PAL) to
+[FAO/WHO/UNU 2004 Table 5.3](https://www.fao.org/4/y5686e/y5686e07.htm),
+macro/fiber ranges to the [National Academies DRI tables](https://www.ncbi.nlm.nih.gov/books/NBK545442/),
+Endotext, Hector 2018, ACSM 2016 and *Sport Nutrition* 4e, per-meal protein to *Advanced Sports
+Nutrition* 3e (p. 44) and Schoenfeld & Aragon 2018, baseline water to Krause 16e (p. 218) with the DRI
+total-water AI as context, BMI/waist context to Endotext, and food values to
+[USDA FoodData Central](https://fdc.nal.usda.gov/) plus Turkish product labels. Textbooks are cited by
+name and page only; their text is never reproduced. These references support the formulas and
 boundaries but do not turn the feature into medical advice.
 
 ### Saved meals (Yemeklerim)
@@ -426,7 +431,7 @@ There is no `api/saved-meals.ts`. The project is at the 12-function Hobby limit,
 serves a second resource: `vercel.json` rewrites `/api/saved-meals` to
 `/api/personal-plan?_resource=saved-meals` (GET list, POST create with a client id, PATCH `?id=`,
 DELETE `?id=`; a per-user cap answers 409). The client side is `src/lib/savedMeals.ts` (type,
-validation, the `savedMealToCombo` adapter that lets saved meals reuse every `Combo` helper, and the
+validation, the `savedMealToMeal` adapter that lets saved meals reuse every `Meal` helper, and the
 fetch wrappers) and `src/hooks/useSavedMeals.ts`. The Yemekler sheet is `src/components/MealsSheet.tsx`
 (tabs Yemeklerim / Hazır Yemekler / Tarifler).
 
@@ -439,7 +444,7 @@ enforced server-side in `api/personal-plan.ts` and partly mirrored in `SAVED_MEA
 slot accepts, gives the slot a share of the day's remaining macros, picks the best portion tier per
 meal with `scoreInstance`, and returns the top few. The per-slot weights (`SLOT_WEIGHT`) are MVP tuning
 constants, not derived from a source. Its snack results are only as good as the slot tags in
-`data/combos.json`. Product scope: `docs/mvp-scope/meal-construction-mvp.md`.
+`data/ready-meals.json`. Product scope: `docs/mvp-scope/meal-construction-mvp.md`.
 
 ### Meal-plan undo history and meal cards
 
@@ -457,8 +462,8 @@ New entries get `position` = one past the slot's highest position, read from the
 orders by `(date, slot, position)` only, so entries sharing a position come back in arbitrary order.
 
 Meal cards are derived, not stored: `src/lib/mealGroups.ts` groups a slot's contiguous items that share a
-`comboId` (a repeated food starts a new group); a group of one renders plain. Names come from the built-in
-combos, the user's saved meals and the evening patterns.
+`mealId` (the `combo_id` column; a repeated food starts a new group); a group of one renders plain. Names come
+from the ready meals, the user's saved meals and the evening patterns.
 
 ## Deployment & environment
 

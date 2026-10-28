@@ -10,15 +10,16 @@
 
 ## Clinical Safety Boundary 
 
-	Add disclaimer
+	Add disclaimer - DONE 2026-10-28: self-attestation checkbox withholds targets (DEC-012) + red-flag note (DEC-013), see docs/mvp-scope/life-stage-mvp.md
 
 ## Body composition
 	
 	Create a single mvp scope feature for this. - SCOPED, see docs/mvp-scope/body-composition-mvp.md
+	Until weight tracking exists, targets carry a "starting estimate" note (DEC-020 posture, 2026-10-28)
 
 ## Macros - MVP, done in individualization - SCOPED, see docs/mvp-scope/macros-mvp.md
 
-	Determine how the protein requirement is distributed across the day’s eating occasions !IMPORTANT - provisional consumer shipped 2026-09-23, see docs/mvp-scope/macros-mvp.md
+	Determine how the protein requirement is distributed across the day’s eating occasions !IMPORTANT - provisional consumer shipped 2026-09-23; source cited in the app 2026-10-28, see docs/mvp-scope/macros-mvp.md
 
 	Determine an appropriate total daily carbohydrate requirement given goal, energy prescription, and tra… - DONE, CHECKED (2026-09-15: very_high band corrected from 10-12 to 6-10 g/kg/day, 130g DRI floor and sedentary/light AMDR added, see docs/mvp-scope/macros-mvp.md)
 
@@ -30,7 +31,7 @@
 
 	Will be done in v2, backlog
 
-## Hydration - SCOPED, see docs/mvp-scope/hydration-mvp.md
+## Hydration - SCOPED, see docs/mvp-scope/hydration-mvp.md (baseline-fluid source corrected to Krause 2026-10-28)
 
 	Small and useful tips on when to drink (how long before or after meal, during which periods of day, etc.) - MISSING
 

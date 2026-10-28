@@ -22,9 +22,13 @@ Two things about it are worth fixing, neither of which is new work on the number
   the 30-35 mL/kg/day band itself (`{ min, max }`), and `PersonalPlanView.tsx`'s "Su" card shows it as a
   range (e.g. "2.1-2.5 L"), the same pattern as the Protein/Yağ/Karbonhidrat/Lif cards. Its citation badge
   was also corrected to its own group ("Su ihtiyacı (temel sıvı)") rather than the AMDR macro-range
-  group it was previously (incorrectly) folded into — both cite DRI, but they're different DRI
-  categories.
-- **One question needs settling first — still open, not resolved here.** The DRI Adequate Intake the spec cites, roughly 2.7 L/day for
+  group it was previously (incorrectly) folded into.
+- **Its source was wrong. — FIXED (2026-10-28).** The app cited the DRI for the 30-35 mL/kg range, but the
+  DRI Adequate Intake for total water is a fixed figure (3.7 L/day men, 2.7 L/day women, food water
+  included), not a per-kg rule. The range is a clinical estimate stated verbatim in Krause 16e (ch. 12,
+  p. 218: "Adult fluid needs often are estimated at 1 mL of water per kilocalorie consumed, or 30 to
+  35 mL/kg of usual body weight"). The "Su" card now cites Krause first and DRI second.
+- **One question needed settling first. — RESOLVED (2026-10-28, owner decision): total fluid.** The "Su" card now reads "toplam sıvı, yiyecekler dahil", matching Krause's wording (all fluid sources). Original note: The DRI Adequate Intake the spec cites, roughly 2.7 L/day for
   women and 3.7 L/day for men, explicitly **includes water from food**. The app presents its figure as
   a drinking target. Whether the 30-35 mL/kg approximation means total water or beverages only is not
   stated in the spec, and the number should not be labelled "drink this much" until it is.

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { BatchCreateForm, type BatchCreateData } from "@/components/BatchCreateForm";
-import { COMBO_BY_ID } from "@/lib/combos";
+import { READY_MEAL_BY_ID } from "@/lib/readyMeals";
 import { uid } from "@/lib/store";
 import type { Nutrition, NutritionMap } from "@/lib/nutrition";
 import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
@@ -45,7 +45,7 @@ export function BatchSheet({
       householdId,
       preparedDate: data.preparedDate,
       storageNote: data.storageNote,
-      sourceComboId: data.sourceComboId,
+      sourceReadyMealId: data.sourceReadyMealId,
       composition: data.composition,
     });
     if (created) setCreating(false);
@@ -84,8 +84,8 @@ export function BatchSheet({
 
             <ul className="space-y-2">
               {ledger.map(({ batch, remaining }) => {
-                const title = batch.sourceComboId
-                  ? (COMBO_BY_ID.get(batch.sourceComboId)?.nameTr ?? "Parti")
+                const title = batch.sourceReadyMealId
+                  ? (READY_MEAL_BY_ID.get(batch.sourceReadyMealId)?.nameTr ?? "Parti")
                   : "Elle hazırlanan parti";
                 const depleted = !hasRemaining(remaining);
                 return (

@@ -4,11 +4,11 @@
 //
 // Per-USER (api/personal-plan.ts, `saved_meals` table, RLS on user_id), like the
 // Personal Plan — not per-household. `items[].foodId` is nutrition.name_tr, the
-// same value space as MealEntry.foodId / Combo.items[].foodId — never the
+// same value space as MealEntry.foodId / Meal.items[].foodId — never the
 // opaque Nutrition.food_id UUID.
-import type { Combo } from "./combos";
-import type { ScoredCombo } from "./comboMatch";
-import { scoreAllCombos } from "./comboMatch";
+import type { Meal } from "./meals";
+import type { ScoredMeal } from "./mealMatch";
+import { scoreAllMeals } from "./mealMatch";
 import { lookupNutrition, type NutritionMap } from "./nutrition";
 import { normalizeComposition, type BatchCompositionItem } from "./preparationBatch";
 import type { FoodExclusion, AllergenClassExclusion } from "./foodExclusions";
@@ -71,10 +71,10 @@ export function stepsToText(steps: string[]): string {
   return steps.join("\n");
 }
 
-// A saved meal wearing the Combo shape, so every existing meal helper
-// (scoreAllCombos, scaledComboTotals, MealsSheet's rows, handleComboSelect)
+// A saved meal wearing the Meal shape, so every existing meal helper
+// (scoreAllMeals, scaledMealTotals, MealsSheet's rows, handleMealSelect)
 // works on it unchanged. prepMinutes 0 = "unknown", which the UI hides.
-export function savedMealToCombo(meal: SavedMeal): Combo {
+export function savedMealToMeal(meal: SavedMeal): Meal {
   return {
     id: meal.id,
     nameTr: meal.name,
@@ -88,11 +88,11 @@ export function savedMealToCombo(meal: SavedMeal): Combo {
 export type SavedMealEntry = {
   meal: SavedMeal;
   // Null when the meal can't be offered — see `blocked`.
-  scored: ScoredCombo | null;
+  scored: ScoredMeal | null;
   // "missing": an ingredient is no longer in the nutrition catalog, so it has
   //   no totals. "excluded": it contains a hard-excluded food (allergy etc.).
   // Never silently dropped: the list shows the row disabled with the reason,
-  // because scoreAllCombos would otherwise make a saved meal just vanish.
+  // because scoreAllMeals would otherwise make a saved meal just vanish.
   blocked: "missing" | "excluded" | null;
 };
 
@@ -103,8 +103,8 @@ export function annotateSavedMeals(
   catalog: NutritionMap
 ): SavedMealEntry[] {
   const scoredById = new Map(
-    scoreAllCombos(meals.map(savedMealToCombo), exclusions, allergenExclusions, catalog).map(
-      (combo) => [combo.id, combo]
+    scoreAllMeals(meals.map(savedMealToMeal), exclusions, allergenExclusions, catalog).map(
+      (meal) => [meal.id, meal]
     )
   );
   return meals.map((meal) => {
