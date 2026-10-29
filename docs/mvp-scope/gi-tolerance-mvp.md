@@ -20,7 +20,7 @@ The roadmap marks this TO BE CHECKED. It is present on both levels.
   excluded.
 
 **The real gap is data, not code.** `DEC-061` is `PARTIAL` for one reason: allergen-class enforcement
-is implemented and safety-tested, but only **19 of 89 foods** have curated allergen-class mappings.
+is implemented and safety-tested, but only **35 of 103 catalog rows** have curated allergen-class mappings (19/89 before 2026-10-29).
 Closing that coverage gap is the actionable work item here, and it is data entry rather than
 engineering.
 

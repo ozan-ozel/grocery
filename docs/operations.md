@@ -310,6 +310,10 @@ The developer runs this in their own terminal — Claude never runs it (it loads
 secrets boundary). Requires `SUPABASE_URL` and `SUPABASE_SECRET_KEY` in `.env.local` (see `.env.local.example`).
 Source data lives in `data/nutrition.json`; row shape is documented in `data/README.md`. The app's hidden
 maintenance upload modal is the other way in — see architecture § Nutrition.
+**Apply `supabase/29-nutrition-catalog-polish.sql` before seeding:** the seed now sends `preparation_state`,
+`is_active` and `canonical_name`, which do not exist on a pre-29 table. Migration 29 itself already writes the
+reviewed 2026-10-29 catalog and its equivalence/allergen updates, which a seed upload cannot do — so after 29 a
+seed is only needed for later edits to `data/nutrition.json`.
 
 **Refreshing `data/nutrition.json` from USDA** (optional, rarer still):
 

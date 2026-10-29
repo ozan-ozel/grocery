@@ -26,7 +26,7 @@ function resolveItems(meal: Meal, catalog: NutritionMap): Nutrition[] | null {
   const rows: Nutrition[] = [];
   for (const item of meal.items) {
     const nutrition = lookupNutrition(catalog, item.foodId);
-    if (!nutrition) return null;
+    if (!nutrition || nutrition.is_active === false) return null;
     rows.push(nutrition);
   }
   return rows;

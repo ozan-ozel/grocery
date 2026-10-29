@@ -22,12 +22,14 @@ export function FoodSearchModal({
   const [selected, setSelected] = useState<Nutrition | null>(null);
   const [quantity, setQuantity] = useState("100");
 
-  const queryLower = query.trim().toLowerCase();
+  const queryLower = query.trim().toLocaleLowerCase("tr-TR");
+  const activeFoods = foods.filter(food => food.is_active !== false);
   const results = queryLower
-    ? foods.filter((food) =>
-        food.name_tr.toLowerCase().includes(queryLower),
+    ? activeFoods.filter((food) =>
+        food.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower) ||
+        (food.aliases ?? []).some(alias => alias.toLocaleLowerCase("tr-TR").includes(queryLower)),
       )
-    : foods.slice(0, 30);
+    : activeFoods.slice(0, 30);
 
   function handleSelect(food: Nutrition) {
     const quantityG = Number(quantity);
@@ -69,6 +71,7 @@ export function FoodSearchModal({
           <div className="flex items-center justify-between">
             <div>
               <h3 className="font-semibold text-foreground">{selected.name_tr}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">{selected.preparation_state ?? "Çiğ / kuru yenilebilir ağırlık; hazır üründe etiketi kontrol et."}</p>
               <p className="text-xs text-muted-foreground mt-1">
                 {Math.round(selected.kcal_per_100 * (Number(quantity) / 100))} kcal
               </p>

@@ -64,14 +64,14 @@ const SNACK_TAGS = ["ara-ogun", "atistirmalik"];
 // Only three of ready-meals.json's tags are used for this: "kahvalti", "ara-ogun",
 // "atistirmalik". Untagged meals are treated as main meals.
 //  - kahvalti slot: breakfast-tagged meals only
-//  - ara slot: snack- or breakfast-tagged (light) meals
+//  - ara slot: explicitly snack-tagged meals only
 //  - ogle / aksam: everything that is neither breakfast- nor snack-tagged
 // Slot ids are used, never the card labels (two cards read "Ara Öğün").
 export function fitsSlot(meal: Pick<Meal, "tags">, slot: MealSlot): boolean {
   const isBreakfast = meal.tags.includes("kahvalti");
   const isSnack = meal.tags.some((tag) => SNACK_TAGS.includes(tag));
   if (slot === "kahvalti") return isBreakfast;
-  if (slot === "ara") return isSnack || isBreakfast;
+  if (slot === "ara") return isSnack;
   return !isBreakfast && !isSnack;
 }
 

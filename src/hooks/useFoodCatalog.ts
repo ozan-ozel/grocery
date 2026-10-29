@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/preact-query";
 import {
   browseNutritionCached,
   BROWSE_CACHE_TTL_MS,
-  type NutritionMap,
+  buildNutritionMap,
 } from "@/lib/nutrition";
 
 export type Status = "idle" | "loading" | "ready" | "error";
@@ -38,16 +38,7 @@ export function useFoodCatalog(enabled = true) {
   // by name_tr AND every alias, so an exclusion search or any other catalog
   // consumer can find a food by an alias spelling too (Phase 9 §20.6 C5).
   // Still exact-match only; fuzzy matching stays out of this map by design.
-  const catalogMap: NutritionMap = useMemo(() => {
-    const map: NutritionMap = new Map();
-    for (const food of foods) {
-      map.set(food.name_tr, food);
-      for (const alias of food.aliases ?? []) {
-        if (!map.has(alias)) map.set(alias, food);
-      }
-    }
-    return map;
-  }, [foods]);
+  const catalogMap = useMemo(() => buildNutritionMap(foods), [foods]);
 
   const status: Status = query.isError
     ? "error"

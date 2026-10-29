@@ -2,7 +2,8 @@ import { useMealPersonalization, DEFAULT_PROFILE } from "./useMealPersonalizatio
 import { todayDateStr, useMealPlan } from "./useMealPlan";
 import { useFoodCatalog } from "./useFoodCatalog";
 import type { MacroTotals } from "@/lib/mealNutrition";
-import { calculateTargets, type PersonalTargets } from "@/lib/mealPersonalization";
+import { calculateTargets } from "@/lib/mealPersonalization";
+import { planningMacros } from "@/lib/planningMacros";
 import type { NutritionMap } from "@/lib/nutrition";
 import type { MealItem, MealSlot } from "@/lib/localMealPlan";
 import type { FoodExclusion, AllergenClassExclusion } from "@/lib/foodExclusions";
@@ -28,6 +29,7 @@ export type RemainingToday =
   | {
       status: "ready";
       remaining: MacroTotals;
+      targetsCompatible: boolean;
       foodExclusions: FoodExclusion[];
       allergenExclusions: AllergenClassExclusion[];
       catalogMap: NutritionMap;
@@ -38,18 +40,6 @@ export type RemainingToday =
       logConsumption: (foodId: string, grams: number, mealId?: string) => LoggedEntry;
       undoConsumption: (entries: LoggedEntry[]) => void;
     };
-
-// Target ranges (protein/fat/carbs/fiber) collapse to their midpoint for a
-// single "remaining" number — the range itself stays visible in Kişisel Plan.
-function targetToMacros(targets: PersonalTargets): MacroTotals {
-  return {
-    kcal: targets.targetKcal,
-    proteinG: (targets.proteinG.min + targets.proteinG.max) / 2,
-    fatG: (targets.fatG.min + targets.fatG.max) / 2,
-    carbsG: (targets.carbsG.min + targets.carbsG.max) / 2,
-    fiberG: (targets.fiberG.min + targets.fiberG.max) / 2,
-  };
-}
 
 function subtractMacros(target: MacroTotals, consumed: MacroTotals): MacroTotals {
   return {
@@ -118,13 +108,15 @@ export function useRemainingToday(
     return { status: "loading-catalog", logConsumption, undoConsumption };
   }
 
-  const target = targetToMacros(effectiveTargets);
+  const planningTarget = planningMacros(effectiveTargets);
+  const target = planningTarget ?? { kcal: 0, proteinG: 0, fatG: 0, carbsG: 0, fiberG: 0 };
   const consumed = dailyNutrition();
   const remaining = subtractMacros(target, consumed);
 
   return {
     status: "ready",
     remaining,
+    targetsCompatible: planningTarget !== null,
     foodExclusions: profile.foodExclusions,
     allergenExclusions: profile.allergenExclusions,
     catalogMap,

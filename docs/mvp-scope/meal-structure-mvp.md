@@ -24,6 +24,13 @@ Ran the "check, not a build" from the MVP scope below against the code:
 
 No code changes were needed; both remain `COVERED`.
 
+**Update 2026-10-29 — planning point and snack slot.** Still `COVERED`; two refinements to how the
+existing distribution reads the daily targets. The day's target is no longer each range's midpoint
+(whose 4/4/9 energy could disagree with the calorie target): `src/lib/planningMacros.ts` picks one
+point inside the existing ranges that matches the calorie target, and hides the summary, per-slot
+protein bands and recommendations with a neutral message when no such point exists. The `ara` slot
+now accepts only explicitly snack-tagged meals instead of also treating breakfasts as snacks.
+
 ## Two items are not missing
 
 **How many eating occasions** is `DEC-055`, covered by the fixed four-slot structure. **Distributing

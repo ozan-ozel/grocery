@@ -276,7 +276,7 @@ export function matchEveningMeals(
   for (const pattern of patterns) {
     const protein = lookupNutrition(catalog, pattern.proteinFoodId);
     const carb = lookupNutrition(catalog, pattern.carbFoodId);
-    if (!protein || !carb) continue;
+    if (!protein || !carb || protein.is_active === false || carb.is_active === false) continue;
 
     const items = [protein, carb];
     const hasHardConflict = items.some(

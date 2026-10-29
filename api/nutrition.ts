@@ -31,6 +31,12 @@ type AllergenClassMapping = {
 type Nutrition = {
   name_tr: string;
   aliases: string[];
+  source?: string;
+  preparation_state?: string;
+  is_active?: boolean;
+  canonical_name?: string;
+  equivalent_food_ids?: string[];
+  equivalent_names?: string[];
   kcal_per_100: number;
   protein_g: number;
   fat_g: number;
@@ -79,8 +85,20 @@ const BROWSE_LIMIT_DEFAULT = 60;
 // "Tümü" view and the food picker — cheap for PostgREST, still capped so a
 // caller can't force a pathological single query.
 const BROWSE_LIMIT_MAX = 1000;
-const SELECT_COLS =
+const LEGACY_SELECT_COLS =
   "name_tr,aliases,kcal_per_100,protein_g,fat_g,carbs_g,fiber_g,allergen_classes,food_id";
+const SELECT_COLS = LEGACY_SELECT_COLS +
+  ",source,preparation_state,is_active,canonical_name,equivalent_food_ids,equivalent_names";
+
+// Rolling migration: older databases remain readable until migration 29 is
+// applied. Retry only a missing-column/schema-cache error, never an auth error.
+async function readRows(url: string, headers: Record<string, string>): Promise<Response> {
+  const response = await fetch(url, { headers });
+  if (response.ok) return response;
+  const error = await response.clone().json().catch(() => null) as { code?: string } | null;
+  if (error?.code !== "42703" && error?.code !== "PGRST204") return response;
+  return fetch(url.replace(`select=${SELECT_COLS}`, `select=${LEGACY_SELECT_COLS}`), { headers });
+}
 
 function normalize(name: string): string {
   return name.trim().toLocaleLowerCase("tr-TR");
@@ -143,7 +161,7 @@ async function handleBrowse(request: Request): Promise<Response> {
   }
 
   try {
-    const res = await fetch(queryUrl, { headers });
+    const res = await readRows(queryUrl, headers);
     if (!res.ok) return json({ error: `supabase ${res.status}` }, 502);
     const rows = ((await res.json()) as unknown[]) ?? [];
     const coerced = rows.map(coerce).filter((n): n is Nutrition => n !== null);
@@ -201,8 +219,8 @@ async function handleRead(request: Request): Promise<Response> {
 
   try {
     const [byName, byAlias] = await Promise.all([
-      fetch(byNameUrl, { headers }),
-      fetch(byAliasUrl, { headers }),
+      readRows(byNameUrl, headers),
+      readRows(byAliasUrl, headers),
     ]);
     if (!byName.ok) return json({ error: `supabase ${byName.status}` }, 502);
     if (!byAlias.ok) return json({ error: `supabase ${byAlias.status}` }, 502);
@@ -296,6 +314,8 @@ type WriteRow = {
   fat_g: number;
   carbs_g: number;
   fiber_g: number;
+  source?: string;
+  preparation_state?: string;
 };
 
 function validateWrite(input: unknown): WriteRow | { error: string } {
@@ -304,6 +324,11 @@ function validateWrite(input: unknown): WriteRow | { error: string } {
 
   const name_tr = typeof r.name_tr === "string" ? normalize(r.name_tr) : "";
   if (!name_tr) return { error: "name_tr required" };
+  for (const key of ["source", "preparation_state"]) {
+    if (r[key] !== undefined && (typeof r[key] !== "string" || (r[key] as string).length > 500)) {
+      return { error: `${key} must be a string of at most 500 characters` };
+    }
+  }
 
   const num = (key: string) => {
     const v = r[key];
@@ -336,6 +361,8 @@ function validateWrite(input: unknown): WriteRow | { error: string } {
     fat_g: fat,
     carbs_g: carbs,
     fiber_g: fiber,
+    ...(typeof r.source === "string" ? { source: r.source.trim() } : {}),
+    ...(typeof r.preparation_state === "string" ? { preparation_state: r.preparation_state.trim() } : {}),
   };
 }
 
@@ -368,6 +395,14 @@ function coerce(row: unknown): Nutrition | null {
   return {
     name_tr: r.name_tr,
     aliases,
+    source: typeof r.source === "string" ? r.source : undefined,
+    preparation_state: typeof r.preparation_state === "string" ? r.preparation_state : undefined,
+    is_active: typeof r.is_active === "boolean" ? r.is_active : undefined,
+    canonical_name: typeof r.canonical_name === "string" ? r.canonical_name : undefined,
+    equivalent_food_ids: Array.isArray(r.equivalent_food_ids)
+      ? r.equivalent_food_ids.filter((id): id is string => typeof id === "string") : undefined,
+    equivalent_names: Array.isArray(r.equivalent_names)
+      ? r.equivalent_names.filter((name): name is string => typeof name === "string") : undefined,
     kcal_per_100: r.kcal_per_100,
     protein_g: r.protein_g,
     fat_g: r.fat_g,
