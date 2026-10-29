@@ -47,7 +47,6 @@ const SettingsView = lazy(() =>
 export function App() {
   const {
     session,
-    cachedSession,
     checked,
     signInWithGoogle,
     signOut,
@@ -58,28 +57,18 @@ export function App() {
   // says we're landing on, instead of always guessing Alışveriş.
   const bootSection = useMemo(() => initialSection(), []);
 
-  // Mount the app on a remembered identity instead of blocking the whole tree
-  // on /api/auth-session, which used to make every other request wait a full
-  // round trip behind it. `checked ? null : cachedSession` is the load-bearing
-  // half: the moment the real answer lands, the hint stops counting, so a
-  // stale cache can never outlive a confirmed 401. Nothing here grants access —
-  // every /api/* handler still authenticates the httpOnly cookie itself, so an
-  // expired session gets a brief skeleton and then LoginGate, never data.
-  const effective = session ?? (checked ? null : cachedSession);
-
-  if (!effective) {
-    return checked ? (
-      <LoginGate onSignIn={signInWithGoogle} />
-    ) : (
-      <AppBootSkeleton section={bootSection} />
-    );
-  }
+  // User-scoped hooks can persist cached data on mount. Wait for the cookie's
+  // confirmed identity before mounting them: a remembered user may differ
+  // from the current cookie after an account switch.
+  if (!checked) return <AppBootSkeleton section={bootSection} />;
+  if (!session?.userId) return <LoginGate onSignIn={signInWithGoogle} />;
 
   return (
     <AppShell
+      key={session.userId}
       onSignOut={signOut}
       onDeleteAccount={deleteAccount}
-      currentUserId={effective.userId}
+      currentUserId={session.userId}
     />
   );
 }

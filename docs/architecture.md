@@ -72,7 +72,8 @@ Each is explained in the section named; break one only deliberately.
 7. **Session refresh is deliberately not implemented**; a session lives as long as Supabase's access-token lifetime
    — "Auth & session".
 8. **Boot caches are cleared together** (sign-out, account deletion, confirmed 401, user change) — "Boot & data
-   loading".
+   loading". User-scoped hooks mount only after `/api/auth-session` confirms the cookie's user; the shell is
+   keyed by that user so account changes cannot reuse another account's in-memory profile.
 9. **The project is at the 12-function Hobby limit**; new endpoints must fit an existing function or displace one —
    [operations.md](operations.md) § Deployment.
 10. **`agent-login` is local-only by deployment** and is never merged into a deployed function —
@@ -142,9 +143,10 @@ an explicit, approved scope boundary (see the header of `lib/auth.ts` and
 `docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md`). The cookie's lifetime is this app's own
 responsibility via `writableCookies`, so QA should include closing and reopening the browser.
 
-**Client side.** `useAuth` asks `/api/auth-session`, keeps an identity *hint* in `grocery.session.v1` for the first
-paint, and calls `clearBootCaches()` on sign-out, on a confirmed 401, and when the answer names a different user
-("Boot & data loading"). **Account deletion** (`DELETE /api/auth-delete-account`, "Hesabı Sil") deletes the
+**Client side.** `useAuth` asks `/api/auth-session`, keeps an identity *hint* in `grocery.session.v1` to detect
+account changes, and calls `clearBootCaches()` on sign-out, on a confirmed 401, and when the answer names a
+different user ("Boot & data loading"). The shell waits for the confirmed identity before mounting user-scoped
+hooks. **Account deletion** (`DELETE /api/auth-delete-account`, "Hesabı Sil") deletes the
 caller's owned households (cascading their data), their invites into others' households, the `app_users` row
 (cascading `personal_plan`, `saved_meals`, `auth_user_map`) and the Supabase Auth user, records an optional
 anonymous reason last (`supabase/27`), and expires the cookies; households owned by someone else are left alone.
@@ -304,19 +306,21 @@ it was removed as dead code (the old, now-historical `docs/archive/roadmap.md` #
 _Verified against code: 2026-09-21 @ 6f93963. Design record and measurements:
 [the 2026-09-17-02 checkpoint](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md)._
 
-A reload used to run `/api/auth-session` → (`/api/households`, `/api/personal-plan`, `/api/nutrition`) →
-(`/api/state`, `/api/item-category-memory`) as three serial tiers. Now the calls start together and the first
-frame paints from local caches.
+A reload first confirms `/api/auth-session`, showing a section-shaped skeleton while it waits. After that,
+`/api/households`, `/api/personal-plan`, `/api/nutrition`, `/api/state` and `/api/item-category-memory` can start
+from the shell's cached tenant and profile state without waiting for household reconciliation. The auth wait
+was restored on 2026-10-29 after live QA reproduced an old cached profile being saved into a newly signed-in
+account before identity confirmation.
 
 - **`useTenants`** resolves `activeTenantId` synchronously from `?tenant=` or `grocery.activeTenant.v1`; the
   households fetch then *reconciles*. If the optimistic id is real it hands back the identical string, so no update
   fires — load-bearing, because `useListSync` keys its effect on `[activeTenantId]` and a new value tears down the
   in-flight sync channel. A `null` from `listHouseholds()` (401/502/network) is *not* "empty account": it must never
   trigger the seed-a-household branch.
-- **`useAuth`** keeps a session hint (`grocery.session.v1`, `{ email, userId }`) and exposes it as `cachedSession`;
-  **`App.tsx`** mounts the shell from `effective = session ?? (checked ? null : cachedSession)`. That expression is
-  load-bearing: once the real answer lands the hint stops counting, so a stale cache never outlives a confirmed
-  401.
+- **`useAuth`** keeps a session hint (`grocery.session.v1`, `{ email, userId }`) only to detect identity changes
+  and invalidate caches. **`App.tsx`** mounts the shell only after the session check confirms a non-null `userId`,
+  and keys the shell by that id. A remembered identity must never start user-scoped reads or writes under a
+  different account's current cookie.
 - **`useListSync`** paints from the `grocery.state.v1:<tenantId>` mirror; the first pull still decides via the
   version gate. `createSync` takes `initialState` (presetting `lastSentSerialized`, so a restored cache is not PUT
   straight back) and `onFirstPullSettled` (`useRollover` waits for it). `pull()` rebaselines when the version matches
@@ -334,9 +338,8 @@ already returns nothing for an unreachable household; `requireHouseholdAccess` w
 PUT/POST/PATCH/DELETE still check access strictly first. (3) The session hint is an identity hint, never a token,
 and authorizes nothing — every handler still validates the real cookie.
 
-**Known residual:** if user A's cookie expires without a sign-out and user B then signs in on the same browser
-profile, A's cached lists can show for the ~1 s until `/api/auth-session` answers and the caches are wiped.
-`clearBootCaches` does not clear the older keys (`grocery.nutrition.v1`, onboarding, theme/prefs). **Not done:**
+`clearBootCaches` does not clear the older keys (`grocery.nutrition.v1`, onboarding, theme/prefs); user-scoped
+profile and onboarding keys remain isolated by the confirmed user id. **Not done:**
 `getClaims()` / custom JWT claims (Phase 4d) and the asset work (self-hosted fonts). Open items:
 [CURRENT_STATE.md](CURRENT_STATE.md).
 

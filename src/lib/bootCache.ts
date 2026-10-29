@@ -1,8 +1,9 @@
 // Boot-path localStorage caches. All three were introduced together by the
 // boot-performance work (docs/superpowers/plans/2026-09-17-boot-performance-waterfall.md)
-// for one reason: let the first paint happen without waiting on the
-// /api/auth-session -> /api/households -> /api/state chain, which used to run
-// as three strictly serial tiers.
+// to reduce the /api/auth-session -> /api/households -> /api/state waterfall.
+// Since the 2026-10-29 account-isolation fix, App waits for auth confirmation
+// before mounting the shell; tenant and state caches still avoid waiting on
+// household reconciliation after that check.
 //
 // The plan called for hand-rolling try/catch at each call site, matching
 // useMealPersonalization / useOnboarding / src/lib/nutrition.ts. They live in
@@ -50,8 +51,8 @@ function writeJson(key: string, value: unknown) {
 
 // -------- session hint -------------------------------------------------------
 
-// Only a hint with a real userId is useful: it exists so App() can render
-// AppShell (which needs currentUserId) before the session check returns.
+// Only a hint with a real userId is useful: useAuth compares it with the
+// confirmed session to clear boot caches when the account has changed.
 export function loadSessionHint(): SessionHint | null {
   const parsed = readJson(SESSION_KEY);
   if (!parsed || typeof parsed !== "object") return null;

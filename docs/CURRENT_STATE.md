@@ -1,6 +1,6 @@
 # Current State
 
-_Last updated: 2026-10-28._
+_Last updated: 2026-10-29._
 
 This file describes the current project state and how to continue from it. It is not a historical session log,
 architecture document, roadmap, or task archive. The historical record of past sessions is a separate thing:
@@ -8,44 +8,40 @@ architecture document, roadmap, or task archive. The historical record of past s
 
 ## Current Objective
 
-A product relaunch is being prepared. The relaunch audit is merged (`d2adb35`). `refactor/combo-to-ready-meal`
-is about to be merged and pushed (CMP). It carries three things: the readyMeal rename, corrected nutrition source
-citations, and an MVP safety posture for DEC-012/013/020. A live `QATEST` of that branch comes next, then the
-remaining blocked decisions and the food-catalog expansion (decisions pending, see Open items).
+A product relaunch is being prepared. The readyMeal rename, corrected source citations and DEC-012/013/020
+MVP safety posture are merged and pushed (`1ebe9b4`). Live QA verified their main existing-account flows but
+found a profile-copy bug during account switching. Its fix builds cleanly and passed the fresh-account
+regression and onboarding ScopeCheck checks locally. The fix is ready for owner review, still uncommitted.
 
 ## Current State
 
-- **Repo:** `master` and `origin/master` are both at `d2adb35` (verified with git): relaunch audit, example-target
-  labelling, DEC-022 note fix, employer README. Before it: `6e65f11` (SN4 citation), `574c9da`, `75abe85`.
+- **Repo:** `master` and `origin/master` are both at `1ebe9b4` (verified with git). The current branch is
+  `fix/account-switch-profile-isolation`, based on that commit, with uncommitted code and documentation changes.
   Earlier history: [`session-checkpoints/README.md`](session-checkpoints/README.md).
-- **In flight:** `refactor/combo-to-ready-meal`, checked out, branched from `d2adb35`, being committed in this
-  CMP. Details: checkpoint
-  [10-28-01](session-checkpoints/2026-10-28-01-ready-meal-rename-sources-safety.md). In short:
-  - Rename "combo" → Meal / readyMeal in code. DB/API `combo_id` fields and the cache's `comboId` are kept.
-  - Kişisel Plan source citations corrected: PAL → FAO/WHO/UNU 2004, water → Krause (now "toplam sıvı"),
-    per-meal protein → AS3 + Schoenfeld 2018, food values → USDA FDC + labels.
-  - Out-of-scope self-attestation hides all targets (`useScopeAttestation`, browser key
-    `grocery.scopeAttestation.v1:<userId>`). The red-flag note and the "starting estimate" note are always
-    shown. Copy lives in `src/lib/safetyCopy.ts`.
-  - `tsc -b` and the build are clean; not yet browser-verified.
-- **Local branches other than `master`:** eleven, all merged into `master` (verified with `git branch --merged`):
-  `agents/simple-test-setup`, `chore/current-state-open-items-cleanup`, `chore/remove-dead-code-exports`,
-  `docs/fill-copilot-instructions`, `docs/refresh-current-state-after-cleanup`,
-  `docs/refresh-current-state-after-dead-code-cleanup`, `docs/refresh-current-state-after-today-cleanup`,
-  `docs/refresh-current-state-worktree-removed`, `docs/sync-refreshes-current-state`,
-  `feature/meal-plan-cards-clear-undo`, `feature/personal-plan-book-sources` — safe to delete when the owner wants.
-  `origin/docs/organize-roadmap-mvp-files` (tip `33c72b8`) is remote-only, unmerged, not examined.
+- **In flight:** App now waits for `/api/auth-session` before mounting user-scoped hooks and keys AppShell by
+  the confirmed user id. Previously a stale cached identity could cause an old profile to be saved into a
+  newly signed-in account. `useAuth`, boot-cache comments and `architecture.md` are updated together.
+  Build passes; existing-account reload and fresh-account isolation checks pass locally. Full evidence:
+  [10-29-01](session-checkpoints/2026-10-29-01-qatest-account-isolation.md).
+- **QA environment:** the owned server on `localhost:3000` and the Chrome QA tab remain open at the user's
+  explicit request. `.vercelignore` is restored with no git diff; the app still responds. Agent login is
+  excluded again. No commit, push or deploy was performed for the isolation fix.
+- **Other local branches:** left untouched; the rename and audit branches are merged. The remote-only
+  `origin/docs/organize-roadmap-mvp-files` branch remains unexamined.
 - **Worktree: one exists** — `D:/CodeSpace/grocery.worktrees/simple-test-setup` on `agents/simple-test-setup`
   (`e999c02`), despite the no-worktrees rule. Not created this session; left untouched for the owner to remove.
-- **Recently shipped to `master` (all pushed):** relaunch audit (`d2adb35`); SN4 book citation in Kişisel Plan sources (`6e65f11`); meal-plan UI
+- **Recently shipped to `master` (all pushed):** rename/sources/safety (`1ebe9b4`); relaunch audit (`d2adb35`); SN4 book citation in Kişisel Plan sources (`6e65f11`); meal-plan UI
   polish batch (`75abe85`); MOBILEUP/MOBILEDOWN docs (`3d0dc77`); DEC-033 protein-target consumer (`a1aad83`..`d77c0ef`).
 - **Deploy state:** not recorded here. Deploys are manual and developer-run (see [`operations.md`](operations.md)).
 
 ## Open items
 
-1. **Live QA of `refactor/combo-to-ready-meal` (pending).** Check the scope checkbox in onboarding and Kişisel
-   Plan, the hidden targets on Yemek Planı, the new source badges, and the Hazır Yemekler / "Yedim" flows after
-   the rename. Persisting the attestation across devices would need a `personal_plan` column (live migration).
+1. **Account-isolation fix: owner review / commit pending.** Local QA passed for fresh-account onboarding,
+   scope toggling/persistence, hidden targets/recommendations, source badges, water copy, ready-meal addition
+   and "Yedim" persistence/undo. New-account `/api/personal-plan` stayed `null`; onboarding was skipped after
+   checking all steps, so "Bitir" submission was not tested. Concurrent account switching in another mounted
+   tab, mobile and production were not tested. See checkpoint [10-29-01](session-checkpoints/2026-10-29-01-qatest-account-isolation.md).
+   Cross-device scope attestation still needs a `personal_plan` column (live migration), not implemented.
 2. **Food-catalog expansion: proposal drafted, owner decisions pending.** The draft table (outside the repo, a
    private Artifact, now with a separate "Öneriler ve değişiklikler" tab) adds canned fish and turkey from Turkish label medians (Migros, 2026-10-27) and a whole-wheat
    pasta row (USDA 169738). Decided: all foods and meal grams are dry/raw; canned and packaged goods use label
@@ -56,8 +52,10 @@ remaining blocked decisions and the food-catalog expansion (decisions pending, s
    consistency (DEC-034/036 — the default profile's macro grams sum to ~2740 kcal against a 2470 target), PAL
    re-anchoring, an eaten flag on `meal_entries` (live migration), and a "Bugün ne pişirsem?" section. The owner's
    profile (age 25, male equation) used in the audit is unconfirmed.
-4. **`agent-session down` reported "ERROR restoring .vercelignore"** (2026-10-27); the file was restored by hand
-   with `git checkout -- .vercelignore` and is clean. Root cause not investigated (`scripts/agent-session.ps1`).
+4. **Ignore restoration can fail with a file lock.** `Restore-Ignore` in `scripts/agent-session.ps1` failed at
+   `File.Replace` with a file-in-use error on 2026-10-29 while the server was running; replacing only its exact
+   marker in place succeeded. `.vercelignore` is clean. The locking process is unidentified; whether this also
+   explains the earlier 2026-10-27 restore error is unverified. See checkpoint [10-29-01](session-checkpoints/2026-10-29-01-qatest-account-isolation.md).
 5. **Schema is not reproducible from the repo:** there is no `CREATE TABLE` for `nutrition`; closing this needs a
    schema-only dump of the live table from the developer. See [`architecture.md`](architecture.md) (Persistence &
    schema map).
@@ -68,8 +66,8 @@ remaining blocked decisions and the food-catalog expansion (decisions pending, s
 
 ## Next Step
 
-`QATEST` the merged rename/sources/safety work (open item 1). Then the remaining blocked decisions: weight
-loop (DEC-027/084), training data (DEC-092), micronutrients (DEC-041), substitutions (DEC-063), pantry (DEC-065).
+Owner review of the uncommitted account-isolation fix on `fix/account-switch-profile-isolation` is next.
+Commit/push requires a separate request. Keep the local server and QA tab open as requested.
 
 ## Constraints and decisions that affect continuation
 
