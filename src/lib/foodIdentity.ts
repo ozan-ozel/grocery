@@ -53,9 +53,15 @@ export function buildFoodIdentityIndex(foods: Nutrition[]): FoodIdentityIndex {
   const byId = new Map<string, Nutrition>();
   const byName = new Map<string, Nutrition[]>();
   const byAlias = new Map<string, Nutrition[]>();
+  const canonicalByName = new Map(foods.map(food => [food.name_tr, food]));
   for (const food of foods) {
     if (food.food_id) byId.set(food.food_id, food);
-    pushInto(byName, normalize(food.name_tr), food);
+    // Only a reviewed database redirect establishes equivalence. UUID reads
+    // still resolve the original row, preserving old entries and exclusions.
+    const namedFood = food.canonical_name
+      ? canonicalByName.get(food.canonical_name) ?? food
+      : food;
+    pushInto(byName, normalize(food.name_tr), namedFood);
     for (const alias of food.aliases ?? []) {
       pushInto(byAlias, normalize(alias), food);
     }

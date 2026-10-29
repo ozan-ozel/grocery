@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQueryClient } from "@tanstack/preact-query";
 import { ConfirmModal } from "@/components/ConfirmModal";
 import { rememberNutrition, saveNutritionBulk, type NutritionWrite } from "@/lib/nutrition";
 
@@ -9,6 +10,7 @@ import { rememberNutrition, saveNutritionBulk, type NutritionWrite } from "@/lib
 // not in ADMIN_EMAILS (lib/auth.ts requireAdmin), so a non-admin who finds this
 // modal just gets an error back.
 export function NutritionUploadModal({ onClose }: { onClose: () => void }) {
+  const queryClient = useQueryClient();
   const [text, setText] = useState("");
   const [status, setStatus] = useState<"idle" | "saving" | "done">("idle");
   const [error, setError] = useState<string | null>(null);
@@ -36,6 +38,7 @@ export function NutritionUploadModal({ onClose }: { onClose: () => void }) {
     try {
       const saved = await saveNutritionBulk(rows);
       rememberNutrition(saved);
+      await queryClient.invalidateQueries({ queryKey: ["foodCatalog"] });
       setSavedCount(saved.length);
       setStatus("done");
     } catch (err) {
@@ -100,6 +103,8 @@ function validateBulk(input: unknown[]): NutritionWrite[] | { error: string } {
       fat_g: r.fat_g as number,
       carbs_g: r.carbs_g as number,
       fiber_g: typeof fiber === "number" ? fiber : 0,
+      ...(typeof r.source === "string" ? { source: r.source } : {}),
+      ...(typeof r.preparation_state === "string" ? { preparation_state: r.preparation_state } : {}),
     });
   }
   return out;

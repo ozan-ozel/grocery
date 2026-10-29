@@ -46,6 +46,7 @@ export function MealFoodPicker({
   // a confirmed PRESENT match.
   const visibleFoods = foods.filter(
     (food) =>
+      food.is_active !== false &&
       // Passing the full food object (not just .name_tr) lets a food-level
       // exclusion match by its canonical food_id too, once one exists
       // (Canonical Food Identity decision 6).
@@ -54,7 +55,8 @@ export function MealFoodPicker({
   );
   const results = queryLower
     ? visibleFoods.filter(food =>
-        food.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower),
+        food.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower) ||
+        (food.aliases ?? []).some(alias => alias.toLocaleLowerCase("tr-TR").includes(queryLower)),
       )
     : visibleFoods.slice(0, 30);
 

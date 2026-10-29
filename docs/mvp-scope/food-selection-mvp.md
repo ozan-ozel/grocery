@@ -35,8 +35,14 @@ after logging — no new UI component, no backend/schema change.
 ## The one work item
 
 `DEC-061` is `PARTIAL` for a single reason: allergen-class enforcement is implemented and
-safety-tested, but only **19 of 89 foods** have curated allergen-class mappings. That is a data-coverage
+safety-tested, but only **35 of 103 catalog rows** have curated allergen-class mappings (19/89 before
+the 2026-10-29 catalog polish, `supabase/29-nutrition-catalog-polish.sql`, which added known `present`
+mappings only — absence is never inferred, so unmapped classes stay UNKNOWN). That is a data-coverage
 gap, not a code gap.
+
+The same polish also made food-level exclusions follow reviewed duplicate identities: an exclusion
+recorded against a retired duplicate (e.g. `ceviz içi`) still blocks its active twin (`ceviz`), and
+vice versa. See `data/catalog-review-2026-10-29.md`.
 
 It is the same item tracked in `gi-tolerance-mvp.md`, listed here because this is the decision it
 actually belongs to. Do it once.

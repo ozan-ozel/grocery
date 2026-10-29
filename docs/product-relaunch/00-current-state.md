@@ -54,7 +54,7 @@ var. Dağılım [Belge]:
 | SHIPPED | 11 | Uygulandı ve doğrulandı |
 | PROVISIONAL | 4 | Geçici MVP seçimi uygulandı (`DEC-009`, `033`, `046`, `071`) |
 | COVERED | 15 | Uygulama bu alanda yeterli bir şey yapıyor; tam versiyon değil |
-| PARTIAL | 1 | `DEC-061` (alerjen sınıfı verisi 19/89 besinde) |
+| PARTIAL | 1 | `DEC-061` (alerjen sınıfı verisi 35/103 besinde) |
 | DEFERRED | 7 | v1 kapsamı dışında, bilinçli |
 | BLOCKED | 74 | Var olmayan bir alt sisteme (kilo trendi, mikro besin verisi, antrenman verisi, kiler, fiyat) ya da insan güvenlik kararına bağlı |
 

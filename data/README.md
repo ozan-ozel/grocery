@@ -17,9 +17,16 @@ Row schema:
   "fat_g": 3.3,
   "carbs_g": 4.8,
   "fiber_g": 0,                     // optional in JSON, defaults to 0
-  "source": "USDA fdc_id 171265"    // optional provenance note
+  "source": "USDA fdc_id 171265",   // optional provenance note
+  "preparation_state": "çiğ",       // optional: what the grams weigh (raw, dry, drained…)
+  "is_active": true,                // optional: false retires a row from new choices, never deletes it
+  "canonical_name": "ceviz"         // optional: retired duplicate → its active twin's name_tr
 }
 ```
+
+The last three need `supabase/29-nutrition-catalog-polish.sql` applied first. Equivalence id groups and
+allergen-class mappings are set by migration, not by this file. Decisions behind the 2026-10-29 catalog:
+`catalog-review-2026-10-29.md`.
 
 Bulk-seed flow (rare):
 1. Edit this file.

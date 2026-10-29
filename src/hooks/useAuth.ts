@@ -9,22 +9,14 @@ type Session = { email: string | null; userId: string | null };
 
 // null = still checking; undefined = signed out; Session = signed in.
 //
-// `cachedSession` is a purely *rendering* optimism: the { email, userId } pair
-// a previous visit saw, remembered so App() can mount AppShell immediately
-// instead of blocking the entire tree on /api/auth-session. It is an identity
-// hint and never a token — it authorizes nothing, and every /api/* handler
-// still validates the real httpOnly cookie via requireUser(). The worst case
-// for an expired cookie is a second of skeleton while the requests 401, then
-// LoginGate. See src/lib/bootCache.ts.
+// The previous identity is remembered only to invalidate boot caches when
+// /api/auth-session confirms a different user. App waits for that response
+// before mounting user-scoped hooks, which may write cached profiles back.
 export function useAuth() {
   const [session, setSession] = useState<Session | null | undefined>(null);
   const [checked, setChecked] = useState(false);
-  const cachedRef = useRef<ReturnType<typeof loadSessionHint>>(null);
-  // Read once, at mount, before the first paint.
-  const [cachedSession] = useState(() => {
-    cachedRef.current = loadSessionHint();
-    return cachedRef.current;
-  });
+  const [initialSessionHint] = useState(loadSessionHint);
+  const cachedRef = useRef(initialSessionHint);
 
   useEffect(() => {
     fetchAppSession();
@@ -106,7 +98,6 @@ export function useAuth() {
 
   return {
     session,
-    cachedSession,
     checked,
     signInWithGoogle,
     signOut,

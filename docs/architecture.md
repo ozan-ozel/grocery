@@ -72,7 +72,8 @@ Each is explained in the section named; break one only deliberately.
 7. **Session refresh is deliberately not implemented**; a session lives as long as Supabase's access-token lifetime
    — "Auth & session".
 8. **Boot caches are cleared together** (sign-out, account deletion, confirmed 401, user change) — "Boot & data
-   loading".
+   loading". User-scoped hooks mount only after `/api/auth-session` confirms the cookie's user; the shell is
+   keyed by that user so account changes cannot reuse another account's in-memory profile.
 9. **The project is at the 12-function Hobby limit**; new endpoints must fit an existing function or displace one —
    [operations.md](operations.md) § Deployment.
 10. **`agent-login` is local-only by deployment** and is never merged into a deployed function —
@@ -142,9 +143,10 @@ an explicit, approved scope boundary (see the header of `lib/auth.ts` and
 `docs/superpowers/specs/2026-09-09-supabase-auth-migration-design.md`). The cookie's lifetime is this app's own
 responsibility via `writableCookies`, so QA should include closing and reopening the browser.
 
-**Client side.** `useAuth` asks `/api/auth-session`, keeps an identity *hint* in `grocery.session.v1` for the first
-paint, and calls `clearBootCaches()` on sign-out, on a confirmed 401, and when the answer names a different user
-("Boot & data loading"). **Account deletion** (`DELETE /api/auth-delete-account`, "Hesabı Sil") deletes the
+**Client side.** `useAuth` asks `/api/auth-session`, keeps an identity *hint* in `grocery.session.v1` to detect
+account changes, and calls `clearBootCaches()` on sign-out, on a confirmed 401, and when the answer names a
+different user ("Boot & data loading"). The shell waits for the confirmed identity before mounting user-scoped
+hooks. **Account deletion** (`DELETE /api/auth-delete-account`, "Hesabı Sil") deletes the
 caller's owned households (cascading their data), their invites into others' households, the `app_users` row
 (cascading `personal_plan`, `saved_meals`, `auth_user_map`) and the Supabase Auth user, records an optional
 anonymous reason last (`supabase/27`), and expires the cookies; households owned by someone else are left alone.
@@ -173,8 +175,8 @@ several independent layers with different scopes:
 | Personal plan profile | `grocery.personalPlan.v1:<userId>` (local cache) + Supabase `personal_plan` table | per user | yes, via `api/personal-plan.ts` |
 | Out-of-scope self-attestation (DEC-012) | `grocery.scopeAttestation.v1:<userId>` = `"out"` (absent = in scope) | per user, per browser | no — browser only; another device asks again |
 | Boot cache (session hint, active tenant) | `grocery.session.v1`, `grocery.activeTenant.v1` (`src/lib/bootCache.ts`, alongside the `grocery.state.v1:` mirror) | device | no |
-| Nutrition catalog cache | `grocery.nutrition.v1` (`src/lib/nutrition.ts`) | device | no (cache of `/api/nutrition`) |
-| Nutrition browse cache | `grocery.nutrition.browse.v1` (`src/lib/nutrition.ts`, `browseNutritionCached`): first page only, one entry per query, expires after `BROWSE_CACHE_TTL_MS` (5 min); dropped whenever nutrition rows are saved | device | no (cache of `GET /api/nutrition`) |
+| Nutrition catalog cache | `grocery.nutrition.v2` (`src/lib/nutrition.ts`): `{ row, ts }` per name, entries expire after 5 min; replaced wholesale by `rememberNutrition` after an upload | device | no (cache of `/api/nutrition`) |
+| Nutrition browse cache | `grocery.nutrition.browse.v2` (`src/lib/nutrition.ts`, `browseNutritionCached`): first page only, one entry per query, expires after `BROWSE_CACHE_TTL_MS` (5 min); dropped whenever nutrition rows are saved | device | no (cache of `GET /api/nutrition`) |
 | Meal-plan / nutrition UI prefs | `grocery.showNutritionValues.v1`, `grocery.shoppingTab.v1`, `grocery.mealPortion.v1` (`src/lib/preferences.ts`) | device | no |
 
 Category customization stays device-local even though it's keyed by tenant. Item category memory
@@ -246,10 +248,10 @@ future policy is written to re-query its own table. The full root-cause writeup 
 _Verified against code: 2026-09-21 @ 6f93963 (grep of `supabase/*.sql`); confirm a table's current shape in the
 migration itself._
 
-**Schema authority.** The schema is the numbered migration files `supabase/01`–`28`, applied by hand in order
+**Schema authority.** The schema is the numbered migration files `supabase/01`–`29`, applied by hand in order
 (see [operations.md](operations.md) § External configuration). There is **no single canonical schema file**:
 `01-schema.sql` holds only the early tables (`lists` and `items` are unused today), and the repo has **no
-`CREATE TABLE` for `nutrition`** (only `ALTER`s and RLS in `14`, `16`, `24`), so the database cannot be rebuilt from
+`CREATE TABLE` for `nutrition`** (only `ALTER`s and RLS in `14`, `16`, `24`, `29`), so the database cannot be rebuilt from
 the repo alone. (`meal_entries` is created in both `01` and `07`, on purpose: `07` does `drop table if exists`
 first and redefines it, so a fresh install in order still works — but re-running `07` on a database that holds
 meal entries deletes them.) The columns `nutrition` is read with are visible in `api/nutrition.ts` (`SELECT_COLS`),
@@ -269,7 +271,8 @@ read the migration that creates or alters the table.
 | `preparation_batches` | `17`; RLS drift fix `18` | `19` | `preparation-batches.ts` |
 | `personal_plan` (per user) | `08`, `09`; exclusions `10`, `13`, `15` | `19` | `personal-plan.ts` |
 | `saved_meals` (per user) | `28` | `28` | `personal-plan.ts` (`/api/saved-meals`) |
-| `nutrition` (global) | no CREATE in repo; `14`, `16` alter | `24` (SELECT only) | `nutrition.ts` |
+| `nutrition` (global) | no CREATE in repo; `14`, `16`, `29` alter | `24` (SELECT only) | `nutrition.ts` |
+| `app_private.nutrition_polish_20261029_backup` | `29` | RLS on, no policy; all grants revoked | none (rollback snapshot + applied marker) |
 | `app_users` | `03` | RLS on, no policy (service role only) | `lib/auth.ts`, `auth-google.ts` |
 | `auth_user_map` | `19` | RLS on, no policy (service role only) | `lib/auth.ts` |
 | `agent_login_tokens` | `25` | RLS on, no policy (service role only) | `agent-login.ts` (local-only) |
@@ -304,19 +307,21 @@ it was removed as dead code (the old, now-historical `docs/archive/roadmap.md` #
 _Verified against code: 2026-09-21 @ 6f93963. Design record and measurements:
 [the 2026-09-17-02 checkpoint](session-checkpoints/2026-09-17-02-boot-performance-waterfall.md)._
 
-A reload used to run `/api/auth-session` → (`/api/households`, `/api/personal-plan`, `/api/nutrition`) →
-(`/api/state`, `/api/item-category-memory`) as three serial tiers. Now the calls start together and the first
-frame paints from local caches.
+A reload first confirms `/api/auth-session`, showing a section-shaped skeleton while it waits. After that,
+`/api/households`, `/api/personal-plan`, `/api/nutrition`, `/api/state` and `/api/item-category-memory` can start
+from the shell's cached tenant and profile state without waiting for household reconciliation. The auth wait
+was restored on 2026-10-29 after live QA reproduced an old cached profile being saved into a newly signed-in
+account before identity confirmation.
 
 - **`useTenants`** resolves `activeTenantId` synchronously from `?tenant=` or `grocery.activeTenant.v1`; the
   households fetch then *reconciles*. If the optimistic id is real it hands back the identical string, so no update
   fires — load-bearing, because `useListSync` keys its effect on `[activeTenantId]` and a new value tears down the
   in-flight sync channel. A `null` from `listHouseholds()` (401/502/network) is *not* "empty account": it must never
   trigger the seed-a-household branch.
-- **`useAuth`** keeps a session hint (`grocery.session.v1`, `{ email, userId }`) and exposes it as `cachedSession`;
-  **`App.tsx`** mounts the shell from `effective = session ?? (checked ? null : cachedSession)`. That expression is
-  load-bearing: once the real answer lands the hint stops counting, so a stale cache never outlives a confirmed
-  401.
+- **`useAuth`** keeps a session hint (`grocery.session.v1`, `{ email, userId }`) only to detect identity changes
+  and invalidate caches. **`App.tsx`** mounts the shell only after the session check confirms a non-null `userId`,
+  and keys the shell by that id. A remembered identity must never start user-scoped reads or writes under a
+  different account's current cookie.
 - **`useListSync`** paints from the `grocery.state.v1:<tenantId>` mirror; the first pull still decides via the
   version gate. `createSync` takes `initialState` (presetting `lastSentSerialized`, so a restored cache is not PUT
   straight back) and `onFirstPullSettled` (`useRollover` waits for it). `pull()` rebaselines when the version matches
@@ -334,9 +339,8 @@ already returns nothing for an unreachable household; `requireHouseholdAccess` w
 PUT/POST/PATCH/DELETE still check access strictly first. (3) The session hint is an identity hint, never a token,
 and authorizes nothing — every handler still validates the real cookie.
 
-**Known residual:** if user A's cookie expires without a sign-out and user B then signs in on the same browser
-profile, A's cached lists can show for the ~1 s until `/api/auth-session` answers and the caches are wiped.
-`clearBootCaches` does not clear the older keys (`grocery.nutrition.v1`, onboarding, theme/prefs). **Not done:**
+`clearBootCaches` does not clear the older keys (`grocery.nutrition.v2`, onboarding, theme/prefs); user-scoped
+profile and onboarding keys remain isolated by the confirmed user id. **Not done:**
 `getClaims()` / custom JWT claims (Phase 4d) and the asset work (self-hosted fonts). Open items:
 [CURRENT_STATE.md](CURRENT_STATE.md).
 
@@ -383,6 +387,18 @@ There is no per-user edit of nutrition values in the app. Ways to change the dat
   UI; it is *not* the security boundary — the endpoint's admin check is.
 - **`scripts/upload-nutrition.ts`** — seeds `data/nutrition.json` straight to Supabase with the
   service-role key (no HTTP, no `ADMIN_EMAILS`).
+
+**Catalog identity and retirement (`supabase/29-nutrition-catalog-polish.sql`).** Migration 29 adds optional
+read columns `source`, `preparation_state`, `is_active`, `canonical_name`, `equivalent_food_ids` and
+`equivalent_names`. Rows are never deleted: a duplicate or ambiguous food is retired with `is_active = false`,
+keeps its `food_id`, and may point at an active twin via `canonical_name`. Pickers, browse/compare views and
+recommendations hide inactive rows, while old meal entries, saved meals and batches still resolve them at
+their original grams. `buildNutritionMap` (`src/lib/nutrition.ts`) follows only an explicit `canonical_name`,
+never fuzzy matching. The equivalence arrays let a food-level exclusion recorded against either twin block
+both (`matchesFoodIdentity` in `src/lib/foodExclusions.ts`); they are set by the migration against real
+database ids, so a plain seed upload is not a substitute for it. Allergen-class mappings are added only as
+known `present`; absence is never inferred. Until 29 is applied, `api/nutrition.ts` retries with the legacy
+column list on a missing-column error only. Data decisions and sources: `data/catalog-review-2026-10-29.md`.
 
 `docs/nutrition-prompt.md` is a copy-paste LLM prompt for turning free-form nutrition text into the
 row JSON both expect.
@@ -443,8 +459,15 @@ enforced server-side in `api/personal-plan.ts` and partly mirrored in `SAVED_MEA
 "Sana uygun" is `src/lib/mealRecommend.ts`: a pure function (no network, no AI) that filters the meals a
 slot accepts, gives the slot a share of the day's remaining macros, picks the best portion tier per
 meal with `scoreInstance`, and returns the top few. The per-slot weights (`SLOT_WEIGHT`) are MVP tuning
-constants, not derived from a source. Its snack results are only as good as the slot tags in
-`data/ready-meals.json`. Product scope: `docs/mvp-scope/meal-construction-mvp.md`.
+constants, not derived from a source. The `ara` slot accepts only meals tagged `ara-ogun`/`atistirmalik` (breakfast meals no
+longer double as snacks), so its results are only as good as those tags in `data/ready-meals.json`.
+
+**Planning macros (`src/lib/planningMacros.ts`).** Meal Plan, "Sana uygun" and the evening suggestions no
+longer use each range's midpoint. `planningMacros(targets)` picks one point inside the existing protein/fat/
+carb ranges whose 4/4/9 energy equals the calorie target (protein, then fat, nearest their midpoints; carbs
+take the rest). If the ranges cannot meet the calorie target together it returns `null`: the summary card,
+per-slot protein bands and recommendations are hidden and `INCOMPATIBLE_TARGETS_MESSAGE` is shown, while
+logging still works. It prescribes nothing new; Kişisel Plan still shows the ranges. Product scope: `docs/mvp-scope/meal-construction-mvp.md`.
 
 ### Meal-plan undo history and meal cards
 

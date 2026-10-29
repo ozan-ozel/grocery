@@ -1,5 +1,6 @@
 import { BookOpen, ChevronRight, ExternalLink } from "lucide-react";
 import { useMemo, useRef, useState } from "react";
+import { planningMacros, INCOMPATIBLE_TARGETS_MESSAGE } from "@/lib/planningMacros";
 import { Input } from "@/components/ui/input";
 import { DropdownChevronButton } from "@/components/DropdownChevronButton";
 import { Field, NumberInput, Select } from "@/components/PersonalPlanFields";
@@ -1202,6 +1203,11 @@ function TargetSummary({
   ];
   return (
     <section className="space-y-3">
+      <p className="text-xs text-muted-foreground">
+        {planningMacros(targets)
+          ? "Yemek Planı, bu aralıklardan kalori hedefinle uyumlu tek bir dağılım kullanır. Aralıkların tüm üst sınırları aynı anda hedeflenmez."
+          : INCOMPATIBLE_TARGETS_MESSAGE}
+      </p>
       <div className="flex items-end justify-between">
         <div>
           <h2 className="text-sm font-semibold">Günlük hedeflerin</h2>

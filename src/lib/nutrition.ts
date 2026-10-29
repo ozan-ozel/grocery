@@ -20,6 +20,13 @@ export type Nutrition = {
   // resolve alias spellings too, not just exact name_tr (Phase 9 §20.6 C5:
   // previously only the POST-by-name path resolved aliases).
   aliases?: string[];
+  source?: string;
+  preparation_state?: string;
+  is_active?: boolean;
+  canonical_name?: string;
+  // Reviewed duplicate identities retained for old shopping/exclusion references.
+  equivalent_food_ids?: string[];
+  equivalent_names?: string[];
   // Türkiye/EU 14 allergen-class relationships for this food (see
   // src/lib/allergenClasses.ts). Snake_case to match every other field on
   // this type, which is a verbatim passthrough of the `nutrition` table's
@@ -44,18 +51,23 @@ function apiUrl(path: string): string {
   return `${baseUrl}${path}`;
 }
 
-const CACHE_KEY = "grocery.nutrition.v1";
+const CACHE_KEY = "grocery.nutrition.v2";
+const LOOKUP_CACHE_TTL_MS = 5 * 60 * 1000;
+type LookupCache = Record<string, { row: Nutrition; ts: number }>;
 
-function loadCache(): Record<string, Nutrition> {
+function loadCache(): LookupCache {
   try {
     const raw = localStorage.getItem(CACHE_KEY);
-    return raw ? (JSON.parse(raw) as Record<string, Nutrition>) : {};
+    if (!raw) return {};
+    const entries = JSON.parse(raw) as LookupCache;
+    return Object.fromEntries(Object.entries(entries).filter(([, entry]) =>
+      entry?.row && Number.isFinite(entry.ts) && Date.now() - entry.ts < LOOKUP_CACHE_TTL_MS));
   } catch {
     return {};
   }
 }
 
-function saveCache(cache: Record<string, Nutrition>) {
+function saveCache(cache: LookupCache) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
   } catch {
@@ -64,12 +76,11 @@ function saveCache(cache: Record<string, Nutrition>) {
 }
 
 // Device-local, cross-session cache of nutrition lookups (nutrition facts
-// aren't tenant-specific, so one shared cache is fine). Only names actually
-// missing from the cache hit the network — this is what makes a reload of
-// the active list's nutrition table not re-fetch names it already knows.
+// aren't tenant-specific, so one shared cache is fine). Entries expire after
+// five minutes; fresh lookup misses cannot extend older entries' lifetimes.
 export async function fetchNutritionCached(names: string[]): Promise<NutritionMap> {
   const cache = loadCache();
-  const map: NutritionMap = new Map(Object.entries(cache));
+  const map: NutritionMap = new Map(Object.entries(cache).map(([name, entry]) => [name, entry.row]));
 
   const normalized = Array.from(
     new Set(names.map(normalize).filter((n) => n.length > 0))
@@ -81,7 +92,7 @@ export async function fetchNutritionCached(names: string[]): Promise<NutritionMa
     if (fresh.size > 0) {
       for (const [key, value] of fresh) {
         map.set(key, value);
-        cache[key] = value;
+        cache[key] = { row: value, ts: Date.now() };
       }
       saveCache(cache);
     }
@@ -94,8 +105,10 @@ export async function fetchNutritionCached(names: string[]): Promise<NutritionMa
 // name that was just changed.
 export function rememberNutrition(rows: Nutrition[]) {
   if (rows.length === 0) return;
-  const cache = loadCache();
-  for (const row of rows) cache[row.name_tr] = row;
+  // Drop old aliases too: an alias removed by an upload must not continue
+  // resolving to yesterday's row in the device cache.
+  const cache: LookupCache = {};
+  for (const row of rows) cache[row.name_tr] = { row, ts: Date.now() };
   saveCache(cache);
   // A save can affect any number of cached browse pages (any query whose
   // results include this row) — cheaper to drop them all than to track
@@ -104,7 +117,7 @@ export function rememberNutrition(rows: Nutrition[]) {
 }
 
 type BrowseCacheEntry = { rows: Nutrition[]; ts: number };
-const BROWSE_CACHE_KEY = "grocery.nutrition.browse.v1";
+const BROWSE_CACHE_KEY = "grocery.nutrition.browse.v2";
 // Browse-all is read-mostly; a short TTL is enough to stop the same page
 // (typically the default alphabetical listing) from refetching on every
 // reload or Alışveriş/Besin tab switch, without risking stale-looking data
@@ -155,14 +168,24 @@ export async function fetchNutrition(names: string[]): Promise<NutritionMap> {
     throw new Error(`nutrition api ${res.status}`);
   }
   const rows = (await res.json()) as ApiRow[];
+  return buildNutritionMap(rows.map(pickNutrition));
+}
+
+// Display/nutrient lookup only; safety identity resolution remains in
+// foodIdentity.ts. Exact names precede aliases; reviewed duplicate redirects
+// follow the database's explicit canonical_name, never fuzzy matching.
+export function buildNutritionMap(rows: Nutrition[]): NutritionMap {
+  const map: NutritionMap = new Map(rows.map(row => [normalize(row.name_tr), row]));
   for (const row of rows) {
-    const nutrition = pickNutrition(row);
-    map.set(nutrition.name_tr, nutrition);
+    const canonical = row.canonical_name ? map.get(normalize(row.canonical_name)) : undefined;
+    if (canonical) map.set(normalize(row.name_tr), canonical);
+  }
+  for (const row of rows) {
+    const resolved = map.get(normalize(row.name_tr)) ?? row;
     for (const alias of row.aliases ?? []) {
-      map.set(alias, nutrition);
+      if (!map.has(normalize(alias))) map.set(normalize(alias), resolved);
     }
   }
-
   return map;
 }
 
@@ -187,7 +210,9 @@ export async function browseNutrition(
   // empty table would otherwise render identically. Let failures throw so
   // the caller can tell the two apart instead of silently showing "no food
   // in the DB" when it's actually the API that's unreachable.
-  const res = await fetch(apiUrl(`/api/nutrition?${params.toString()}`));
+  // The explicit local cache owns the TTL. Bypass the separate HTTP cache so
+  // invalidating after a maintenance upload cannot fetch an old browser copy.
+  const res = await fetch(apiUrl(`/api/nutrition?${params.toString()}`), { cache: "no-store" });
   if (!res.ok) {
     throw new Error(`browse api ${res.status}`);
   }
@@ -249,6 +274,8 @@ function prepareRow(row: NutritionWrite) {
     fat_g: row.fat_g,
     carbs_g: row.carbs_g,
     fiber_g: row.fiber_g,
+    ...(row.source !== undefined ? { source: row.source } : {}),
+    ...(row.preparation_state !== undefined ? { preparation_state: row.preparation_state } : {}),
   };
 }
 
@@ -305,6 +332,12 @@ function pickNutrition(row: ApiRow): Nutrition {
     // built from it, e.g. useFoodCatalog's map) alias-blind while
     // fetchNutrition's POST-by-name path already resolved aliases.
     aliases: row.aliases,
+    source: row.source,
+    preparation_state: row.preparation_state,
+    is_active: row.is_active,
+    canonical_name: row.canonical_name,
+    equivalent_food_ids: row.equivalent_food_ids,
+    equivalent_names: row.equivalent_names,
     // Now sent by api/nutrition.ts's SELECT_COLS (see the
     // Nutrition type above) — carries real curated/regulatory allergen-class
     // data once supabase/14-nutrition-allergen-classes.sql has been applied.

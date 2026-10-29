@@ -15,6 +15,13 @@ Domain L is `DEC-066` through `DEC-070`. Four of the five are already done.
 Translating selected foods and portions into constructed meals is `DEC-066`, covered by the curated
 `data/ready-meals.json` and `src/lib/readyMeals.ts`. Nothing to build.
 
+**Update 2026-10-29 — catalog and portion polish.** Still `COVERED`. Authored grams of the
+grain/legume meals were lowered to dry-weight defaults (e.g. rice 150 → 60 g, pasta 150 → 80 g), ten
+canned-food meals and two snack-tagged meals were added, and the dry-legume meals no longer claim a
+10–15 minute preparation from raw. Meal ids are unchanged and logged grams are not rewritten. These
+are editable product defaults, not clinical serving recommendations. Decisions:
+`data/catalog-review-2026-10-29.md`.
+
 **Update 2026-09-19 — portion tiers shipped.** The Meal Plan's "Yemekler" picker no longer adds a
 combo at one fixed portion. Each meal offers Küçük / Normal / Büyük (×⅔ / ×1 / ×1⅓ of the authored
 grams) plus a custom multiplier, and a plain tap adds at the last-used tier (remembered per device).

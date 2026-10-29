@@ -49,11 +49,18 @@ export function tierOf(reason: ExclusionReason): ExclusionTier {
 // future rename for entries created going forward (Canonical Food Identity
 // decision 6 / investigation §12) while never breaking an old entry that
 // only ever had a name to match against.
-type FoodIdentityLike = string | { name_tr: string; food_id?: string };
+type FoodIdentityLike = string | {
+  name_tr: string;
+  food_id?: string;
+  equivalent_food_ids?: string[];
+  equivalent_names?: string[];
+};
 
 function matchesFoodIdentity(entryFoodId: string, candidate: FoodIdentityLike): boolean {
   if (typeof candidate === "string") return entryFoodId === candidate;
-  return entryFoodId === candidate.name_tr || entryFoodId === candidate.food_id;
+  return entryFoodId === candidate.name_tr || entryFoodId === candidate.food_id ||
+    (candidate.equivalent_food_ids ?? []).includes(entryFoodId) ||
+    (candidate.equivalent_names ?? []).includes(entryFoodId);
 }
 
 export function hasHardExclusion(

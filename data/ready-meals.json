@@ -3,9 +3,18 @@
     "id": "tavuk-pirinc-brokoli",
     "name_tr": "Tavuklu pirinç ve brokoli",
     "items": [
-      { "food_id": "tavuk göğsü", "grams": 150 },
-      { "food_id": "pirinç", "grams": 150 },
-      { "food_id": "brokoli", "grams": 100 }
+      {
+        "food_id": "tavuk göğsü",
+        "grams": 150
+      },
+      {
+        "food_id": "pirinç",
+        "grams": 60
+      },
+      {
+        "food_id": "brokoli",
+        "grams": 100
+      }
     ],
     "prep_minutes": 20,
     "tags": [],
@@ -15,9 +24,18 @@
     "id": "somon-brokoli-zeytinyagi",
     "name_tr": "Somon ve brokoli",
     "items": [
-      { "food_id": "somon", "grams": 150 },
-      { "food_id": "brokoli", "grams": 100 },
-      { "food_id": "zeytinyağı", "grams": 10 }
+      {
+        "food_id": "somon",
+        "grams": 150
+      },
+      {
+        "food_id": "brokoli",
+        "grams": 100
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 10
+      }
     ],
     "prep_minutes": 20,
     "tags": []
@@ -26,32 +44,63 @@
     "id": "yogurt-muz-ceviz",
     "name_tr": "Yoğurt, muz ve ceviz",
     "items": [
-      { "food_id": "yoğurt", "grams": 200 },
-      { "food_id": "muz", "grams": 100 },
-      { "food_id": "ceviz", "grams": 20 }
+      {
+        "food_id": "yoğurt",
+        "grams": 200
+      },
+      {
+        "food_id": "muz",
+        "grams": 100
+      },
+      {
+        "food_id": "ceviz",
+        "grams": 20
+      }
     ],
     "prep_minutes": 3,
-    "tags": ["kahvalti"]
+    "tags": [
+      "kahvalti"
+    ]
   },
   {
     "id": "yumurta-tam-bugday-domates",
     "name_tr": "Yumurta ve tam buğday ekmeği",
     "items": [
-      { "food_id": "yumurta", "grams": 100 },
-      { "food_id": "tam buğday ekmeği", "grams": 60 },
-      { "food_id": "domates", "grams": 80 }
+      {
+        "food_id": "yumurta",
+        "grams": 100
+      },
+      {
+        "food_id": "tam buğday ekmeği",
+        "grams": 60
+      },
+      {
+        "food_id": "domates",
+        "grams": 80
+      }
     ],
     "prep_minutes": 10,
-    "tags": ["kahvalti"],
+    "tags": [
+      "kahvalti"
+    ],
     "prep_note": "Yumurtaları haşlayın veya sote edin, ekmeği kızartıp domatesle birlikte servis edin."
   },
   {
     "id": "mercimek-corbasi",
     "name_tr": "Mercimek çorbası malzemeleri",
     "items": [
-      { "food_id": "kırmızı mercimek", "grams": 100 },
-      { "food_id": "soğan", "grams": 50 },
-      { "food_id": "havuç", "grams": 50 }
+      {
+        "food_id": "kırmızı mercimek",
+        "grams": 50
+      },
+      {
+        "food_id": "soğan",
+        "grams": 50
+      },
+      {
+        "food_id": "havuç",
+        "grams": 50
+      }
     ],
     "prep_minutes": 30,
     "tags": []
@@ -60,21 +109,43 @@
     "id": "nohutlu-salata",
     "name_tr": "Nohutlu salata",
     "items": [
-      { "food_id": "nohut", "grams": 150 },
-      { "food_id": "domates", "grams": 100 },
-      { "food_id": "salatalık", "grams": 100 },
-      { "food_id": "zeytinyağı", "grams": 15 }
+      {
+        "food_id": "nohut",
+        "grams": 60
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      },
+      {
+        "food_id": "salatalık",
+        "grams": 100
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 15
+      }
     ],
-    "prep_minutes": 10,
-    "tags": []
+    "prep_minutes": 60,
+    "tags": [],
+    "prep_note": "Baklagili kuru tartın; ıslatma ve pişirme için ambalajdaki hazırlama talimatını izleyin. Süre yaklaşık, ıslatma hariçtir."
   },
   {
     "id": "karides-kabak-mantar",
     "name_tr": "Karides ve sebze sote",
     "items": [
-      { "food_id": "karides", "grams": 150 },
-      { "food_id": "kabak", "grams": 100 },
-      { "food_id": "mantar", "grams": 80 }
+      {
+        "food_id": "karides",
+        "grams": 150
+      },
+      {
+        "food_id": "kabak",
+        "grams": 100
+      },
+      {
+        "food_id": "mantar",
+        "grams": 80
+      }
     ],
     "prep_minutes": 15,
     "tags": []
@@ -83,9 +154,18 @@
     "id": "hindi-bulgur-patlican",
     "name_tr": "Hindi ve bulgur pilavı",
     "items": [
-      { "food_id": "hindi göğsü", "grams": 150 },
-      { "food_id": "bulgur", "grams": 150 },
-      { "food_id": "patlıcan", "grams": 100 }
+      {
+        "food_id": "hindi göğsü",
+        "grams": 150
+      },
+      {
+        "food_id": "bulgur",
+        "grams": 60
+      },
+      {
+        "food_id": "patlıcan",
+        "grams": 100
+      }
     ],
     "prep_minutes": 25,
     "tags": []
@@ -94,8 +174,14 @@
     "id": "biftek-pirinc-pilavi",
     "name_tr": "Biftek (antrikot) ve pirinç pilavı",
     "items": [
-      { "food_id": "biftek (antrikot)", "grams": 150 },
-      { "food_id": "pirinç", "grams": 150 }
+      {
+        "food_id": "biftek (antrikot)",
+        "grams": 150
+      },
+      {
+        "food_id": "pirinç",
+        "grams": 60
+      }
     ],
     "prep_minutes": 20,
     "tags": [],
@@ -105,8 +191,14 @@
     "id": "dana-sote-kontrfile-bulgur",
     "name_tr": "Et sote (kontrfile) ve bulgur pilavı",
     "items": [
-      { "food_id": "kontrfile", "grams": 150 },
-      { "food_id": "bulgur", "grams": 150 }
+      {
+        "food_id": "kontrfile",
+        "grams": 150
+      },
+      {
+        "food_id": "bulgur",
+        "grams": 60
+      }
     ],
     "prep_minutes": 25,
     "tags": [],
@@ -116,9 +208,18 @@
     "id": "izgara-tavuk-tava",
     "name_tr": "Tavuk ızgara tava",
     "items": [
-      { "food_id": "tavuk göğsü", "grams": 150 },
-      { "food_id": "patates", "grams": 150 },
-      { "food_id": "zeytinyağı", "grams": 10 }
+      {
+        "food_id": "tavuk göğsü",
+        "grams": 150
+      },
+      {
+        "food_id": "patates",
+        "grams": 150
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 10
+      }
     ],
     "prep_minutes": 20,
     "tags": [],
@@ -126,34 +227,63 @@
   },
   {
     "id": "firinda-tavuk-but-kemikli",
-    "name_tr": "Fırında tavuk but (kemikli)",
+    "name_tr": "Fırında tavuk but ve patates",
     "items": [
-      { "food_id": "tavuk but (kemikli)", "grams": 200 },
-      { "food_id": "patates", "grams": 150 }
+      {
+        "food_id": "tavuk but eti",
+        "grams": 150
+      },
+      {
+        "food_id": "patates",
+        "grams": 150
+      }
     ],
     "prep_minutes": 40,
     "tags": [],
-    "prep_note": "Kemikli tavuk butunu patatesle birlikte fırında pişirin."
+    "prep_note": "Kemiksiz ve derisiz tavuk but etini patatesle birlikte fırında hazırlayın. Gramaj çiğ, yenilebilir ete aittir."
   },
   {
     "id": "beyaz-peynir-tabagi",
     "name_tr": "Beyaz peynirli kahvaltı tabağı",
     "items": [
-      { "food_id": "beyaz peynir", "grams": 60 },
-      { "food_id": "domates", "grams": 80 },
-      { "food_id": "salatalık", "grams": 80 },
-      { "food_id": "tam buğday ekmeği", "grams": 50 }
+      {
+        "food_id": "beyaz peynir",
+        "grams": 60
+      },
+      {
+        "food_id": "domates",
+        "grams": 80
+      },
+      {
+        "food_id": "salatalık",
+        "grams": 80
+      },
+      {
+        "food_id": "tam buğday ekmeği",
+        "grams": 50
+      }
     ],
     "prep_minutes": 5,
-    "tags": ["kahvalti"]
+    "tags": [
+      "kahvalti"
+    ]
   },
   {
     "id": "kiyma-makarna-domates",
     "name_tr": "Dana kıyma ve makarna",
     "items": [
-      { "food_id": "dana kıyma", "grams": 120 },
-      { "food_id": "makarna", "grams": 150 },
-      { "food_id": "domates", "grams": 100 }
+      {
+        "food_id": "dana kıyma",
+        "grams": 120
+      },
+      {
+        "food_id": "makarna",
+        "grams": 80
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      }
     ],
     "prep_minutes": 25,
     "tags": []
@@ -162,19 +292,35 @@
     "id": "kuru-fasulye-pirinc",
     "name_tr": "Kuru fasulye ve pirinç",
     "items": [
-      { "food_id": "kuru fasulye", "grams": 150 },
-      { "food_id": "pirinç", "grams": 100 }
+      {
+        "food_id": "kuru fasulye",
+        "grams": 70
+      },
+      {
+        "food_id": "pirinç",
+        "grams": 60
+      }
     ],
-    "prep_minutes": 15,
-    "tags": []
+    "prep_minutes": 60,
+    "tags": [],
+    "prep_note": "Baklagili kuru tartın; ıslatma ve pişirme için ambalajdaki hazırlama talimatını izleyin. Süre yaklaşık, ıslatma hariçtir."
   },
   {
     "id": "somon-patates-ispanak",
     "name_tr": "Somon, patates ve ıspanak",
     "items": [
-      { "food_id": "somon", "grams": 150 },
-      { "food_id": "patates", "grams": 200 },
-      { "food_id": "ıspanak", "grams": 80 }
+      {
+        "food_id": "somon",
+        "grams": 150
+      },
+      {
+        "food_id": "patates",
+        "grams": 200
+      },
+      {
+        "food_id": "ıspanak",
+        "grams": 80
+      }
     ],
     "prep_minutes": 30,
     "tags": []
@@ -183,31 +329,60 @@
     "id": "badem-kuru-uzum",
     "name_tr": "Badem ve kuru üzüm",
     "items": [
-      { "food_id": "badem", "grams": 30 },
-      { "food_id": "kuru üzüm", "grams": 30 }
+      {
+        "food_id": "badem",
+        "grams": 30
+      },
+      {
+        "food_id": "kuru üzüm",
+        "grams": 30
+      }
     ],
     "prep_minutes": 1,
-    "tags": ["ara-ogun", "atistirmalik"]
+    "tags": [
+      "ara-ogun",
+      "atistirmalik"
+    ]
   },
   {
     "id": "kasarli-omlet",
     "name_tr": "Kaşarlı omlet",
     "items": [
-      { "food_id": "yumurta", "grams": 150 },
-      { "food_id": "kaşar peyniri", "grams": 30 },
-      { "food_id": "yeşil biber", "grams": 50 }
+      {
+        "food_id": "yumurta",
+        "grams": 150
+      },
+      {
+        "food_id": "kaşar peyniri",
+        "grams": 30
+      },
+      {
+        "food_id": "yeşil biber",
+        "grams": 50
+      }
     ],
     "prep_minutes": 10,
-    "tags": ["kahvalti"],
+    "tags": [
+      "kahvalti"
+    ],
     "prep_note": "Yumurtaları çırpıp kaşar peyniri ve biberle birlikte tavada omlet olarak pişirin."
   },
   {
     "id": "tavuk-karnabahar",
     "name_tr": "Tavuk ve karnabahar",
     "items": [
-      { "food_id": "tavuk göğsü", "grams": 150 },
-      { "food_id": "karnabahar", "grams": 150 },
-      { "food_id": "zeytinyağı", "grams": 10 }
+      {
+        "food_id": "tavuk göğsü",
+        "grams": 150
+      },
+      {
+        "food_id": "karnabahar",
+        "grams": 150
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 10
+      }
     ],
     "prep_minutes": 20,
     "tags": []
@@ -216,10 +391,327 @@
     "id": "elma-ceviz",
     "name_tr": "Elma ve ceviz",
     "items": [
-      { "food_id": "elma", "grams": 150 },
-      { "food_id": "ceviz", "grams": 20 }
+      {
+        "food_id": "elma",
+        "grams": 150
+      },
+      {
+        "food_id": "ceviz",
+        "grams": 20
+      }
     ],
     "prep_minutes": 1,
-    "tags": ["ara-ogun"]
+    "tags": [
+      "ara-ogun"
+    ]
+  },
+  {
+    "id": "ton-salatasi",
+    "name_tr": "Ton balıklı yeşil salata",
+    "items": [
+      {
+        "food_id": "ton balığı",
+        "grams": 80
+      },
+      {
+        "food_id": "marul",
+        "grams": 80
+      },
+      {
+        "food_id": "domates",
+        "grams": 120
+      },
+      {
+        "food_id": "salatalık",
+        "grams": 100
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 10
+      },
+      {
+        "food_id": "limon",
+        "grams": 15
+      }
+    ],
+    "prep_minutes": 10,
+    "tags": []
+  },
+  {
+    "id": "ton-makarna",
+    "name_tr": "Ton balıklı domatesli makarna",
+    "items": [
+      {
+        "food_id": "ton balığı",
+        "grams": 80
+      },
+      {
+        "food_id": "makarna",
+        "grams": 80
+      },
+      {
+        "food_id": "domates",
+        "grams": 150
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 5
+      },
+      {
+        "food_id": "sarımsak",
+        "grams": 5
+      }
+    ],
+    "prep_minutes": 15,
+    "tags": []
+  },
+  {
+    "id": "ton-nohut-salata",
+    "name_tr": "Ton balıklı nohut salatası",
+    "items": [
+      {
+        "food_id": "ton balığı",
+        "grams": 80
+      },
+      {
+        "food_id": "nohut",
+        "grams": 50
+      },
+      {
+        "food_id": "salatalık",
+        "grams": 100
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      },
+      {
+        "food_id": "soğan",
+        "grams": 30
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 10
+      }
+    ],
+    "prep_minutes": 60,
+    "tags": [],
+    "prep_note": "Nohudu kuru tartın, ambalajdaki hazırlama talimatıyla haşlayın ve salataya ekleyin. Süre yaklaşık, ıslatma hariçtir."
+  },
+  {
+    "id": "ton-yumurta-kahvalti",
+    "name_tr": "Ton balığı ve haşlanmış yumurta",
+    "items": [
+      {
+        "food_id": "ton balığı",
+        "grams": 80
+      },
+      {
+        "food_id": "yumurta",
+        "grams": 100
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      },
+      {
+        "food_id": "tam buğday ekmeği",
+        "grams": 50
+      }
+    ],
+    "prep_minutes": 12,
+    "tags": [
+      "kahvalti"
+    ]
+  },
+  {
+    "id": "hindi-bulgur-salatasi",
+    "name_tr": "Konserve hindili bulgur salatası",
+    "items": [
+      {
+        "food_id": "hindi fileto konserve",
+        "grams": 120
+      },
+      {
+        "food_id": "bulgur",
+        "grams": 50
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      },
+      {
+        "food_id": "salatalık",
+        "grams": 100
+      },
+      {
+        "food_id": "zeytinyağı",
+        "grams": 10
+      },
+      {
+        "food_id": "limon",
+        "grams": 15
+      }
+    ],
+    "prep_minutes": 20,
+    "tags": []
+  },
+  {
+    "id": "hindi-sandvic",
+    "name_tr": "Konserve hindili tam buğday sandviç",
+    "items": [
+      {
+        "food_id": "hindi fileto konserve",
+        "grams": 80
+      },
+      {
+        "food_id": "tam buğday ekmeği",
+        "grams": 60
+      },
+      {
+        "food_id": "domates",
+        "grams": 60
+      },
+      {
+        "food_id": "marul",
+        "grams": 30
+      }
+    ],
+    "prep_minutes": 5,
+    "tags": [
+      "ara-ogun"
+    ]
+  },
+  {
+    "id": "hindi-pirinc-brokoli",
+    "name_tr": "Konserve hindi, pirinç ve brokoli",
+    "items": [
+      {
+        "food_id": "hindi fileto konserve",
+        "grams": 120
+      },
+      {
+        "food_id": "pirinç",
+        "grams": 60
+      },
+      {
+        "food_id": "brokoli",
+        "grams": 150
+      }
+    ],
+    "prep_minutes": 20,
+    "tags": []
+  },
+  {
+    "id": "sardalya-ekmek",
+    "name_tr": "Sardalyalı tam buğday ekmeği ve salata",
+    "items": [
+      {
+        "food_id": "sardalya konserve",
+        "grams": 100
+      },
+      {
+        "food_id": "tam buğday ekmeği",
+        "grams": 50
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      },
+      {
+        "food_id": "soğan",
+        "grams": 30
+      },
+      {
+        "food_id": "limon",
+        "grams": 15
+      }
+    ],
+    "prep_minutes": 5,
+    "tags": []
+  },
+  {
+    "id": "uskumru-bulgur",
+    "name_tr": "Uskumrulu bulgur salatası",
+    "items": [
+      {
+        "food_id": "uskumru konserve",
+        "grams": 100
+      },
+      {
+        "food_id": "bulgur",
+        "grams": 50
+      },
+      {
+        "food_id": "soğan",
+        "grams": 30
+      },
+      {
+        "food_id": "domates",
+        "grams": 100
+      },
+      {
+        "food_id": "limon",
+        "grams": 15
+      }
+    ],
+    "prep_minutes": 20,
+    "tags": []
+  },
+  {
+    "id": "konserve-somon-patates",
+    "name_tr": "Konserve somon, patates ve ıspanak",
+    "items": [
+      {
+        "food_id": "somon konserve",
+        "grams": 100
+      },
+      {
+        "food_id": "patates",
+        "grams": 200
+      },
+      {
+        "food_id": "ıspanak",
+        "grams": 100
+      }
+    ],
+    "prep_minutes": 25,
+    "tags": []
+  },
+  {
+    "id": "yogurt-cilek",
+    "name_tr": "Yoğurt ve çilek",
+    "items": [
+      {
+        "food_id": "yoğurt",
+        "grams": 150
+      },
+      {
+        "food_id": "çilek",
+        "grams": 100
+      }
+    ],
+    "prep_minutes": 2,
+    "tags": [
+      "ara-ogun"
+    ]
+  },
+  {
+    "id": "elma-badem",
+    "name_tr": "Elma ve badem",
+    "items": [
+      {
+        "food_id": "elma",
+        "grams": 150
+      },
+      {
+        "food_id": "badem",
+        "grams": 15
+      }
+    ],
+    "prep_minutes": 1,
+    "tags": [
+      "ara-ogun"
+    ]
   }
 ]

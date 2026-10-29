@@ -16,6 +16,9 @@ type Row = {
   carbs_g: number;
   fiber_g?: number;
   source?: string;
+  preparation_state?: string;
+  is_active?: boolean;
+  canonical_name?: string;
 };
 
 function normalize(name: string): string {
@@ -72,6 +75,9 @@ async function main() {
       carbs_g: row.carbs_g,
       fiber_g: row.fiber_g ?? 0,
       source: row.source,
+      preparation_state: row.preparation_state,
+      is_active: row.is_active,
+      canonical_name: row.canonical_name,
     };
   });
 

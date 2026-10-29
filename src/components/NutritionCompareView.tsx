@@ -192,7 +192,7 @@ function FoodSlot({
     queryLower
       ? foods.filter((f) => f.name_tr.toLocaleLowerCase("tr-TR").includes(queryLower))
       : foods
-  ).filter((f) => f.name_tr !== otherSelected?.name_tr);
+  ).filter((f) => f.is_active !== false && f.name_tr !== otherSelected?.name_tr);
 
   if (!open) {
     return (

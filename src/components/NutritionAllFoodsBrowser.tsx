@@ -16,8 +16,9 @@ export function AllFoodsBrowser() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLocaleLowerCase("tr-TR");
-    if (!q) return foods;
-    return foods.filter(
+    const activeFoods = foods.filter(food => food.is_active !== false);
+    if (!q) return activeFoods;
+    return activeFoods.filter(
       (f) =>
         f.name_tr.toLocaleLowerCase("tr-TR").includes(q) ||
         (f.aliases ?? []).some((a) => a.toLocaleLowerCase("tr-TR").includes(q))
@@ -56,7 +57,7 @@ export function AllFoodsBrowser() {
       </div>
 
       <p className="ledger px-1 pb-1 pt-4 text-xs uppercase tracking-widest text-muted-foreground">
-        {query.trim() ? `${filtered.length} sonuç` : `${foods.length} besin`}
+        {query.trim() ? `${filtered.length} sonuç` : `${filtered.length} besin · 100 g başına`}
       </p>
 
       {status === "loading" && (
@@ -108,7 +109,18 @@ function FoodCategorySection({
         <tbody>
           {rows.map((n) => (
             <tr key={n.name_tr} className="border-b border-border/60">
-              <td className="py-2 pr-2">{n.name_tr}</td>
+              <td className="py-2 pr-2">
+                {n.name_tr}
+                {n.preparation_state && (
+                  <span className="mt-0.5 block text-xs text-muted-foreground">{n.preparation_state}</span>
+                )}
+                {n.source && (
+                  <details className="mt-0.5 text-xs text-muted-foreground">
+                    <summary className="cursor-pointer">Kaynak</summary>
+                    <p className="max-w-44 break-words py-1 text-[0.65rem]">{n.source}</p>
+                  </details>
+                )}
+              </td>
               <Cell value={n.kcal_per_100} />
               <Cell value={n.protein_g} />
               <Cell value={n.fat_g} />

@@ -53,6 +53,8 @@ below. Files are named `YYYY-MM-DD-NN-slug.md`, so they sort chronologically.
 | 32 | [DEC-033 per-occasion protein target consumer](2026-09-23-01-meal-plan-protein-target-consumer.md) |
 | 33 | [Meal-plan UI polish batch](2026-09-23-02-meal-plan-ui-polish-batch.md) |
 | 34 | [readyMeal rename, source citations, DEC-012/013/020 safety posture](2026-10-28-01-ready-meal-rename-sources-safety.md) |
+| 35 | [Ready-meal QA and account-switch profile isolation](2026-10-29-01-qatest-account-isolation.md) |
+| 36 | [Nutrition catalog, portions and planning-macro polish](2026-10-29-02-catalog-portions-polish.md) |
 
 The UI polish pass of 2026-09-16 (buttons, spacing, macro rings, nav feel) has no checkpoint of its own; its
 full record is [`../ui-ux-audit-2026-09-16-polish.md`](../ui-ux-audit-2026-09-16-polish.md).

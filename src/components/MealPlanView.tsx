@@ -24,6 +24,7 @@ import { lookupNutrition, type Nutrition } from "@/lib/nutrition";
 import { MacroSummaryCard } from "@/components/MacroSummaryCard";
 import { useScopeAttestation } from "@/hooks/useScopeAttestation";
 import { OUT_OF_SCOPE_MESSAGE } from "@/lib/safetyCopy";
+import { planningMacros, INCOMPATIBLE_TARGETS_MESSAGE } from "@/lib/planningMacros";
 import { MealContainer, MEAL_LABELS } from "@/components/MealContainer";
 import { BatchSheet } from "@/components/BatchSheet";
 import { BatchAllocateSheet } from "@/components/BatchAllocateSheet";
@@ -181,15 +182,8 @@ export function MealPlanView({
   );
 
   const targets = calculateTargets(personalizationProfile);
-  const targetMacros: MacroTotals = targets
-    ? {
-        kcal: targets.targetKcal,
-        proteinG: (targets.proteinG.min + targets.proteinG.max) / 2,
-        fatG: (targets.fatG.min + targets.fatG.max) / 2,
-        carbsG: (targets.carbsG.min + targets.carbsG.max) / 2,
-        fiberG: (targets.fiberG.min + targets.fiberG.max) / 2,
-      }
-    : {
+  const planningTarget = targets ? planningMacros(targets) : null;
+  const targetMacros: MacroTotals = planningTarget ?? {
         kcal: 0,
         proteinG: 0,
         fatG: 0,
@@ -218,7 +212,7 @@ export function MealPlanView({
   // goToNextDay, so showing it on a different day would misrepresent a
   // past/future day's plan as "tonight."
   const eveningSuggestions: ScoredMeal[] =
-    isToday && remainingToday.status === "ready"
+    isToday && remainingToday.status === "ready" && remainingToday.targetsCompatible
       ? matchEveningMeals(
           EVENING_CANDIDATE_PATTERNS,
           remainingToday.remaining,
@@ -459,6 +453,10 @@ export function MealPlanView({
             <p className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
               {OUT_OF_SCOPE_MESSAGE}
             </p>
+          ) : !planningTarget ? (
+            <p className="rounded-lg border border-border bg-card p-3 text-xs text-muted-foreground">
+              {INCOMPATIBLE_TARGETS_MESSAGE}
+            </p>
           ) : (
             <MacroSummaryCard
               consumed={totals}
@@ -471,7 +469,7 @@ export function MealPlanView({
           {/* Meal Containers */}
           <div className="space-y-3">
             {(() => {
-              const proteinTarget = outOfScope
+              const proteinTarget = outOfScope || !planningTarget
                 ? undefined
                 : occasionProteinTargetG(personalizationProfile.weightKg);
               return MEAL_SLOTS.map(({ slot }) => (
@@ -603,7 +601,7 @@ export function MealPlanView({
         remaining={remainingMacros}
         filledSlots={filledSlots}
         targetsEstimated={targetsAreExample}
-        hideRecommendations={outOfScope}
+          hideRecommendations={outOfScope || !planningTarget}
         canSaveMeals={!!userId}
         savedMeals={savedMeals.savedMeals}
         savedLoading={savedMeals.isLoading}

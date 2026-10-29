@@ -49,7 +49,7 @@
 
 	Determine how pre-exercise, during-exercise, and post-exercise/recovery nutrient timing needs are - V2, Backlog
 
-	Determine how daily macro/energy targets are distributed across the chosen eating occasions - MISSING
+	Determine how daily macro/energy targets are distributed across the chosen eating occasions - MISSING (covered by per-slot totals; 2026-10-29 the planning target became one energy-consistent point inside the macro ranges and the ara slot snack-tagged meals only, see docs/mvp-scope/meal-structure-mvp.md)
 
 	What is the best combination of macros in a meal that would be healty for digestion and gut? - MISSING
 
@@ -60,7 +60,7 @@
 
 ## Meal Construction/Prep - SCOPED, see docs/mvp-scope/meal-construction-mvp.md
 
-	Determine how a set of selected foods and portions is translated into constructed meals - MISSING (curated combos cover the meals; portion tiers Küçük/Normal/Büyük + custom multiplier shipped 2026-09-19, see docs/mvp-scope/meal-construction-mvp.md)
+	Determine how a set of selected foods and portions is translated into constructed meals - MISSING (curated combos cover the meals; portion tiers Küçük/Normal/Büyük + custom multiplier shipped 2026-09-19; authored dry-weight portions lowered and 10 canned + 2 snack meals added 2026-10-29, see docs/mvp-scope/meal-construction-mvp.md)
 
 	Batch cooking / leftovers (DEC-069): backend shipped earlier; Yemek Planı UI ("Toplu Hazırlıklar" sheet + per-meal "Partiden" allocation) shipped 2026-09-19, UI hidden again since 2026-09-20 pending re-wiring to the renamed Yemekler sheet (BATCH_PREP_VISIBLE in MealPlanView.tsx), see docs/mvp-scope/meal-construction-mvp.md
 

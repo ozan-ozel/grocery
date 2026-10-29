@@ -75,6 +75,7 @@ export function MealRow({
   const shown = showTiers
     ? tierTotals[MEAL_PORTIONS.findIndex((p) => p.id === activeTier)]
     : (scaledMealTotals(meal, 1, catalog) ?? meal.totals);
+  const shownItems = scaleMealItems(meal.items, bodyFactor);
 
   const customFactor = Number(customText);
   const customValid =
@@ -119,6 +120,9 @@ export function MealRow({
         <p className="mt-1 text-xs text-muted-foreground">
           {meal.items.length} malzeme · {Math.round(shown.kcal)} kcal · P:{" "}
           {Math.round(shown.proteinG)}g
+        </p>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {shownItems.map(item => `${item.foodId} ${item.grams} g`).join(" · ")}
         </p>
         {meal.hasSoftConflict && (
           <p className="mt-1 text-xs text-signal">İçinde hassasiyet listendeki bir besin var</p>
